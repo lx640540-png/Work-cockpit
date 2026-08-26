@@ -97,6 +97,12 @@ const contracts = [
   [html.includes('function richListIndent(') && html.includes('event.key!=="Tab"') && html.includes('parentItem.after(item)') && html.includes('nested.appendChild(item)') && html.includes('richListIndent(event,editor)||richListBoundary'), 'Tab and Shift+Tab indent and outdent list items'],
   [functionSource('richListIndent').includes('caret=richBookmark(item)') && functionSource('richListIndent').includes('restoreRichBookmark(item,caret)'), 'list indentation preserves the caret inside the moved item'],
   [functionSource('updateRichEmpty').includes('editor.querySelector("ul,ol,.focus-marker")'), 'empty formatted lists hide placeholder text while editing'],
+  [html.includes('const TASK_CARD_TRANSITIONS=Object.freeze') && html.includes('moveTask(id,fromScope,toScope') && html.includes('data-drop-zone="waiting"') && html.includes('data-drop-zone="long"'), 'central cross-card transition map'],
+  [html.includes('pinToday:[]') && html.includes('function pinOrdered(') && html.includes('data-unpin-all') && functionSource('applySmartOrder').includes('pins.has'), 'view pin compatibility and smart-sort boundary'],
+  [functionSource('todayWaiting').includes('task.followup&&task.followup<=today') && html.includes('跟进逾期 ') && html.includes('今日跟进'), 'due follow-up reminders'],
+  [html.includes('project-master-detail') && html.includes('project-list-panel') && html.includes('project-detail-panel') && html.includes('projectSplitter'), 'project master detail and independent scrolling'],
+  [html.includes('.review-field:focus-within') && html.includes('.review-field .rich-editor{background:transparent}') && html.includes('color-mix(in srgb,var(--blue)'), 'themed weekly review visuals'],
+
   [html.includes('decisions:[]') && html.includes('function normalizeDecision(') && html.includes('id="decisionDialog"'), 'key decision data and editor'],
   [html.includes('data-project-panel="tasks"') && html.includes('data-project-panel="decisions"') && html.includes('data-new-decision'), 'project workspace decision panel'],
   [html.includes('formatVersion:7') && html.includes('decisions:value.decisions'), 'key decisions included in export and snapshots'],
