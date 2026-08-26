@@ -1,0 +1,15 @@
+{
+  "name": "work-cockpit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Regression test environment for the Work Cockpit single-page application",
+  "scripts": {
+    "test": "npm run test:static && npm run test:browser",
+    "test:static": "node qa-regression.js index.html",
+    "test:browser": "node qa-browser.js",
+    "setup:cloud": "playwright install chromium"
+  },
+  "devDependencies": {
+    "playwright": "1.55.0"
+  }
+}

@@ -1,14 +1,39 @@
 const { chromium } = require('playwright');
+const fs = require('fs');
+const http = require('http');
+const path = require('path');
 
-const url = process.argv[2] || 'http://127.0.0.1:4173/library-current-v19/index.html';
+const requestedUrl = process.argv[2];
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
+let server;
+
+async function testUrl() {
+  if (requestedUrl) return requestedUrl;
+  const indexPath = path.join(__dirname, 'index.html');
+  server = http.createServer((request, response) => {
+    if (request.url !== '/' && request.url !== '/index.html') {
+      response.writeHead(404).end('Not found');
+      return;
+    }
+    response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    fs.createReadStream(indexPath).pipe(response);
+  });
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', resolve);
+  });
+  const { port } = server.address();
+  return `http://127.0.0.1:${port}/index.html`;
+}
 
 (async () => {
+  const url = await testUrl();
   let browser;
   try { browser = await chromium.launch({ headless: true }); }
   catch (error) {
     if (String(error.message).includes('Executable doesn\'t exist')) {
       console.log('SKIP: Playwright browser binary is not installed');
+      await new Promise(resolve => server ? server.close(resolve) : resolve());
       return;
     }
     throw error;
@@ -206,7 +231,9 @@ const assert = (condition, message) => { if (!condition) throw new Error(message
   assert(errors.length === 0, `page errors: ${errors.join(' | ')}`);
   console.log('PASS: browser interaction regression');
   await browser.close();
+  await new Promise(resolve => server ? server.close(resolve) : resolve());
 })().catch(async error => {
+  if (server) await new Promise(resolve => server.close(resolve));
   console.error(error.stack || error);
   process.exit(1);
 });
