@@ -1,0 +1,9 @@
+node_modules
+.git
+.codex
+qa-browser.js
+qa-regression.js
+package.json
+package-lock.json
+README.md
+wrangler.jsonc
