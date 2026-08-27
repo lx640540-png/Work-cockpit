@@ -105,7 +105,11 @@ const contracts = [
   [html.includes('.project-workspace>.milestone-task-panel{grid-column:2') && html.includes("+detail+taskPanel+"), 'milestone relations follow completion criteria'],
   [html.includes('.task-table th{position:sticky') && html.includes('#page-tasks>.toolbar{position:sticky'), 'all-task toolbar and headers stay frozen'],
   [html.includes('@container (max-width:620px)') && html.includes('.task-main{display:grid;grid-template-columns:'), 'next action responds to card width'],
-  [html.includes('document.addEventListener("wheel"') && html.includes('lists[lists.length-1]'), 'today wheel falls back to rightmost list'],
+  [html.includes('data-main-scroll') && html.includes('const WheelRouter=') && html.includes('event.composedPath()') && html.includes('requestAnimationFrame(()=>this.flush())') && !html.includes('nearestVerticalScroller') && !html.includes('lists[lists.length-1]'), 'single frame-coalesced wheel router replaces ancestor style search and rightmost-card fallback'],
+  [html.includes('data-scroll-region') && html.includes('data-scroll-boundary') && functionSource('normalizeWheelDelta').includes('DOM_DELTA_LINE') && functionSource('consumeScroll').includes('remainder'), 'annotated scroll ownership, delta normalization, and remainder consumption'],
+  [html.includes('projects:[]') && functionSource('normalizeState').includes('next.order.projects') && functionSource('renderProjects').includes('data-project-drag'), 'project order is migrated and rendered with dedicated drag handles'],
+  [!functionSource('renderProjects').includes('里程碑相关任务'), 'project page omits the duplicate milestone task module'],
+  [functionSource('richCopyCut').includes('richSingleBlockRange') && functionSource('richPaste').includes('htmlBlocks>1'), 'rich clipboard distinguishes inline selections from logical multi-block selections'],
   [functionSource('moveTask').includes('id===toId') && functionSource('moveTask').includes('target.indexOf(toId)'), 'cross-card drop preserves peers and inserts at release row'],
   [html.includes('.review-field:focus-within') && html.includes('.review-field .rich-editor{background:transparent}') && html.includes('color-mix(in srgb,var(--blue)'), 'themed weekly review visuals'],
 
@@ -125,6 +129,9 @@ for (const [condition, label] of contracts) assert(condition, `contract failed: 
 const escSource = js.split('\n').find(line => line.startsWith('const esc='));
 const normalizeRichSource = js.split('\n').find(line => line.startsWith('const normalizeRich='));
 vm.runInNewContext(`${escSource}\n${normalizeRichSource}\nif(normalizeRich('第一行\\n第二行')!=='第一行<br>第二行')throw new Error('plain multiline migration failed');if(normalizeRich('<p>已有格式</p>')!=='<p>已有格式</p>')throw new Error('existing rich text changed')`);
+const wheelContext={WheelEvent:{DOM_DELTA_LINE:1,DOM_DELTA_PAGE:2}};
+vm.runInNewContext(`${functionSource('normalizeWheelDelta')}\n${functionSource('consumeScroll')}\nconst close=(a,b)=>Math.abs(a-b)<1e-9;if(!close(normalizeWheelDelta({deltaMode:0,deltaY:2.5},800),2.5))throw new Error('pixel delta failed');if(normalizeWheelDelta({deltaMode:1,deltaY:3},800)!==48)throw new Error('line delta failed');if(normalizeWheelDelta({deltaMode:2,deltaY:-1},800)!==-800)throw new Error('page delta failed');let down={scrollTop:80,scrollHeight:200,clientHeight:100},d=consumeScroll(down,120);if(down.scrollTop!==100||d.consumed!==20||d.remainder!==100)throw new Error('down remainder failed');let up={scrollTop:20,scrollHeight:200,clientHeight:100},u=consumeScroll(up,-120);if(up.scrollTop!==0||u.consumed!==-20||u.remainder!==-100)throw new Error('up remainder failed');let edge={scrollTop:100,scrollHeight:200,clientHeight:100},e=consumeScroll(edge,10);if(e.consumed!==0||e.remainder!==10)throw new Error('edge remainder failed')`,wheelContext);
+
 vm.runInNewContext(`${functionSource('richShortcutSpec')}\nconst cases=[['1.',{kind:'ordered',start:1}],['12.',{kind:'ordered',start:12}],['-',{kind:'unordered',start:1}],['.',{kind:'focus',start:1}],['正文',null],[' 1.',null],['1. 正文',null]];for(const [input,expected] of cases){const actual=richShortcutSpec(input);if(JSON.stringify(actual)!==JSON.stringify(expected))throw new Error('shortcut parse failed: '+input)}`);
 
 const context = {

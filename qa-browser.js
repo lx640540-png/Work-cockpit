@@ -35,12 +35,12 @@ async function testUrl() {
   let browser;
   try { browser = await chromium.launch({ headless: true }); }
   catch (error) {
-    if (String(error.message).includes('Executable doesn\'t exist')) {
-      console.log('SKIP: Playwright browser binary is not installed');
+    if (process.env.ALLOW_BROWSER_SKIP === '1') {
+      console.log(`SKIP: Playwright Chromium launch explicitly allowed to skip: ${error.message}`);
       await new Promise(resolve => server ? server.close(resolve) : resolve());
       return;
     }
-    throw error;
+    throw new Error(`Playwright Chromium is required: ${error.message}`);
   }
   activeBrowser = browser;
   const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
@@ -58,9 +58,9 @@ async function testUrl() {
     overdue.setDate(overdue.getDate() - 2);
     localStorage.setItem('work-cockpit-local-mode-v1', '1');
     localStorage.setItem('work-cockpit-browser-fixture-v1', JSON.stringify({ today: localDateKey(today), overdue: localDateKey(overdue) }));
-    localStorage.setItem('work-cockpit-v6', JSON.stringify({
+    if (!localStorage.getItem('work-cockpit-v6')) localStorage.setItem('work-cockpit-v6', JSON.stringify({
       version: 6,
-      projects: [{ id: 'p1', name: '灯靶V0.2', code: 'TARGET', description: '', archived: false, milestones: [{ id: 'm1', name: 'EVT验证', due: '', status: '当前阶段', criteria: '' }] }],
+      projects: [{ id: 'p1', name: '灯靶V0.2', code: 'TARGET', description: '', archived: false, milestones: [{ id: 'm1', name: 'EVT验证', due: '', status: '当前阶段', criteria: '' }] }, { id: 'p2', name: '项目二', archived: false, milestones: [] }, { id: 'p3', name: '项目三', archived: false, milestones: [] }],
       tasks: [
         { id: 't1', title: '确认样机测试', nextAction: '整理测试项', notes: '', project: 'p1', milestone: 'm1', type: '任务', status: '进行中', priority: 'P1', focus: false, week: false, inbox: false, archived: false, checklist: [], attachments: [], relatedTaskIds: [] },
         { id: 't2', title: '当天跟进', nextAction: '催办反馈', notes: '', project: 'p1', milestone: 'm1', type: '任务', status: '等待', priority: 'P2', focus: false, week: true, inbox: false, archived: false, followup: localDateKey(today), checklist: [], attachments: [], relatedTaskIds: [] },
@@ -73,11 +73,18 @@ async function testUrl() {
         { id: 'n2', title: '待批量删除一', content: '<p>临时内容一</p>', project: '', pinned: false, archived: false },
         { id: 'n3', title: '待批量删除二', content: '<p>临时内容二</p>', project: '', pinned: false, archived: false },
       ],
-      decisions: [], weeks: {}, trash: [], snapshots: [], favorites: ['p1'], order: { today: ['t1', 't4'], waiting: ['t2', 't3', 't5'] }, meta: {},
+      decisions: [], weeks: {}, trash: [], snapshots: [], favorites: ['p1'], order: { today: ['t1', 't4'], waiting: ['t2', 't3', 't5'], projects: ['p1', 'p2', 'p3'] }, meta: {},
     }));
   });
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !document.documentElement.classList.contains('booting'));
+  // The main page is the only fallback scroller; the frozen sidebar and the other card never move.
+  await page.evaluate(() => { document.querySelector('#page-today').style.minHeight = '1800px'; });
+  const wheelBefore = await page.evaluate(() => ({ main: mainScroll.scrollTop, side: document.querySelector('.sidebar').scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, right: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop }));
+  await page.locator('#page-today .summary').first().hover(); await page.mouse.wheel(0, 260); await page.waitForTimeout(80);
+  const wheelAfter = await page.evaluate(() => ({ main: mainScroll.scrollTop, side: document.querySelector('.sidebar').scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, right: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop }));
+  assert(wheelAfter.main > wheelBefore.main && wheelAfter.side === wheelBefore.side && wheelAfter.right === wheelBefore.right, 'ordinary today card wheel did not exclusively scroll the main page');
+  await page.evaluate(() => { mainScroll.scrollTop = 0; document.querySelector('#page-today').style.minHeight = ''; });
   await page.waitForFunction(() => {
     const fixture = JSON.parse(localStorage.getItem('work-cockpit-browser-fixture-v1') || 'null');
     const state = JSON.parse(localStorage.getItem('work-cockpit-v6') || 'null');
@@ -110,6 +117,33 @@ async function testUrl() {
   assert(await page.locator('.today-task-scroll').count() === 2, 'today execution cards do not own independent scroll regions');
   const overflowModes = await page.locator('.today-task-scroll').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).overflowY));
   assert(overflowModes.every(value => value === 'auto'), `today execution card scrolling is not independent: ${overflowModes.join(', ')}`);
+  const businessBeforeWheel = await page.evaluate(() => localStorage.getItem('work-cockpit-v6'));
+  await page.evaluate(() => {
+    const page = document.querySelector('#page-today'), local = document.querySelector('.today-task-scroll');
+    page.style.minHeight = '1900px';
+    const seed = local.querySelector('.task-row'); for (let i=0;i<18;i++) local.appendChild(seed.cloneNode(true));
+    mainScroll.scrollTop = 0; local.scrollTop = 60; window.__wheelRenderNode = page;
+  });
+  const localScroller = page.locator('.today-task-scroll').first();
+  await localScroller.hover();
+  let positions = await page.evaluate(() => ({ local: document.querySelector('.today-task-scroll').scrollTop, main: mainScroll.scrollTop }));
+  await page.mouse.wheel(0, 40); await page.evaluate(() => new Promise(requestAnimationFrame));
+  let moved = await page.evaluate(() => ({ local: document.querySelector('.today-task-scroll').scrollTop, main: mainScroll.scrollTop }));
+  assert(moved.local > positions.local && moved.main === positions.main, 'scrollable local card did not exclusively consume wheel input');
+  await page.evaluate(() => { const local=document.querySelector('.today-task-scroll'); local.scrollTop=local.scrollHeight-local.clientHeight-20; mainScroll.scrollTop=0; });
+  await page.mouse.wheel(0, 120); await page.evaluate(() => new Promise(requestAnimationFrame));
+  moved = await page.evaluate(() => { const local=document.querySelector('.today-task-scroll'); return { local:local.scrollTop, max:local.scrollHeight-local.clientHeight, main:mainScroll.scrollTop }; });
+  assert(Math.abs(moved.local-moved.max)<1 && moved.main >= 95, 'downward boundary handoff did not consume the remainder in the same frame');
+  await page.evaluate(() => { const local=document.querySelector('.today-task-scroll'); local.scrollTop=20; mainScroll.scrollTop=300; });
+  await localScroller.hover(); await page.mouse.wheel(0, -120); await page.evaluate(() => new Promise(requestAnimationFrame));
+  moved = await page.evaluate(() => ({ local:document.querySelector('.today-task-scroll').scrollTop, main:mainScroll.scrollTop }));
+  assert(moved.local === 0 && moved.main <= 205, `upward boundary handoff did not consume the remainder in the same frame: ${JSON.stringify(moved)}`);
+  await page.evaluate(() => { const local=document.querySelector('.today-task-scroll'); local.scrollTop=0; mainScroll.scrollTop=0; });
+  await localScroller.hover(); const trackpadPositions=[]; for(const delta of [0.5,1.25,2.75,4.5]) { await page.mouse.wheel(0,delta); await page.evaluate(() => new Promise(requestAnimationFrame)); trackpadPositions.push(await localScroller.evaluate(node=>node.scrollTop)); }
+  assert(trackpadPositions.every((value,index)=>!index||value>=trackpadPositions[index-1]) && trackpadPositions.at(-1)>trackpadPositions[0], `fractional trackpad deltas were not continuous and monotonic: ${trackpadPositions}`);
+  const beforeModalMain = await page.locator('#mainScroll').evaluate(node=>node.scrollTop); await page.click('[data-action="new-task"]'); await page.locator('#taskNotes').hover(); await page.mouse.wheel(0,180); await page.evaluate(() => new Promise(requestAnimationFrame)); assert(await page.locator('#mainScroll').evaluate(node=>node.scrollTop)===beforeModalMain,'modal rich editor wheel penetrated to the background'); await page.click('#taskDialog [data-close="taskDialog"]');
+  assert(await page.evaluate(() => localStorage.getItem('work-cockpit-v6')) === businessBeforeWheel, 'wheel routing mutated business data');
+  await page.evaluate(() => { document.querySelector('#page-today').style.minHeight=''; mainScroll.scrollTop=0; });
   const dividerBackground = await page.locator('#todayHeightResizer').evaluate(node => getComputedStyle(node).backgroundImage);
   assert(dividerBackground === 'none', 'today height divider still renders a redundant full-width line');
   const divider = await page.locator('#todayHeightResizer').boundingBox();
@@ -243,6 +277,11 @@ async function testUrl() {
   await editor.evaluate(node => { node.innerHTML = '<p>前<strong>加粗文字</strong>后</p><p>目标</p>'; const text = node.querySelector('strong').firstChild; const range = document.createRange(); range.selectNodeContents(text); const selection = getSelection(); selection.removeAllRanges(); selection.addRange(range); const data = new DataTransfer(); node.dispatchEvent(new ClipboardEvent('copy', { clipboardData: data, bubbles: true, cancelable: true })); const target = node.lastElementChild.firstChild; const caret = document.createRange(); caret.setStart(target, target.length); caret.collapse(true); selection.removeAllRanges(); selection.addRange(caret); node.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true })); });
   assert(await editor.locator('p p').count() === 0, 'single-line paste inserted a nested paragraph');
   assert((await editor.locator('p').last().textContent()).includes('目标加粗文字'), 'single-line paste lost selected text');
+  await editor.evaluate(node => { node.innerHTML = '<p><u>整行文字</u></p><p>前后</p>'; const source=node.firstElementChild, selection=getSelection(), range=document.createRange(), data=new DataTransfer(); range.selectNodeContents(source); selection.removeAllRanges(); selection.addRange(range); node.dispatchEvent(new ClipboardEvent('copy',{clipboardData:data,bubbles:true,cancelable:true})); const target=node.lastElementChild.firstChild, caret=document.createRange(); caret.setStart(target,1);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true})); });
+  assert(await editor.locator(':scope > p').count() === 2 && await editor.locator(':scope > p').last().textContent() === '前整行文字后', 'whole logical line paste created a paragraph');
+  assert(await editor.locator(':scope > p').last().locator('u').textContent() === '整行文字', 'inline underline was not retained');
+  await editor.evaluate(node => { node.innerHTML='<p>甲行</p><p>乙行</p><p>目标</p>'; const selection=getSelection(),range=document.createRange(),data=new DataTransfer();range.setStart(node.children[0].firstChild,0);range.setEnd(node.children[1].firstChild,2);selection.removeAllRanges();selection.addRange(range);node.dispatchEvent(new ClipboardEvent('copy',{clipboardData:data,bubbles:true,cancelable:true}));const target=node.lastElementChild.firstChild,caret=document.createRange();caret.setStart(target,2);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true})); });
+  assert(await editor.locator(':scope > p').count() === 4 && !(await editor.innerHTML()).includes('<p><p>'), 'multi-paragraph paste produced the wrong block count or nesting');
 
   await page.click('[data-toggle-memo-multi]');
   await page.click('[data-toggle-memo-select="n2"]');
@@ -276,6 +315,16 @@ async function testUrl() {
   assert(await page.locator('#projectSearch').count() === 0, 'project list still contains the removed search box');
   const selectedStyle = await page.locator('[data-select-project="p1"]').evaluate(node => ({ background: getComputedStyle(node).backgroundColor, panel: getComputedStyle(document.querySelector('.project-list-panel')).backgroundColor, shadow: getComputedStyle(node).boxShadow, border: getComputedStyle(node).borderColor }));
   assert(selectedStyle.background === selectedStyle.panel && selectedStyle.shadow === 'none', 'selected project retained a background or shadow instead of only a blue border');
+  assert(await page.getByText('里程碑相关任务', { exact: true }).count() === 0, 'project main page still renders milestone-related tasks');
+  const selectedBeforeDrag = await page.locator('.project-list-item.selected').getAttribute('data-select-project');
+  await page.locator('[data-project-drag="p1"]').dragTo(page.locator('[data-project-drop="p3"]'), { targetPosition: { x: 80, y: 70 } });
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
+  assert(saved.order.projects.join(',') === 'p2,p3,p1', 'project drag did not persist the indicated after position');
+  assert(await page.locator('.project-list-item.selected').getAttribute('data-select-project') === selectedBeforeDrag, 'project drag changed the selected project');
+  const favoriteOrder = saved.order.projects.join(','); await page.click('[data-select-project="p2"] .favorite');
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6'))); assert(saved.order.projects.join(',') === favoriteOrder, 'favorite toggling reordered projects');
+  await page.reload({ waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => !document.documentElement.classList.contains('booting')); await page.click('[data-page="projects"]');
+  assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p3,p1', 'project order did not survive reload');
 
   await page.click('[data-action="new-project"]');
   assert(await page.locator('#projectTemplate').inputValue() === 'hardware', 'new project did not select the hardware template by default');
@@ -286,6 +335,7 @@ async function testUrl() {
   await page.selectOption('#projectTemplate', 'hardware');
   assert(await page.locator('#projectDialog .milestone-nav').count() === 6, 'switching back to hardware template did not restore stages');
   await page.click('#projectDialog [data-close="projectDialog"]');
+  await page.click('[data-select-project="p1"] .project-list-content');
   await page.click('[data-edit-project="p1"]');
   await page.click('[data-project-panel="decisions"]');
   assert(await page.locator('[data-edit-decision]').count() >= 1, 'project decision panel is empty');
@@ -303,6 +353,7 @@ async function testUrl() {
   assert(saved.projects.some(project => project.id === 'p1'), 'project restore failed');
   assert(saved.tasks.find(task => task.id === 't1').project === 'p1', 'project restore did not restore task relation');
 
+  const widePage = await browser.newPage({ viewport: { width: 1920, height: 1080 } }); await widePage.goto(url, { waitUntil: 'domcontentloaded' }); await widePage.waitForFunction(() => !document.documentElement.classList.contains('booting')); assert(await widePage.locator('[data-main-scroll]').count() === 1, '1920x1080 viewport lacks the unique main scroll container'); await widePage.click('[data-page="tasks"]'); await widePage.evaluate(() => { const page=document.querySelector('#page-tasks'),table=document.querySelector('.table-card'),row=table.querySelector('tbody tr');page.style.minHeight='1900px';for(let i=0;i<30;i++)table.querySelector('tbody').appendChild(row.cloneNode(true));table.scrollTop=table.scrollHeight-table.clientHeight-20;mainScroll.scrollTop=0; }); await widePage.locator('.table-card').hover(); await widePage.mouse.wheel(0,120); await widePage.evaluate(() => new Promise(requestAnimationFrame)); const wideHandoff=await widePage.evaluate(()=>({main:mainScroll.scrollTop,table:document.querySelector('.table-card').scrollTop,max:document.querySelector('.table-card').scrollHeight-document.querySelector('.table-card').clientHeight}));assert(wideHandoff.main>=95&&Math.abs(wideHandoff.table-wideHandoff.max)<1,'1920x1080 task table did not hand remainder to main page'); await widePage.screenshot({path:path.join(screenshotDirectory,'desktop-1920x1080.png')}); await widePage.close();
   assert(errors.length === 0, `page errors: ${errors.join(' | ')}`);
   console.log('PASS: browser interaction regression');
   await browser.close();
