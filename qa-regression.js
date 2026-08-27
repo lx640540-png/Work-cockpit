@@ -101,6 +101,12 @@ const contracts = [
   [html.includes('pinToday:[]') && html.includes('function pinOrdered(') && html.includes('data-unpin-all') && functionSource('applySmartOrder').includes('pins.has'), 'view pin compatibility and smart-sort boundary'],
   [functionSource('todayWaiting').includes('task.followup&&task.followup<=today') && html.includes('跟进逾期 ') && html.includes('今日跟进'), 'due follow-up reminders'],
   [html.includes('project-master-detail') && html.includes('project-list-panel') && html.includes('project-detail-panel') && html.includes('projectSplitter'), 'project master detail and independent scrolling'],
+  [!html.includes('id="projectSearch"') && html.includes('.project-list-item.selected{border-color:var(--blue);background:var(--panel);box-shadow:none}'), 'project list search removal and border-only selection'],
+  [html.includes('.project-workspace>.milestone-task-panel{grid-column:2') && html.includes("+detail+taskPanel+"), 'milestone relations follow completion criteria'],
+  [html.includes('.task-table th{position:sticky') && html.includes('#page-tasks>.toolbar{position:sticky'), 'all-task toolbar and headers stay frozen'],
+  [html.includes('@container (max-width:620px)') && html.includes('.task-main{display:grid;grid-template-columns:'), 'next action responds to card width'],
+  [html.includes('document.addEventListener("wheel"') && html.includes('lists[lists.length-1]'), 'today wheel falls back to rightmost list'],
+  [functionSource('moveTask').includes('id===toId') && functionSource('moveTask').includes('target.indexOf(toId)'), 'cross-card drop preserves peers and inserts at release row'],
   [html.includes('.review-field:focus-within') && html.includes('.review-field .rich-editor{background:transparent}') && html.includes('color-mix(in srgb,var(--blue)'), 'themed weekly review visuals'],
 
   [html.includes('decisions:[]') && html.includes('function normalizeDecision(') && html.includes('id="decisionDialog"'), 'key decision data and editor'],
