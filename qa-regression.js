@@ -105,7 +105,10 @@ const contracts = [
   [html.includes('.project-workspace>.milestone-task-panel{grid-column:2') && html.includes("+detail+taskPanel+"), 'milestone relations follow completion criteria'],
   [html.includes('.task-table th{position:sticky') && html.includes('#page-tasks>.toolbar{position:sticky'), 'all-task toolbar and headers stay frozen'],
   [html.includes('@container (max-width:620px)') && html.includes('.task-main{display:grid;grid-template-columns:'), 'next action responds to card width'],
-  [html.includes('document.addEventListener("wheel"') && html.includes('lists[lists.length-1]'), 'today wheel falls back to rightmost list'],
+  [html.includes('data-main-scroll') && functionSource('routePageWheel').includes('nearestVerticalScroller') && functionSource('routePageWheel').includes('canScrollInDirection(main') && !html.includes('lists[lists.length-1]'), 'today and task wheels fall back to the main page, never the rightmost card'],
+  [html.includes('projects:[]') && functionSource('normalizeState').includes('next.order.projects') && functionSource('renderProjects').includes('data-project-drag'), 'project order is migrated and rendered with dedicated drag handles'],
+  [!functionSource('renderProjects').includes('里程碑相关任务'), 'project page omits the duplicate milestone task module'],
+  [functionSource('richCopyCut').includes('richSingleBlockRange') && functionSource('richPaste').includes('htmlBlocks>1'), 'rich clipboard distinguishes inline selections from logical multi-block selections'],
   [functionSource('moveTask').includes('id===toId') && functionSource('moveTask').includes('target.indexOf(toId)'), 'cross-card drop preserves peers and inserts at release row'],
   [html.includes('.review-field:focus-within') && html.includes('.review-field .rich-editor{background:transparent}') && html.includes('color-mix(in srgb,var(--blue)'), 'themed weekly review visuals'],
 
