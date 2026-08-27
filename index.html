@@ -555,7 +555,7 @@ function decisionProjectOptions(selected){return'<option value="">暂不关联�
 function decisionSourceOptions(selected){return'<option value="">不关联来源任务</option>'+state.tasks.filter(task=>!task.archived).map(task=>'<option value="'+task.id+'" '+(selected===task.id?"selected":"")+'>'+esc(task.title)+'</option>').join("")}
 function openDecision(id,prefill={}){
  let existing=id?decisionById(id):null,source=prefill.sourceTaskId?taskById(prefill.sourceTaskId):null;
- decisionDraft=normalizeDecision(existing?clone(existing):{id:uid("decision"),title:"",project:source?.project||prefill.project||"",milestone:source?.milestone||prefill.milestone||"",sourceTaskId:source?.id||"",date:todayKey(),...prefill});
+ decisionDraft=normalizeDecision(existing?clone(existing):{id:uid("decision"),title:"",...prefill,project:source?.project||prefill.project||"",milestone:source?.milestone||prefill.milestone||"",sourceTaskId:source?.id||prefill.sourceTaskId||"",date:todayKey()});
  $("#decisionDialogTitle").textContent=existing?"编辑关键决策":"记录关键决策";$("#deleteDecisionButton").hidden=!existing;renderDecisionEditor();showDialog($("#decisionDialog"));requestAnimationFrame(()=>$("#decisionTitle")?.focus());
 }
 function renderDecisionEditor(){

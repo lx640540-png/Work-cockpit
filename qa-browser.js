@@ -6,6 +6,10 @@ const path = require('path');
 const requestedUrl = process.argv[2];
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 let server;
+let activePage;
+let activeBrowser;
+const browserErrors = [];
+const screenshotDirectory = path.join(__dirname, 'artifacts', 'browser-regression');
 
 async function testUrl() {
   if (requestedUrl) return requestedUrl;
@@ -38,18 +42,29 @@ async function testUrl() {
     }
     throw error;
   }
+  activeBrowser = browser;
   const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
+  activePage = page;
   const errors = [];
-  page.on('pageerror', error => errors.push(error.message));
+  page.on('pageerror', error => { errors.push(error.message); browserErrors.push(`pageerror: ${error.message}`); });
+  page.on('console', message => {
+    if (message.type() === 'error') browserErrors.push(`console.error: ${message.text()}`);
+  });
   await page.addInitScript(() => {
+    // Match the application's local YYYY-MM-DD formatter instead of using UTC ISO dates.
+    const localDateKey = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const today = new Date();
+    const overdue = new Date(today);
+    overdue.setDate(overdue.getDate() - 2);
     localStorage.setItem('work-cockpit-local-mode-v1', '1');
+    localStorage.setItem('work-cockpit-browser-fixture-v1', JSON.stringify({ today: localDateKey(today), overdue: localDateKey(overdue) }));
     localStorage.setItem('work-cockpit-v6', JSON.stringify({
       version: 6,
       projects: [{ id: 'p1', name: '灯靶V0.2', code: 'TARGET', description: '', archived: false, milestones: [{ id: 'm1', name: 'EVT验证', due: '', status: '当前阶段', criteria: '' }] }],
       tasks: [
         { id: 't1', title: '确认样机测试', nextAction: '整理测试项', notes: '', project: 'p1', milestone: 'm1', type: '任务', status: '进行中', priority: 'P1', focus: false, week: false, inbox: false, archived: false, checklist: [], attachments: [], relatedTaskIds: [] },
-        { id: 't2', title: '当天跟进', nextAction: '催办反馈', notes: '', project: 'p1', milestone: 'm1', type: '任务', status: '等待', priority: 'P2', focus: false, week: true, inbox: false, archived: false, followup: new Date().toISOString().slice(0,10), checklist: [], attachments: [], relatedTaskIds: [] },
-        { id: 't3', title: '逾期跟进', nextAction: '确认阻塞', notes: '', project: 'p1', milestone: '', type: '长期跟进', status: '等待', priority: 'P1', focus: false, week: false, inbox: false, archived: false, followup: new Date(Date.now()-86400000*2).toISOString().slice(0,10), checklist: [], attachments: [], relatedTaskIds: [] },
+        { id: 't2', title: '当天跟进', nextAction: '催办反馈', notes: '', project: 'p1', milestone: 'm1', type: '任务', status: '等待', priority: 'P2', focus: false, week: true, inbox: false, archived: false, followup: localDateKey(today), checklist: [], attachments: [], relatedTaskIds: [] },
+        { id: 't3', title: '逾期跟进', nextAction: '确认阻塞', notes: '', project: 'p1', milestone: '', type: '长期跟进', status: '等待', priority: 'P1', focus: false, week: false, inbox: false, archived: false, followup: localDateKey(overdue), checklist: [], attachments: [], relatedTaskIds: [] },
       ],
       memos: [
         { id: 'n1', title: '输入测试', content: '<p><br></p>', project: 'p1', pinned: false, archived: false },
@@ -61,6 +76,11 @@ async function testUrl() {
   });
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !document.documentElement.classList.contains('booting'));
+  await page.waitForFunction(() => {
+    const fixture = JSON.parse(localStorage.getItem('work-cockpit-browser-fixture-v1') || 'null');
+    const state = JSON.parse(localStorage.getItem('work-cockpit-v6') || 'null');
+    return fixture && state?.tasks?.find(task => task.id === 't2')?.followup === fixture.today;
+  });
 
   await page.click('[data-page="tasks"]');
   await page.click('[data-edit-task="t1"]');
@@ -83,9 +103,11 @@ async function testUrl() {
   assert(!saved.tasks.find(task => task.id === 't1').focus && !saved.tasks.find(task => task.id === 't1').week, 'removing week did not remove today focus');
   await page.click('[data-toggle-focus="t1"]');
   await page.click('[data-page="today"]');
+  await page.waitForSelector('#page-today.active #todayExecution', { state: 'visible' });
+  await page.waitForSelector('#page-today.active #todayHeightResizer', { state: 'visible' });
   assert(await page.locator('.today-task-scroll').count() === 2, 'today execution cards do not own independent scroll regions');
   const overflowModes = await page.locator('.today-task-scroll').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).overflowY));
-  assert(overflowModes.every(value => value === 'auto'), 'today execution card scrolling is not independent');
+  assert(overflowModes.every(value => value === 'auto'), `today execution card scrolling is not independent: ${overflowModes.join(', ')}`);
   const dividerBackground = await page.locator('#todayHeightResizer').evaluate(node => getComputedStyle(node).backgroundImage);
   assert(dividerBackground === 'none', 'today height divider still renders a redundant full-width line');
   const divider = await page.locator('#todayHeightResizer').boundingBox();
@@ -114,8 +136,13 @@ async function testUrl() {
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(!saved.tasks.find(task => task.id === 't1').inbox && saved.tasks.find(task => task.id === 't1').focus && saved.tasks.find(task => task.id === 't1').week, 'inbox task did not return to today and week');
 
-  assert(await page.getByText('今日跟进', { exact: true }).count() === 1, 'today follow-up reminder missing');
-  assert(await page.getByText('跟进逾期 2 天', { exact: true }).count() === 1, 'overdue follow-up reminder missing');
+  await page.waitForSelector('#page-today.active');
+  const todayReminder = page.locator('#page-today.active .followup.reminder').filter({ hasText: '今日跟进' });
+  const overdueReminder = page.locator('#page-today.active .followup.reminder').filter({ hasText: '跟进逾期 2 天' });
+  await todayReminder.waitFor({ state: 'visible' });
+  await overdueReminder.waitFor({ state: 'visible' });
+  assert(await todayReminder.count() === 1, 'today follow-up reminder missing');
+  assert(await overdueReminder.count() === 1, 'overdue follow-up reminder missing');
   await page.click('[data-task="t1"] [data-pin-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinToday.includes('t1'), 'single task pin was not persisted');
@@ -144,15 +171,15 @@ async function testUrl() {
   assert(!saved.tasks.find(task => task.id === 't3').week && saved.tasks.find(task => task.id === 't3').type === '长期跟进', 'weekly to long-term transition failed');
 
 
-  await page.fill('#globalSearch', '样机');
+  await page.fill('#globalSearch', '回车保存');
   await page.waitForSelector('#page-search.active [data-search-task="t1"]');
-  assert(await page.locator('#searchPageInput').isFocused(), 'search input lost focus after opening the search page');
+  assert(await page.locator('#searchPageInput').evaluate(node => node === document.activeElement), 'search input lost focus after opening the search page');
   const searchGeometry = await page.locator('.search-page-field').evaluate(node => { const input=node.querySelector('input').getBoundingClientRect(), field=node.getBoundingClientRect(), clear=node.querySelector('button').getBoundingClientRect(); return { fieldHeight:field.height,inputHeight:input.height,clearTop:clear.top-input.top,clearBottom:input.bottom-clear.bottom }; });
   assert(Math.abs(searchGeometry.fieldHeight-searchGeometry.inputHeight)<1 && searchGeometry.clearTop>5 && searchGeometry.clearBottom>5, 'standalone search controls are vertically misaligned');
-  await page.fill('#searchPageInput', '样机测');
+  await page.fill('#searchPageInput', '回车保存测');
   assert(await page.locator('[data-search-task="t1"]').count() === 1, 'Chinese search did not update on the standalone page');
   await page.click('[data-close-search-page]');
-  await page.waitForSelector('#page-tasks.active');
+  await page.waitForSelector('#page-week.active');
   assert(await page.locator('#page-search').isHidden(), 'standalone search page did not close');
 
   await page.click('[data-page="memos"]');
@@ -213,7 +240,9 @@ async function testUrl() {
 
   await page.click('[data-toggle-memo-multi]');
   await page.click('[data-toggle-memo-select="n2"]');
+  await page.waitForSelector('[data-toggle-memo-select="n2"].active');
   await page.click('[data-toggle-memo-select="n3"]');
+  await page.waitForSelector('[data-toggle-memo-select="n3"].active');
   assert(await page.locator('.memo-item.selected').count() === 2, 'memo multi-select did not keep both selections');
   await page.click('[data-memo-bulk-delete]');
   await page.click('#confirmAccept');
@@ -222,7 +251,7 @@ async function testUrl() {
   assert(saved.trash.filter(item => item.type === 'memo').length === 2, 'memo bulk delete did not move both records to trash');
 
   await page.click('[data-page="tasks"]');
-  await page.click('[data-edit-task="t1"]');
+  await page.click('#page-tasks.active [data-edit-task="t1"]');
   await page.click('[data-new-decision]');
   await page.fill('#decisionTitle', '采用方案A');
   await page.fill('#decisionConclusion', '继续使用当前样机结构');
@@ -234,6 +263,7 @@ async function testUrl() {
   await page.click('#taskForm .modal-actions [data-close="taskDialog"]');
 
   await page.click('[data-page="projects"]');
+  await page.waitForSelector('#page-projects.active .project-master-detail', { state: 'visible' });
   assert(await page.locator('.project-master-detail').count() === 1, 'project master-detail workspace missing');
   const projectOverflow = await page.locator('.project-list-panel,.project-detail-panel').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).overflowY));
   assert(projectOverflow.every(value => value === 'auto'), 'project panes are not independently scrollable');
@@ -269,8 +299,27 @@ async function testUrl() {
   assert(errors.length === 0, `page errors: ${errors.join(' | ')}`);
   console.log('PASS: browser interaction regression');
   await browser.close();
+  activeBrowser = null;
   await new Promise(resolve => server ? server.close(resolve) : resolve());
 })().catch(async error => {
+  if (activePage) {
+    const diagnostics = await activePage.evaluate(() => {
+      const fixture = JSON.parse(localStorage.getItem('work-cockpit-browser-fixture-v1') || 'null');
+      const state = JSON.parse(localStorage.getItem('work-cockpit-v6') || 'null');
+      return {
+        testDate: fixture?.today || '(missing)',
+        followups: (state?.tasks || []).filter(task => ['t2', 't3'].includes(task.id)).map(task => ({ id: task.id, followup: task.followup })),
+        renderedText: document.querySelector('#page-today')?.innerText || '(today page missing)',
+      };
+    }).catch(diagnosticError => ({ diagnosticError: diagnosticError.message }));
+    fs.mkdirSync(screenshotDirectory, { recursive: true });
+    const screenshotPath = path.join(screenshotDirectory, 'failure.png');
+    await activePage.screenshot({ path: screenshotPath, fullPage: true }).catch(screenshotError => {
+      browserErrors.push(`screenshot error: ${screenshotError.message}`);
+    });
+    console.error('Browser regression diagnostics:', JSON.stringify({ ...diagnostics, consoleErrors: browserErrors, screenshotPath }, null, 2));
+  }
+  if (activeBrowser) await activeBrowser.close().catch(() => {});
   if (server) await new Promise(resolve => server.close(resolve));
   console.error(error.stack || error);
   process.exit(1);
