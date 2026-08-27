@@ -113,6 +113,14 @@ const contracts = [
   [html.includes('#draftChecklist [data-check-text]:focus') && html.includes('outline:0'), 'checklist focus uses themed focus ring instead of browser black outline'],
   [functionSource('richParagraphToList').includes('richCleanPlaceholder(entry)') && functionSource('richParagraphToList').includes('entry.appendChild(document.createElement("br"))'), 'empty toolbar list has exactly one normalized placeholder'],
   [html.includes('function renderNow(') && functionSource('saveTaskDraft').includes('renderNow()') && functionSource('saveProjectDraft').includes('renderNow()'), 'modal saves synchronously reconcile the current view'],
+  [!html.includes('id="projectSearch"') && !html.includes('projectQuery') && !html.includes('project-search'), 'project list search fully removed'],
+  [html.includes('function starSvg(') && html.includes('project-select-button') && html.includes('aria-label="\'+(favorite?\'取消收藏\':\'收藏项目\')'), 'project selection and SVG favorite controls are independent'],
+  [html.includes('tasks-sticky-tools') && html.includes('--tasks-tools-height') && html.includes('function updateTaskStickyOffset('), 'task actions and table headers use coordinated sticky offsets'],
+  [html.includes('container-type:inline-size') && html.includes('@container(max-width:780px)') && html.includes('class="task-primary"'), 'shared task row uses container-responsive title and next-action layout'],
+  [functionSource('ordered').includes('return[...items].sort') && !functionSource('ordered').includes('.push('), 'render ordering is read-only'],
+  [functionSource('moveTask').includes('targetSnapshot') && functionSource('moveTask').includes('after?1:0') && html.includes('insert-after'), 'cross-card drop preserves target snapshot and pointer insertion side'],
+  [html.includes('function canWheelScroll(') && html.includes('data-scroll-region="waiting"') && html.includes('{passive:false}'), 'today wheel fallback uses one delegated handler'],
+  [functionSource('richKeydown').includes('richState(editor).composing') && !js.split('\n').find(line => line.includes('target.dataset.memoContent'))?.includes('serializeRichEditor(target)'), 'shared rich input kernel preserves native text and IME composition'],
 ];
 for (const [condition, label] of contracts) assert(condition, `contract failed: ${label}`);
 
