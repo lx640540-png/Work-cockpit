@@ -85,9 +85,17 @@ async function testUrl() {
   await page.locator('#page-today .summary').first().hover(); await page.mouse.wheel(0, 260); await page.waitForTimeout(80);
   const wheelAfter = await page.evaluate(() => ({ main: mainScroll.scrollTop, side: document.querySelector('.sidebar').scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, right: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop }));
   assert(wheelAfter.main > wheelBefore.main && wheelAfter.side === wheelBefore.side && wheelAfter.right === wheelBefore.right, 'ordinary today card wheel did not exclusively scroll the main page');
+  assert(await page.locator('html').evaluate(node => node.classList.contains('main-wheel-gesture')), 'main wheel gesture did not lock its target');
+  const crossCardBefore = await page.evaluate(() => mainScroll.scrollTop);
+  const crossCardBox = await page.locator('#page-today .summary').nth(3).boundingBox();
+  await page.mouse.move(crossCardBox.x + crossCardBox.width / 2, crossCardBox.y + crossCardBox.height / 2);
+  await page.mouse.wheel(0, 140); await page.waitForTimeout(80);
+  assert(await page.evaluate(() => mainScroll.scrollTop) > crossCardBefore, 'main wheel gesture lost scrolling while the pointer crossed cards');
+  await page.waitForTimeout(170);
+  assert(!await page.locator('html').evaluate(node => node.classList.contains('main-wheel-gesture')), 'main wheel target lock did not release after the gesture');
 
-  // Registered local regions consume the available distance and hand only the exact remainder to the main page.
-  const storedBeforeWheelRouting = await page.evaluate(() => localStorage.getItem('work-cockpit-v6'));
+  // Scrollable cards own their native wheel range and do not chain at a boundary.
+  // Cards without overflow let the same native wheel gesture reach the main page.
   await page.evaluate(() => {
     const local = document.querySelector('.today-task-scroll');
     const fixture = document.createElement('div');
@@ -101,7 +109,8 @@ async function testUrl() {
   const todayLocal = page.locator('.today-task-scroll').first();
   await todayLocal.hover(); await page.mouse.wheel(0, 120); await page.waitForTimeout(80);
   let routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, other: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop, side: document.querySelector('.sidebar').scrollTop }));
-  assert(Math.abs(routed.local - 120) < 3 && routed.main === 0 && routed.other === 0 && routed.side === 0, `local wheel routing moved the wrong region: ${JSON.stringify(routed)}`);
+  assert(routed.local > 90 && routed.main === 0 && routed.other === 0 && routed.side === 0, `native local wheel moved the wrong region: ${JSON.stringify(routed)}`);
+  assert(!await page.locator('html').evaluate(node => node.classList.contains('main-wheel-gesture')), 'local card scrolling incorrectly activated the main wheel lock');
 
   const downBoundary = await page.evaluate(() => {
     const local = document.querySelector('.today-task-scroll');
@@ -112,30 +121,15 @@ async function testUrl() {
   });
   await todayLocal.hover(); await page.mouse.wheel(0, 100); await page.waitForTimeout(80);
   routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop }));
-  assert(Math.abs(routed.local - downBoundary.maximum) < 2 && Math.abs(routed.main - 75) < 3, `downward boundary remainder was not conserved: ${JSON.stringify({ downBoundary, routed })}`);
+  assert(Math.abs(routed.local - downBoundary.maximum) < 2 && routed.main === 0, `local boundary incorrectly chained to the page: ${JSON.stringify({ downBoundary, routed })}`);
 
-  await page.evaluate(() => { const local = document.querySelector('.today-task-scroll'); local.scrollTop = 20; mainScroll.scrollTop = 140; });
-  await todayLocal.hover(); await page.mouse.wheel(0, -80); await page.waitForTimeout(80);
-  routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop }));
-  assert(routed.local === 0 && Math.abs(routed.main - 80) < 3, `upward boundary remainder was not conserved: ${JSON.stringify(routed)}`);
-
-  await page.evaluate(() => {
-    const local = document.querySelector('.today-task-scroll');
-    local.scrollTop = 0;
-    mainScroll.scrollTop = 0;
-    for (let index = 0; index < 12; index += 1) local.dispatchEvent(new WheelEvent('wheel', { deltaY: .75, deltaMode: 0, bubbles: true, cancelable: true }));
-  });
-  await page.waitForTimeout(80);
-  routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop }));
-  assert(Math.abs(routed.local - 9) < 2 && routed.main === 0, `fractional wheel deltas were dropped or stuttered: ${JSON.stringify(routed)}`);
-
-  await page.evaluate(() => { const local = document.querySelector('.today-task-scroll'); local.scrollTop = 0; mainScroll.scrollTop = 0; local.dispatchEvent(new WheelEvent('wheel', { deltaY: 2, deltaMode: 1, bubbles: true, cancelable: true })); });
-  await page.waitForTimeout(80);
-  assert(Math.abs(await todayLocal.evaluate(node => node.scrollTop) - 32) < 2, 'line-mode wheel delta was not normalized');
-  assert(await page.evaluate(() => localStorage.getItem('work-cockpit-v6')) === storedBeforeWheelRouting, 'wheel routing mutated business data');
+  await page.evaluate(() => { document.querySelector('[data-wheel-fixture="today"]')?.remove(); const local = document.querySelector('.today-task-scroll'); local.scrollTop = 0; mainScroll.scrollTop = 0; });
+  await todayLocal.hover(); await page.mouse.wheel(0, 120); await page.waitForTimeout(80);
+  routed = await page.evaluate(() => { const local = document.querySelector('.today-task-scroll'); return { main: mainScroll.scrollTop, local: local.scrollTop, overflow: local.scrollHeight - local.clientHeight }; });
+  assert(routed.overflow <= 1 && routed.local === 0 && routed.main > 70, `non-overflowing card did not pass native wheel scrolling to the page: ${JSON.stringify(routed)}`);
   fs.mkdirSync(screenshotDirectory, { recursive: true });
   await page.screenshot({ path: path.join(screenshotDirectory, 'wheel-routing.png'), fullPage: false });
-  await page.evaluate(() => { document.querySelector('[data-wheel-fixture="today"]')?.remove(); mainScroll.scrollTop = 0; document.querySelector('#page-today').style.minHeight = ''; });
+  await page.evaluate(() => { mainScroll.scrollTop = 0; document.querySelector('#page-today').style.minHeight = ''; });
   await page.waitForFunction(() => {
     const fixture = JSON.parse(localStorage.getItem('work-cockpit-browser-fixture-v1') || 'null');
     const state = JSON.parse(localStorage.getItem('work-cockpit-v6') || 'null');
@@ -143,6 +137,7 @@ async function testUrl() {
   });
 
   await page.click('[data-page="tasks"]');
+  await page.waitForSelector('#page-tasks.active');
   await page.evaluate(() => {
     const pageNode = document.querySelector('#page-tasks');
     const table = pageNode.querySelector('.table-card');
@@ -164,7 +159,7 @@ async function testUrl() {
   });
   await taskTableScroller.hover(); await page.mouse.wheel(0, 80); await page.waitForTimeout(80);
   taskWheel = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('#page-tasks .table-card').scrollTop }));
-  assert(Math.abs(taskWheel.local - taskBoundary) < 2 && Math.abs(taskWheel.main - 65) < 3, `all-task boundary did not hand its exact remainder to the page: ${JSON.stringify({ taskBoundary, taskWheel })}`);
+  assert(Math.abs(taskWheel.local - taskBoundary) < 2 && taskWheel.main === 0, `all-task boundary incorrectly chained to the page: ${JSON.stringify({ taskBoundary, taskWheel })}`);
   await page.evaluate(() => { const pageNode = document.querySelector('#page-tasks'), table = pageNode.querySelector('.table-card'); pageNode.style.minHeight = ''; table.style.maxHeight = ''; table.scrollTop = 0; mainScroll.scrollTop = 0; });
   await page.click('[data-edit-task="t1"]');
   await page.click('[data-add-check]');
@@ -327,8 +322,16 @@ async function testUrl() {
   await editor.evaluate(node => { node.innerHTML = '<p><u>整行文字</u></p><p>前后</p>'; const source=node.firstElementChild, selection=getSelection(), range=document.createRange(), data=new DataTransfer(); range.selectNodeContents(source); selection.removeAllRanges(); selection.addRange(range); node.dispatchEvent(new ClipboardEvent('copy',{clipboardData:data,bubbles:true,cancelable:true})); const target=node.lastElementChild.firstChild, caret=document.createRange(); caret.setStart(target,1);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true})); });
   assert(await editor.locator(':scope > p').count() === 2 && await editor.locator(':scope > p').last().textContent() === '前整行文字后', 'whole logical line paste created a paragraph');
   assert(await editor.locator(':scope > p').last().locator('u').textContent() === '整行文字', 'inline underline was not retained');
-  await editor.evaluate(node => { node.innerHTML='<p>甲行</p><p>乙行</p><p>目标</p>'; const selection=getSelection(),range=document.createRange(),data=new DataTransfer();range.setStart(node.children[0].firstChild,0);range.setEnd(node.children[1].firstChild,2);selection.removeAllRanges();selection.addRange(range);node.dispatchEvent(new ClipboardEvent('copy',{clipboardData:data,bubbles:true,cancelable:true}));const target=node.lastElementChild.firstChild,caret=document.createRange();caret.setStart(target,2);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true})); });
+  const boundaryCopyMode = await editor.evaluate(node => { node.innerHTML='<p><strong>边界整行</strong></p><p>前后</p>';const selection=getSelection(),range=document.createRange(),data=new DataTransfer();range.setStart(node,0);range.setEnd(node,1);selection.removeAllRanges();selection.addRange(range);node.dispatchEvent(new ClipboardEvent('copy',{clipboardData:data,bubbles:true,cancelable:true}));const target=node.lastElementChild.firstChild,caret=document.createRange();caret.setStart(target,1);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true}));return data.getData('application/x-work-cockpit-rich-fragment'); });
+  assert(boundaryCopyMode === 'inline', 'editor-level boundaries were misclassified as a multi-block selection');
+  assert(await editor.locator(':scope > p').count() === 2 && await editor.locator(':scope > p').last().textContent() === '前边界整行后', 'editor-boundary whole-line paste created a new paragraph');
+  await editor.evaluate(node => { node.innerHTML='<p><u>剪切整行</u></p><p>前后</p>';const selection=getSelection(),range=document.createRange(),data=new DataTransfer();range.setStart(node,0);range.setEnd(node,1);selection.removeAllRanges();selection.addRange(range);node.dispatchEvent(new ClipboardEvent('cut',{clipboardData:data,bubbles:true,cancelable:true}));const target=node.lastElementChild.firstChild,caret=document.createRange();caret.setStart(target,1);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true})); });
+  assert(await editor.locator(':scope > p').count() === 1 && await editor.locator(':scope > p').textContent() === '前剪切整行后', 'whole-line cut left an empty paragraph or pasted as a new paragraph');
+  await editor.evaluate(node => { node.innerHTML='<p><strong>甲行</strong></p><p><u>乙行</u></p><p>目标</p>'; const selection=getSelection(),range=document.createRange(),data=new DataTransfer();range.setStart(node.children[0].firstChild.firstChild,0);range.setEnd(node.children[1].firstChild.firstChild,2);selection.removeAllRanges();selection.addRange(range);node.dispatchEvent(new ClipboardEvent('copy',{clipboardData:data,bubbles:true,cancelable:true}));const target=node.lastElementChild.firstChild,caret=document.createRange();caret.setStart(target,2);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true})); });
   assert(await editor.locator(':scope > p').count() === 4 && !(await editor.innerHTML()).includes('<p><p>'), 'multi-paragraph paste produced the wrong block count or nesting');
+  assert(await editor.locator(':scope > p').nth(2).locator('strong').textContent() === '甲行' && await editor.locator(':scope > p').nth(3).locator('u').textContent() === '乙行', 'multi-paragraph paste lost inline formatting');
+  await editor.evaluate(node => { node.innerHTML='<p>目标</p>';const target=node.firstElementChild.firstChild,selection=getSelection(),caret=document.createRange(),data=new DataTransfer();caret.setStart(target,1);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);data.setData('text/html','<p><u>外部整行</u></p>');data.setData('text/plain','外部整行\n');node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true})); });
+  assert(await editor.locator(':scope > p').count() === 1 && await editor.locator(':scope > p > u').textContent() === '外部整行', 'external single-line paste with a trailing newline lost formatting or created a paragraph');
 
   await page.click('[data-toggle-memo-multi]');
   await page.click('[data-toggle-memo-select="n2"]');
