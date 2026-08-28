@@ -26,6 +26,9 @@ npm run test:browser
 
 The browser regression runner starts a temporary loopback HTTP server automatically. An
 explicit application URL can still be supplied as the first argument to `qa-browser.js`.
+The browser suite fails when Chromium is unavailable so a missing browser cannot be reported
+as a successful regression. For an intentional static-only diagnostic, opt in explicitly with
+`ALLOW_BROWSER_SKIP=1 npm run test:browser`.
 
 ## Codex Cloud setup
 

@@ -35,11 +35,12 @@ async function testUrl() {
   let browser;
   try { browser = await chromium.launch({ headless: true }); }
   catch (error) {
-    if (String(error.message).includes('Executable doesn\'t exist')) {
+    if (String(error.message).includes('Executable doesn\'t exist') && process.env.ALLOW_BROWSER_SKIP === '1') {
       console.log('SKIP: Playwright browser binary is not installed');
       await new Promise(resolve => server ? server.close(resolve) : resolve());
       return;
     }
+    if (String(error.message).includes('Executable doesn\'t exist')) throw new Error('Playwright Chromium is required. Run: npx playwright install chromium');
     throw error;
   }
   activeBrowser = browser;
@@ -78,13 +79,63 @@ async function testUrl() {
   });
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !document.documentElement.classList.contains('booting'));
-  // The main page is the only fallback scroller; the frozen sidebar and the other card never move.
+  // A regular card uses the main page's native scroll; the frozen sidebar and unrelated cards never move.
   await page.evaluate(() => { document.querySelector('#page-today').style.minHeight = '1800px'; });
   const wheelBefore = await page.evaluate(() => ({ main: mainScroll.scrollTop, side: document.querySelector('.sidebar').scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, right: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop }));
   await page.locator('#page-today .summary').first().hover(); await page.mouse.wheel(0, 260); await page.waitForTimeout(80);
   const wheelAfter = await page.evaluate(() => ({ main: mainScroll.scrollTop, side: document.querySelector('.sidebar').scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, right: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop }));
   assert(wheelAfter.main > wheelBefore.main && wheelAfter.side === wheelBefore.side && wheelAfter.right === wheelBefore.right, 'ordinary today card wheel did not exclusively scroll the main page');
-  await page.evaluate(() => { mainScroll.scrollTop = 0; document.querySelector('#page-today').style.minHeight = ''; });
+
+  // Registered local regions consume the available distance and hand only the exact remainder to the main page.
+  const storedBeforeWheelRouting = await page.evaluate(() => localStorage.getItem('work-cockpit-v6'));
+  await page.evaluate(() => {
+    const local = document.querySelector('.today-task-scroll');
+    const fixture = document.createElement('div');
+    fixture.dataset.wheelFixture = 'today';
+    fixture.style.height = '1400px';
+    fixture.style.pointerEvents = 'none';
+    local.appendChild(fixture);
+    mainScroll.scrollTop = 0;
+    local.scrollTop = 0;
+  });
+  const todayLocal = page.locator('.today-task-scroll').first();
+  await todayLocal.hover(); await page.mouse.wheel(0, 120); await page.waitForTimeout(80);
+  let routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, other: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop, side: document.querySelector('.sidebar').scrollTop }));
+  assert(Math.abs(routed.local - 120) < 3 && routed.main === 0 && routed.other === 0 && routed.side === 0, `local wheel routing moved the wrong region: ${JSON.stringify(routed)}`);
+
+  const downBoundary = await page.evaluate(() => {
+    const local = document.querySelector('.today-task-scroll');
+    const maximum = local.scrollHeight - local.clientHeight;
+    local.scrollTop = maximum - 25;
+    mainScroll.scrollTop = 0;
+    return { maximum, before: local.scrollTop };
+  });
+  await todayLocal.hover(); await page.mouse.wheel(0, 100); await page.waitForTimeout(80);
+  routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop }));
+  assert(Math.abs(routed.local - downBoundary.maximum) < 2 && Math.abs(routed.main - 75) < 3, `downward boundary remainder was not conserved: ${JSON.stringify({ downBoundary, routed })}`);
+
+  await page.evaluate(() => { const local = document.querySelector('.today-task-scroll'); local.scrollTop = 20; mainScroll.scrollTop = 140; });
+  await todayLocal.hover(); await page.mouse.wheel(0, -80); await page.waitForTimeout(80);
+  routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop }));
+  assert(routed.local === 0 && Math.abs(routed.main - 80) < 3, `upward boundary remainder was not conserved: ${JSON.stringify(routed)}`);
+
+  await page.evaluate(() => {
+    const local = document.querySelector('.today-task-scroll');
+    local.scrollTop = 0;
+    mainScroll.scrollTop = 0;
+    for (let index = 0; index < 12; index += 1) local.dispatchEvent(new WheelEvent('wheel', { deltaY: .75, deltaMode: 0, bubbles: true, cancelable: true }));
+  });
+  await page.waitForTimeout(80);
+  routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop }));
+  assert(Math.abs(routed.local - 9) < 2 && routed.main === 0, `fractional wheel deltas were dropped or stuttered: ${JSON.stringify(routed)}`);
+
+  await page.evaluate(() => { const local = document.querySelector('.today-task-scroll'); local.scrollTop = 0; mainScroll.scrollTop = 0; local.dispatchEvent(new WheelEvent('wheel', { deltaY: 2, deltaMode: 1, bubbles: true, cancelable: true })); });
+  await page.waitForTimeout(80);
+  assert(Math.abs(await todayLocal.evaluate(node => node.scrollTop) - 32) < 2, 'line-mode wheel delta was not normalized');
+  assert(await page.evaluate(() => localStorage.getItem('work-cockpit-v6')) === storedBeforeWheelRouting, 'wheel routing mutated business data');
+  fs.mkdirSync(screenshotDirectory, { recursive: true });
+  await page.screenshot({ path: path.join(screenshotDirectory, 'wheel-routing.png'), fullPage: false });
+  await page.evaluate(() => { document.querySelector('[data-wheel-fixture="today"]')?.remove(); mainScroll.scrollTop = 0; document.querySelector('#page-today').style.minHeight = ''; });
   await page.waitForFunction(() => {
     const fixture = JSON.parse(localStorage.getItem('work-cockpit-browser-fixture-v1') || 'null');
     const state = JSON.parse(localStorage.getItem('work-cockpit-v6') || 'null');
@@ -92,6 +143,29 @@ async function testUrl() {
   });
 
   await page.click('[data-page="tasks"]');
+  await page.evaluate(() => {
+    const pageNode = document.querySelector('#page-tasks');
+    const table = pageNode.querySelector('.table-card');
+    pageNode.style.minHeight = '1800px';
+    table.style.maxHeight = '170px';
+    table.scrollTop = 0;
+    mainScroll.scrollTop = 0;
+  });
+  const taskTableScroller = page.locator('#page-tasks .table-card');
+  await taskTableScroller.hover(); await page.mouse.wheel(0, 90); await page.waitForTimeout(80);
+  let taskWheel = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('#page-tasks .table-card').scrollTop }));
+  assert(taskWheel.local > 70 && taskWheel.main === 0, `all-task local wheel did not stay in the table: ${JSON.stringify(taskWheel)}`);
+  const taskBoundary = await page.evaluate(() => {
+    const local = document.querySelector('#page-tasks .table-card');
+    const maximum = local.scrollHeight - local.clientHeight;
+    local.scrollTop = maximum - 15;
+    mainScroll.scrollTop = 0;
+    return maximum;
+  });
+  await taskTableScroller.hover(); await page.mouse.wheel(0, 80); await page.waitForTimeout(80);
+  taskWheel = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('#page-tasks .table-card').scrollTop }));
+  assert(Math.abs(taskWheel.local - taskBoundary) < 2 && Math.abs(taskWheel.main - 65) < 3, `all-task boundary did not hand its exact remainder to the page: ${JSON.stringify({ taskBoundary, taskWheel })}`);
+  await page.evaluate(() => { const pageNode = document.querySelector('#page-tasks'), table = pageNode.querySelector('.table-card'); pageNode.style.minHeight = ''; table.style.maxHeight = ''; table.scrollTop = 0; mainScroll.scrollTop = 0; });
   await page.click('[data-edit-task="t1"]');
   await page.click('[data-add-check]');
   const checklistInput = page.locator('#draftChecklist [data-check-text]').last();
