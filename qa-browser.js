@@ -5,6 +5,13 @@ const path = require('path');
 
 const requestedUrl = process.argv[2];
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
+const dragAt = (page, sourceSelector, targetSelector, ratio = 0.5) => page.evaluate(({ sourceSelector, targetSelector, ratio }) => {
+  const source = document.querySelector(sourceSelector), target = document.querySelector(targetSelector), data = new DataTransfer(), rect = target.getBoundingClientRect(), clientX = rect.left + rect.width / 2, clientY = rect.top + rect.height * ratio;
+  source.dispatchEvent(new DragEvent('dragstart', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
+  target.dispatchEvent(new DragEvent('dragover', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
+  target.dispatchEvent(new DragEvent('drop', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
+  source.dispatchEvent(new DragEvent('dragend', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
+}, { sourceSelector, targetSelector, ratio });
 let server;
 let activePage;
 let activeBrowser;
@@ -165,6 +172,15 @@ async function testUrl() {
   await page.evaluate(() => { const pageNode = document.querySelector('#page-tasks'), table = pageNode.querySelector('.table-card'); pageNode.style.minHeight = ''; table.style.maxHeight = ''; table.scrollTop = 0; mainScroll.scrollTop = 0; });
   await page.click('[data-edit-task="t1"]');
   await page.click('[data-add-check]');
+  await page.click('[data-add-check]');
+  await page.click('[data-add-check]');
+  const checklistRows = page.locator('#draftChecklist [data-check-drop]');
+  await checklistRows.nth(0).locator('[data-check-text]').fill('检查项一');
+  await checklistRows.nth(1).locator('[data-check-text]').fill('检查项二');
+  await checklistRows.nth(2).locator('[data-check-text]').fill('检查项三');
+  await dragAt(page, '[data-check-drag="0"]', '[data-check-drop="2"]', 0.9);
+  const checklistOrder = (await page.locator('#draftChecklist [data-check-text]').evaluateAll(nodes => nodes.map(node => node.value))).join(',');
+  assert(checklistOrder === '检查项二,检查项三,检查项一', `checklist downward drag did not insert after the release row: ${checklistOrder}`);
   const checklistInput = page.locator('#draftChecklist [data-check-text]').last();
   await checklistInput.focus();
   const checklistFocus = await checklistInput.evaluate(node => ({ outline: getComputedStyle(node).outlineStyle, shadow: getComputedStyle(node).boxShadow }));
@@ -239,6 +255,16 @@ async function testUrl() {
   await page.keyboard.press('Control+Z');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').status === '进行中' && saved.tasks.find(task => task.id === 't1').focus, 'cross-card undo did not restore the complete task state');
+  await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="today"][data-task="t4"]', 0.9);
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
+  assert(saved.order.today.indexOf('t1') === saved.order.today.indexOf('t4') + 1, 'same-card downward drag did not insert after the release row');
+  await page.evaluate(() => { const style=document.createElement('style');style.id='drag-scroll-fixture';style.textContent='.today-task-scroll{max-height:96px!important}';document.head.appendChild(style);const local=document.querySelector('.today-task-scroll');local.scrollTop=40;const scroll=captureDragScroll();moveOrder('today','t1','t4','before');restoreDragScroll(scroll); });
+  await page.waitForTimeout(50);
+  assert(await page.locator('.today-task-scroll').first().evaluate(node => node.scrollTop > 0), 'same-card drag reset the local list to the top');
+  await page.evaluate(() => document.querySelector('#drag-scroll-fixture')?.remove());
+  await dragAt(page, '[data-drag-handle="today"][data-task="t4"]', '[data-drop-scope="today"][data-task="t1"]', 0.1);
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
+  assert(saved.order.today.indexOf('t4') === saved.order.today.indexOf('t1') - 1, 'same-card upward drag did not insert before the release row');
   await page.locator('#globalSearch').focus();
   await page.keyboard.type('撤销隔离');
   const beforeTextUndo = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).tasks.find(task => task.id === 't1').status);
@@ -247,6 +273,11 @@ async function testUrl() {
   assert(beforeTextUndo === afterTextUndo, 'text input Ctrl+Z incorrectly triggered task history');
   await page.fill('#globalSearch', '');
   await page.click('[data-page="week"]');
+  await page.click('[data-add-top]'); await page.click('[data-add-top]'); await page.click('[data-add-top]');
+  await page.locator('[data-top-index="0"]').fill('重点一'); await page.locator('[data-top-index="1"]').fill('重点二'); await page.locator('[data-top-index="2"]').fill('重点三');
+  await dragAt(page, '[data-top-drag="0"]', '[data-top-drop="2"]', 0.9);
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
+  assert(saved.weeks[Object.keys(saved.weeks).sort().at(-1)].top.join(',') === '重点二,重点三,重点一', 'Top 3 downward drag did not insert after the release row');
   await page.locator('[data-drag-handle="long"][data-task="t3"]').dragTo(page.locator('[data-drop-zone="week"]'));
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't3').week && saved.tasks.find(task => task.id === 't3').type === '任务', 'long-term to weekly transition failed');
@@ -334,8 +365,24 @@ async function testUrl() {
   await editor.evaluate(node => { node.innerHTML='<p><strong>甲行</strong></p><p><u>乙行</u></p><p>目标</p>'; const selection=getSelection(),range=document.createRange(),data=new DataTransfer();range.setStart(node.children[0].firstChild.firstChild,0);range.setEnd(node.children[1].firstChild.firstChild,2);selection.removeAllRanges();selection.addRange(range);node.dispatchEvent(new ClipboardEvent('copy',{clipboardData:data,bubbles:true,cancelable:true}));const target=node.lastElementChild.firstChild,caret=document.createRange();caret.setStart(target,2);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true})); });
   assert(await editor.locator(':scope > p').count() === 4 && !(await editor.innerHTML()).includes('<p><p>'), 'multi-paragraph paste produced the wrong block count or nesting');
   assert(await editor.locator(':scope > p').nth(2).locator('strong').textContent() === '甲行' && await editor.locator(':scope > p').nth(3).locator('u').textContent() === '乙行', 'multi-paragraph paste lost inline formatting');
+  const listClipboard = await editor.evaluate(node => { node.innerHTML='<ul><li><strong>列表甲</strong></li><li><u>列表乙</u></li></ul><p>目标</p>';const items=node.querySelectorAll('li'),selection=getSelection(),range=document.createRange(),data=new DataTransfer();range.setStart(items[0].firstChild.firstChild,0);range.setEnd(items[1].firstChild.firstChild,3);selection.removeAllRanges();selection.addRange(range);node.dispatchEvent(new ClipboardEvent('copy',{clipboardData:data,bubbles:true,cancelable:true}));const target=node.lastElementChild.firstChild,caret=document.createRange();caret.setStart(target,1);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true}));return{html:data.getData('text/html'),result:node.innerHTML}; });
+  assert(await editor.locator(':scope > ul').count() === 2 && await editor.locator(':scope > ul').last().locator(':scope > li').count() === 2, `multi-item list clipboard lost list structure: ${JSON.stringify(listClipboard)}`);
+  assert(await editor.locator(':scope > ul').last().locator('strong').textContent() === '列表甲' && await editor.locator(':scope > ul').last().locator('u').textContent() === '列表乙', 'multi-item list clipboard lost inline formatting');
   await editor.evaluate(node => { node.innerHTML='<p>目标</p>';const target=node.firstElementChild.firstChild,selection=getSelection(),caret=document.createRange(),data=new DataTransfer();caret.setStart(target,1);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);data.setData('text/html','<p><u>外部整行</u></p>');data.setData('text/plain','外部整行\n');node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true})); });
   assert(await editor.locator(':scope > p').count() === 1 && await editor.locator(':scope > p > u').textContent() === '外部整行', 'external single-line paste with a trailing newline lost formatting or created a paragraph');
+  await editor.evaluate(node => { node.innerHTML='<p>目标</p>';const target=node.firstElementChild.firstChild,selection=getSelection(),caret=document.createRange(),data=new DataTransfer();caret.setStart(target,1);caret.collapse(true);selection.removeAllRanges();selection.addRange(caret);data.setData('text/html','<div><p><span style="font-weight:700">网页加粗</span></p><p><span style="text-decoration:underline">网页下划线</span></p></div>');data.setData('text/plain','网页加粗\n网页下划线');node.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true})); });
+  assert(await editor.locator('strong').textContent() === '网页加粗' && await editor.locator('u').textContent() === '网页下划线', 'external styled spans lost bold or underline formatting');
+  assert(await editor.locator('p p').count() === 0, 'external wrapper HTML produced nested paragraphs');
+  await editor.evaluate(node => { node.innerHTML='<p><strong>甲行</strong></p><p><u>乙行</u></p><p>保留行</p>';const selection=getSelection(),range=document.createRange(),data=new DataTransfer();range.setStart(node.children[0].firstChild.firstChild,0);range.setEnd(node.children[1].firstChild.firstChild,2);selection.removeAllRanges();selection.addRange(range);node.dispatchEvent(new ClipboardEvent('cut',{clipboardData:data,bubbles:true,cancelable:true})); });
+  assert(await editor.locator(':scope > p').count() === 1 && await editor.locator(':scope > p').textContent() === '保留行', 'multi-paragraph cut left empty or partial source blocks');
+  await editor.evaluate(node => { node.innerHTML='<p><strong>清除加粗</strong>和<u>下划线</u></p>';const text=node.querySelector('strong').firstChild,selection=getSelection(),range=document.createRange();range.selectNodeContents(text);selection.removeAllRanges();selection.addRange(range);node.focus(); });
+  await page.click('.memo-editor-body [data-command="removeFormat"]');
+  assert(await editor.locator('strong').count() === 0 && (await editor.textContent()).includes('清除加粗'), 'clear-format did not unwrap a selection inside one inline format');
+
+  const memoOrderBefore = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).order.memoActive.slice());
+  await dragAt(page, '[data-memo-drag="n1"]', '[data-select-memo="n3"]', 0.9);
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
+  assert(saved.order.memoActive.indexOf('n1') === saved.order.memoActive.indexOf('n3') + 1, `memo downward drag did not insert after the release card: ${memoOrderBefore.join(',')} -> ${saved.order.memoActive.join(',')}`);
 
   await page.click('[data-toggle-memo-multi]');
   await page.click('[data-toggle-memo-select="n2"]');
