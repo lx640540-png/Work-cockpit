@@ -85,15 +85,15 @@ async function testUrl() {
   await page.locator('#page-today .summary').first().hover(); await page.mouse.wheel(0, 260); await page.waitForTimeout(80);
   const wheelAfter = await page.evaluate(() => ({ main: mainScroll.scrollTop, side: document.querySelector('.sidebar').scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, right: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop }));
   assert(wheelAfter.main > wheelBefore.main && wheelAfter.side === wheelBefore.side && wheelAfter.right === wheelBefore.right, 'ordinary today card wheel did not exclusively scroll the main page');
-  assert(await page.evaluate(() => todayWheelOwner === mainScroll), 'ordinary today wheel did not lock the main page as its owner');
+  assert(await page.locator('.today-wheel-shield').count() === 2, 'ordinary today wheel did not isolate the local scrollers');
   const crossCardBefore = await page.evaluate(() => ({ main: mainScroll.scrollTop, locals: [...document.querySelectorAll('.today-task-scroll')].map(node => node.scrollTop) }));
   const crossCardBox = await page.locator('.today-task-scroll').first().boundingBox();
   await page.mouse.move(crossCardBox.x + crossCardBox.width / 2, crossCardBox.y + crossCardBox.height / 2);
   await page.mouse.wheel(0, 140); await page.waitForTimeout(80);
-  const crossCardAfter = await page.evaluate(() => ({ main: mainScroll.scrollTop, locals: [...document.querySelectorAll('.today-task-scroll')].map(node => node.scrollTop), ownerIsMain: todayWheelOwner === mainScroll }));
-  assert(crossCardAfter.main > crossCardBefore.main && crossCardAfter.locals.every((value, index) => value === crossCardBefore.locals[index]) && crossCardAfter.ownerIsMain, 'main wheel gesture changed owner while the pointer crossed cards');
+  const crossCardAfter = await page.evaluate(() => ({ main: mainScroll.scrollTop, locals: [...document.querySelectorAll('.today-task-scroll')].map(node => node.scrollTop), isolated: document.querySelectorAll('.today-wheel-shield').length === 2 }));
+  assert(crossCardAfter.main > crossCardBefore.main && crossCardAfter.locals.every((value, index) => value === crossCardBefore.locals[index]) && crossCardAfter.isolated, 'native main wheel gesture changed target while the pointer crossed cards');
   await page.waitForTimeout(300);
-  assert(await page.evaluate(() => todayWheelOwner === null), 'today wheel owner did not release after the gesture');
+  assert(await page.locator('.today-wheel-shield').count() === 0, 'today main wheel isolation did not release after the gesture');
 
   // Scrollable cards keep their wheel range across pointer movement and do not chain at a boundary.
   // Cards without overflow choose the main page at the start of the next gesture.
@@ -111,14 +111,7 @@ async function testUrl() {
   await todayLocal.hover(); await page.mouse.wheel(0, 120); await page.waitForTimeout(80);
   let routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, other: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop, side: document.querySelector('.sidebar').scrollTop }));
   assert(routed.local > 90 && routed.main === 0 && routed.other === 0 && routed.side === 0, `local wheel moved the wrong region: ${JSON.stringify(routed)}`);
-  assert(await page.evaluate(() => todayWheelOwner === document.querySelector('.today-task-scroll')), 'local wheel did not lock the overflowing card as its owner');
-
-  const localCrossBefore = routed;
-  const otherLocalBox = await page.locator('.today-task-scroll').last().boundingBox();
-  await page.mouse.move(otherLocalBox.x + otherLocalBox.width / 2, otherLocalBox.y + otherLocalBox.height / 2);
-  await page.mouse.wheel(0, 90); await page.waitForTimeout(80);
-  routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, other: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop, ownerIsFirst: todayWheelOwner === document.querySelector('.today-task-scroll') }));
-  assert(routed.local > localCrossBefore.local && routed.main === 0 && routed.other === 0 && routed.ownerIsFirst, `local wheel gesture changed owner across cards: ${JSON.stringify(routed)}`);
+  assert(await page.locator('.today-wheel-shield').count() === 0, 'local wheel incorrectly activated main-page isolation');
 
   const downBoundary = await page.evaluate(() => {
     const local = document.querySelector('.today-task-scroll');
@@ -263,6 +256,8 @@ async function testUrl() {
 
 
   await page.fill('#globalSearch', '回车保存');
+  await page.waitForSelector('#page-search.active');
+  await page.fill('#searchPageInput', '回车保存');
   await page.waitForSelector('#page-search.active [data-search-task="t1"]');
   assert(await page.locator('#searchPageInput').evaluate(node => node === document.activeElement), 'search input lost focus after opening the search page');
   const searchGeometry = await page.locator('.search-page-field').evaluate(node => { const input=node.querySelector('input').getBoundingClientRect(), field=node.getBoundingClientRect(), clear=node.querySelector('button').getBoundingClientRect(); return { fieldHeight:field.height,inputHeight:input.height,clearTop:clear.top-input.top,clearBottom:input.bottom-clear.bottom }; });
