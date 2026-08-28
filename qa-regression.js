@@ -122,6 +122,12 @@ const contracts = [
   [html.includes('#draftChecklist [data-check-text]:focus') && html.includes('outline:0'), 'checklist focus uses themed focus ring instead of browser black outline'],
   [functionSource('richParagraphToList').includes('richCleanPlaceholder(entry)') && functionSource('richParagraphToList').includes('entry.appendChild(document.createElement("br"))'), 'empty toolbar list has exactly one normalized placeholder'],
   [html.includes('function renderNow(') && functionSource('saveTaskDraft').includes('renderNow()') && functionSource('saveProjectDraft').includes('renderNow()'), 'modal saves synchronously reconcile the current view'],
+  [functionSource('sanitizeRichValue').includes('font-weight') && functionSource('sanitizeRichValue').includes('text-decoration') && functionSource('sanitizeRichValue').includes('querySelector(":scope > p,:scope > div,:scope > ul,:scope > ol")'), 'external styled rich text keeps supported formatting without nested blocks'],
+  [functionSource('richClearFormat').includes('marker.dataset.richClear') && functionSource('richClearFormat').includes('owner.cloneNode(false)') && functionSource('richClearFormat').includes('owner.replaceWith'), 'clear format splits enclosing inline wrappers around the exact selection'],
+  [functionSource('richCopyCut').includes('listParent') && functionSource('richCopyCut').includes('document.createElement(listParent.tagName)'), 'multi-item list clipboard preserves its list container'],
+  [html.includes('function reorderId(') && html.includes('function reorderIndex(') && functionSource('moveOrder').includes('position') && functionSource('moveTask').includes('position'), 'all draggable collections support explicit before and after placement'],
+  [html.includes('function captureDragScroll(') && html.includes('function restoreDragScroll(') && functionSource('dragAutoScroll').includes('owner.scrollTop') && functionSource('cleanupDrag').includes('drag-before'), 'dragging preserves scroll positions, auto-scrolls edges, and clears visual state'],
+  [functionSource('markDropPosition').includes('getBoundingClientRect') && html.includes('.task-row.drag-before') && html.includes('.task-row.drag-after') && html.includes('.memo-item.drag-before'), 'drag release position has visible before and after feedback'],
 ];
 for (const [condition, label] of contracts) assert(condition, `contract failed: ${label}`);
 
