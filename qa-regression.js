@@ -68,7 +68,7 @@ const contracts = [
   [!html.includes('本周项目推进'), 'redundant week project card absent'],
   [html.includes('.task-modal>form{height:') && html.includes('.task-modal .task-editor{min-height:0;max-height:none;overflow:hidden') && html.includes('.task-content-column{height:100%;min-height:0;display:block;overflow-y:auto'), 'task detail middle column scroll owner'],
   [html.indexOf('id="taskNext"') < html.indexOf('class="task-section checklist-section ') && html.indexOf('class="task-section checklist-section ') < html.indexOf('id="taskNotes"'), 'checklist below next action'],
-  [html.includes('function sanitizeRichValue(') && functionSource('serializeRichEditor').includes('quill.getSemanticHTML()') && html.includes('formats:["bold","underline","list","focus"]'), 'sanitized Quill serialization pipeline'],
+  [html.includes('function sanitizeRichValue(') && functionSource('serializeRichEditor').includes('quill.getSemanticHTML()') && html.includes('formats:["bold","underline","list","indent","focus"]'), 'sanitized Quill serialization pipeline'],
   [html.includes('data-action="new-task" data-inbox="1">＋ 先记下来') && !html.includes('data-action="quick-memo">＋ 先记下来'), 'quick capture opens inbox task'],
   [html.includes('.top-delete{width:28px') && html.includes('.overview-row>div:first-child small{display:block;margin-top:6px'), 'Top 3 delete and project overview spacing'],
   [html.includes('<strong>工作台</strong>') && !html.includes('工作驾驶舱'), 'workbench brand rename'],
@@ -128,6 +128,9 @@ const contracts = [
   [functionSource('richClearFormat').includes('marker.dataset.richClear') && functionSource('richClearFormat').includes('owner.cloneNode(false)') && functionSource('richClearFormat').includes('owner.replaceWith'), 'clear format splits enclosing inline wrappers around the exact selection'],
   [functionSource('richCopyCut').includes('listParent') && functionSource('richCopyCut').includes('document.createElement(listParent.tagName)'), 'multi-item list clipboard preserves its list container'],
   [html.includes('function reorderId(') && html.includes('function reorderIndex(') && functionSource('moveOrder').includes('position') && functionSource('moveTask').includes('position'), 'all draggable collections support explicit before and after placement'],
+  [html.includes('vendor/sortablejs-1.15.6/Sortable.min.js') && functionSource('initTaskSortables').includes('new Sortable') && functionSource('initTaskSortables').includes('taskDomIds(toCard)'), 'task lists use local SortableJS and persist actual DOM order'],
+  [functionSource('initTaskSortables').includes('transition.apply(task)') && functionSource('initTaskSortables').includes('task.followup=""') && functionSource('initTaskSortables').includes('draft.order[fromScope]=sourceIds'), 'cross-card move is one atomic model commit'],
+  [functionSource('initQuillEditors').includes('"indent"') && functionSource('initQuillEditors').includes('key:9') && html.includes('data-command="outdent"') && html.includes('data-command="indent"'), 'Quill list indent supports toolbar and Tab bindings'],
   [html.includes('function captureDragScroll(') && html.includes('function restoreDragScroll(') && functionSource('dragAutoScroll').includes('owner.scrollTop') && functionSource('cleanupDrag').includes('drag-before'), 'dragging preserves scroll positions, auto-scrolls edges, and clears visual state'],
   [functionSource('markDropPosition').includes('getBoundingClientRect') && html.includes('.task-row.drag-before') && html.includes('.task-row.drag-after') && html.includes('.memo-item.drag-before'), 'drag release position has visible before and after feedback'],
 ];
