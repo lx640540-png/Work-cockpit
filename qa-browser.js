@@ -22,12 +22,16 @@ async function testUrl() {
   if (requestedUrl) return requestedUrl;
   const indexPath = path.join(__dirname, 'index.html');
   server = http.createServer((request, response) => {
-    if (request.url !== '/' && request.url !== '/index.html') {
+    const pathname = new URL(request.url, 'http://127.0.0.1').pathname;
+    const relative = pathname === '/' ? 'index.html' : pathname.slice(1);
+    const allowed = new Set(['index.html', 'vendor/quill-2.0.3/quill.js', 'vendor/quill-2.0.3/quill.core.css']);
+    if (!allowed.has(relative)) {
       response.writeHead(404).end('Not found');
       return;
     }
-    response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    fs.createReadStream(indexPath).pipe(response);
+    const contentType = relative.endsWith('.js') ? 'text/javascript; charset=utf-8' : relative.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/html; charset=utf-8';
+    response.writeHead(200, { 'Content-Type': contentType });
+    fs.createReadStream(relative === 'index.html' ? indexPath : path.join(__dirname, relative)).pipe(response);
   });
   await new Promise((resolve, reject) => {
     server.once('error', reject);
@@ -51,7 +55,8 @@ async function testUrl() {
     throw error;
   }
   activeBrowser = browser;
-  const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
+  const context = await browser.newContext({ viewport: { width: 1600, height: 1000 }, permissions: ['clipboard-read', 'clipboard-write'] });
+  const page = await context.newPage();
   activePage = page;
   const errors = [];
   page.on('pageerror', error => { errors.push(error.message); browserErrors.push(`pageerror: ${error.message}`); });
@@ -171,6 +176,7 @@ async function testUrl() {
   assert(Math.abs(taskWheel.local - taskBoundary) < 2 && taskWheel.main === 0, `all-task boundary incorrectly chained to the page: ${JSON.stringify({ taskBoundary, taskWheel })}`);
   await page.evaluate(() => { const pageNode = document.querySelector('#page-tasks'), table = pageNode.querySelector('.table-card'); pageNode.style.minHeight = ''; table.style.maxHeight = ''; table.scrollTop = 0; mainScroll.scrollTop = 0; });
   await page.click('[data-edit-task="t1"]');
+  assert(await page.locator('#taskNotes[data-quill-version="2.0.3"] > .ql-editor').count() === 1, 'task notes did not initialize with Quill 2');
   await page.click('[data-add-check]');
   await page.click('[data-add-check]');
   await page.click('[data-add-check]');
@@ -306,6 +312,7 @@ async function testUrl() {
   assert(await page.locator('#page-search').isHidden(), 'standalone search page did not close');
 
   await page.click('[data-page="memos"]');
+  if (false) {
   const editor = page.locator('[data-memo-content]');
   await editor.click();
   await editor.evaluate(node => { node.innerHTML = '<p>已有文本</p>'; const range = document.createRange(); range.setStart(node.firstChild, 0); range.collapse(true); const selection = getSelection(); selection.removeAllRanges(); selection.addRange(range); });
@@ -390,6 +397,74 @@ async function testUrl() {
   await editor.evaluate(node => { node.innerHTML='<p><strong>清除加粗</strong>和<u>下划线</u></p>';const text=node.querySelector('strong').firstChild,selection=getSelection(),range=document.createRange();range.selectNodeContents(text);selection.removeAllRanges();selection.addRange(range);node.focus(); });
   await page.click('.memo-editor-body [data-command="removeFormat"]');
   assert(await editor.locator('strong').count() === 0 && (await editor.textContent()).includes('清除加粗'), 'clear-format did not unwrap a selection inside one inline format');
+  }
+
+  const quillEditor = page.locator('[data-memo-content]');
+  const quillRoot = quillEditor.locator('.ql-editor');
+  assert(await quillEditor.getAttribute('data-quill-version') === '2.0.3', 'memo editor did not initialize Quill 2.0.3');
+  assert(await quillRoot.count() === 1, 'Quill created an invalid editor root');
+
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setText('已有文本\n','silent');quill.setSelection(0,0,'silent');quill.focus(); });
+  await page.keyboard.type('1. ');
+  let quillState = await quillEditor.evaluate(node => ({ text:node.__quill.getText(), format:node.__quill.getFormat(0,1) }));
+  assert(quillState.text.includes('已有文本') && quillState.format.list === 'ordered', 'Quill ordered-list shortcut lost the existing suffix');
+
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setText('上一行\n\n','silent');quill.setSelection(4,0,'silent');quill.focus(); });
+  await page.keyboard.type('- ');
+  quillState = await quillEditor.evaluate(node => ({ text:node.__quill.getText(), first:node.__quill.getText(0,3), format:node.__quill.getFormat(4,1) }));
+  assert(quillState.first === '上一行' && quillState.format.list === 'bullet', 'Quill bullet shortcut changed the preceding line');
+
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setText('\n','silent');quill.setSelection(0,0,'silent');quill.focus(); });
+  await page.keyboard.type('. ');
+  quillState = await quillEditor.evaluate(node => ({ text:node.__quill.getText(), format:node.__quill.getFormat(0,2), html:node.__quill.getSemanticHTML() }));
+  assert(quillState.text.startsWith('重点 ') && quillState.format.focus && quillState.html.includes('focus-marker'), 'Quill focus-marker shortcut was not preserved');
+
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setContents({ops:[{insert:'甲行',attributes:{bold:true}},{insert:'\n'},{insert:'乙行',attributes:{underline:true}},{insert:'\n'},{insert:'目标'},{insert:'\n'}]},'silent');quill.history.clear();quill.setSelection(0,5,'silent');quill.focus(); });
+  await page.keyboard.press('Control+C');
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setSelection(8,0,'silent');quill.focus(); });
+  await page.keyboard.press('Control+V');
+  quillState = await quillEditor.evaluate(node => ({ text:node.__quill.getText(), bold:node.__quill.getFormat(8,2).bold, underline:node.__quill.getFormat(11,2).underline }));
+  assert(quillState.text.endsWith('目标甲行\n乙行\n') && !quillState.text.includes('\n\n'), `two-line copy/paste collapsed lines or added a blank paragraph: ${JSON.stringify(quillState)}`);
+  assert(quillState.bold && quillState.underline, 'two-line copy/paste lost inline formatting');
+
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setContents({ops:[{insert:'剪甲',attributes:{bold:true}},{insert:'\n'},{insert:'剪乙',attributes:{underline:true}},{insert:'\n'},{insert:'保留'},{insert:'\n'}]},'silent');quill.history.clear();quill.setSelection(0,6,'silent');quill.focus(); });
+  await page.keyboard.press('Control+X');
+  quillState = await quillEditor.evaluate(node => ({ text:node.__quill.getText(), lines:node.__quill.getText().split('\n') }));
+  assert(quillState.text === '保留\n', `two-line cut left a partial or blank source paragraph: ${JSON.stringify(quillState)}`);
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setSelection(0,0,'silent');quill.focus(); });
+  await page.keyboard.press('Control+V');
+  quillState = await quillEditor.evaluate(node => ({ text:node.__quill.getText(), bold:node.__quill.getFormat(0,2).bold, underline:node.__quill.getFormat(3,2).underline }));
+  assert(quillState.text === '剪甲\n剪乙\n保留\n' && !quillState.text.includes('\n\n'), `two-line cut/paste changed line count: ${JSON.stringify(quillState)}`);
+  assert(quillState.bold && quillState.underline, 'two-line cut/paste lost formatting');
+
+  await quillEditor.evaluate(async node => { const quill=node.__quill;quill.setText('目标\n','silent');quill.setSelection(2,0,'silent');quill.focus();await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob(['<p><span style="font-weight:700">网页加粗</span></p><p><span style="text-decoration:underline">网页下划线</span></p>'],{type:'text/html'}),'text/plain':new Blob(['网页加粗\n网页下划线'],{type:'text/plain'})})]); });
+  await page.keyboard.press('Control+V');
+  quillState = await quillEditor.evaluate(node => ({ text:node.__quill.getText(), bold:node.__quill.getFormat(2,4).bold, underline:node.__quill.getFormat(7,5).underline, html:node.__quill.getSemanticHTML() }));
+  assert(quillState.text === '目标网页加粗\n网页下划线\n' && !quillState.text.includes('\n\n'), `external two-line paste changed paragraph count: ${JSON.stringify(quillState)}`);
+  assert(quillState.bold && quillState.underline && !quillState.html.includes('<p><p>'), 'external rich paste lost supported formatting or created nested paragraphs');
+
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setText('第一行\n第二行\n第三行\n','silent');quill.setSelection(0,11,'silent');quill.focus(); });
+  await page.click('.memo-editor-body [data-command="insertUnorderedList"]');
+  quillState = await quillEditor.evaluate(node => [0,4,8].map(index => node.__quill.getFormat(index,1).list));
+  assert(quillState.every(value => value === 'bullet'), 'Quill toolbar did not batch-format selected lines');
+  await page.click('.memo-editor-body [data-command="insertOrderedList"]');
+  quillState = await quillEditor.evaluate(node => [0,4,8].map(index => node.__quill.getFormat(index,1).list));
+  assert(quillState.every(value => value === 'ordered'), 'Quill toolbar did not batch-change list type');
+
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setContents({ops:[{insert:'清除加粗',attributes:{bold:true}},{insert:'和'},{insert:'下划线',attributes:{underline:true}},{insert:'\n'}]},'silent');quill.setSelection(0,4,'silent');quill.focus(); });
+  await page.click('.memo-editor-body [data-command="removeFormat"]');
+  quillState = await quillEditor.evaluate(node => ({ text:node.__quill.getText(), format:node.__quill.getFormat(0,4) }));
+  assert(quillState.text.startsWith('清除加粗') && !quillState.format.bold, 'Quill clear-format changed text or retained bold');
+
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setText('撤销','silent');quill.history.clear();quill.setSelection(2,0,'silent');quill.focus(); });
+  await page.keyboard.type('测试');
+  await page.keyboard.press('Control+Z');
+  assert(await quillEditor.evaluate(node => node.__quill.getText()) === '撤销\n', 'Quill undo did not restore editor-local content');
+  await page.keyboard.press('Control+Shift+Z');
+  assert(await quillEditor.evaluate(node => node.__quill.getText()) === '撤销测试\n', 'Quill redo did not restore editor-local content');
+  await page.waitForTimeout(350);
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
+  assert(saved.memos.find(memo => memo.id === 'n1').content.includes('撤销测试'), 'Quill user edits did not autosave through the existing memo lifecycle');
 
   const memoOrderBefore = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).order.memoActive.slice());
   await dragAt(page, '[data-memo-drag="n1"]', '[data-select-memo="n3"]', 0.9);
