@@ -9,6 +9,9 @@
     "test:browser": "node qa-browser.js",
     "setup:cloud": "playwright install chromium"
   },
+  "dependencies": {
+    "quill": "2.0.3"
+  },
   "devDependencies": {
     "playwright": "1.55.0"
   }
