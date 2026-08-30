@@ -340,9 +340,12 @@ async function testUrl() {
   await page.keyboard.press('Control+Z');
   await page.waitForSelector('[data-drop-scope="waiting"][data-task="t2"]');
   await page.click('[data-drop-scope="today"][data-task="t1"] [data-pin-task="t1"]');
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="1"]');
   await page.click('[data-drop-scope="waiting"][data-task="t2"] [data-pin-task="t2"]');
+  await page.waitForSelector('[data-drop-scope="waiting"][data-task="t2"][data-pinned="1"]');
   const orderBeforeDrop = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).order);
   await page.locator('[data-drag-handle="today"][data-task="t1"]').dragTo(page.locator('[data-drop-scope="waiting"][data-task="t2"]'));
+  await page.waitForSelector('[data-drop-scope="waiting"][data-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').status === '等待', 'cross-card drop did not update task status');
   assert(saved.order.waiting.indexOf('t1') === saved.order.waiting.indexOf('t2') - 1, 'cross-card task did not land at the release row');
