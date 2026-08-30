@@ -279,7 +279,7 @@ async function testUrl() {
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   const converted = saved.tasks.find(task => task.title === '第二行');
   assert(converted?.status === '待处理' && converted.inbox && saved.order.inbox[0] === converted.id, 'current quick-note line did not convert directly into the first inbox task');
-  await page.waitForSelector('#captureResizer', { state: 'visible' });
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   const captureDivider = await page.locator('#captureResizer').boundingBox();
   assert(captureDivider, 'quick note/inbox splitter did not return after the conversion render');
   const quickWidthBefore = await page.locator('.quick-note-card').evaluate(node => node.getBoundingClientRect().width);
