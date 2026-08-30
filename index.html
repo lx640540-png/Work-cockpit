@@ -822,7 +822,7 @@ function initQuillEditors(root=document){
   editor.addEventListener("compositionend",()=>{editor.classList.remove("ime-composing");queueMicrotask(()=>updateRichEmpty(editor))});
   editor.addEventListener("blur",()=>editor.classList.remove("ime-composing"));
   quill.on("selection-change",range=>{if(range){activeRichEditor=editor;updateRichToolbar(editor)}else if(activeRichEditor===editor)queueMicrotask(()=>{if(!editor.contains(document.activeElement)&&!document.activeElement?.closest?.(".rich-toolbar,#undoButton,#redoButton")){activeRichEditor=null;renderSidebar()}})});
-  quill.on("text-change",(delta,oldDelta,source)=>{if(quick)normalizeQuickNoteLines(quill);updateRichEmpty(editor);updateRichToolbar(editor);if(source==="user")editor.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText"}));queueMicrotask(()=>updateRichToolbar(editor))});
+  quill.on("text-change",(delta,oldDelta,source)=>{if(quick)normalizeQuickNoteLines(quill);updateRichEmpty(editor);updateRichToolbar(editor);if(source!=="silent")editor.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText"}));queueMicrotask(()=>updateRichToolbar(editor))});
  });
 }
 function richEditorFor(owner){let host=owner?.closest?.(".editor-box,.review-field,.memo-editor-body,.quick-note-body");return host?.querySelector(".rich-editor")||null}
