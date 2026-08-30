@@ -379,7 +379,7 @@ async function testUrl() {
   await page.waitForSelector('[data-drop-zone="today"] .pinned-divider');
 
   const assertCrossCardBefore = async (sourceScope, taskId, targetScope, targetId) => {
-    await dragAt(page, `[data-drag-handle="${sourceScope}"][data-task="${taskId}"]`, `[data-drop-scope="${targetScope}"][data-task="${targetId}"]`);
+    await dragAt(page, `[data-drag-handle="${sourceScope}"][data-task="${taskId}"]`, `[data-drop-scope="${targetScope}"][data-task="${targetId}"]`, .25);
     const result = await page.evaluate(({ targetScope, taskId, targetId }) => {
       const state = JSON.parse(localStorage.getItem('work-cockpit-v6'));
       const dom = [...document.querySelectorAll(`[data-drop-zone="${targetScope}"] .task-row[data-task]`)].map(row => row.dataset.task);
