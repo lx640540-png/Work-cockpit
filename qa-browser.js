@@ -327,12 +327,13 @@ async function testUrl() {
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinToday.includes('t1'), 'single task pin was not persisted');
   await page.waitForSelector('[data-drop-zone="today"] .pinned-task-segment [data-task="t1"][data-pinned="1"]');
-  const pinDividerVisual = await page.locator('[data-drop-zone="today"] .pinned-task-segment').evaluate(node => ({ border: getComputedStyle(node).borderTopWidth, background: getComputedStyle(node).backgroundColor, label: getComputedStyle(node, '::before').display }));
-  assert(await page.locator('[data-drop-zone="today"] .pinned-divider').count() === 1 && pinDividerVisual.border === '0px' && pinDividerVisual.label === 'none', `pinned tasks still expose a visible pin lane instead of a divider: ${JSON.stringify(pinDividerVisual)}`);
+  const pinDividerVisual = await page.locator('[data-drop-zone="today"] .pinned-task-segment.has-pins').evaluate(node => ({ border: getComputedStyle(node).borderTopWidth, background: getComputedStyle(node).backgroundColor, label: getComputedStyle(node, '::before').display }));
+  assert(await page.locator('[data-drop-zone="today"] .pinned-divider').count() === 1 && pinDividerVisual.border !== '0px' && pinDividerVisual.background !== 'rgba(0, 0, 0, 0)' && pinDividerVisual.label === 'none', `pinned tasks did not show the light-blue grouping frame: ${JSON.stringify(pinDividerVisual)}`);
   await page.click('[data-unpin-all="today"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinToday.length === 0, 'clear all pins did not stay scoped to today card');
   await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="0"]');
+  assert(await page.locator('[data-drop-zone="today"] .pinned-task-segment.has-pins,[data-drop-zone="today"] .pinned-divider').count() === 0, 'pin grouping remained visible after the last pinned task was cleared');
   const firstTodayBeforeCardDrop = await page.locator('[data-drop-scope="today"][data-task]').first().getAttribute('data-task');
   await dragAt(page, '[data-drag-handle="waiting"][data-task="t2"]', '[data-drop-zone="today"] .card-head', 0.5);
   await page.waitForSelector('[data-drop-scope="today"][data-task="t2"]');
@@ -374,7 +375,7 @@ async function testUrl() {
 
   await page.click('[data-toggle-group="today"]');
   await page.waitForSelector('[data-drop-zone="today"] .task-group');
-  assert(await page.locator('[data-drop-zone="today"] .pin-task,[data-drop-zone="today"] [data-unpin-all="today"],[data-drop-zone="today"] .pinned-divider').count() === 0, 'project grouping still exposes pin actions or a pin lane');
+  assert(await page.locator('[data-drop-zone="today"] .pin-task,[data-drop-zone="today"] [data-unpin-all="today"],[data-drop-zone="today"] .pinned-task-segment.has-pins,[data-drop-zone="today"] .pinned-divider').count() === 0, 'project grouping still exposes pin actions or a pin lane');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinToday.includes('t1'), 'entering project grouping erased stored pin membership');
   await page.click('[data-toggle-group="today"]');
