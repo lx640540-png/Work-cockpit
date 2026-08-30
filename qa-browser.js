@@ -331,8 +331,10 @@ async function testUrl() {
   await page.click('[data-unpin-all="today"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinToday.length === 0, 'clear all pins did not stay scoped to today card');
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="0"]');
   const firstTodayBeforeCardDrop = await page.locator('[data-drop-scope="today"][data-task]').first().getAttribute('data-task');
   await dragAt(page, '[data-drag-handle="waiting"][data-task="t2"]', '[data-drop-zone="today"] .card-head', 0.5);
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t2"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.today.indexOf('t2') === saved.order.today.indexOf(firstTodayBeforeCardDrop) - 1, 'card-header drop appended the incoming task instead of inserting before the first visible row');
   await page.keyboard.press('Control+Z');
