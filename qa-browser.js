@@ -345,7 +345,7 @@ async function testUrl() {
   await page.click('[data-drop-scope="waiting"][data-task="t2"] [data-pin-task="t2"]');
   await page.waitForSelector('[data-drop-scope="waiting"][data-task="t2"][data-pinned="1"]');
   const orderBeforeDrop = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).order);
-  await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="waiting"][data-task="t2"]');
+  await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="waiting"][data-task="t2"]', .25);
   await page.waitForSelector('[data-drop-scope="waiting"][data-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').status === '等待', 'cross-card drop did not update task status');
