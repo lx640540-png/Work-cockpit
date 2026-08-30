@@ -80,17 +80,20 @@ async function testUrl() {
         { id: 't3', title: '逾期跟进', nextAction: '确认阻塞', notes: '', project: 'p1', milestone: '', type: '长期跟进', status: '等待', priority: 'P1', focus: false, week: false, inbox: false, archived: false, followup: localDateKey(overdue), checklist: [], attachments: [], relatedTaskIds: [] },
         { id: 't4', title: '保持推进顺序', nextAction: '不要移动', notes: '', project: 'p1', milestone: '', type: '任务', status: '进行中', priority: 'P2', focus: true, week: true, inbox: false, archived: false, checklist: [], attachments: [], relatedTaskIds: [] },
         { id: 't5', title: '保持等待顺序', nextAction: '不要移动', notes: '', project: 'p1', milestone: '', type: '任务', status: '等待', priority: 'P2', focus: false, week: false, inbox: false, archived: false, checklist: [], attachments: [], relatedTaskIds: [] },
+        { id: 't6', title: '收件箱事项一', nextAction: '等待整理', notes: '', project: 'p1', milestone: '', type: '任务', status: '待处理', priority: 'P2', focus: false, week: false, inbox: true, archived: false, checklist: [], attachments: [], relatedTaskIds: [] },
+        { id: 't7', title: '收件箱事项二', nextAction: '等待整理', notes: '', project: 'p1', milestone: '', type: '任务', status: '待处理', priority: 'P2', focus: false, week: false, inbox: true, archived: false, checklist: [], attachments: [], relatedTaskIds: [] },
       ],
       memos: [
         { id: 'n1', title: '输入测试', content: '<p><br></p>', project: 'p1', pinned: false, archived: false },
         { id: 'n2', title: '待批量删除一', content: '<p>临时内容一</p>', project: '', pinned: false, archived: false },
         { id: 'n3', title: '待批量删除二', content: '<p>临时内容二</p>', project: '', pinned: false, archived: false },
       ],
-      decisions: [], weeks: {}, trash: [], snapshots: [], favorites: ['p1'], order: { today: ['t1', 't4'], waiting: ['t2', 't3', 't5'], projects: ['p1', 'p2', 'p3'] }, meta: {},
+      decisions: [], weeks: {}, trash: [], snapshots: [], favorites: ['p1'], order: { today: ['t1', 't4'], waiting: ['t2', 't3', 't5'], inbox: ['t6', 't7'], projects: ['p1', 'p2', 'p3'] }, meta: {},
     }));
   });
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !document.documentElement.classList.contains('booting'));
+  assert(await page.evaluate(() => typeof Sortable === 'function'), 'local SortableJS runtime did not load');
   // A wheel gesture chooses one owner on its first event and keeps it while the pointer crosses cards.
   await page.evaluate(() => { document.querySelector('#page-today').style.minHeight = '1800px'; });
   const wheelBefore = await page.evaluate(() => ({ main: mainScroll.scrollTop, side: document.querySelector('.sidebar').scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, right: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop }));
@@ -257,16 +260,42 @@ async function testUrl() {
   assert(saved.order.today.indexOf('t2') === saved.order.today.indexOf(firstTodayBeforeCardDrop) - 1, 'card-header drop appended the incoming task instead of inserting before the first visible row');
   await page.keyboard.press('Control+Z');
   await page.waitForSelector('[data-drop-scope="waiting"][data-task="t2"]');
+  await page.click('[data-drop-scope="today"][data-task="t1"] [data-pin-task="t1"]');
+  await page.click('[data-drop-scope="waiting"][data-task="t2"] [data-pin-task="t2"]');
   const orderBeforeDrop = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).order);
   await page.locator('[data-drag-handle="today"][data-task="t1"]').dragTo(page.locator('[data-drop-scope="waiting"][data-task="t2"]'));
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').status === '等待', 'cross-card drop did not update task status');
   assert(saved.order.waiting.indexOf('t1') === saved.order.waiting.indexOf('t2') - 1, 'cross-card task did not land at the release row');
+  assert(saved.order.pinWaiting.includes('t1') && saved.order.pinWaiting.includes('t2') && !saved.order.pinToday.includes('t1'), 'cross-card drag did not transfer the existing pin without changing unrelated pins');
+  const waitingPinnedDom = await page.locator('[data-drop-zone="waiting"] .task-row[data-pinned="1"]').evaluateAll(rows => rows.map(row => row.dataset.task));
+  assert(waitingPinnedDom.join(',') === 't1,t2', `pinned DOM order changed after cross-card drag: ${waitingPinnedDom.join(',')}`);
   assert(saved.order.waiting.filter(id => id !== 't1').join() === orderBeforeDrop.waiting.filter(id => id !== 't1').join(), 'cross-card drop reordered unrelated target tasks');
   assert(saved.order.today.filter(id => id !== 't1').join() === orderBeforeDrop.today.filter(id => id !== 't1').join(), 'cross-card drop reordered unrelated source tasks');
   await page.keyboard.press('Control+Z');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').status === '进行中' && saved.tasks.find(task => task.id === 't1').focus, 'cross-card undo did not restore the complete task state');
+  assert(saved.order.pinToday.includes('t1') && saved.order.pinWaiting.includes('t2'), 'cross-card undo did not restore source and target pins');
+
+  const assertCrossCardBefore = async (sourceScope, taskId, targetScope, targetId) => {
+    await page.locator(`[data-drag-handle="${sourceScope}"][data-task="${taskId}"]`).dragTo(page.locator(`[data-drop-scope="${targetScope}"][data-task="${targetId}"]`));
+    const result = await page.evaluate(({ targetScope, taskId, targetId }) => {
+      const state = JSON.parse(localStorage.getItem('work-cockpit-v6'));
+      const dom = [...document.querySelectorAll(`[data-drop-zone="${targetScope}"] .task-row[data-task]`)].map(row => row.dataset.task);
+      return { order: state.order[targetScope], pins: state.order[`pin${targetScope[0].toUpperCase()}${targetScope.slice(1)}`] || [], dom, taskId, targetId };
+    }, { targetScope, taskId, targetId });
+    assert(result.order.indexOf(taskId) < result.order.indexOf(targetId), `${sourceScope} -> ${targetScope} saved the moved task after the release row`);
+    assert(result.dom.indexOf(taskId) < result.dom.indexOf(targetId), `${sourceScope} -> ${targetScope} rendered the moved task at the bottom`);
+    assert(!result.pins.includes(taskId), `${sourceScope} -> ${targetScope} implicitly pinned an unpinned task`);
+    await page.keyboard.press('Control+Z');
+    await page.waitForSelector(`[data-drop-scope="${sourceScope}"][data-task="${taskId}"]`);
+  };
+  await assertCrossCardBefore('today', 't4', 'waiting', 't5');
+  await assertCrossCardBefore('waiting', 't5', 'today', 't4');
+  await assertCrossCardBefore('today', 't4', 'inbox', 't6');
+  await assertCrossCardBefore('inbox', 't6', 'today', 't4');
+  await assertCrossCardBefore('waiting', 't5', 'inbox', 't6');
+  await assertCrossCardBefore('inbox', 't6', 'waiting', 't5');
   await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="today"][data-task="t4"]', 0.9);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.today.indexOf('t1') === saved.order.today.indexOf('t4') + 1, 'same-card downward drag did not insert after the release row');
