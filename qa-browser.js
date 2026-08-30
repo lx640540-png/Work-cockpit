@@ -24,7 +24,7 @@ async function testUrl() {
   server = http.createServer((request, response) => {
     const pathname = new URL(request.url, 'http://127.0.0.1').pathname;
     const relative = pathname === '/' ? 'index.html' : pathname.slice(1);
-    const allowed = new Set(['index.html', 'vendor/quill-2.0.3/quill.js', 'vendor/quill-2.0.3/quill.core.css', 'vendor/sortablejs-1.15.6/Sortable.min.js']);
+    const allowed = new Set(['index.html', 'vendor/quill-2.0.3/quill.js', 'vendor/quill-2.0.3/quill.core.css', 'vendor/task-dnd-1.15.6/engine.min.js']);
     if (!allowed.has(relative)) {
       response.writeHead(404).end('Not found');
       return;
@@ -93,6 +93,7 @@ async function testUrl() {
   });
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !document.documentElement.classList.contains('booting'));
+  assert(await page.evaluate(() => typeof Sortable === 'function'), 'local SortableJS runtime did not load');
   // A wheel gesture chooses one owner on its first event and keeps it while the pointer crosses cards.
   await page.evaluate(() => { document.querySelector('#page-today').style.minHeight = '1800px'; });
   const wheelBefore = await page.evaluate(() => ({ main: mainScroll.scrollTop, side: document.querySelector('.sidebar').scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, right: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop }));
