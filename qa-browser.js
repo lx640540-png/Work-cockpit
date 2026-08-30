@@ -649,6 +649,7 @@ async function testUrl() {
   assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p1,p3', 'newly pinned project did not move into the top section');
   assert(await page.locator('[data-select-project="p2"] .favorite.active').count() === 1, 'project pin button did not show its active state');
   await page.click('[data-select-project="p2"] .project-list-content');
+  await page.waitForSelector('[data-select-project="p2"].selected');
   const pinnedSelection = await page.evaluate(() => {
     const selected = document.querySelector('[data-select-project="p2"]');
     const otherPinned = document.querySelector('[data-select-project="p1"]');
