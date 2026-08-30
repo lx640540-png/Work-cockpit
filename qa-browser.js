@@ -82,18 +82,29 @@ async function testUrl() {
         { id: 't5', title: '保持等待顺序', nextAction: '不要移动', notes: '', project: 'p1', milestone: '', type: '任务', status: '等待', priority: 'P2', focus: false, week: false, inbox: false, archived: false, checklist: [], attachments: [], relatedTaskIds: [] },
         { id: 't6', title: '收件箱事项一', nextAction: '等待整理', notes: '', project: 'p1', milestone: '', type: '任务', status: '待处理', priority: 'P2', focus: false, week: false, inbox: true, archived: false, checklist: [], attachments: [], relatedTaskIds: [] },
         { id: 't7', title: '收件箱事项二', nextAction: '等待整理', notes: '', project: 'p1', milestone: '', type: '任务', status: '待处理', priority: 'P2', focus: false, week: false, inbox: true, archived: false, checklist: [], attachments: [], relatedTaskIds: [] },
+        { id: 't8', title: '推进同伴任务', nextAction: '保持来源顺序', notes: '', project: 'p1', milestone: '', type: '任务', status: '进行中', priority: 'P2', focus: true, week: true, inbox: false, archived: false, checklist: [], attachments: [], relatedTaskIds: [] },
+        { id: 't9', title: '旧数据重复归属', nextAction: '规范为等待', notes: '', project: 'p1', milestone: '', type: '任务', status: '等待', priority: 'P2', focus: true, week: true, inbox: true, archived: false, checklist: [], attachments: [], relatedTaskIds: [] },
       ],
       memos: [
         { id: 'n1', title: '输入测试', content: '<p><br></p>', project: 'p1', pinned: false, archived: false },
         { id: 'n2', title: '待批量删除一', content: '<p>临时内容一</p>', project: '', pinned: false, archived: false },
         { id: 'n3', title: '待批量删除二', content: '<p>临时内容二</p>', project: '', pinned: false, archived: false },
       ],
-      decisions: [], weeks: {}, trash: [], snapshots: [], favorites: ['p1'], order: { today: ['t1', 't4'], waiting: ['t2', 't3', 't5'], inbox: ['t6', 't7'], projects: ['p1', 'p2', 'p3'] }, meta: {},
+      decisions: [], weeks: {}, trash: [], snapshots: [], favorites: ['p1'], order: { today: ['t1', 't4', 't8', 't9'], waiting: ['t2', 't3', 't5', 't9'], inbox: ['t6', 't7', 't9'], pinToday: ['t9'], pinInbox: ['t9'], projects: ['p1', 'p2', 'p3'] }, meta: {},
     }));
   });
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !document.documentElement.classList.contains('booting'));
   assert(await page.evaluate(() => typeof Sortable === 'function'), 'local SortableJS runtime did not load');
+  const exclusiveFixture = await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem('work-cockpit-v6'));
+    const locations = ['today', 'waiting', 'inbox'].filter(scope => document.querySelector(`[data-drop-zone="${scope}"] [data-task="t9"]`));
+    const task = state.tasks.find(item => item.id === 't9');
+    return { locations, task, order: state.order };
+  });
+  assert(exclusiveFixture.locations.join(',') === 'waiting', `legacy duplicate task remained in multiple today cards: ${exclusiveFixture.locations.join(',')}`);
+  assert(!exclusiveFixture.task.focus && !exclusiveFixture.task.inbox, 'legacy waiting task kept incompatible focus/inbox flags');
+  assert(!exclusiveFixture.order.today.includes('t9') && !exclusiveFixture.order.inbox.includes('t9') && !exclusiveFixture.order.pinToday.includes('t9') && !exclusiveFixture.order.pinInbox.includes('t9'), 'legacy duplicate order and pin pollution was not pruned');
   // A wheel gesture chooses one owner on its first event and keeps it while the pointer crosses cards.
   await page.evaluate(() => { document.querySelector('#page-today').style.minHeight = '1800px'; });
   const wheelBefore = await page.evaluate(() => ({ main: mainScroll.scrollTop, side: document.querySelector('.sidebar').scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, right: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop }));
@@ -225,6 +236,42 @@ async function testUrl() {
   assert(afterHeight > beforeHeight + 40, 'today height divider did not resize the execution area');
   const storedLayout = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-layout-v1')));
   assert(storedLayout.todayHeight === Math.round(afterHeight), 'today height was not persisted as a browser UI preference');
+  const quickEditor = page.locator('[data-quick-note] .ql-editor');
+  assert(await quickEditor.count() === 1, 'persistent quick note card did not initialize with Quill');
+  await quickEditor.click();
+  await quickEditor.pressSequentially('第一行');
+  await quickEditor.press('Enter');
+  await quickEditor.pressSequentially('第二行');
+  await page.waitForTimeout(220);
+  let quickSaved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).quickNote);
+  assert(quickSaved.delta.ops.some(op => String(op.insert || '').includes('第一行')) && quickSaved.delta.ops.some(op => String(op.insert || '').includes('第二行')), 'quick note did not auto-save multiline content');
+  assert(await page.locator('[data-quick-note] .ql-editor :is(p,li)[class*="ql-quick-done-"]').count() === 2, 'quick note did not attach a completion box to every line');
+  const firstQuickLine = page.locator('[data-quick-note] .ql-editor p').first();
+  const firstQuickBox = await firstQuickLine.boundingBox();
+  await page.mouse.click(firstQuickBox.x + 9, firstQuickBox.y + Math.min(10, firstQuickBox.height / 2));
+  await page.waitForTimeout(80);
+  assert(await firstQuickLine.evaluate(node => node.classList.contains('ql-quick-done-1')), 'quick note line completion box did not toggle');
+  await page.evaluate(() => document.querySelector('[data-quick-note]').__quill.setSelection(0, 3, 'silent'));
+  await page.click('.quick-note-body [data-command="bold"]');
+  quickSaved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).quickNote);
+  assert(quickSaved.delta.ops.some(op => op.attributes?.bold), 'quick note bold formatting was not persisted');
+  await page.evaluate(() => { const quill = document.querySelector('[data-quick-note]').__quill; const index = quill.getText().indexOf('第二行'); quill.setSelection(index, 0, 'silent'); });
+  await page.click('.quick-note-body [data-command="insertUnorderedList"]');
+  quickSaved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).quickNote);
+  assert(quickSaved.delta.ops.some(op => op.attributes?.list === 'bullet'), 'quick note bullet list formatting was not persisted');
+  await page.click('[data-quick-note-to-task]');
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
+  const converted = saved.tasks.find(task => task.title === '第二行');
+  assert(converted?.status === '待处理' && converted.inbox && saved.order.inbox[0] === converted.id, 'current quick-note line did not convert directly into the first inbox task');
+  const captureDivider = await page.locator('#captureResizer').boundingBox();
+  const quickWidthBefore = await page.locator('.quick-note-card').evaluate(node => node.getBoundingClientRect().width);
+  await page.mouse.move(captureDivider.x + captureDivider.width / 2, captureDivider.y + captureDivider.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(captureDivider.x + captureDivider.width / 2 + 90, captureDivider.y + captureDivider.height / 2, { steps: 4 });
+  await page.mouse.up();
+  const quickWidthAfter = await page.locator('.quick-note-card').evaluate(node => node.getBoundingClientRect().width);
+  const captureLayout = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-layout-v1')));
+  assert(quickWidthAfter > quickWidthBefore + 55 && captureLayout.quickNoteLeft > 0.5, 'quick note/inbox splitter did not resize and persist the left card');
   await page.click('[data-task="t1"] [data-property="status"]');
   await page.click('#choicePopover [data-choice="等待"]');
   await page.waitForSelector('[data-drop-scope="waiting"][data-task="t1"]');
@@ -272,10 +319,27 @@ async function testUrl() {
   assert(waitingPinnedDom.join(',') === 't1,t2', `pinned DOM order changed after cross-card drag: ${waitingPinnedDom.join(',')}`);
   assert(saved.order.waiting.filter(id => id !== 't1').join() === orderBeforeDrop.waiting.filter(id => id !== 't1').join(), 'cross-card drop reordered unrelated target tasks');
   assert(saved.order.today.filter(id => id !== 't1').join() === orderBeforeDrop.today.filter(id => id !== 't1').join(), 'cross-card drop reordered unrelated source tasks');
+  const todayPeersAfterDrop = await page.locator('[data-drop-zone="today"] .task-row[data-task]').evaluateAll(rows => rows.map(row => row.dataset.task).filter(id => id !== 't1'));
+  const todayPeersBeforeDrop = orderBeforeDrop.today.filter(id => id !== 't1');
+  assert(todayPeersAfterDrop.join() === todayPeersBeforeDrop.join(), `moving a task out of today changed the remaining visible order: ${todayPeersAfterDrop.join()}`);
   await page.keyboard.press('Control+Z');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').status === '进行中' && saved.tasks.find(task => task.id === 't1').focus, 'cross-card undo did not restore the complete task state');
   assert(saved.order.pinToday.includes('t1') && saved.order.pinWaiting.includes('t2'), 'cross-card undo did not restore source and target pins');
+
+  await page.locator('[data-drag-handle="today"][data-task="t4"]').dragTo(page.locator('[data-drop-zone="waiting"] [data-sort-segment="pinned"]').first());
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
+  assert(saved.order.pinWaiting.includes('t4'), 'dropping an unpinned task into the pinned segment did not add the target pin');
+  assert(await page.locator('[data-drop-zone="waiting"] [data-sort-segment="pinned"] [data-task="t4"][data-pinned="1"]').count() === 1, 'task dropped into the pinned segment rendered outside the pinned bar');
+  await page.keyboard.press('Control+Z');
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t4"]');
+
+  await page.locator('[data-drag-handle="today"][data-task="t1"]').dragTo(page.locator('[data-drop-zone="waiting"] [data-sort-segment="normal"]').first());
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
+  assert(!saved.order.pinWaiting.includes('t1') && !saved.order.pinToday.includes('t1'), 'dropping a pinned task into the normal segment kept a stale pin');
+  assert(await page.locator('[data-drop-zone="waiting"] [data-sort-segment="normal"] [data-task="t1"][data-pinned="0"]').count() === 1, 'task dropped into the normal segment did not render in normal order');
+  await page.keyboard.press('Control+Z');
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t1"]');
 
   const assertCrossCardBefore = async (sourceScope, taskId, targetScope, targetId) => {
     await page.locator(`[data-drag-handle="${sourceScope}"][data-task="${taskId}"]`).dragTo(page.locator(`[data-drop-scope="${targetScope}"][data-task="${targetId}"]`));
@@ -539,9 +603,13 @@ async function testUrl() {
   assert(saved.order.projects.join(',') === 'p2,p3,p1', 'project drag did not persist the indicated after position');
   assert(await page.locator('.project-list-item.selected').getAttribute('data-select-project') === selectedBeforeDrag, 'project drag changed the selected project');
   const favoriteOrder = saved.order.projects.join(','); await page.click('[data-select-project="p2"] .favorite');
-  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6'))); assert(saved.order.projects.join(',') === favoriteOrder, 'favorite toggling reordered projects');
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6'))); assert(saved.order.projects.join(',') === favoriteOrder, 'pin toggling rewrote the manual project order');
+  assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p1,p3', 'newly pinned project did not move into the top section');
+  assert(await page.locator('[data-select-project="p2"] .favorite.active').count() === 1, 'project pin button did not show its active state');
+  const projectRail = await page.locator('#projectSplitter').evaluate(node => ({ hit: node.getBoundingClientRect().width, visible: getComputedStyle(node, '::before').width }));
+  assert(projectRail.hit === 8 && projectRail.visible === '2px', `project splitter is not visually narrow with a usable hit target: ${JSON.stringify(projectRail)}`);
   await page.reload({ waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => !document.documentElement.classList.contains('booting')); await page.click('[data-page="projects"]');
-  assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p3,p1', 'project order did not survive reload');
+  assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p1,p3', 'project pin order did not survive reload');
 
   await page.click('[data-action="new-project"]');
   assert(await page.locator('#projectTemplate').inputValue() === 'hardware', 'new project did not select the hardware template by default');
