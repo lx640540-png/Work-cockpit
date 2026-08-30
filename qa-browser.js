@@ -344,7 +344,7 @@ async function testUrl() {
   await page.click('[data-drop-scope="waiting"][data-task="t2"] [data-pin-task="t2"]');
   await page.waitForSelector('[data-drop-scope="waiting"][data-task="t2"][data-pinned="1"]');
   const orderBeforeDrop = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).order);
-  await page.locator('[data-drag-handle="today"][data-task="t1"]').dragTo(page.locator('[data-drop-scope="waiting"][data-task="t2"]'));
+  await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="waiting"][data-task="t2"]');
   await page.waitForSelector('[data-drop-scope="waiting"][data-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').status === '等待', 'cross-card drop did not update task status');
@@ -362,7 +362,7 @@ async function testUrl() {
   assert(saved.tasks.find(task => task.id === 't1').status === '进行中' && saved.tasks.find(task => task.id === 't1').focus, 'cross-card undo did not restore the complete task state');
   assert(saved.order.pinToday.includes('t1') && saved.order.pinWaiting.includes('t2'), 'cross-card undo did not restore source and target pins');
 
-  await page.locator('[data-drag-handle="today"][data-task="t1"]').dragTo(page.locator('[data-drop-scope="waiting"][data-task="t5"]'));
+  await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="waiting"][data-task="t5"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinWaiting.includes('t1') && !saved.order.pinToday.includes('t1'), 'cross-card drag lost the task pin when released beside a normal row');
   assert(await page.locator('[data-drop-zone="waiting"] [data-task="t1"][data-pinned="1"]').count() === 1, 'cross-card pinned task did not remain above the divider');
@@ -378,7 +378,7 @@ async function testUrl() {
   await page.waitForSelector('[data-drop-zone="today"] .pinned-divider');
 
   const assertCrossCardBefore = async (sourceScope, taskId, targetScope, targetId) => {
-    await page.locator(`[data-drag-handle="${sourceScope}"][data-task="${taskId}"]`).dragTo(page.locator(`[data-drop-scope="${targetScope}"][data-task="${targetId}"]`));
+    await dragAt(page, `[data-drag-handle="${sourceScope}"][data-task="${taskId}"]`, `[data-drop-scope="${targetScope}"][data-task="${targetId}"]`);
     const result = await page.evaluate(({ targetScope, taskId, targetId }) => {
       const state = JSON.parse(localStorage.getItem('work-cockpit-v6'));
       const dom = [...document.querySelectorAll(`[data-drop-zone="${targetScope}"] .task-row[data-task]`)].map(row => row.dataset.task);
@@ -419,10 +419,10 @@ async function testUrl() {
   await dragAt(page, '[data-top-drag="0"]', '[data-top-drop="2"]', 0.9);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.weeks[Object.keys(saved.weeks).sort().at(-1)].top.join(',') === '重点二,重点三,重点一', 'Top 3 downward drag did not insert after the release row');
-  await page.locator('[data-drag-handle="long"][data-task="t3"]').dragTo(page.locator('[data-drop-zone="week"]'));
+  await dragAt(page, '[data-drag-handle="long"][data-task="t3"]', '[data-drop-zone="week"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't3').week && saved.tasks.find(task => task.id === 't3').type === '任务', 'long-term to weekly transition failed');
-  await page.locator('[data-drag-handle="week"][data-task="t3"]').dragTo(page.locator('[data-drop-zone="long"]'));
+  await dragAt(page, '[data-drag-handle="week"][data-task="t3"]', '[data-drop-zone="long"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(!saved.tasks.find(task => task.id === 't3').week && saved.tasks.find(task => task.id === 't3').type === '长期跟进', 'weekly to long-term transition failed');
 
