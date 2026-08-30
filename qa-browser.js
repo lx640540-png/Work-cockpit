@@ -401,9 +401,13 @@ async function testUrl() {
   await assertCrossCardBefore('inbox', 't6', 'waiting', 't5');
   await page.click('[data-drop-scope="today"][data-task="t1"] [data-pin-task="t1"]');
   await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="0"]');
+  const sameCardBefore = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).order.today.slice());
   await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="today"][data-task="t4"]', 0.9);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
-  assert(saved.order.today.indexOf('t1') === saved.order.today.indexOf('t4') + 1, 'same-card downward drag did not insert after the release row');
+  assert(
+    saved.order.today.indexOf('t1') === saved.order.today.indexOf('t4') + 1,
+    `same-card downward drag did not insert after the release row: before=${JSON.stringify(sameCardBefore)} after=${JSON.stringify(saved.order.today)}`
+  );
   await page.evaluate(() => { const style=document.createElement('style');style.id='drag-scroll-fixture';style.textContent='.today-task-scroll{max-height:96px!important}';document.head.appendChild(style);const local=document.querySelector('.today-task-scroll');local.scrollTop=40;const scroll=captureDragScroll();moveOrder('today','t1','t4','before');restoreDragScroll(scroll); });
   await page.waitForTimeout(50);
   assert(await page.locator('.today-task-scroll').first().evaluate(node => node.scrollTop > 0), 'same-card drag reset the local list to the top');
