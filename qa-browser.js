@@ -267,10 +267,12 @@ async function testUrl() {
   assert(await firstQuickLine.evaluate(node => node.classList.contains('ql-quick-done-1')), 'quick note line completion box did not toggle');
   await page.evaluate(() => document.querySelector('[data-quick-note]').__quill.setSelection(0, 3, 'silent'));
   await page.click('.quick-note-body [data-command="bold"]');
+  await page.waitForTimeout(220);
   quickSaved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).quickNote);
-  assert(quickSaved.delta.ops.some(op => op.attributes?.bold), `quick note bold formatting was not persisted: ${JSON.stringify({ saved: quickSaved.delta, live: await page.locator('[data-quick-note]').evaluate(node => node.__quill.getContents()) })}`);
+  assert(quickSaved.delta.ops.some(op => op.attributes?.bold), 'quick note bold formatting was not persisted after autosave');
   await page.evaluate(() => { const quill = document.querySelector('[data-quick-note]').__quill; const index = quill.getText().indexOf('第二行'); quill.setSelection(index, 0, 'silent'); });
   await page.click('.quick-note-body [data-command="insertUnorderedList"]');
+  await page.waitForTimeout(220);
   quickSaved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).quickNote);
   assert(quickSaved.delta.ops.some(op => op.attributes?.list === 'bullet'), 'quick note bullet list formatting was not persisted');
   await page.click('[data-quick-note-to-task]');
