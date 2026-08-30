@@ -359,6 +359,7 @@ async function testUrl() {
   const todayPeersBeforeDrop = orderBeforeDrop.today.filter(id => id !== 't1');
   assert(todayPeersAfterDrop.join() === todayPeersBeforeDrop.join(), `moving a task out of today changed the remaining visible order: ${todayPeersAfterDrop.join()}`);
   await page.keyboard.press('Control+Z');
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').status === '进行中' && saved.tasks.find(task => task.id === 't1').focus, 'cross-card undo did not restore the complete task state');
   assert(saved.order.pinToday.includes('t1') && saved.order.pinWaiting.includes('t2'), 'cross-card undo did not restore source and target pins');
