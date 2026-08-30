@@ -313,6 +313,15 @@ function ordered(items,scope){
  let order=state.order[scope]||(state.order[scope]=[]),known=new Set(order);items.forEach(task=>{if(!known.has(task.id)){order.push(task.id);known.add(task.id)}});
  let rank=new Map(order.map((id,index)=>[id,index]));return[...items].sort((a,b)=>(rank.get(a.id)??99999)-(rank.get(b.id)??99999));
 }
+function reconcileVisibleOrder(existing,beforeIds,afterIds){
+ let touched=new Set([...beforeIds,...afterIds]),queue=[...afterIds],next=[],insertAt=-1;
+ for(let id of existing||[]){
+  if(touched.has(id)){if(queue.length)next.push(queue.shift());insertAt=next.length}
+  else next.push(id);
+ }
+ if(queue.length)next.splice(insertAt<0?next.length:insertAt,0,...queue);
+ return[...new Set(next)];
+}
 function applySmartOrder(items,scope){
  let pins=new Set(state.order[pinKey(scope)]||[]),sorted=smartSort(items.filter(task=>pins.has(task.id)),scope).concat(smartSort(items.filter(task=>!pins.has(task.id)),scope)),visible=new Set(sorted.map(task=>task.id)),old=state.order[scope]||[];
  commit("智能排序",draft=>{draft.order[scope]=sorted.map(task=>task.id).concat(old.filter(id=>!visible.has(id)))},{immediate:true});toast("已完成智能排序；后续修改不会自动重排");
@@ -326,9 +335,9 @@ function moveOrder(scope,fromId,toId,position="before"){
 const TASK_CARD_TRANSITIONS=Object.freeze({today:{label:"我来推进",accept:true,apply(task){task.focus=true;task.week=true;task.inbox=false;task.status="进行中";task.completed=""}},waiting:{label:"等待与催办",accept:true,apply(task){task.status="等待";task.inbox=false;task.completed=""}},inbox:{label:"临时收件箱",accept:true,apply(task){task.status="待处理";task.inbox=true;task.focus=false}},week:{label:"本周行动清单",accept:true,apply(task){task.week=true;task.type=task.type==="长期跟进"?"任务":task.type}},long:{label:"长期跟进",accept:true,apply(task){task.type="长期跟进";task.week=false;task.focus=false}},done:{label:"本周完成",accept:false}});
 const pinKey=scope=>"pin"+scope.charAt(0).toUpperCase()+scope.slice(1);
 function isPinned(taskId,scope){return(state.order[pinKey(scope)]||[]).includes(taskId)}
-function pinOrdered(items,scope){return ordered(items,scope)}
+function pinOrdered(items,scope){let rows=ordered(items,scope),pins=new Set(state.order[pinKey(scope)]||[]);return rows.filter(task=>pins.has(task.id)).concat(rows.filter(task=>!pins.has(task.id)))}
 function updateTask(id,label,updater){commit(label,draft=>{let task=draft.tasks.find(item=>item.id===id);if(!task)return;updater(task,draft);task.updatedAt=new Date().toISOString()},{immediate:true})}
-function moveTask(id,fromScope,toScope,toId="",position="before"){let transition=TASK_CARD_TRANSITIONS[toScope];if(!transition?.accept||id===toId)return;commit("移动事项至"+transition.label,draft=>{let task=draft.tasks.find(item=>item.id===id);if(!task)return;transition.apply(task);if(toScope!=="waiting")task.followup="";task.updatedAt=new Date().toISOString();let source=draft.order[fromScope]||[],target=(draft.order[toScope]||[]).filter(value=>value!==id);draft.order[fromScope]=source.filter(value=>value!==id);let at=toId?target.indexOf(toId):-1;target.splice(at<0?target.length:at+(position==="after"?1:0),0,id);draft.order[toScope]=target},{immediate:true})}
+function moveTask(id,fromScope,toScope,toId="",position="before"){let transition=TASK_CARD_TRANSITIONS[toScope];if(!transition?.accept||id===toId)return;commit("移动事项至"+transition.label,draft=>{let task=draft.tasks.find(item=>item.id===id);if(!task)return;let sourcePinKey=pinKey(fromScope),targetPinKey=pinKey(toScope),wasPinned=(draft.order[sourcePinKey]||[]).includes(id);transition.apply(task);if(toScope!=="waiting")task.followup="";task.updatedAt=new Date().toISOString();let source=draft.order[fromScope]||[],target=(draft.order[toScope]||[]).filter(value=>value!==id);draft.order[fromScope]=source.filter(value=>value!==id);let at=toId?target.indexOf(toId):-1;target.splice(at<0?target.length:at+(position==="after"?1:0),0,id);draft.order[toScope]=target;draft.order[sourcePinKey]=(draft.order[sourcePinKey]||[]).filter(value=>value!==id);let targetPins=new Set((draft.order[targetPinKey]||[]).filter(value=>value!==id));if(wasPinned)targetPins.add(id);draft.order[targetPinKey]=target.filter(value=>targetPins.has(value))},{immediate:true})}
 function followupReminder(task){if(!task.followup||task.followup>todayKey()||isDone(task)||task.archived||["暂停"].includes(task.status))return"";let days=Math.round((parseDate(todayKey())-parseDate(task.followup))/86400000),text=days?"跟进逾期 "+days+" 天":"今日跟进";return'<span class="followup reminder" data-tip="跟进日期已到，请确认进展">◷ '+text+'</span>'}
 function openTasks(){return state.tasks.filter(task=>!task.archived&&!isDone(task))}
 function todayAdvance(){let today=todayKey();return openTasks().filter(task=>(task.focus||(task.planDate&&task.planDate<=today))&&!task.inbox&&!["等待","暂停"].includes(task.status))}
@@ -372,17 +381,18 @@ function groupedTaskList(items,options={}){
 }
 let taskSortables=[];
 function taskDomIds(card){return card?Array.from(card.querySelectorAll(".task-row[data-task]"),row=>row.dataset.task):[]}
+function taskCardSnapshot(root){return new Map(Array.from(root.querySelectorAll(".drop-card[data-drop-zone]"),card=>[card.dataset.dropZone,taskDomIds(card)]))}
 function initTaskSortables(root){
  taskSortables.forEach(sortable=>sortable.destroy());taskSortables=[];
  if(!root||typeof Sortable!=="function")return;
  root.querySelectorAll(".drop-card").forEach(card=>{
   let scope=card.dataset.dropZone;if(!TASK_CARD_TRANSITIONS[scope]?.accept)return;
   let outer=card.querySelector(":scope > .items"),containers=outer?.querySelector(".task-group")?Array.from(outer.querySelectorAll(":scope > .task-group")):[outer];
-  containers.filter(Boolean).forEach(container=>taskSortables.push(new Sortable(container,{group:"work-cockpit-tasks",draggable:".task-row",handle:".drag-handle",animation:150,ghostClass:"dragging",chosenClass:"sortable-chosen",dragClass:"sortable-drag",scroll:true,scrollSensitivity:64,scrollSpeed:18,emptyInsertThreshold:28,onStart(event){event.item.dataset.fromScope=event.item.dataset.dropScope;event.item.closest(".drop-card")?.classList.add("drag-target")},onEnd(event){
+  containers.filter(Boolean).forEach(container=>taskSortables.push(new Sortable(container,{group:"work-cockpit-tasks",draggable:".task-row",handle:".drag-handle",animation:150,ghostClass:"dragging",chosenClass:"sortable-chosen",dragClass:"sortable-drag",scroll:true,scrollSensitivity:64,scrollSpeed:18,emptyInsertThreshold:28,onStart(event){let row=event.item,scope=row.dataset.dropScope;row.dataset.fromScope=scope;row.dataset.wasPinned=isPinned(row.dataset.task,scope)?"1":"0";row._taskCardSnapshot=taskCardSnapshot(root);row.closest(".drop-card")?.classList.add("drag-target")},onEnd(event){
    let row=event.item,id=row.dataset.task,fromScope=row.dataset.fromScope||row.dataset.dropScope,toCard=row.closest(".drop-card"),fromCard=event.from.closest(".drop-card"),toScope=toCard?.dataset.dropZone;if(!id||!toScope)return requestRender();
-   let previous=row.previousElementSibling,next=row.nextElementSibling,pinned=previous?.classList.contains("pinned-divider")?false:next?.classList.contains("pinned-divider")?true:next?.dataset.pinned==="1"||previous?.dataset.pinned==="1"&&previous?.dataset.pinned!=="0";
-   let targetIds=taskDomIds(toCard),sourceIds=fromCard===toCard?targetIds:taskDomIds(fromCard),project=row.closest("[data-sort-project]")?.dataset.sortProject;
-   commit("拖动事项",draft=>{let task=draft.tasks.find(item=>item.id===id),transition=TASK_CARD_TRANSITIONS[toScope];if(!task||!transition?.accept)return;transition.apply(task);if(toScope!=="waiting")task.followup="";if(project!==undefined)task.project=project;task.updatedAt=new Date().toISOString();draft.order[fromScope]=sourceIds;draft.order[toScope]=targetIds;let targetPin=pinKey(toScope),pins=new Set(draft.order[targetPin]||[]);pinned?pins.add(id):pins.delete(id);draft.order[targetPin]=targetIds.filter(value=>pins.has(value));if(fromScope!==toScope)draft.order[pinKey(fromScope)]=(draft.order[pinKey(fromScope)]||[]).filter(value=>value!==id)},{immediate:true});
+   let snapshot=row._taskCardSnapshot||new Map(),targetBefore=snapshot.get(toScope)||[],sourceBefore=snapshot.get(fromScope)||[],targetAfter=taskDomIds(toCard),sourceAfter=fromCard===toCard?targetAfter:taskDomIds(fromCard),wasPinned=row.dataset.wasPinned==="1",project=row.closest("[data-sort-project]")?.dataset.sortProject;
+   commit("拖动事项",draft=>{let task=draft.tasks.find(item=>item.id===id),transition=TASK_CARD_TRANSITIONS[toScope];if(!task||!transition?.accept)return;transition.apply(task);if(toScope!=="waiting")task.followup="";if(project!==undefined)task.project=project;task.updatedAt=new Date().toISOString();let sourceOrder=reconcileVisibleOrder(draft.order[fromScope]||[],sourceBefore,sourceAfter),targetOrder=fromScope===toScope?sourceOrder:reconcileVisibleOrder(draft.order[toScope]||[],targetBefore,targetAfter);draft.order[fromScope]=sourceOrder;draft.order[toScope]=targetOrder;let sourcePin=pinKey(fromScope),targetPin=pinKey(toScope);if(fromScope===toScope){let pins=new Set(draft.order[targetPin]||[]),beforePins=sourceBefore.filter(value=>pins.has(value)),afterPins=sourceAfter.filter(value=>pins.has(value));draft.order[targetPin]=reconcileVisibleOrder(draft.order[targetPin]||[],beforePins,afterPins)}else{let sourcePins=new Set(draft.order[sourcePin]||[]),sourcePinAfter=new Set([...sourcePins].filter(value=>value!==id));draft.order[sourcePin]=reconcileVisibleOrder(draft.order[sourcePin]||[],sourceBefore.filter(value=>sourcePins.has(value)),sourceAfter.filter(value=>sourcePinAfter.has(value))).filter(value=>value!==id);let targetPins=new Set((draft.order[targetPin]||[]).filter(value=>value!==id));if(wasPinned)targetPins.add(id);draft.order[targetPin]=reconcileVisibleOrder(draft.order[targetPin]||[],targetBefore.filter(value=>targetPins.has(value)),targetAfter.filter(value=>targetPins.has(value)));if(wasPinned&&!draft.order[targetPin].includes(id))draft.order[targetPin].push(id)}},{immediate:true});
+   delete row._taskCardSnapshot;
   } })));
  });
 }
