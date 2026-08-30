@@ -325,6 +325,7 @@ async function testUrl() {
   await page.click('[data-task="t1"] [data-pin-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinToday.includes('t1'), 'single task pin was not persisted');
+  await page.waitForSelector('[data-drop-zone="today"] .pinned-task-segment [data-task="t1"][data-pinned="1"]');
   const pinDividerVisual = await page.locator('[data-drop-zone="today"] .pinned-task-segment').evaluate(node => ({ border: getComputedStyle(node).borderTopWidth, background: getComputedStyle(node).backgroundColor, label: getComputedStyle(node, '::before').display }));
   assert(await page.locator('[data-drop-zone="today"] .pinned-divider').count() === 1 && pinDividerVisual.border === '0px' && pinDividerVisual.label === 'none', `pinned tasks still expose a visible pin lane instead of a divider: ${JSON.stringify(pinDividerVisual)}`);
   await page.click('[data-unpin-all="today"]');
