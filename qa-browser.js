@@ -399,6 +399,8 @@ async function testUrl() {
   await assertCrossCardBefore('inbox', 't6', 'today', 't4');
   await assertCrossCardBefore('waiting', 't5', 'inbox', 't6');
   await assertCrossCardBefore('inbox', 't6', 'waiting', 't5');
+  await page.click('[data-drop-scope="today"][data-task="t1"] [data-pin-task="t1"]');
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="0"]');
   await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="today"][data-task="t4"]', 0.9);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.today.indexOf('t1') === saved.order.today.indexOf('t4') + 1, 'same-card downward drag did not insert after the release row');
