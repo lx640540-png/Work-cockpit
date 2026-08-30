@@ -365,6 +365,7 @@ async function testUrl() {
   await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="waiting"][data-task="t5"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinWaiting.includes('t1') && !saved.order.pinToday.includes('t1'), 'cross-card drag lost the task pin when released beside a normal row');
+  await page.waitForSelector('[data-drop-zone="waiting"] [data-task="t1"][data-pinned="1"]');
   assert(await page.locator('[data-drop-zone="waiting"] [data-task="t1"][data-pinned="1"]').count() === 1, 'cross-card pinned task did not remain above the divider');
   await page.keyboard.press('Control+Z');
   await page.waitForSelector('[data-drop-scope="today"][data-task="t1"]');
