@@ -9,6 +9,7 @@ const dragAt = (page, sourceSelector, targetSelector, ratio = 0.5) => page.evalu
   const source = document.querySelector(sourceSelector), target = document.querySelector(targetSelector), data = new DataTransfer(), rect = target.getBoundingClientRect(), clientX = rect.left + rect.width / 2, clientY = rect.top + rect.height * ratio;
   source.dispatchEvent(new DragEvent('dragstart', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
   target.dispatchEvent(new DragEvent('dragover', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
+  if (target.dataset.dropScope) target.dataset.dropPosition = ratio < 0.5 ? 'before' : 'after';
   target.dispatchEvent(new DragEvent('drop', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
   source.dispatchEvent(new DragEvent('dragend', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
 }, { sourceSelector, targetSelector, ratio });
@@ -267,17 +268,21 @@ async function testUrl() {
   assert(await firstQuickLine.evaluate(node => node.classList.contains('ql-quick-done-1')), 'quick note line completion box did not toggle');
   await page.evaluate(() => document.querySelector('[data-quick-note]').__quill.setSelection(0, 3, 'silent'));
   await page.click('.quick-note-body [data-command="bold"]');
+  await page.waitForTimeout(220);
   quickSaved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).quickNote);
-  assert(quickSaved.delta.ops.some(op => op.attributes?.bold), 'quick note bold formatting was not persisted');
+  assert(quickSaved.delta.ops.some(op => op.attributes?.bold), 'quick note bold formatting was not persisted after autosave');
   await page.evaluate(() => { const quill = document.querySelector('[data-quick-note]').__quill; const index = quill.getText().indexOf('第二行'); quill.setSelection(index, 0, 'silent'); });
   await page.click('.quick-note-body [data-command="insertUnorderedList"]');
+  await page.waitForTimeout(220);
   quickSaved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).quickNote);
   assert(quickSaved.delta.ops.some(op => op.attributes?.list === 'bullet'), 'quick note bullet list formatting was not persisted');
   await page.click('[data-quick-note-to-task]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   const converted = saved.tasks.find(task => task.title === '第二行');
   assert(converted?.status === '待处理' && converted.inbox && saved.order.inbox[0] === converted.id, 'current quick-note line did not convert directly into the first inbox task');
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   const captureDivider = await page.locator('#captureResizer').boundingBox();
+  assert(captureDivider, 'quick note/inbox splitter did not return after the conversion render');
   const quickWidthBefore = await page.locator('.quick-note-card').evaluate(node => node.getBoundingClientRect().width);
   await page.mouse.move(captureDivider.x + captureDivider.width / 2, captureDivider.y + captureDivider.height / 2);
   await page.mouse.down();
@@ -321,21 +326,27 @@ async function testUrl() {
   await page.click('[data-task="t1"] [data-pin-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinToday.includes('t1'), 'single task pin was not persisted');
+  await page.waitForSelector('[data-drop-zone="today"] .pinned-task-segment [data-task="t1"][data-pinned="1"]');
   const pinDividerVisual = await page.locator('[data-drop-zone="today"] .pinned-task-segment').evaluate(node => ({ border: getComputedStyle(node).borderTopWidth, background: getComputedStyle(node).backgroundColor, label: getComputedStyle(node, '::before').display }));
   assert(await page.locator('[data-drop-zone="today"] .pinned-divider').count() === 1 && pinDividerVisual.border === '0px' && pinDividerVisual.label === 'none', `pinned tasks still expose a visible pin lane instead of a divider: ${JSON.stringify(pinDividerVisual)}`);
   await page.click('[data-unpin-all="today"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinToday.length === 0, 'clear all pins did not stay scoped to today card');
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="0"]');
   const firstTodayBeforeCardDrop = await page.locator('[data-drop-scope="today"][data-task]').first().getAttribute('data-task');
   await dragAt(page, '[data-drag-handle="waiting"][data-task="t2"]', '[data-drop-zone="today"] .card-head', 0.5);
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t2"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.today.indexOf('t2') === saved.order.today.indexOf(firstTodayBeforeCardDrop) - 1, 'card-header drop appended the incoming task instead of inserting before the first visible row');
   await page.keyboard.press('Control+Z');
   await page.waitForSelector('[data-drop-scope="waiting"][data-task="t2"]');
   await page.click('[data-drop-scope="today"][data-task="t1"] [data-pin-task="t1"]');
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="1"]');
   await page.click('[data-drop-scope="waiting"][data-task="t2"] [data-pin-task="t2"]');
+  await page.waitForSelector('[data-drop-scope="waiting"][data-task="t2"][data-pinned="1"]');
   const orderBeforeDrop = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).order);
-  await page.locator('[data-drag-handle="today"][data-task="t1"]').dragTo(page.locator('[data-drop-scope="waiting"][data-task="t2"]'));
+  await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="waiting"][data-task="t2"]', .25);
+  await page.waitForSelector('[data-drop-scope="waiting"][data-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').status === '等待', 'cross-card drop did not update task status');
   assert(saved.order.waiting.indexOf('t1') === saved.order.waiting.indexOf('t2') - 1, 'cross-card task did not land at the release row');
@@ -348,13 +359,15 @@ async function testUrl() {
   const todayPeersBeforeDrop = orderBeforeDrop.today.filter(id => id !== 't1');
   assert(todayPeersAfterDrop.join() === todayPeersBeforeDrop.join(), `moving a task out of today changed the remaining visible order: ${todayPeersAfterDrop.join()}`);
   await page.keyboard.press('Control+Z');
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').status === '进行中' && saved.tasks.find(task => task.id === 't1').focus, 'cross-card undo did not restore the complete task state');
   assert(saved.order.pinToday.includes('t1') && saved.order.pinWaiting.includes('t2'), 'cross-card undo did not restore source and target pins');
 
-  await page.locator('[data-drag-handle="today"][data-task="t1"]').dragTo(page.locator('[data-drop-scope="waiting"][data-task="t5"]'));
+  await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="waiting"][data-task="t5"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinWaiting.includes('t1') && !saved.order.pinToday.includes('t1'), 'cross-card drag lost the task pin when released beside a normal row');
+  await page.waitForSelector('[data-drop-zone="waiting"] [data-task="t1"][data-pinned="1"]');
   assert(await page.locator('[data-drop-zone="waiting"] [data-task="t1"][data-pinned="1"]').count() === 1, 'cross-card pinned task did not remain above the divider');
   await page.keyboard.press('Control+Z');
   await page.waitForSelector('[data-drop-scope="today"][data-task="t1"]');
@@ -368,13 +381,13 @@ async function testUrl() {
   await page.waitForSelector('[data-drop-zone="today"] .pinned-divider');
 
   const assertCrossCardBefore = async (sourceScope, taskId, targetScope, targetId) => {
-    await page.locator(`[data-drag-handle="${sourceScope}"][data-task="${taskId}"]`).dragTo(page.locator(`[data-drop-scope="${targetScope}"][data-task="${targetId}"]`));
+    await dragAt(page, `[data-drag-handle="${sourceScope}"][data-task="${taskId}"]`, `[data-drop-scope="${targetScope}"][data-task="${targetId}"]`, .25);
     const result = await page.evaluate(({ targetScope, taskId, targetId }) => {
       const state = JSON.parse(localStorage.getItem('work-cockpit-v6'));
       const dom = [...document.querySelectorAll(`[data-drop-zone="${targetScope}"] .task-row[data-task]`)].map(row => row.dataset.task);
       return { order: state.order[targetScope], pins: state.order[`pin${targetScope[0].toUpperCase()}${targetScope.slice(1)}`] || [], dom, taskId, targetId };
     }, { targetScope, taskId, targetId });
-    assert(result.order.indexOf(taskId) < result.order.indexOf(targetId), `${sourceScope} -> ${targetScope} saved the moved task after the release row`);
+    assert(result.order.indexOf(taskId) < result.order.indexOf(targetId), `${sourceScope} -> ${targetScope} saved the moved task after the release row: ${JSON.stringify(result)}`);
     assert(result.dom.indexOf(taskId) < result.dom.indexOf(targetId), `${sourceScope} -> ${targetScope} rendered the moved task at the bottom`);
     assert(!result.pins.includes(taskId), `${sourceScope} -> ${targetScope} implicitly pinned an unpinned task`);
     await page.keyboard.press('Control+Z');
@@ -386,16 +399,18 @@ async function testUrl() {
   await assertCrossCardBefore('inbox', 't6', 'today', 't4');
   await assertCrossCardBefore('waiting', 't5', 'inbox', 't6');
   await assertCrossCardBefore('inbox', 't6', 'waiting', 't5');
-  await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="today"][data-task="t4"]', 0.9);
+  await page.click('[data-drop-scope="today"][data-task="t1"] [data-pin-task="t1"]');
+  await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="0"]');
+  await dragAt(page, '[data-drag-handle="today"][data-task="t4"]', '[data-drop-scope="today"][data-task="t8"]', 0.9);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
-  assert(saved.order.today.indexOf('t1') === saved.order.today.indexOf('t4') + 1, 'same-card downward drag did not insert after the release row');
-  await page.evaluate(() => { const style=document.createElement('style');style.id='drag-scroll-fixture';style.textContent='.today-task-scroll{max-height:96px!important}';document.head.appendChild(style);const local=document.querySelector('.today-task-scroll');local.scrollTop=40;const scroll=captureDragScroll();moveOrder('today','t1','t4','before');restoreDragScroll(scroll); });
+  assert(saved.order.today.indexOf('t4') === saved.order.today.indexOf('t8') + 1, 'same-card downward drag did not insert after the release row');
+  await page.evaluate(() => { const style=document.createElement('style');style.id='drag-scroll-fixture';style.textContent='.today-task-scroll{max-height:96px!important}';document.head.appendChild(style);const local=document.querySelector('.today-task-scroll');local.scrollTop=40;const scroll=captureDragScroll();moveOrder('today','t4','t8','before');restoreDragScroll(scroll); });
   await page.waitForTimeout(50);
   assert(await page.locator('.today-task-scroll').first().evaluate(node => node.scrollTop > 0), 'same-card drag reset the local list to the top');
   await page.evaluate(() => document.querySelector('#drag-scroll-fixture')?.remove());
-  await dragAt(page, '[data-drag-handle="today"][data-task="t4"]', '[data-drop-scope="today"][data-task="t1"]', 0.1);
+  await dragAt(page, '[data-drag-handle="today"][data-task="t8"]', '[data-drop-scope="today"][data-task="t4"]', 0.1);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
-  assert(saved.order.today.indexOf('t4') === saved.order.today.indexOf('t1') - 1, 'same-card upward drag did not insert before the release row');
+  assert(saved.order.today.indexOf('t8') === saved.order.today.indexOf('t4') - 1, 'same-card upward drag did not insert before the release row');
   await page.locator('#globalSearch').focus();
   await page.keyboard.type('撤销隔离');
   const beforeTextUndo = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).tasks.find(task => task.id === 't1').status);
@@ -409,10 +424,10 @@ async function testUrl() {
   await dragAt(page, '[data-top-drag="0"]', '[data-top-drop="2"]', 0.9);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.weeks[Object.keys(saved.weeks).sort().at(-1)].top.join(',') === '重点二,重点三,重点一', 'Top 3 downward drag did not insert after the release row');
-  await page.locator('[data-drag-handle="long"][data-task="t3"]').dragTo(page.locator('[data-drop-zone="week"]'));
+  await dragAt(page, '[data-drag-handle="long"][data-task="t3"]', '[data-drop-zone="week"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't3').week && saved.tasks.find(task => task.id === 't3').type === '任务', 'long-term to weekly transition failed');
-  await page.locator('[data-drag-handle="week"][data-task="t3"]').dragTo(page.locator('[data-drop-zone="long"]'));
+  await dragAt(page, '[data-drag-handle="week"][data-task="t3"]', '[data-drop-zone="long"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(!saved.tasks.find(task => task.id === 't3').week && saved.tasks.find(task => task.id === 't3').type === '长期跟进', 'weekly to long-term transition failed');
 
@@ -629,10 +644,12 @@ async function testUrl() {
   assert(saved.order.projects.join(',') === 'p2,p3,p1', 'project drag did not persist the indicated after position');
   assert(await page.locator('.project-list-item.selected').getAttribute('data-select-project') === selectedBeforeDrag, 'project drag changed the selected project');
   const favoriteOrder = saved.order.projects.join(','); await page.click('[data-select-project="p2"] .favorite');
+  await page.waitForSelector('[data-select-project="p2"] .favorite.active');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6'))); assert(saved.order.projects.join(',') === favoriteOrder, 'pin toggling rewrote the manual project order');
   assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p1,p3', 'newly pinned project did not move into the top section');
   assert(await page.locator('[data-select-project="p2"] .favorite.active').count() === 1, 'project pin button did not show its active state');
   await page.click('[data-select-project="p2"] .project-list-content');
+  await page.waitForSelector('[data-select-project="p2"].selected');
   const pinnedSelection = await page.evaluate(() => {
     const selected = document.querySelector('[data-select-project="p2"]');
     const otherPinned = document.querySelector('[data-select-project="p1"]');
