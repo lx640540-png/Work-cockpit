@@ -396,12 +396,11 @@ async function testUrl() {
   await page.waitForSelector('[data-drop-zone="today"] .pinned-divider');
 
   const assertCrossCardBefore = async (sourceScope, taskId, targetScope, targetId) => {
-    await page.evaluate(() => { window.__qaTaskDragTrace = []; });
     await sortableDragAt(page, `[data-drag-handle="${sourceScope}"][data-task="${taskId}"]`, `[data-drop-scope="${targetScope}"][data-task="${targetId}"]`, .25);
     const result = await page.evaluate(({ targetScope, taskId, targetId }) => {
       const state = JSON.parse(localStorage.getItem('work-cockpit-v6'));
       const dom = [...document.querySelectorAll(`[data-drop-zone="${targetScope}"] .task-row[data-task]`)].map(row => row.dataset.task);
-      return { order: state.order[targetScope], pins: state.order[`pin${targetScope[0].toUpperCase()}${targetScope.slice(1)}`] || [], dom, taskId, targetId, trace: window.__qaTaskDragTrace };
+      return { order: state.order[targetScope], pins: state.order[`pin${targetScope[0].toUpperCase()}${targetScope.slice(1)}`] || [], dom, taskId, targetId };
     }, { targetScope, taskId, targetId });
     assert(result.order.indexOf(taskId) < result.order.indexOf(targetId), `${sourceScope} -> ${targetScope} saved the moved task after the release row: ${JSON.stringify(result)}`);
     assert(result.dom.indexOf(taskId) < result.dom.indexOf(targetId), `${sourceScope} -> ${targetScope} rendered the moved task at the bottom`);
