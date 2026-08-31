@@ -15,7 +15,13 @@ const dragAt = (page, sourceSelector, targetSelector, ratio = 0.5) => page.evalu
 }, { sourceSelector, targetSelector, ratio });
 const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5) => {
   const source = page.locator(sourceSelector), target = page.locator(targetSelector);
-  await source.scrollIntoViewIfNeeded(); await target.scrollIntoViewIfNeeded();
+  const scrollStable = async locator => {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try { await locator.scrollIntoViewIfNeeded(); return; }
+      catch (error) { if (!String(error).includes('not attached') || attempt === 2) throw error; await page.waitForTimeout(60); }
+    }
+  };
+  await scrollStable(source); await scrollStable(target);
   const from = await source.boundingBox(), to = await target.boundingBox();
   assert(from && to, `missing real drag geometry: ${sourceSelector} -> ${targetSelector}`);
   await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
