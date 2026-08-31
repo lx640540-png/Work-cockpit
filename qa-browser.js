@@ -13,6 +13,28 @@ const dragAt = (page, sourceSelector, targetSelector, ratio = 0.5) => page.evalu
   target.dispatchEvent(new DragEvent('drop', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
   source.dispatchEvent(new DragEvent('dragend', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
 }, { sourceSelector, targetSelector, ratio });
+const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5) => {
+  const source = page.locator(sourceSelector), target = page.locator(targetSelector);
+  const scrollStable = async locator => {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try { await locator.scrollIntoViewIfNeeded(); return; }
+      catch (error) { if (!String(error).includes('not attached') || attempt === 2) throw error; await page.waitForTimeout(60); }
+    }
+  };
+  await scrollStable(source); await scrollStable(target);
+  const from = await source.boundingBox(), to = await target.boundingBox();
+  assert(from && to, `missing real drag geometry: ${sourceSelector} -> ${targetSelector}`);
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(from.x + from.width / 2 + 6, from.y + from.height / 2 + 6, { steps: 4 });
+  await page.mouse.move(to.x + to.width / 2, to.y + to.height * ratio, { steps: 18 });
+  await page.waitForTimeout(80);
+  const release = await target.boundingBox();
+  assert(release, `missing release geometry after Sortable auto-scroll: ${targetSelector}`);
+  await page.mouse.move(release.x + release.width / 2, release.y + release.height * ratio, { steps: 3 });
+  await page.mouse.up();
+  await page.waitForTimeout(180);
+};
 let server;
 let activePage;
 let activeBrowser;
@@ -106,24 +128,15 @@ async function testUrl() {
   assert(exclusiveFixture.locations.join(',') === 'waiting', `legacy duplicate task remained in multiple today cards: ${exclusiveFixture.locations.join(',')}`);
   assert(!exclusiveFixture.task.focus && !exclusiveFixture.task.inbox, 'legacy waiting task kept incompatible focus/inbox flags');
   assert(!exclusiveFixture.order.today.includes('t9') && !exclusiveFixture.order.inbox.includes('t9') && !exclusiveFixture.order.pinToday.includes('t9') && !exclusiveFixture.order.pinInbox.includes('t9'), 'legacy duplicate order and pin pollution was not pruned');
-  // A wheel gesture chooses one owner on its first event and keeps it while the pointer crosses cards.
+  // Today relies on native wheel scrolling. A non-overflowing local area chains to the page,
+  // while a genuinely scrollable card contains the wheel at its own boundary.
   await page.evaluate(() => { document.querySelector('#page-today').style.minHeight = '1800px'; });
   const wheelBefore = await page.evaluate(() => ({ main: mainScroll.scrollTop, side: document.querySelector('.sidebar').scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, right: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop }));
   await page.locator('#page-today .summary').first().hover(); await page.mouse.wheel(0, 260); await page.waitForTimeout(80);
   const wheelAfter = await page.evaluate(() => ({ main: mainScroll.scrollTop, side: document.querySelector('.sidebar').scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, right: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop }));
-  assert(wheelAfter.main > wheelBefore.main && wheelAfter.side === wheelBefore.side && wheelAfter.right === wheelBefore.right, 'ordinary today card wheel did not exclusively scroll the main page');
-  assert(await page.evaluate(() => todayWheelOwner === mainScroll), 'ordinary today wheel did not lock the main page as gesture owner');
-  const crossCardBefore = await page.evaluate(() => ({ main: mainScroll.scrollTop, locals: [...document.querySelectorAll('.today-task-scroll')].map(node => node.scrollTop) }));
-  const crossCardBox = await page.locator('.today-task-scroll').first().boundingBox();
-  await page.mouse.move(crossCardBox.x + crossCardBox.width / 2, crossCardBox.y + crossCardBox.height / 2);
-  await page.mouse.wheel(0, 140); await page.waitForTimeout(80);
-  const crossCardAfter = await page.evaluate(() => ({ main: mainScroll.scrollTop, locals: [...document.querySelectorAll('.today-task-scroll')].map(node => node.scrollTop), locked: todayWheelOwner === mainScroll }));
-  assert(crossCardAfter.main > crossCardBefore.main && crossCardAfter.locals.every((value, index) => value === crossCardBefore.locals[index]) && crossCardAfter.locked, 'main wheel gesture changed owner while the pointer crossed cards');
-  await page.waitForTimeout(300);
-  assert(await page.evaluate(() => todayWheelOwner === null), 'today wheel owner did not release after the gesture');
+  assert(wheelAfter.main > wheelBefore.main && wheelAfter.side === wheelBefore.side && wheelAfter.right === wheelBefore.right, 'ordinary today wheel did not use the main page native scroller');
+  assert(await page.evaluate(() => typeof todayWheelOwner === 'undefined' && typeof stabilizeTodayWheel === 'undefined'), 'legacy JavaScript wheel owner is still installed');
 
-  // Scrollable cards keep their wheel range across pointer movement and do not chain at a boundary.
-  // Cards without overflow choose the main page at the start of the next gesture.
   await page.evaluate(() => {
     const local = document.querySelector('.today-task-scroll');
     const fixture = document.createElement('div');
@@ -133,16 +146,13 @@ async function testUrl() {
     local.appendChild(fixture);
     mainScroll.scrollTop = 0;
     local.scrollTop = 0;
+    syncTodayScrollability();
   });
   const todayLocal = page.locator('.today-task-scroll').first();
+  assert(await todayLocal.evaluate(node => node.classList.contains('can-local-scroll')), 'overflowing card did not enable native overscroll containment');
   await todayLocal.hover(); await page.mouse.wheel(0, 120); await page.waitForTimeout(80);
   let routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, other: [...document.querySelectorAll('.today-task-scroll')].at(-1).scrollTop, side: document.querySelector('.sidebar').scrollTop }));
   assert(routed.local > 90 && routed.main === 0 && routed.other === 0 && routed.side === 0, `local wheel moved the wrong region: ${JSON.stringify(routed)}`);
-  assert(await page.evaluate(() => todayWheelOwner === document.querySelector('.today-task-scroll')), 'local wheel did not lock its own card as gesture owner');
-  const localBeforeCross = routed.local;
-  await page.locator('#page-today .summary').first().hover(); await page.mouse.wheel(0, 90); await page.waitForTimeout(80);
-  routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop, locked: todayWheelOwner === document.querySelector('.today-task-scroll') }));
-  assert(routed.local > localBeforeCross && routed.main === 0 && routed.locked, `local wheel gesture changed owner after pointer movement: ${JSON.stringify(routed)}`);
 
   const downBoundary = await page.evaluate(() => {
     const local = document.querySelector('.today-task-scroll');
@@ -155,11 +165,15 @@ async function testUrl() {
   routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop }));
   assert(Math.abs(routed.local - downBoundary.maximum) < 2 && routed.main === 0, `local boundary incorrectly chained to the page: ${JSON.stringify({ downBoundary, routed })}`);
 
-  await page.evaluate(() => { document.querySelector('[data-wheel-fixture="today"]')?.remove(); const local = document.querySelector('.today-task-scroll'); local.scrollTop = 0; mainScroll.scrollTop = 0; });
-  await page.waitForTimeout(300);
+  await page.evaluate(() => { document.querySelector('[data-wheel-fixture="today"]')?.remove(); const local = document.querySelector('.today-task-scroll'); local.scrollTop = 0; mainScroll.scrollTop = 0; syncTodayScrollability(); });
+  assert(await todayLocal.evaluate(node => !node.classList.contains('can-local-scroll')), 'non-overflowing card kept overscroll containment');
   await todayLocal.hover(); await page.mouse.wheel(0, 120); await page.waitForTimeout(80);
   routed = await page.evaluate(() => { const local = document.querySelector('.today-task-scroll'); return { main: mainScroll.scrollTop, local: local.scrollTop, overflow: local.scrollHeight - local.clientHeight }; });
-  assert(routed.overflow <= 1 && routed.local === 0 && routed.main > 70, `non-overflowing card did not choose the main page: ${JSON.stringify(routed)}`);
+  assert(routed.overflow <= 1 && routed.local === 0 && routed.main > 70, `non-overflowing card did not naturally chain to the main page: ${JSON.stringify(routed)}`);
+  const mainAfterLocal = routed.main;
+  await page.locator('#page-today .summary').first().hover(); await page.mouse.wheel(0, 90); await page.waitForTimeout(30);
+  routed = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('.today-task-scroll').scrollTop }));
+  assert(routed.main > mainAfterLocal && routed.local === 0, `rapid pointer movement was still locked to the old wheel target: ${JSON.stringify(routed)}`);
   fs.mkdirSync(screenshotDirectory, { recursive: true });
   await page.screenshot({ path: path.join(screenshotDirectory, 'wheel-routing.png'), fullPage: false });
   await page.evaluate(() => { mainScroll.scrollTop = 0; document.querySelector('#page-today').style.minHeight = ''; });
@@ -335,7 +349,7 @@ async function testUrl() {
   await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="0"]');
   assert(await page.locator('[data-drop-zone="today"] .pinned-task-segment.has-pins,[data-drop-zone="today"] .pinned-divider').count() === 0, 'pin grouping remained visible after the last pinned task was cleared');
   const firstTodayBeforeCardDrop = await page.locator('[data-drop-scope="today"][data-task]').first().getAttribute('data-task');
-  await dragAt(page, '[data-drag-handle="waiting"][data-task="t2"]', '[data-drop-zone="today"] .card-head', 0.5);
+  await sortableDragAt(page, '[data-drag-handle="waiting"][data-task="t2"]', '[data-drop-zone="today"] .card-head', 0.5);
   await page.waitForSelector('[data-drop-scope="today"][data-task="t2"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.today.indexOf('t2') === saved.order.today.indexOf(firstTodayBeforeCardDrop) - 1, 'card-header drop appended the incoming task instead of inserting before the first visible row');
@@ -346,7 +360,7 @@ async function testUrl() {
   await page.click('[data-drop-scope="waiting"][data-task="t2"] [data-pin-task="t2"]');
   await page.waitForSelector('[data-drop-scope="waiting"][data-task="t2"][data-pinned="1"]');
   const orderBeforeDrop = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).order);
-  await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="waiting"][data-task="t2"]', .25);
+  await sortableDragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="waiting"][data-task="t2"]', .25);
   await page.waitForSelector('[data-drop-scope="waiting"][data-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').status === '等待', 'cross-card drop did not update task status');
@@ -365,7 +379,7 @@ async function testUrl() {
   assert(saved.tasks.find(task => task.id === 't1').status === '进行中' && saved.tasks.find(task => task.id === 't1').focus, 'cross-card undo did not restore the complete task state');
   assert(saved.order.pinToday.includes('t1') && saved.order.pinWaiting.includes('t2'), 'cross-card undo did not restore source and target pins');
 
-  await dragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="waiting"][data-task="t5"]');
+  await sortableDragAt(page, '[data-drag-handle="today"][data-task="t1"]', '[data-drop-scope="waiting"][data-task="t5"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinWaiting.includes('t1') && !saved.order.pinToday.includes('t1'), 'cross-card drag lost the task pin when released beside a normal row');
   await page.waitForSelector('[data-drop-zone="waiting"] [data-task="t1"][data-pinned="1"]');
@@ -382,7 +396,7 @@ async function testUrl() {
   await page.waitForSelector('[data-drop-zone="today"] .pinned-divider');
 
   const assertCrossCardBefore = async (sourceScope, taskId, targetScope, targetId) => {
-    await dragAt(page, `[data-drag-handle="${sourceScope}"][data-task="${taskId}"]`, `[data-drop-scope="${targetScope}"][data-task="${targetId}"]`, .25);
+    await sortableDragAt(page, `[data-drag-handle="${sourceScope}"][data-task="${taskId}"]`, `[data-drop-scope="${targetScope}"][data-task="${targetId}"]`, .25);
     const result = await page.evaluate(({ targetScope, taskId, targetId }) => {
       const state = JSON.parse(localStorage.getItem('work-cockpit-v6'));
       const dom = [...document.querySelectorAll(`[data-drop-zone="${targetScope}"] .task-row[data-task]`)].map(row => row.dataset.task);
@@ -402,14 +416,14 @@ async function testUrl() {
   await assertCrossCardBefore('inbox', 't6', 'waiting', 't5');
   await page.click('[data-drop-scope="today"][data-task="t1"] [data-pin-task="t1"]');
   await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="0"]');
-  await dragAt(page, '[data-drag-handle="today"][data-task="t4"]', '[data-drop-scope="today"][data-task="t8"]', 0.9);
+  await sortableDragAt(page, '[data-drag-handle="today"][data-task="t4"]', '[data-drop-scope="today"][data-task="t8"]', 0.9);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.today.indexOf('t4') === saved.order.today.indexOf('t8') + 1, 'same-card downward drag did not insert after the release row');
   await page.evaluate(() => { const style=document.createElement('style');style.id='drag-scroll-fixture';style.textContent='.today-task-scroll{max-height:96px!important}';document.head.appendChild(style);const local=document.querySelector('.today-task-scroll');local.scrollTop=40;const scroll=captureDragScroll();moveOrder('today','t4','t8','before');restoreDragScroll(scroll); });
   await page.waitForTimeout(50);
   assert(await page.locator('.today-task-scroll').first().evaluate(node => node.scrollTop > 0), 'same-card drag reset the local list to the top');
   await page.evaluate(() => document.querySelector('#drag-scroll-fixture')?.remove());
-  await dragAt(page, '[data-drag-handle="today"][data-task="t8"]', '[data-drop-scope="today"][data-task="t4"]', 0.1);
+  await sortableDragAt(page, '[data-drag-handle="today"][data-task="t8"]', '[data-drop-scope="today"][data-task="t4"]', 0.1);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.today.indexOf('t8') === saved.order.today.indexOf('t4') - 1, 'same-card upward drag did not insert before the release row');
   await page.locator('#globalSearch').focus();
@@ -425,10 +439,10 @@ async function testUrl() {
   await dragAt(page, '[data-top-drag="0"]', '[data-top-drop="2"]', 0.9);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.weeks[Object.keys(saved.weeks).sort().at(-1)].top.join(',') === '重点二,重点三,重点一', 'Top 3 downward drag did not insert after the release row');
-  await dragAt(page, '[data-drag-handle="long"][data-task="t3"]', '[data-drop-zone="week"]');
+  await sortableDragAt(page, '[data-drag-handle="long"][data-task="t3"]', '[data-drop-zone="week"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't3').week && saved.tasks.find(task => task.id === 't3').type === '任务', 'long-term to weekly transition failed');
-  await dragAt(page, '[data-drag-handle="week"][data-task="t3"]', '[data-drop-zone="long"]');
+  await sortableDragAt(page, '[data-drag-handle="week"][data-task="t3"]', '[data-drop-zone="long"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(!saved.tasks.find(task => task.id === 't3').week && saved.tasks.find(task => task.id === 't3').type === '长期跟进', 'weekly to long-term transition failed');
 
