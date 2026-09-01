@@ -188,6 +188,9 @@ async function testUrl() {
 
   await page.click('[data-page="tasks"]');
   await page.waitForSelector('#page-tasks.active');
+  assert(await page.locator('#page-tasks .task-advanced-panel').isHidden(), 'secondary task filters are expanded by default');
+  await page.click('[data-toggle-task-options]');
+  assert(await page.locator('#page-tasks .task-advanced-panel').isVisible(), 'task filter and grouping options did not expand');
   await page.check('[data-bulk-select="t1"]');
   await page.click('[data-quick="waiting"]');
   await page.waitForSelector('[data-bulk-select="t1"]', { state: 'detached' });
@@ -444,6 +447,12 @@ async function testUrl() {
   assert(beforeTextUndo === afterTextUndo, 'text input Ctrl+Z incorrectly triggered task history');
   await page.fill('#globalSearch', '');
   await page.click('[data-page="week"]');
+  assert(await page.locator('[data-week-panel="plan"].active').count() === 1 && await page.locator('#page-week .top-card').count() === 1, 'weekly planning mode is not the default');
+  await page.click('[data-week-panel="review"]');
+  await page.waitForSelector('#page-week .week-review-layout');
+  assert(await page.locator('#page-week .review-card').count() === 1 && await page.locator('#page-week .top-card').count() === 0, 'weekly review mode did not isolate completion and review content');
+  await page.click('[data-week-panel="plan"]');
+  await page.waitForSelector('#page-week .top-card');
   await page.click('[data-add-top]'); await page.click('[data-add-top]'); await page.click('[data-add-top]');
   await page.locator('[data-top-index="0"]').fill('重点一'); await page.locator('[data-top-index="1"]').fill('重点二'); await page.locator('[data-top-index="2"]').fill('重点三');
   await dragAt(page, '[data-top-drag="0"]', '[data-top-drop="2"]', 0.9);
@@ -660,6 +669,11 @@ async function testUrl() {
   const projectOverflow = await page.locator('.project-list-panel,.project-detail-panel').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).overflowY));
   assert(projectOverflow.every(value => value === 'auto'), 'project panes are not independently scrollable');
   assert(await page.locator('#projectSearch').count() === 0, 'project list still contains the removed search box');
+  await page.fill('#projectTaskSearch', '确认样机');
+  await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length === 1);
+  assert((await page.locator('#page-projects .overview-row b').first().textContent()).includes('确认样机测试'), 'project-local task search returned the wrong item');
+  await page.fill('#projectTaskSearch', '');
+  await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length > 1);
   const selectedStyle = await page.locator('[data-select-project="p1"]').evaluate(node => ({ background: getComputedStyle(node).backgroundColor, panel: getComputedStyle(document.querySelector('.project-list-panel')).backgroundColor, shadow: getComputedStyle(node).boxShadow, border: getComputedStyle(node).borderColor }));
   assert(selectedStyle.background === selectedStyle.panel && selectedStyle.shadow === 'none', 'selected project retained a background or shadow instead of only a blue border');
   assert(await page.getByText('里程碑相关任务', { exact: true }).count() === 0, 'project main page still renders milestone-related tasks');
