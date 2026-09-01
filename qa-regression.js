@@ -69,7 +69,7 @@ const contracts = [
   [html.includes('.task-modal>form{height:') && html.includes('.task-modal .task-editor{min-height:0;max-height:none;overflow:hidden') && html.includes('.task-content-column{height:100%;min-height:0;display:block;overflow-y:auto'), 'task detail middle column scroll owner'],
   [html.indexOf('id="taskNext"') < html.indexOf('class="task-section checklist-section ') && html.indexOf('class="task-section checklist-section ') < html.indexOf('id="taskNotes"'), 'checklist below next action'],
   [html.includes('function sanitizeRichValue(') && functionSource('serializeRichEditor').includes('quill.getSemanticHTML()') && html.includes('formats:["bold","underline","list","indent","focus","quickDone"]'), 'sanitized Quill serialization pipeline'],
-  [html.includes('data-action="new-task" data-inbox="1">＋ 先记下来') && !html.includes('data-action="quick-memo">＋ 先记下来'), 'quick capture opens inbox task'],
+  [html.includes('data-action="new-task" data-inbox="1" data-tip="快速记入收件箱；快捷键 N">＋ 快速记录') && !html.includes('<button class="btn primary" data-action="new-task">＋ 新增事项</button></div></header>') && html.includes('event.key.toLowerCase()==="n"') && !html.includes('data-action="quick-memo">＋ 先记下来'), 'single global quick capture opens inbox task'],
   [html.includes('.top-delete{width:28px') && html.includes('.overview-row>div:first-child small{display:block;margin-top:6px'), 'Top 3 delete and project overview spacing'],
   [html.includes('<strong>工作台</strong>') && !html.includes('工作驾驶舱'), 'workbench brand rename'],
   [html.includes('class="task-column task-content-column"') && html.includes('id="taskNext" rows="1"'), 'compact task content and one-line next action'],
@@ -154,6 +154,9 @@ const contracts = [
   [html.includes('function searchRank(') && functionSource('globalResults').includes('project?.code') && functionSource('globalResults').includes('project.code') && functionSource('filteredTasks').includes('project?.code'), 'project code and relevance-aware search'],
   [html.includes('data-summary-target=') && html.includes('data-toggle-week-done') && functionSource('renderWeek').includes('doneItems.slice(0,5)') && functionSource('renderWeek').includes('b.completed.localeCompare(a.completed)'), 'clickable Today summaries and progressive weekly completion list'],
   [functionSource('renderWeek').includes('state.weeks[selectedWeekKey]||emptyWeek()') && !functionSource('renderWeek').includes('state.weeks[selectedWeekKey]=emptyWeek()') && !html.includes('target.dataset.weekShift)*7));ui.showAllWeekDone=false;state.weeks[selectedWeekKey]'), 'week browsing is read-only until the user edits a week'],
+  [functionSource('renderWeek').includes('data-week-panel="plan"') && functionSource('renderWeek').includes('data-week-panel="review"') && functionSource('renderWeek').includes('panel==="review"?reviewMarkup:planMarkup') && html.includes('weekPanel:"plan"'), 'weekly planning and review use focused modes'],
+  [functionSource('renderProjects').includes('projectTaskQuery') && functionSource('renderProjects').includes('id="projectTaskSearch"') && functionSource('renderProjects').includes('data-open-project-tasks') && html.includes('target.id==="projectTaskSearch"'), 'project detail has local task search and full-view handoff'],
+  [functionSource('renderTasks').includes('data-toggle-task-options') && functionSource('renderTasks').includes('task-advanced-panel') && html.includes('taskOptionsOpen:false') && html.includes('target.dataset.toggleTaskOptions'), 'all-items secondary filters are progressively disclosed'],
 ];
 for (const [condition, label] of contracts) assert(condition, `contract failed: ${label}`);
 
