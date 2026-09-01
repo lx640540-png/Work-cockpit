@@ -670,9 +670,9 @@ async function testUrl() {
   const projectOverflow = await page.locator('.project-list-panel,.project-detail-panel').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).overflowY));
   assert(projectOverflow.every(value => value === 'auto'), 'project panes are not independently scrollable');
   assert(await page.locator('#projectSearch').count() === 0, 'project list still contains the removed search box');
-  await page.fill('#projectTaskSearch', '确认样机');
+  await page.fill('#projectTaskSearch', '保持推进顺序');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length === 1);
-  assert((await page.locator('#page-projects .overview-row b').first().textContent()).includes('确认样机测试'), 'project-local task search returned the wrong item');
+  assert((await page.locator('#page-projects .overview-row b').first().textContent()).includes('保持推进顺序'), 'project-local task search returned the wrong item');
   await page.fill('#projectTaskSearch', '');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length > 1);
   const selectedStyle = await page.locator('[data-select-project="p1"]').evaluate(node => ({ background: getComputedStyle(node).backgroundColor, panel: getComputedStyle(document.querySelector('.project-list-panel')).backgroundColor, shadow: getComputedStyle(node).boxShadow, border: getComputedStyle(node).borderColor }));
