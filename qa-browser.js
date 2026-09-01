@@ -182,9 +182,19 @@ async function testUrl() {
     const state = JSON.parse(localStorage.getItem('work-cockpit-v6') || 'null');
     return fixture && state?.tasks?.find(task => task.id === 't2')?.followup === fixture.today;
   });
+  await page.click('#page-today [data-summary-target="week"]');
+  await page.waitForSelector('#page-week.active');
+  assert(await page.locator('#page-week .week-grid').count() === 1, 'Today weekly summary did not open the weekly workflow');
 
   await page.click('[data-page="tasks"]');
   await page.waitForSelector('#page-tasks.active');
+  await page.check('[data-bulk-select="t1"]');
+  await page.click('[data-quick="waiting"]');
+  await page.waitForSelector('[data-bulk-select="t1"]', { state: 'detached' });
+  assert(await page.locator('#page-tasks .bulk-bar').count() === 0, 'filter change retained a hidden task in bulk selection');
+  await page.click('[data-quick="open"]');
+  await page.waitForSelector('[data-bulk-select="t1"]');
+  assert(!await page.locator('[data-bulk-select="t1"]').isChecked(), 'hidden bulk selection returned after restoring the filter');
   await page.evaluate(() => {
     const pageNode = document.querySelector('#page-tasks');
     const table = pageNode.querySelector('.table-card');
@@ -445,11 +455,11 @@ async function testUrl() {
   await sortableDragAt(page, '[data-drag-handle="week"][data-task="t3"]', '[data-drop-zone="long"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(!saved.tasks.find(task => task.id === 't3').week && saved.tasks.find(task => task.id === 't3').type === '长期跟进', 'weekly to long-term transition failed');
-
-
-  await page.fill('#globalSearch', '回车保存');
-  await page.waitForSelector('#page-search.active');
+  await page.fill('#globalSearch', 'TARGET');
+  await page.waitForSelector('#page-search.active [data-search-project="p1"]');
+  assert(await page.locator('#page-search.active [data-search-task="t1"]').count() === 1, 'project code search did not find a related task');
   await page.fill('#searchPageInput', '回车保存');
+  await page.waitForSelector('#page-search.active');
   await page.waitForSelector('#page-search.active [data-search-task="t1"]');
   assert(await page.locator('#searchPageInput').evaluate(node => node === document.activeElement), 'search input lost focus after opening the search page');
   const searchGeometry = await page.locator('.search-page-field').evaluate(node => { const input=node.querySelector('input').getBoundingClientRect(), field=node.getBoundingClientRect(), clear=node.querySelector('button').getBoundingClientRect(); return { fieldHeight:field.height,inputHeight:input.height,clearTop:clear.top-input.top,clearBottom:input.bottom-clear.bottom }; });
@@ -702,6 +712,7 @@ async function testUrl() {
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.projects.some(project => project.id === 'p1'), 'project restore failed');
   assert(saved.tasks.find(task => task.id === 't1').project === 'p1', 'project restore did not restore task relation');
+  assert(saved.decisions.find(item => item.id === decision.id).project === 'p1', 'project restore did not restore decision relation');
 
   const widePage = await browser.newPage({ viewport: { width: 1920, height: 1080 } }); await widePage.goto(url, { waitUntil: 'domcontentloaded' }); await widePage.waitForFunction(() => !document.documentElement.classList.contains('booting')); assert(await widePage.locator('[data-main-scroll]').count() === 1, '1920x1080 viewport lacks the unique main scroll container'); await widePage.close();
   assert(errors.length === 0, `page errors: ${errors.join(' | ')}`);
