@@ -190,8 +190,10 @@ async function testUrl() {
   await page.waitForSelector('#page-tasks.active');
   await page.check('[data-bulk-select="t1"]');
   await page.click('[data-quick="waiting"]');
+  await page.waitForSelector('[data-bulk-select="t1"]', { state: 'detached' });
   assert(await page.locator('#page-tasks .bulk-bar').count() === 0, 'filter change retained a hidden task in bulk selection');
   await page.click('[data-quick="open"]');
+  await page.waitForSelector('[data-bulk-select="t1"]');
   assert(!await page.locator('[data-bulk-select="t1"]').isChecked(), 'hidden bulk selection returned after restoring the filter');
   await page.evaluate(() => {
     const pageNode = document.querySelector('#page-tasks');
