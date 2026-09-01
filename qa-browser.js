@@ -224,6 +224,14 @@ async function testUrl() {
   await page.click('[data-page="tasks"]');
   await page.waitForSelector('#page-tasks.active');
   assert(await page.locator('#page-tasks .task-advanced-panel').isHidden(), 'secondary task filters are expanded by default');
+  await page.locator('[data-hover-task-options]').hover();
+  await page.waitForSelector('#page-tasks .task-advanced-panel:not([hidden])');
+  await page.locator('[data-filter-detail="project"] summary').hover();
+  await page.waitForFunction(() => document.querySelector('[data-filter-detail="project"]')?.open === true);
+  await page.locator('[data-filter-detail="type"] summary').hover();
+  await page.waitForFunction(() => document.querySelector('[data-filter-detail="type"]')?.open === true && document.querySelector('[data-filter-detail="project"]')?.open === false);
+  await page.locator('#page-tasks .task-table').hover(); await page.waitForTimeout(140);
+  assert(await page.locator('#page-tasks .task-advanced-panel').isHidden(), 'hover-opened task filters did not close after the pointer left');
   await page.click('[data-toggle-task-options]');
   await page.waitForSelector('#page-tasks .task-advanced-panel:not([hidden])');
   assert(await page.locator('#page-tasks .task-advanced-panel').isVisible(), 'task filter and grouping options did not expand');
@@ -699,6 +707,7 @@ async function testUrl() {
   assert(decision.sourceTaskId === 't1' && decision.project === 'p1' && decision.milestone === 'm1', 'decision auto-relations were not saved');
   await page.click('#taskForm .modal-actions [data-close="taskDialog"]');
 
+  await page.evaluate(() => { const project = projectById('p1'); window.__projectMilestoneFixture = clone(project.milestones); project.milestones.push({ id: 'm2', name: 'DVT 验证', due: '', status: '未开始', criteria: '' }, { id: 'm3', name: '小批试产', due: '', status: '未开始', criteria: '' }); saveLocal(true); });
   await page.click('[data-page="projects"]');
   await page.waitForSelector('#page-projects.active .project-master-detail', { state: 'visible' });
   assert(await page.locator('.project-master-detail').count() === 1, 'project master-detail workspace missing');
@@ -712,12 +721,16 @@ async function testUrl() {
   await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length > 1);
   await page.locator('.project-milestone-filter summary').hover();
   await page.waitForFunction(() => document.querySelector('.project-milestone-filter')?.open === true);
+  const milestoneChoices = await page.locator('.project-milestone-filter .milestone-filter-choice').evaluateAll(nodes => nodes.map(node => node.textContent.replace(/\s+/g, ' ').trim()));
+  assert(milestoneChoices.length === 3 && milestoneChoices.some(text => text.includes('DVT 验证')) && milestoneChoices.some(text => text.includes('小批试产')), `project milestone filter did not list every milestone separately: ${milestoneChoices.join(' | ')}`);
   await page.click('[data-project-milestone-filter="m1"]');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length === 2);
   assert(await page.locator('#page-projects .overview-row').count() === 2, 'project milestone filter did not isolate milestone tasks');
   await page.locator('.project-milestone-filter summary').hover();
   await page.click('[data-project-milestone-filter="all"]');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length > 2);
+  await page.evaluate(() => { projectById('p1').milestones = clone(window.__projectMilestoneFixture); delete window.__projectMilestoneFixture; saveLocal(true); requestRender(); });
+  await page.waitForFunction(() => document.querySelectorAll('.project-milestone-filter .milestone-filter-choice').length === 1);
   const selectedStyle = await page.locator('[data-select-project="p1"]').evaluate(node => ({ background: getComputedStyle(node).backgroundColor, panel: getComputedStyle(document.querySelector('.project-list-panel')).backgroundColor, shadow: getComputedStyle(node).boxShadow, border: getComputedStyle(node).borderColor }));
   assert(selectedStyle.background === selectedStyle.panel && selectedStyle.shadow === 'none', 'selected project retained a background or shadow instead of only a blue border');
   assert(await page.getByText('里程碑相关任务', { exact: true }).count() === 0, 'project main page still renders milestone-related tasks');
