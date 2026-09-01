@@ -185,6 +185,7 @@ async function testUrl() {
   await page.click('#page-today [data-summary-target="week"]');
   await page.waitForSelector('#page-week.active');
   assert(await page.locator('#page-week .week-grid').count() === 1, 'Today weekly summary did not open the weekly workflow');
+  await page.evaluate(() => { window.__weeklyFeatureState = clone(state); });
   const weekOrderBeforeFocus = await page.locator('[data-drop-zone="week"] .task-row[data-task]').evaluateAll(nodes => nodes.map(node => node.dataset.task).join(','));
   assert(await page.locator('[data-drop-zone="week"] [data-task="t4"] [data-toggle-focus="t4"].active').count() === 1, 'weekly action row did not show the active Today focus state');
   await page.click('[data-drop-zone="week"] [data-task="t4"] [data-toggle-focus="t4"]');
@@ -218,7 +219,7 @@ async function testUrl() {
   await page.click('#taskHistoryDialog [data-history-version="' + pastWeekKey + '"]');
   assert((await page.locator('#taskHistoryDialog .history-title').textContent()).includes('历史推进标题'), 'current task changes overwrote the past weekly snapshot');
   await page.click('#taskHistoryDialog [data-close="taskHistoryDialog"]');
-  await page.evaluate(() => { selectedWeekKey = currentWeekKey(); ui.weekPanel = 'plan'; requestRender(); });
+  await page.evaluate(() => { state = normalizeState(clone(window.__weeklyFeatureState)); delete window.__weeklyFeatureState; selectedWeekKey = currentWeekKey(); ui.weekPanel = 'plan'; saveLocal(true); requestRender(); });
 
   await page.click('[data-page="tasks"]');
   await page.waitForSelector('#page-tasks.active');
