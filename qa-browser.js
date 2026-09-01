@@ -185,6 +185,40 @@ async function testUrl() {
   await page.click('#page-today [data-summary-target="week"]');
   await page.waitForSelector('#page-week.active');
   assert(await page.locator('#page-week .week-grid').count() === 1, 'Today weekly summary did not open the weekly workflow');
+  const weekOrderBeforeFocus = await page.locator('[data-drop-zone="week"] .task-row[data-task]').evaluateAll(nodes => nodes.map(node => node.dataset.task).join(','));
+  assert(await page.locator('[data-drop-zone="week"] [data-task="t4"] [data-toggle-focus="t4"].active').count() === 1, 'weekly action row did not show the active Today focus state');
+  await page.click('[data-drop-zone="week"] [data-task="t4"] [data-toggle-focus="t4"]');
+  let focusState = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).tasks.find(task => task.id === 't4'));
+  assert(!focusState.focus && focusState.week, 'removing a weekly task from Today also removed it from the week');
+  await page.click('[data-drop-zone="week"] [data-task="t4"] [data-toggle-focus="t4"]');
+  focusState = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).tasks.find(task => task.id === 't4'));
+  const weekOrderAfterFocus = await page.locator('[data-drop-zone="week"] .task-row[data-task]').evaluateAll(nodes => nodes.map(node => node.dataset.task).join(','));
+  assert(focusState.focus && focusState.week && weekOrderAfterFocus === weekOrderBeforeFocus, 'adding a weekly task to Today changed its weekly membership or manual order');
+  await page.click('[data-page="today"]');
+  await page.waitForSelector('#page-today.active [data-drop-zone="today"] [data-task="t4"]');
+  await page.click('#page-today [data-summary-target="done"]');
+  await page.waitForSelector('#page-week.active [data-week-panel="review"].active');
+  assert(await page.locator('#page-week .week-review-layout').count() === 1, 'Today completion summary did not open the current weekly review');
+  const pastWeekKey = await page.evaluate(() => {
+    const key = fmt(addDays(parseDate(currentWeekKey()), -7));
+    const live = taskById('t8');
+    const project = projectById(live.project);
+    state.weeks[key] = { ...emptyWeek(), taskIds: ['t8'], taskSnapshots: [{ ...clone(live), title: '历史推进标题', nextAction: '历史下一步', week: true, focus: false }], projectSnapshots: [clone(project)], closedAt: new Date().toISOString() };
+    live.title = '当前推进标题'; live.nextAction = '当前下一步'; live.updatedAt = new Date().toISOString();
+    selectedWeekKey = key; ui.weekPanel = 'plan'; saveLocal(true); requestRender();
+    return key;
+  });
+  await page.waitForSelector('#page-week.active .history-row [data-view-task-history="t8"]');
+  assert((await page.locator('#page-week [data-task="t8"] .task-name').textContent()).includes('历史推进标题'), 'past week row drifted to the current task title');
+  await page.click('#page-week [data-view-task-history="t8"]');
+  await page.waitForSelector('#taskHistoryDialog[open]');
+  assert((await page.locator('#taskHistoryDialog .history-title').textContent()).includes('历史推进标题'), 'historical detail did not use the closed weekly snapshot');
+  await page.click('#taskHistoryDialog [data-history-version="current"]');
+  assert((await page.locator('#taskHistoryDialog .history-title').textContent()).includes('当前推进标题'), 'task history could not switch from the past snapshot to the current task');
+  await page.click('#taskHistoryDialog [data-history-version="' + pastWeekKey + '"]');
+  assert((await page.locator('#taskHistoryDialog .history-title').textContent()).includes('历史推进标题'), 'current task changes overwrote the past weekly snapshot');
+  await page.click('#taskHistoryDialog [data-close="taskHistoryDialog"]');
+  await page.evaluate(() => { selectedWeekKey = currentWeekKey(); ui.weekPanel = 'plan'; requestRender(); });
 
   await page.click('[data-page="tasks"]');
   await page.waitForSelector('#page-tasks.active');
@@ -675,6 +709,14 @@ async function testUrl() {
   assert((await page.locator('#page-projects .overview-row b').first().textContent()).includes('保持推进顺序'), 'project-local task search returned the wrong item');
   await page.fill('#projectTaskSearch', '');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length > 1);
+  await page.locator('.project-milestone-filter summary').hover();
+  await page.waitForFunction(() => document.querySelector('.project-milestone-filter')?.open === true);
+  await page.click('[data-project-milestone-filter="m1"]');
+  await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length === 2);
+  assert(await page.locator('#page-projects .overview-row').count() === 2, 'project milestone filter did not isolate milestone tasks');
+  await page.locator('.project-milestone-filter summary').hover();
+  await page.click('[data-project-milestone-filter="all"]');
+  await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length > 2);
   const selectedStyle = await page.locator('[data-select-project="p1"]').evaluate(node => ({ background: getComputedStyle(node).backgroundColor, panel: getComputedStyle(document.querySelector('.project-list-panel')).backgroundColor, shadow: getComputedStyle(node).boxShadow, border: getComputedStyle(node).borderColor }));
   assert(selectedStyle.background === selectedStyle.panel && selectedStyle.shadow === 'none', 'selected project retained a background or shadow instead of only a blue border');
   assert(await page.getByText('里程碑相关任务', { exact: true }).count() === 0, 'project main page still renders milestone-related tasks');
@@ -698,6 +740,12 @@ async function testUrl() {
   assert(pinnedSelection.selectedClass && !pinnedSelection.otherSelected && pinnedSelection.selectedBorder !== pinnedSelection.otherBorder, `selected and unselected pinned projects remain visually indistinguishable: ${JSON.stringify(pinnedSelection)}`);
   const projectRail = await page.locator('#projectSplitter').evaluate(node => ({ hit: node.getBoundingClientRect().width, visible: getComputedStyle(node, '::before').width, length: getComputedStyle(node, '::before').height }));
   assert(projectRail.hit === 8 && projectRail.visible === '6px' && projectRail.length === '84px', `project splitter does not share the Today grip with a usable hit target: ${JSON.stringify(projectRail)}`);
+  await page.click('[data-select-project="p1"] .project-list-content');
+  await page.evaluate(() => { taskFilter = { ...taskFilter, query: '残留筛选', type: ['问题与Bug'], status: ['暂停'] }; });
+  await page.click('[data-open-project-tasks="p1"]');
+  await page.waitForSelector('#page-tasks.active');
+  const projectHandoffFilter = await page.evaluate(() => taskFilter);
+  assert(projectHandoffFilter.query === '' && projectHandoffFilter.type.length === 0 && projectHandoffFilter.status.length === 0 && projectHandoffFilter.project.join(',') === 'p1', `project full-view handoff retained stale filters: ${JSON.stringify(projectHandoffFilter)}`);
   await page.reload({ waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => !document.documentElement.classList.contains('booting')); await page.click('[data-page="projects"]');
   assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p1,p3', 'project pin order did not survive reload');
 
