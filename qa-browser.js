@@ -190,6 +190,7 @@ async function testUrl() {
   await page.waitForSelector('#page-tasks.active');
   assert(await page.locator('#page-tasks .task-advanced-panel').isHidden(), 'secondary task filters are expanded by default');
   await page.click('[data-toggle-task-options]');
+  await page.waitForSelector('#page-tasks .task-advanced-panel:not([hidden])');
   assert(await page.locator('#page-tasks .task-advanced-panel').isVisible(), 'task filter and grouping options did not expand');
   await page.check('[data-bulk-select="t1"]');
   await page.click('[data-quick="waiting"]');
