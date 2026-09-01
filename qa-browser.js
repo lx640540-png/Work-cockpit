@@ -185,7 +185,7 @@ async function testUrl() {
   await page.click('#page-today [data-summary-target="week"]');
   await page.waitForSelector('#page-week.active');
   assert(await page.locator('#page-week .week-grid').count() === 1, 'Today weekly summary did not open the weekly workflow');
-  await page.evaluate(() => { window.__weeklyFeatureState = clone(state); });
+  await page.evaluate(() => { window.__weeklyFeatureState = { state: clone(state), undo: clone(undoStack), redo: clone(redoStack) }; });
   const weekOrderBeforeFocus = await page.locator('[data-drop-zone="week"] .task-row[data-task]').evaluateAll(nodes => nodes.map(node => node.dataset.task).join(','));
   assert(await page.locator('[data-drop-zone="week"] [data-task="t4"] [data-toggle-focus="t4"].active').count() === 1, 'weekly action row did not show the active Today focus state');
   await page.click('[data-drop-zone="week"] [data-task="t4"] [data-toggle-focus="t4"]');
@@ -219,7 +219,7 @@ async function testUrl() {
   await page.click('#taskHistoryDialog [data-history-version="' + pastWeekKey + '"]');
   assert((await page.locator('#taskHistoryDialog .history-title').textContent()).includes('历史推进标题'), 'current task changes overwrote the past weekly snapshot');
   await page.click('#taskHistoryDialog [data-close="taskHistoryDialog"]');
-  await page.evaluate(() => { state = normalizeState(clone(window.__weeklyFeatureState)); delete window.__weeklyFeatureState; selectedWeekKey = currentWeekKey(); ui.weekPanel = 'plan'; saveLocal(true); requestRender(); });
+  await page.evaluate(() => { const saved = window.__weeklyFeatureState; state = normalizeState(clone(saved.state)); undoStack = clone(saved.undo); redoStack = clone(saved.redo); delete window.__weeklyFeatureState; selectedWeekKey = currentWeekKey(); ui.weekPanel = 'plan'; saveLocal(true); requestRender(); });
 
   await page.click('[data-page="tasks"]');
   await page.waitForSelector('#page-tasks.active');
@@ -748,7 +748,9 @@ async function testUrl() {
   const projectHandoffFilter = await page.evaluate(() => taskFilter);
   assert(projectHandoffFilter.query === '' && projectHandoffFilter.type.length === 0 && projectHandoffFilter.status.length === 0 && projectHandoffFilter.project.join(',') === 'p1', `project full-view handoff retained stale filters: ${JSON.stringify(projectHandoffFilter)}`);
   await page.reload({ waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => !document.documentElement.classList.contains('booting')); await page.click('[data-page="projects"]');
-  assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p1,p3', 'project pin order did not survive reload');
+  await page.waitForFunction(() => document.querySelector('#page-projects.active')?.querySelectorAll('[data-project-drop]').length === 3);
+  const projectOrderAfterReload = await page.locator('#page-projects.active [data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop));
+  assert(projectOrderAfterReload.join(',') === 'p2,p1,p3', `project pin order did not survive reload: ${projectOrderAfterReload.join(',')}`);
 
   await page.click('[data-action="new-project"]');
   assert(await page.locator('#projectTemplate').inputValue() === 'hardware', 'new project did not select the hardware template by default');
