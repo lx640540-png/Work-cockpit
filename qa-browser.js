@@ -722,9 +722,11 @@ async function testUrl() {
   assert(await page.locator('.memo-editor-head [data-toggle-pin]').count() === 0, 'memo editor still exposes the old text pin action');
   const pinBefore = await page.evaluate(() => memoById('n1').pinned);
   await page.click('[data-select-memo="n1"] [data-toggle-pin="n1"]');
+  await page.waitForFunction(expected => { const memo=memoById('n1'),icon=document.querySelector('[data-toggle-pin="n1"]');return memo?.pinned===expected&&!!icon?.classList.contains('active')===expected; }, !pinBefore);
   let pinAfter = await page.evaluate(() => memoById('n1').pinned);
-  assert(pinAfter !== pinBefore && await page.locator('[data-select-memo="n1"] [data-toggle-pin="n1"].active').count() === Number(pinAfter), 'memo card pin icon did not toggle its state');
+  assert(pinAfter !== pinBefore, 'memo card pin icon did not toggle its state');
   await page.click('[data-select-memo="n1"] [data-toggle-pin="n1"]');
+  await page.waitForFunction(expected => { const memo=memoById('n1'),icon=document.querySelector('[data-toggle-pin="n1"]');return memo?.pinned===expected&&!!icon?.classList.contains('active')===expected; }, pinBefore);
   pinAfter = await page.evaluate(() => memoById('n1').pinned);
   assert(pinAfter === pinBefore, 'memo card pin test did not restore the original state');
 
