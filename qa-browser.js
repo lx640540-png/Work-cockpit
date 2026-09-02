@@ -197,6 +197,8 @@ async function testUrl() {
   assert(focusState.focus && focusState.week && weekOrderAfterFocus === weekOrderBeforeFocus, 'adding a weekly task to Today changed its weekly membership or manual order');
   await page.click('[data-page="today"]');
   await page.waitForSelector('#page-today.active [data-drop-zone="today"] [data-task="t4"]');
+  await page.evaluate(() => { const task=taskById('t4');task.status='已完成';task.completed=todayKey();task.focus=false;task.week=true;saveLocal(true);requestRender(); });
+  await page.waitForFunction(() => document.querySelector('#page-today [data-summary-target="done"]')?.textContent.includes('1'));
   await page.click('#page-today [data-summary-target="done"]');
   await page.waitForSelector('#page-week.active [data-week-panel="review"].active');
   assert(await page.locator('#page-week .week-review-layout').count() === 1, 'Today completion summary did not open the current weekly review');
