@@ -185,7 +185,7 @@ async function testUrl() {
   await page.click('#page-today [data-summary-target="week"]');
   await page.waitForSelector('#page-week.active');
   assert(await page.locator('#page-week .week-grid').count() === 1, 'Today weekly summary did not open the weekly workflow');
-  await page.evaluate(() => { window.__weeklyFeatureState = { state: clone(state), undo: clone(undoStack), redo: clone(redoStack) }; });
+  await page.evaluate(() => { window.__weeklyFeatureState = { state: clone(state), undo: clone(undoStack), redo: clone(redoStack), layout: clone(uiLayout) }; });
   const weekOrderBeforeFocus = await page.locator('[data-drop-zone="week"] .task-row[data-task]').evaluateAll(nodes => nodes.map(node => node.dataset.task).join(','));
   assert(await page.locator('[data-drop-zone="week"] [data-task="t4"] [data-toggle-focus="t4"].active').count() === 1, 'weekly action row did not show the active Today focus state');
   await page.click('[data-drop-zone="week"] [data-task="t4"] [data-toggle-focus="t4"]');
@@ -200,6 +200,24 @@ async function testUrl() {
   await page.click('#page-today [data-summary-target="done"]');
   await page.waitForSelector('#page-week.active [data-week-panel="review"].active');
   assert(await page.locator('#page-week .week-review-layout').count() === 1, 'Today completion summary did not open the current weekly review');
+  const completedTitle = page.locator('#page-week .week-review-layout .task-name').first();
+  assert(await completedTitle.count() === 1 && !!await completedTitle.getAttribute('title'), 'weekly completed title is missing its full-title hover text');
+  const ellipsisState = await completedTitle.evaluate(node => { node.style.width='72px'; node.textContent='用于验证实时省略号的超长完成事项名称'; const style=getComputedStyle(node); return { whiteSpace:style.whiteSpace, overflow:style.overflow, textOverflow:style.textOverflow, clipped:node.scrollWidth>node.clientWidth }; });
+  assert(ellipsisState.whiteSpace === 'nowrap' && ellipsisState.overflow === 'hidden' && ellipsisState.textOverflow === 'ellipsis' && ellipsisState.clipped, `weekly completed title did not use a live single-line ellipsis: ${JSON.stringify(ellipsisState)}`);
+  let splitterState = await page.locator('#weekReviewSplitter').evaluate(node => ({ cursor:getComputedStyle(node).cursor, opacity:getComputedStyle(node,'::before').opacity }));
+  assert(splitterState.cursor === 'col-resize' && splitterState.opacity === '0', `weekly review splitter was not a hidden drag surface: ${JSON.stringify(splitterState)}`);
+  let splitBefore = await page.evaluate(() => uiLayout.weekReviewLeft);
+  let splitBox = await page.locator('#weekReviewSplitter').boundingBox();
+  await page.mouse.move(splitBox.x + splitBox.width / 2, splitBox.y + splitBox.height / 2); await page.mouse.down(); await page.mouse.move(splitBox.x + splitBox.width / 2 + 70, splitBox.y + splitBox.height / 2, { steps: 5 }); await page.mouse.up();
+  let splitAfter = await page.evaluate(() => ({ value:uiLayout.weekReviewLeft, saved:JSON.parse(localStorage.getItem('work-cockpit-layout-v1')).weekReviewLeft }));
+  assert(Math.abs(splitAfter.value-splitBefore)>.02 && splitAfter.saved===splitAfter.value, `weekly review split resize did not persist: ${JSON.stringify({splitBefore,splitAfter})}`);
+  await page.click('[data-week-panel="plan"]');
+  await page.waitForSelector('#weekPlanSplitter');
+  splitBefore = await page.evaluate(() => uiLayout.weekPlanLeft);
+  splitBox = await page.locator('#weekPlanSplitter').boundingBox();
+  await page.mouse.move(splitBox.x + splitBox.width / 2, splitBox.y + splitBox.height / 2); await page.mouse.down(); await page.mouse.move(splitBox.x + splitBox.width / 2 - 65, splitBox.y + splitBox.height / 2, { steps: 5 }); await page.mouse.up();
+  splitAfter = await page.evaluate(() => ({ value:uiLayout.weekPlanLeft, saved:JSON.parse(localStorage.getItem('work-cockpit-layout-v1')).weekPlanLeft }));
+  assert(Math.abs(splitAfter.value-splitBefore)>.02 && splitAfter.saved===splitAfter.value, `weekly plan split resize did not persist: ${JSON.stringify({splitBefore,splitAfter})}`);
   const pastWeekKey = await page.evaluate(() => {
     const key = fmt(addDays(parseDate(currentWeekKey()), -7));
     const live = taskById('t8');
@@ -219,7 +237,7 @@ async function testUrl() {
   await page.click('#taskHistoryDialog [data-history-version="' + pastWeekKey + '"]');
   assert((await page.locator('#taskHistoryDialog .history-title').textContent()).includes('历史推进标题'), 'current task changes overwrote the past weekly snapshot');
   await page.click('#taskHistoryDialog [data-close="taskHistoryDialog"]');
-  await page.evaluate(() => { const saved = window.__weeklyFeatureState; state = normalizeState(clone(saved.state)); undoStack = clone(saved.undo); redoStack = clone(saved.redo); delete window.__weeklyFeatureState; selectedWeekKey = currentWeekKey(); ui.weekPanel = 'plan'; saveLocal(true); requestRender(); });
+  await page.evaluate(() => { const saved = window.__weeklyFeatureState; state = normalizeState(clone(saved.state)); undoStack = clone(saved.undo); redoStack = clone(saved.redo); uiLayout=clone(saved.layout);saveUiLayout();delete window.__weeklyFeatureState; selectedWeekKey = currentWeekKey(); ui.weekPanel = 'plan'; saveLocal(true); requestRender(); });
 
   await page.click('[data-page="tasks"]');
   await page.waitForSelector('#page-tasks.active');
@@ -616,6 +634,27 @@ async function testUrl() {
   assert(await quillEditor.getAttribute('data-quill-version') === '2.0.3', 'memo editor did not initialize Quill 2.0.3');
   assert(await quillRoot.count() === 1, 'Quill created an invalid editor root');
 
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setText('\n','silent');quill.setSelection(0,0,'silent');quill.focus(); });
+  await page.click('.memo-editor-body [data-command="divider"]');
+  let richDividerLocator = quillRoot.locator('.rich-divider').first();
+  assert(await richDividerLocator.count() === 1, 'rich-text divider toolbar button did not insert a divider');
+  let dividerStyle = await richDividerLocator.evaluate(node => ({ opacity:getComputedStyle(node).opacity, align:getComputedStyle(node.querySelector('.rich-divider-label')).textAlign }));
+  assert(dividerStyle.opacity === '0.7' && dividerStyle.align === 'center', `rich-text divider did not use the required 70% centered style: ${JSON.stringify(dividerStyle)}`);
+  await richDividerLocator.dblclick();
+  const dividerLabel = quillRoot.locator('.rich-divider-label[contenteditable="true"]');
+  await dividerLabel.fill('阶段总结');
+  await dividerLabel.press('Enter');
+  await page.waitForFunction(() => document.querySelector('[data-memo-content] .rich-divider')?.dataset.label === '阶段总结');
+  assert((await quillEditor.evaluate(node => serializeRichEditor(node))).includes('阶段总结'), 'edited divider label was not preserved by rich-text serialization');
+  richDividerLocator = quillRoot.locator('.rich-divider').first();
+  await richDividerLocator.click();
+  assert(await richDividerLocator.evaluate(node => node.classList.contains('selected')), 'single-click did not select the whole rich-text divider');
+  await page.keyboard.press('Delete');
+  assert(await quillRoot.locator('.rich-divider').count() === 0, 'Delete did not remove the selected rich-text divider');
+  await quillEditor.evaluate(node => { const quill=node.__quill;quill.setText('\n','silent');quill.setSelection(0,0,'silent');quill.focus(); });
+  await page.keyboard.type('-- ');
+  assert(await quillRoot.locator('.rich-divider').count() === 1, 'typing -- plus space did not create a rich-text divider');
+
   await quillEditor.evaluate(node => { const quill=node.__quill;quill.setText('已有文本\n','silent');quill.setSelection(0,0,'silent');quill.focus(); });
   await page.keyboard.type('1. ');
   let quillState = await quillEditor.evaluate(node => ({ text:node.__quill.getText(), format:node.__quill.getFormat(0,1) }));
@@ -678,6 +717,15 @@ async function testUrl() {
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.memos.find(memo => memo.id === 'n1').content.includes('撤销测试'), 'Quill user edits did not autosave through the existing memo lifecycle');
 
+  assert(await page.locator('.memo-editor-head [data-toggle-pin]').count() === 0, 'memo editor still exposes the old text pin action');
+  const pinBefore = await page.evaluate(() => memoById('n1').pinned);
+  await page.click('[data-select-memo="n1"] [data-toggle-pin="n1"]');
+  let pinAfter = await page.evaluate(() => memoById('n1').pinned);
+  assert(pinAfter !== pinBefore && await page.locator('[data-select-memo="n1"] [data-toggle-pin="n1"].active').count() === Number(pinAfter), 'memo card pin icon did not toggle its state');
+  await page.click('[data-select-memo="n1"] [data-toggle-pin="n1"]');
+  pinAfter = await page.evaluate(() => memoById('n1').pinned);
+  assert(pinAfter === pinBefore, 'memo card pin test did not restore the original state');
+
   const memoOrderBefore = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')).order.memoActive.slice());
   await dragAt(page, '[data-memo-drag="n1"]', '[data-select-memo="n3"]', 0.9);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
@@ -697,6 +745,15 @@ async function testUrl() {
 
   await page.click('[data-page="tasks"]');
   await page.click('#page-tasks.active [data-edit-task="t1"]');
+  await page.waitForSelector('#taskDialog[open] #taskEditor .hover-select');
+  const detailSelectState = await page.locator('#taskEditor').evaluate(node => ({ selects:node.querySelectorAll('select').length, enhanced:node.querySelectorAll('.hover-select').length }));
+  assert(detailSelectState.selects > 0 && detailSelectState.selects === detailSelectState.enhanced, `task-detail dropdowns were not all hover-enabled: ${JSON.stringify(detailSelectState)}`);
+  await page.locator('#draftStatus + .hover-select-trigger').hover();
+  await page.waitForFunction(() => document.querySelector('#draftStatus')?.closest('.hover-select')?.classList.contains('open'));
+  await page.locator('#draftPriority + .hover-select-trigger').hover();
+  await page.waitForFunction(() => !document.querySelector('#draftStatus')?.closest('.hover-select')?.classList.contains('open') && document.querySelector('#draftPriority')?.closest('.hover-select')?.classList.contains('open'));
+  await page.locator('#draftPriority').locator('xpath=..').locator('[data-hover-select-option]').filter({ hasText:'P2' }).click();
+  assert(await page.locator('#draftPriority').inputValue() === 'P2', 'task-detail hover dropdown did not update the native field value');
   await page.click('[data-new-decision]');
   await page.fill('#decisionTitle', '采用方案A');
   await page.fill('#decisionConclusion', '继续使用当前样机结构');
