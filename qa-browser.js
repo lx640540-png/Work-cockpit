@@ -748,7 +748,7 @@ async function testUrl() {
   assert(saved.trash.filter(item => item.type === 'memo').length === 2, 'memo bulk delete did not move both records to trash');
 
   await page.click('[data-page="tasks"]');
-  const tableAlignment = await page.locator('#page-tasks [data-task="t1"]').evaluate(row => {
+  const tableAlignment = await page.locator('#page-tasks tr[data-task="t1"]').evaluate(row => {
     const status = row.querySelector('[data-property="status"]').getBoundingClientRect();
     const priority = row.querySelector('[data-property="priority"]').getBoundingClientRect();
     const pin = row.querySelector('[data-pin-task]').getBoundingClientRect();
