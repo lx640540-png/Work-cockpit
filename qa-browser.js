@@ -766,7 +766,8 @@ async function testUrl() {
   await page.locator('#draftStatus').locator('xpath=..').locator('[data-hover-select-option]').filter({ hasText:'已完成' }).click();
   const completedDraft = await page.locator('#draftCompleted').evaluate(node => ({ disabled:node.disabled, value:node.value }));
   assert(!completedDraft.disabled && completedDraft.value === await page.evaluate(() => todayKey()), `completion date did not enable and default to today: ${JSON.stringify(completedDraft)}`);
-  await page.locator('#draftStatus + .hover-select-trigger').click();
+  await page.locator('#draftStatus + .hover-select-trigger').hover();
+  await page.waitForFunction(() => document.querySelector('#draftStatus')?.closest('.hover-select')?.classList.contains('open'));
   await page.locator('#draftStatus').locator('xpath=..').locator('[data-hover-select-option]').filter({ hasText:'进行中' }).click();
   assert(await page.locator('#draftCompleted').isDisabled() && await page.locator('#draftCompleted').inputValue() === '', 'reopening a task status did not clear and disable completion date');
   await page.locator('#draftPriority + .hover-select-trigger').hover();
