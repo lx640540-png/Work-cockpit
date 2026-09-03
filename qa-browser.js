@@ -234,11 +234,14 @@ async function testUrl() {
   await page.click('#page-week [data-view-task-history="t8"]');
   await page.waitForSelector('#taskHistoryDialog[open]');
   assert((await page.locator('#taskHistoryDialog .history-title').textContent()).includes('历史推进标题'), 'historical detail did not use the closed weekly snapshot');
+  const historyLayout = await page.locator('#taskHistoryDialog').evaluate(dialog => { const shell=dialog.querySelector('.history-shell'), versions=dialog.querySelector('.history-versions'), detail=dialog.querySelector('.history-detail');return { display:getComputedStyle(dialog).display, shellOverflow:getComputedStyle(shell).overflowY, versionsOverflow:getComputedStyle(versions).overflowY, detailOverflow:getComputedStyle(detail).overflowY, divider:getComputedStyle(versions).borderRightWidth, fits:dialog.getBoundingClientRect().height<=innerHeight-10 }; });
+  assert(historyLayout.display === 'grid' && historyLayout.shellOverflow === 'auto' && historyLayout.versionsOverflow === 'visible' && historyLayout.detailOverflow === 'visible' && historyLayout.divider === '0px' && historyLayout.fits, `task history has nested scrollbars or stray divider lines: ${JSON.stringify(historyLayout)}`);
   await page.click('#taskHistoryDialog [data-history-version="current"]');
   assert((await page.locator('#taskHistoryDialog .history-title').textContent()).includes('当前推进标题'), 'task history could not switch from the past snapshot to the current task');
   await page.click('#taskHistoryDialog [data-history-version="' + pastWeekKey + '"]');
   assert((await page.locator('#taskHistoryDialog .history-title').textContent()).includes('历史推进标题'), 'current task changes overwrote the past weekly snapshot');
-  await page.click('#taskHistoryDialog [data-close="taskHistoryDialog"]');
+  await page.mouse.click(2, 2);
+  await page.waitForFunction(() => !document.querySelector('#taskHistoryDialog')?.open);
   await page.evaluate(() => { const saved = window.__weeklyFeatureState; state = normalizeState(clone(saved.state)); undoStack = clone(saved.undo); redoStack = clone(saved.redo); uiLayout=clone(saved.layout);saveUiLayout();delete window.__weeklyFeatureState; selectedWeekKey = currentWeekKey(); ui.weekPanel = 'plan'; saveLocal(true); requestRender(); });
 
   await page.click('[data-page="tasks"]');
@@ -334,16 +337,21 @@ async function testUrl() {
   assert(storedLayout.todayHeight === Math.round(afterHeight), 'today height was not persisted as a browser UI preference');
   const quickEditor = page.locator('[data-quick-note] .ql-editor');
   assert(await quickEditor.count() === 1, 'persistent quick note card did not initialize with Quill');
-  const quickPlaceholder = await page.locator('[data-quick-note]').evaluate(node => {
+  const quickPlaceholder = await page.locator('.quick-note-body').evaluate(body => {
+    const node = body.querySelector('[data-quick-note]');
     const editor = node.querySelector('.ql-editor');
-    const before = getComputedStyle(editor, '::before');
+    const line = editor.querySelector('p,li');
+    const prompt = body.querySelector('.quick-note-placeholder');
+    const lineRect = line.getBoundingClientRect(), promptRect = prompt.getBoundingClientRect(), check = getComputedStyle(line, '::after');
+    const checkRight = lineRect.left + parseFloat(check.left) + parseFloat(check.width) + parseFloat(check.borderLeftWidth) + parseFloat(check.borderRightWidth);
+    const initial = getComputedStyle(prompt).display;
     node.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: 'n' }));
-    const during = getComputedStyle(editor, '::before').content;
+    const during = getComputedStyle(prompt).display;
     node.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '你' }));
-    return { left: before.left, right: before.right, during, composingAfter: node.classList.contains('ime-composing') };
+    return { gap: promptRect.left - checkRight, initial, during, after: getComputedStyle(prompt).display, composingAfter: node.classList.contains('ime-composing') };
   });
-  assert(quickPlaceholder.left === '12px' && quickPlaceholder.right === '12px', `quick note placeholder is not aligned to the text inset: ${JSON.stringify(quickPlaceholder)}`);
-  assert(quickPlaceholder.during === 'none' && !quickPlaceholder.composingAfter, 'quick note placeholder remained visible during Chinese IME composition');
+  assert(quickPlaceholder.initial !== 'none' && quickPlaceholder.gap >= 6, `quick note placeholder overlaps the completion control: ${JSON.stringify(quickPlaceholder)}`);
+  assert(quickPlaceholder.during === 'none' && quickPlaceholder.after !== 'none' && !quickPlaceholder.composingAfter, 'quick note placeholder visibility did not follow Chinese IME composition');
   await quickEditor.click();
   await quickEditor.pressSequentially('第一行');
   await quickEditor.press('Enter');
@@ -748,6 +756,7 @@ async function testUrl() {
   assert(saved.trash.filter(item => item.type === 'memo').length === 2, 'memo bulk delete did not move both records to trash');
 
   await page.click('[data-page="tasks"]');
+  await page.waitForFunction(() => document.querySelector('#page-tasks')?.classList.contains('active') && document.querySelector('#page-tasks tr[data-task="t1"]')?.getBoundingClientRect().height > 0);
   const tableAlignment = await page.locator('#page-tasks tr[data-task="t1"]').evaluate(row => {
     const status = row.querySelector('[data-property="status"]').getBoundingClientRect();
     const priority = row.querySelector('[data-property="priority"]').getBoundingClientRect();
@@ -774,9 +783,32 @@ async function testUrl() {
   await page.waitForFunction(() => !document.querySelector('#draftStatus')?.closest('.hover-select')?.classList.contains('open') && document.querySelector('#draftPriority')?.closest('.hover-select')?.classList.contains('open'));
   await page.locator('#draftPriority').locator('xpath=..').locator('[data-hover-select-option]').filter({ hasText:'P2' }).click();
   assert(await page.locator('#draftPriority').inputValue() === 'P2', 'task-detail hover dropdown did not update the native field value');
-  assert(await page.locator('.task-notes-field.collapsed').count() === 1, 'empty task notes did not start collapsed');
-  await page.click('[data-toggle-task-notes]');
+  assert(await page.locator('[data-toggle-task-notes]').count() === 0 && await page.locator('#taskNotes .ql-editor').isVisible(), 'task notes did not stay expanded in the restored editor layout');
+  const taskContentGap = await page.locator('.task-content-column').evaluate(node => { const checklist=node.querySelector('.checklist-section').getBoundingClientRect(), notes=node.querySelector('.task-notes-field').getBoundingClientRect(); return notes.top-checklist.bottom; });
+  assert(taskContentGap >= 6 && taskContentGap <= 16, `checklist and task-note spacing is not compact: ${taskContentGap}`);
   const notesHost = page.locator('#taskNotes');
+  const notesResizeHandle = page.locator('.task-notes-editor [data-rich-height-resizer="taskNotesHeight"]');
+  const notesResizeBox = await notesResizeHandle.boundingBox();
+  const notesHeightBefore = await notesHost.evaluate(node => node.getBoundingClientRect().height);
+  await page.mouse.move(notesResizeBox.x + notesResizeBox.width / 2, notesResizeBox.y + notesResizeBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(notesResizeBox.x + notesResizeBox.width / 2, notesResizeBox.y + notesResizeBox.height / 2 + 64, { steps: 4 });
+  await page.mouse.up();
+  const notesHeightAfter = await notesHost.evaluate(node => node.getBoundingClientRect().height);
+  let richLayout = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-layout-v1')));
+  assert(notesHeightAfter > notesHeightBefore + 45 && richLayout.taskNotesHeight === Math.round(notesHeightAfter), 'task-note bottom edge did not resize and persist its height');
+  await notesResizeHandle.dblclick();
+  assert(Math.abs(await notesHost.evaluate(node => node.getBoundingClientRect().height) - 220) < 1, 'double-click did not restore the task-note editor height');
+  await notesHost.evaluate(node => { const quill=node.__quill;quill.setContents({ops:[{insert:'第一项'},{insert:'\n',attributes:{list:'ordered'}},{insert:'第二项'},{insert:'\n',attributes:{list:'ordered'}}]},'silent');quill.setSelection(1,0,'user');quill.focus(); });
+  await page.keyboard.press('Tab');
+  let listIndent = await notesHost.evaluate(node => ({ first:node.__quill.getFormat(0,1).indent||0, buttonDisabled:node.closest('.editor-box').querySelector('[data-command="indent"]').disabled }));
+  assert(listIndent.first === 0 && listIndent.buttonDisabled, `first ordered-list item created an orphan indent: ${JSON.stringify(listIndent)}`);
+  await notesHost.evaluate(node => { const quill=node.__quill,index=quill.getText().indexOf('第二项');quill.setSelection(index+1,0,'user');quill.focus(); });
+  await page.keyboard.press('Tab');
+  listIndent = await notesHost.evaluate(node => { const quill=node.__quill,index=quill.getText().indexOf('第二项');return quill.getFormat(index,1).indent||0; });
+  assert(listIndent === 1, `ordered-list item with a valid parent did not indent: ${listIndent}`);
+  await page.keyboard.press('Shift+Tab');
+  assert(await notesHost.evaluate(node => { const quill=node.__quill,index=quill.getText().indexOf('第二项');return !(quill.getFormat(index,1).indent||0); }), 'ordered-list outdent did not return to the root level');
   await notesHost.evaluate(node => { const quill=node.__quill;quill.setText('--','silent');quill.setSelection(2,0,'silent');quill.focus(); });
   await page.keyboard.press('Space');
   let dividerState = await notesHost.evaluate(node => ({ text:node.__quill.getText(), dividers:node.querySelectorAll('.rich-divider').length, height:node.querySelector('.rich-divider')?.getBoundingClientRect().height }));
@@ -785,8 +817,6 @@ async function testUrl() {
   await page.keyboard.press('Backspace');
   assert(await notesHost.locator('.rich-divider').count() === 1, 'backspace on the adjacent empty line deleted the divider');
   await notesHost.evaluate(node => { node.__quill.setContents({ops:[{insert:'需要保留的富文本备注',attributes:{bold:true}},{insert:'\n'}]},'silent'); });
-  await page.click('[data-toggle-task-notes]');
-  assert(await page.locator('.task-notes-field.collapsed .task-notes-preview').textContent() === '需要保留的富文本备注', 'collapsed notes preview did not preserve current rich-text content');
   await page.click('[data-new-related-task]');
   await page.waitForFunction(() => document.querySelector('#taskDialog')?.open && taskDraft?.title === '新的关联事项');
   const relatedCreation = await page.evaluate(() => { const child=taskDraft,parent=taskById('t1'),savedChild=taskById(child.id);return { childId:child.id, parentLinks:parent.relatedTaskIds, childLinks:savedChild.relatedTaskIds, parentNotes:parent.notes, project:savedChild.project, milestone:savedChild.milestone }; });
@@ -797,6 +827,19 @@ async function testUrl() {
   await page.click('#page-tasks.active [data-edit-task="t1"]');
   await page.click('[data-new-decision]');
   assert(await page.locator('#decisionDialog[open] .decision-rich-box .ql-container').count() === 2, 'key decision fields did not initialize as rich-text editors');
+  assert(await page.locator('#decisionDialog[open] [data-rich-height-resizer]').count() === 2, 'key decision rich editors do not expose the shared bottom-edge resize area');
+  const decisionResizeHandle = page.locator('[data-rich-height-resizer="decisionConclusionHeight"]');
+  const decisionResizeBox = await decisionResizeHandle.boundingBox();
+  const decisionHeightBefore = await page.locator('#decisionConclusion').evaluate(node => node.getBoundingClientRect().height);
+  await page.mouse.move(decisionResizeBox.x + decisionResizeBox.width / 2, decisionResizeBox.y + decisionResizeBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(decisionResizeBox.x + decisionResizeBox.width / 2, decisionResizeBox.y + decisionResizeBox.height / 2 + 44, { steps: 3 });
+  await page.mouse.up();
+  const decisionHeightAfter = await page.locator('#decisionConclusion').evaluate(node => node.getBoundingClientRect().height);
+  richLayout = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-layout-v1')));
+  assert(decisionHeightAfter > decisionHeightBefore + 30 && richLayout.decisionConclusionHeight === Math.round(decisionHeightAfter), 'key decision editor height did not resize and persist');
+  await decisionResizeHandle.dblclick();
+  assert(Math.abs(await page.locator('#decisionConclusion').evaluate(node => node.getBoundingClientRect().height) - 160) < 1, 'double-click did not restore the key decision editor height');
   await page.fill('#decisionTitle', '采用方案A');
   await page.locator('#decisionConclusion').evaluate(node => node.__quill.setContents({ops:[{insert:'继续使用',attributes:{bold:true}},{insert:'当前样机结构\n'}]},'user'));
   await page.locator('#decisionRationale').evaluate(node => node.__quill.setContents({ops:[{insert:'兼顾成本与验证进度\n'}]},'user'));
