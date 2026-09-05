@@ -288,13 +288,14 @@ function normalizeState(raw){
  let oldOrder=source.order||source.viewOrderState||{},order=emptyOrder();
  Object.keys(order).forEach(name=>{if(Array.isArray(order[name]))order[name]=Array.isArray(oldOrder[name])?oldOrder[name].map(String):[];else order[name]=!!oldOrder[name]});
  let next={...base,...source,version:8,tasks:Array.isArray(source.tasks)?source.tasks.map(normalizeTask):[],projects:Array.isArray(source.projects)?source.projects.map(normalizeProject):[],memos:Array.isArray(source.memos)?source.memos.map(normalizeMemo):[],decisions:Array.isArray(source.decisions)?source.decisions.map(normalizeDecision):[],weeks,trash:Array.isArray(source.trash)?source.trash.filter(item=>item&&item.data):[],snapshots:Array.isArray(source.snapshots)?source.snapshots.filter(item=>item&&item.state).slice(0,12):[],favorites:Array.isArray(source.favorites)?source.favorites.map(String):Array.isArray(source.favoriteProjectIds)?source.favoriteProjectIds.map(String):[],quickNote:normalizeQuickNote(source.quickNote),order,meta:{...base.meta,...(source.meta||{}),activeWeekKey:String(source.meta?.activeWeekKey||source.activeWeekKey||""),updatedAt:source.meta?.updatedAt||source.savedAt||new Date().toISOString()}};
+ next.tasks.forEach(task=>{if(!canAdvanceToday(task))task.focus=false});
  let projectIds=new Set(next.projects.map(item=>item.id)),taskIds=new Set(next.tasks.map(item=>item.id)),memoIds=new Set(next.memos.map(item=>item.id));
  next.tasks.forEach(task=>{if(task.project&&!projectIds.has(task.project)){task.project="";task.milestone=""}if(task.project){let project=next.projects.find(item=>item.id===task.project);if(task.milestone&&!project?.milestones.some(item=>item.id===task.milestone))task.milestone=""}else task.milestone="";task.relatedTaskIds=[...new Set(task.relatedTaskIds.filter(id=>id!==task.id&&taskIds.has(id)))]});
  next.decisions.forEach(decision=>{if(decision.project&&!projectIds.has(decision.project)){decision.project="";decision.milestone=""}if(decision.project){let project=next.projects.find(item=>item.id===decision.project);if(decision.milestone&&!project?.milestones.some(item=>item.id===decision.milestone))decision.milestone=""}if(decision.sourceTaskId&&!taskIds.has(decision.sourceTaskId))decision.sourceTaskId=""});
  next.projects.forEach(project=>project.milestones.forEach(milestone=>milestone.id=String(milestone.id)));
  next.favorites=[...new Set(next.favorites.filter(id=>projectIds.has(id)))];
  let today=todayKey(),open=task=>!task.archived&&!isDone(task),members={
-  today:task=>open(task)&&(task.focus||(task.planDate&&task.planDate<=today))&&!task.inbox&&!['等待','暂停'].includes(task.status),
+  today:task=>canAdvanceToday(task)&&(task.focus||isPlanDue(task,today)),
   waiting:task=>open(task)&&task.status==='等待',
   inbox:task=>open(task)&&task.status==='待处理',
   week:task=>open(task)&&task.week&&task.type!=="长期跟进",
@@ -338,13 +339,13 @@ function recordDirectEdit(key,label){
 function commit(label,mutator,options={}){
  directEditSessions.clear();
  if(options.history!==false){undoStack.push({label,state:snapshotCore()});if(undoStack.length>24)undoStack.shift();redoStack=[]}
- mutator(state);state=normalizeState(state);captureCurrentWeek();saveLocal(!!options.immediate);requestRender();
+ mutator(state);state=normalizeState(state);activateScheduledTasks(state);captureCurrentWeek();saveLocal(!!options.immediate);requestRender();
 }
 function replaceState(next,label){
- undoStack.push({label:label||"替换数据",state:snapshotCore()});if(undoStack.length>24)undoStack.shift();redoStack=[];state=normalizeState(next);ensureCurrentWeek();saveLocal(true);requestRender();
+ undoStack.push({label:label||"替换数据",state:snapshotCore()});if(undoStack.length>24)undoStack.shift();redoStack=[];state=normalizeState(next);ensureCurrentWeek();activateScheduledTasks();saveLocal(true);requestRender();
 }
-function undo(){directEditSessions.clear();let entry=undoStack.pop();if(!entry)return;redoStack.push({label:entry.label,state:snapshotCore()});state=normalizeState(entry.state);saveLocal(true);requestRender();toast("已撤回："+entry.label)}
-function redo(){directEditSessions.clear();let entry=redoStack.pop();if(!entry)return;undoStack.push({label:entry.label,state:snapshotCore()});state=normalizeState(entry.state);saveLocal(true);requestRender();toast("已恢复："+entry.label)}
+function undo(){directEditSessions.clear();let entry=undoStack.pop();if(!entry)return;redoStack.push({label:entry.label,state:snapshotCore()});state=normalizeState(entry.state);activateScheduledTasks();saveLocal(true);requestRender();toast("已撤回："+entry.label)}
+function redo(){directEditSessions.clear();let entry=redoStack.pop();if(!entry)return;undoStack.push({label:entry.label,state:snapshotCore()});state=normalizeState(entry.state);activateScheduledTasks();saveLocal(true);requestRender();toast("已恢复："+entry.label)}
 function createSnapshot(label){
  let item={id:uid("snapshot"),label:label||"安全快照",createdAt:new Date().toISOString(),state:snapshotCore()};
  item.state.snapshots=[];state.snapshots.unshift(item);state.snapshots=state.snapshots.slice(0,12);return item;
@@ -406,21 +407,44 @@ function moveOrder(scope,fromId,toId,position="before"){
  let order=state.order[scope]||(state.order[scope]=[]);if(order.indexOf(fromId)<0||fromId===toId)return;
  commit("手动调整顺序",draft=>reorderId(draft.order[scope],fromId,toId,position),{immediate:true});
 }
-const TASK_CARD_TRANSITIONS=Object.freeze({today:{label:"我来推进",accept:true,apply(task){task.focus=true;task.week=true;task.inbox=false;task.status="进行中";task.completed=""}},waiting:{label:"等待与催办",accept:true,apply(task){task.status="等待";task.inbox=false;task.completed=""}},inbox:{label:"临时收件箱",accept:true,apply(task){task.status="待处理";task.inbox=true;task.focus=false}},week:{label:"本周行动清单",accept:true,apply(task){task.week=true;task.type=task.type==="长期跟进"?"任务":task.type}},long:{label:"长期跟进",accept:true,apply(task){task.type="长期跟进";task.week=false;task.focus=false}},done:{label:"本周完成",accept:false}});
+function canAdvanceToday(task){return!task.archived&&!isDone(task)&&!task.inbox&&!["待处理","等待","暂停"].includes(task.status)}
+function isPlanDue(task,today=todayKey()){return!!task.planDate&&task.planDate<=today}
+function activateScheduledTasks(value=state){
+ let changed=false,today=todayKey();
+ value.tasks.forEach(task=>{if(canAdvanceToday(task)&&isPlanDue(task,today)&&!task.focus){task.focus=true;task.week=true;task.updatedAt=new Date().toISOString();changed=true}});
+ return changed;
+}
+function refreshScheduledTasks(){if(activateScheduledTasks()){captureCurrentWeek();saveLocal(true);requestRender()}}
+function setTaskFocus(task,active,draft){
+ if(active){if(task.archived||isDone(task))return;setTaskStatus(task,"进行中",draft);task.focus=true;task.week=true}
+ else{task.focus=false;if(isPlanDue(task))task.planDate=""}
+}
+function reconcileTaskEdit(task,previous){
+ if(previous&&task.type!==previous.type&&task.type==="长期跟进"){task.week=false;task.focus=false}
+ if(previous&&task.planDate!==previous.planDate&&task.planDate>todayKey())task.focus=false;
+ if(!canAdvanceToday(task))task.focus=false;
+ if(task.focus)task.week=true;
+}
+function applyTaskCardTransition(task,fromScope,toScope,draft){
+ if(fromScope===toScope)return;
+ let previous={...task},transition=TASK_CARD_TRANSITIONS[toScope];if(!transition?.accept)return;
+ transition.apply(task,draft);reconcileTaskEdit(task,previous);
+}
+const TASK_CARD_TRANSITIONS=Object.freeze({today:{label:"我来推进",accept:true,apply(task,draft){setTaskFocus(task,true,draft)}},waiting:{label:"等待与催办",accept:true,apply(task,draft){setTaskStatus(task,"等待",draft)}},inbox:{label:"临时收件箱",accept:true,apply(task,draft){setTaskStatus(task,"待处理",draft)}},week:{label:"本周行动清单",accept:true,apply(task){task.week=true;task.type=task.type==="长期跟进"?"任务":task.type}},long:{label:"长期跟进",accept:true,apply(task){task.type="长期跟进";task.week=false;task.focus=false}},done:{label:"本周完成",accept:false}});
 const pinKey=scope=>"pin"+scope.charAt(0).toUpperCase()+scope.slice(1);
 function isPinned(taskId,scope){return(state.order[pinKey(scope)]||[]).includes(taskId)}
 function pinOrdered(items,scope){let rows=ordered(items,scope),pins=new Set(state.order[pinKey(scope)]||[]);return rows.filter(task=>pins.has(task.id)).concat(rows.filter(task=>!pins.has(task.id)))}
 function updateTask(id,label,updater){commit(label,draft=>{let task=draft.tasks.find(item=>item.id===id);if(!task)return;updater(task,draft);task.updatedAt=new Date().toISOString()},{immediate:true})}
-function moveTask(id,fromScope,toScope,toId="",position="before"){let transition=TASK_CARD_TRANSITIONS[toScope];if(!transition?.accept||id===toId)return;commit("移动事项至"+transition.label,draft=>{let task=draft.tasks.find(item=>item.id===id);if(!task)return;let sourcePinKey=pinKey(fromScope),targetPinKey=pinKey(toScope),wasPinned=(draft.order[sourcePinKey]||[]).includes(id);transition.apply(task);if(toScope!=="waiting")task.followup="";task.updatedAt=new Date().toISOString();let source=draft.order[fromScope]||[],target=(draft.order[toScope]||[]).filter(value=>value!==id);draft.order[fromScope]=source.filter(value=>value!==id);let at=toId?target.indexOf(toId):-1;target.splice(at<0?target.length:at+(position==="after"?1:0),0,id);draft.order[toScope]=target;draft.order[sourcePinKey]=(draft.order[sourcePinKey]||[]).filter(value=>value!==id);let targetPins=new Set((draft.order[targetPinKey]||[]).filter(value=>value!==id));if(wasPinned)targetPins.add(id);draft.order[targetPinKey]=target.filter(value=>targetPins.has(value))},{immediate:true})}
+function moveTask(id,fromScope,toScope,toId="",position="before"){let transition=TASK_CARD_TRANSITIONS[toScope];if(!transition?.accept||id===toId)return;commit("移动事项至"+transition.label,draft=>{let task=draft.tasks.find(item=>item.id===id);if(!task)return;let sourcePinKey=pinKey(fromScope),targetPinKey=pinKey(toScope),wasPinned=(draft.order[sourcePinKey]||[]).includes(id);applyTaskCardTransition(task,fromScope,toScope,draft);task.updatedAt=new Date().toISOString();let source=draft.order[fromScope]||[],target=(draft.order[toScope]||[]).filter(value=>value!==id);draft.order[fromScope]=source.filter(value=>value!==id);let at=toId?target.indexOf(toId):-1;target.splice(at<0?target.length:at+(position==="after"?1:0),0,id);draft.order[toScope]=target;draft.order[sourcePinKey]=(draft.order[sourcePinKey]||[]).filter(value=>value!==id);let targetPins=new Set((draft.order[targetPinKey]||[]).filter(value=>value!==id));if(wasPinned)targetPins.add(id);draft.order[targetPinKey]=target.filter(value=>targetPins.has(value))},{immediate:true})}
 function followupReminder(task){if(!task.followup||task.followup>todayKey()||isDone(task)||task.archived||["暂停"].includes(task.status))return"";let days=Math.round((parseDate(todayKey())-parseDate(task.followup))/86400000),text=days?"跟进逾期 "+days+" 天":"今日跟进";return'<span class="followup reminder" data-tip="跟进日期已到，请确认进展">◷ '+text+'</span>'}
 function openTasks(){return state.tasks.filter(task=>!task.archived&&!isDone(task))}
-function todayAdvance(){let today=todayKey();return openTasks().filter(task=>(task.focus||(task.planDate&&task.planDate<=today))&&!task.inbox&&!["等待","暂停"].includes(task.status))}
+function todayAdvance(){return openTasks().filter(task=>canAdvanceToday(task)&&task.focus)}
 function todayWaiting(){return openTasks().filter(task=>task.status==="等待")}
 function inboxTasks(){return openTasks().filter(task=>task.inbox||task.status==="待处理")}
 function weekTasks(){return openTasks().filter(task=>task.week&&task.type!=="长期跟进")}
 function longTasks(){return openTasks().filter(task=>task.type==="长期跟进")}
 ensureCurrentWeek();
-saveLocal(true);
+localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshotCore()));
 function toolbar(){
  return'<div class="rich-toolbar"><button type="button" data-command="bold" data-tip="加粗（Ctrl/Cmd+B）">B</button><button type="button" data-command="underline" data-tip="下划线（Ctrl/Cmd+U）"><u>U</u></button><button type="button" data-command="insertUnorderedList" data-tip="项目符号列表；选中多行可批量转换（- 加空格）">•</button><button type="button" data-command="insertOrderedList" data-tip="编号列表；选中多行可批量转换（1. 加空格）">1.</button><button type="button" data-command="divider" data-tip="插入分割线（-- 加空格）；双击可编辑文字">—</button><button type="button" data-command="outdent" data-tip="减少缩进（Shift+Tab）">←</button><button type="button" data-command="indent" data-tip="增加缩进（Tab）">→</button><button type="button" data-command="removeFormat" data-tip="清除所选文字格式">清除格式</button></div>';
 }
@@ -440,7 +464,7 @@ function milestoneOf(task,project){
 function taskRow(task,options={}){
  let scope=options.scope||"",readonly=!!options.readonly,project=options.projectLookup?options.projectLookup(task.project):projectById(task.project),milestone=milestoneOf(task,project),carry=scope==="week"&&currentWeek().carriedTaskIds.includes(task.id);
  let drag=scope&&!readonly?'<button class="drag-handle" type="button" data-drag-handle="'+scope+'" data-task="'+task.id+'" data-tip="拖动调整顺序">⠿</button>':'<span></span>';
- let focusToggle=scope==="week"&&!readonly?'<button class="flag-btn focus '+(task.focus?'active':'')+'" type="button" data-toggle-focus="'+task.id+'" data-tip="'+(task.focus?'移出今日行动':'加入今日行动')+'">★</button>':'';
+ let focusToggle=scope==="week"&&!readonly?'<button class="flag-btn focus '+(task.focus?'active':'')+'" type="button" data-toggle-focus="'+task.id+'" data-tip="'+(task.focus?'移出今日行动（取消已到期计划）':'加入今日行动')+'">★</button>':'';
  let check=readonly?'<span class="check '+(isDone(task)?"done":"")+'">'+(isDone(task)?"✓":"")+'</span>':'<button class="check '+(isDone(task)?"done":"")+'" type="button" data-toggle-task="'+task.id+'" data-tip="'+(isDone(task)?"恢复事项":"完成事项")+'">'+(isDone(task)?"✓":"")+'</button>';
  let next=!isDone(task)?'<div class="task-next"><b>下一步 · </b>'+esc(task.nextAction||"继续推进并更新结果")+'</div>':"";
  let projectLine='<div class="task-project"><i></i>'+esc(project?.name||"通用事项")+(milestone?" · "+esc(milestone.name):"")+'</div>';
@@ -474,7 +498,7 @@ function initTaskSortables(root){
   containers.filter(Boolean).forEach(container=>taskSortables.push(new Sortable(container,{group:"work-cockpit-tasks",draggable:".task-row",handle:".drag-handle",animation:150,ghostClass:"dragging",chosenClass:"sortable-chosen",dragClass:"sortable-drag",scroll:true,scrollSensitivity:64,scrollSpeed:18,emptyInsertThreshold:28,onMove(event,originalEvent){let row=event.dragged,targetCard=event.to.closest(".drop-card"),related=event.related,intent=sortableRowIntent(row,targetCard,related?.classList?.contains("task-row")?related:null,originalEvent)||sortableTaskIntent(row,targetCard,originalEvent);if(row&&intent)row._taskDropIntent=intent;root.querySelectorAll(".drop-card").forEach(card=>card.classList.toggle("drag-target",card===targetCard));if(!related?.classList?.contains("task-row")||!originalEvent)return true;let rect=related.getBoundingClientRect();return originalEvent.clientY<rect.top+rect.height/2?-1:1},onStart(event){let row=event.item,scope=row.dataset.dropScope;activeSortableTask=row;row.dataset.fromScope=scope;row.dataset.wasPinned=isPinned(row.dataset.task,scope)?"1":"0";row._taskCardSnapshot=taskCardSnapshot(root);row._taskDropIntent=null;root.querySelectorAll(".drop-card[data-drop-zone]").forEach(card=>card.classList.add("drag-target"))},onEnd(event){
    let row=event.item,id=row.dataset.task,fromScope=row.dataset.fromScope||row.dataset.dropScope,intent=row._taskDropIntent,toScope=intent?.toScope||row.closest(".drop-card")?.dataset.dropZone,toCard=toScope?root.querySelector('.drop-card[data-drop-zone="'+toScope+'"]'):null;activeSortableTask=null;if(!id||!toScope)return requestRender();
    let snapshot=row._taskCardSnapshot||new Map(),targetSnapshot=snapshot.get(toScope)||{all:[],pinned:[]},sourceSnapshot=snapshot.get(fromScope)||{all:[],pinned:[]},targetBefore=targetSnapshot.all,sourceBefore=sourceSnapshot.all;intent=intent?.toScope===toScope?intent:sortableTaskIntent(row,toCard,event.originalEvent);let targetAfter=targetBefore.filter(value=>value!==id),toId=intent?.toId&&intent.toId!==id?intent.toId:"",at=toId?targetAfter.indexOf(toId):-1;targetAfter.splice(at<0?targetAfter.length:at+(intent?.position==="after"?1:0),0,id);let sourceAfter=fromScope===toScope?targetAfter:sourceBefore.filter(value=>value!==id),wasPinned=row.dataset.wasPinned==="1",project=intent?.project;
-   commit("拖动事项",draft=>{let task=draft.tasks.find(item=>item.id===id),transition=TASK_CARD_TRANSITIONS[toScope];if(!task||!transition?.accept)return;transition.apply(task);if(toScope!=="waiting")task.followup="";if(project!==undefined)task.project=project;task.updatedAt=new Date().toISOString();let sourceOrder=reconcileVisibleOrder(draft.order[fromScope]||[],sourceBefore,sourceAfter),targetOrder=fromScope===toScope?sourceOrder:reconcileVisibleOrder(draft.order[toScope]||[],targetBefore,targetAfter);draft.order[fromScope]=sourceOrder;draft.order[toScope]=targetOrder;let sourcePin=pinKey(fromScope),targetPin=pinKey(toScope);if(fromScope===toScope){let pins=new Set(sourceSnapshot.pinned);draft.order[targetPin]=targetOrder.filter(value=>pins.has(value))}else{draft.order[sourcePin]=(draft.order[sourcePin]||[]).filter(value=>value!==id);let targetPins=new Set(targetSnapshot.pinned);wasPinned?targetPins.add(id):targetPins.delete(id);draft.order[targetPin]=targetOrder.filter(value=>targetPins.has(value))}},{immediate:true});
+   commit("拖动事项",draft=>{let task=draft.tasks.find(item=>item.id===id),transition=TASK_CARD_TRANSITIONS[toScope];if(!task||!transition?.accept)return;applyTaskCardTransition(task,fromScope,toScope,draft);if(project!==undefined)task.project=project;task.updatedAt=new Date().toISOString();let sourceOrder=reconcileVisibleOrder(draft.order[fromScope]||[],sourceBefore,sourceAfter),targetOrder=fromScope===toScope?sourceOrder:reconcileVisibleOrder(draft.order[toScope]||[],targetBefore,targetAfter);draft.order[fromScope]=sourceOrder;draft.order[toScope]=targetOrder;let sourcePin=pinKey(fromScope),targetPin=pinKey(toScope);if(fromScope===toScope){let pins=new Set(sourceSnapshot.pinned);draft.order[targetPin]=targetOrder.filter(value=>pins.has(value))}else{draft.order[sourcePin]=(draft.order[sourcePin]||[]).filter(value=>value!==id);let targetPins=new Set(targetSnapshot.pinned);wasPinned?targetPins.add(id):targetPins.delete(id);draft.order[targetPin]=targetOrder.filter(value=>targetPins.has(value))}},{immediate:true});
    delete row._taskCardSnapshot;delete row._taskDropIntent;
   } })));
  });
@@ -553,7 +577,7 @@ function filteredTasks(){
 }
 function tableRow(task){
  let project=projectById(task.project),milestone=milestoneOf(task,project);
- return'<tr data-drop-scope="all" data-task="'+task.id+'"><td><button class="drag-handle" draggable="true" data-drag-handle="all" data-task="'+task.id+'">⠿</button></td><td><input class="bulk-check" type="checkbox" data-bulk-select="'+task.id+'" '+(ui.selectedTasks.has(task.id)?"checked":"")+'></td><td><button class="flag-btn focus '+(task.focus?"active":"")+'" data-toggle-focus="'+task.id+'" data-tip="切换今日行动；勾选后会同时加入本周">★</button></td><td><button class="flag-btn '+(task.week?"active":"")+'" data-toggle-week="'+task.id+'" data-tip="切换本周行动">◆</button></td><td><button class="check '+(isDone(task)?"done":"")+'" data-toggle-task="'+task.id+'">'+(isDone(task)?"✓":"")+'</button></td><td><div class="table-title">'+esc(task.title)+'</div><span class="pill">'+esc(task.type)+'</span></td><td><div class="table-sub"><b style="color:var(--blue)">下一步 · </b>'+esc(task.nextAction||"—")+'</div><div class="table-sub">'+esc(strip(task.notes)||"")+'</div></td><td><b>'+esc(project?.name||"通用事项")+'</b><div class="muted" style="font-size:11px">'+esc(milestone?.name||"")+'</div></td><td><div class="table-status-cell"><button class="pin-task '+(isPinned(task.id,'all')?'active':'')+'" data-pin-task="'+task.id+'" data-pin-scope="all" data-tip="置顶全部事项视图"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2l8 8-3 1-4 4 1 5-1 1-5-6-5 5-1-1 5-5-6-5 1-1 5 1 4-4z"/></svg></button>'+propertyButton(task,"status",false)+'</div></td><td>'+propertyButton(task,"priority",false)+'</td><td><div class="table-date"><span class="muted">计划：'+dateShort(task.planDate)+'</span><br><span class="muted">完成：'+dateShort(task.completed)+'</span></div></td><td><button class="row-edit" data-edit-task="'+task.id+'">✎</button></td></tr>';
+ return'<tr data-drop-scope="all" data-task="'+task.id+'"><td><button class="drag-handle" draggable="true" data-drag-handle="all" data-task="'+task.id+'">⠿</button></td><td><input class="bulk-check" type="checkbox" data-bulk-select="'+task.id+'" '+(ui.selectedTasks.has(task.id)?"checked":"")+'></td><td><button class="flag-btn focus '+(task.focus?"active":"")+'" data-toggle-focus="'+task.id+'" data-tip="切换今日行动；加入时同时加入本周，移出时取消已到期的计划日期">★</button></td><td><button class="flag-btn '+(task.week?"active":"")+'" data-toggle-week="'+task.id+'" data-tip="切换本周行动">◆</button></td><td><button class="check '+(isDone(task)?"done":"")+'" data-toggle-task="'+task.id+'">'+(isDone(task)?"✓":"")+'</button></td><td><div class="table-title">'+esc(task.title)+'</div><span class="pill">'+esc(task.type)+'</span></td><td><div class="table-sub"><b style="color:var(--blue)">下一步 · </b>'+esc(task.nextAction||"—")+'</div><div class="table-sub">'+esc(strip(task.notes)||"")+'</div></td><td><b>'+esc(project?.name||"通用事项")+'</b><div class="muted" style="font-size:11px">'+esc(milestone?.name||"")+'</div></td><td><div class="table-status-cell"><button class="pin-task '+(isPinned(task.id,'all')?'active':'')+'" data-pin-task="'+task.id+'" data-pin-scope="all" data-tip="置顶全部事项视图"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2l8 8-3 1-4 4 1 5-1 1-5-6-5 5-1-1 5-5-6-5 1-1 5 1 4-4z"/></svg></button>'+propertyButton(task,"status",false)+'</div></td><td>'+propertyButton(task,"priority",false)+'</td><td><div class="table-date"><span class="muted">计划：'+dateShort(task.planDate)+'</span><br><span class="muted">完成：'+dateShort(task.completed)+'</span></div></td><td><button class="row-edit" data-edit-task="'+task.id+'">✎</button></td></tr>';
 }
 function multiFilter(label,field,options){
  let selected=taskFilter[field],title=selected.length?label+" "+selected.length:label;
@@ -718,7 +742,7 @@ function applyRelations(taskId,nextIds){
 function saveTaskDraft(){
  collectTaskDraft();if(!taskDraft.title)return toast("请填写事项名称");
  let existing=taskById(taskDraft.id),label=existing?"编辑事项":"新增事项";
- commit(label,draft=>{let saved=clone(taskDraft),links=new Set(saved.relatedTaskIds),index=draft.tasks.findIndex(task=>task.id===saved.id);if(index>=0)draft.tasks[index]=saved;else draft.tasks.unshift(saved);draft.tasks.forEach(task=>{if(task.id===saved.id)return;let related=new Set(task.relatedTaskIds||[]);links.has(task.id)?related.add(saved.id):related.delete(saved.id);task.relatedTaskIds=Array.from(related)})},{immediate:true});
+ commit(label,draft=>{let saved=clone(taskDraft),links=new Set(saved.relatedTaskIds),index=draft.tasks.findIndex(task=>task.id===saved.id),previous=index>=0?draft.tasks[index]:null;if(previous&&saved.status!==previous.status){let status=saved.status,completed=saved.completed,followup=saved.followup;saved.status=previous.status;saved.completed=previous.completed;setTaskStatus(saved,status,draft);if(completed)saved.completed=completed;if(followup!==previous.followup)saved.followup=followup}reconcileTaskEdit(saved,previous);index=draft.tasks.findIndex(task=>task.id===saved.id);if(index>=0)draft.tasks[index]=saved;else draft.tasks.unshift(saved);draft.tasks.forEach(task=>{if(task.id===saved.id)return;let related=new Set(task.relatedTaskIds||[]);links.has(task.id)?related.add(saved.id):related.delete(saved.id);task.relatedTaskIds=Array.from(related)})},{immediate:true});
  closeDialog("taskDialog");renderNow();toast(existing?"事项已保存":"事项已创建");
 }
 function createRelatedTask(){
@@ -759,6 +783,7 @@ function setTaskStatus(item,value,draft,options={}){
  let wasDone=isDone(item),previousStatus=item.status;item.status=value;
  item.inbox=value==="待处理";
  if(previousStatus==="等待"&&value!=="等待")item.followup="";
+ if(["待处理","等待","暂停","已完成"].includes(value))item.focus=false;
  if(options.fromToday&&value==="进行中"){item.focus=true;item.week=true}
  if(value==="已完成"){if(!item.completed)item.completed=todayKey();if(!wasDone)generateRepeat(item,draft)}else item.completed="";
  item.updatedAt=new Date().toISOString();
@@ -1117,8 +1142,8 @@ function handleClick(event){
  if(target.dataset.toggleTask)return toggleTask(target.dataset.toggleTask);
  if(target.dataset.pinTask)return updateTask(target.dataset.pinTask,"切换事项置顶",(task,draft)=>{let key=pinKey(target.dataset.pinScope),list=draft.order[key]||(draft.order[key]=[]);draft.order[key]=list.includes(task.id)?list.filter(id=>id!==task.id):list.concat(task.id)});
  if(target.dataset.unpinAll)return commit("取消当前卡片全部置顶",draft=>draft.order[pinKey(target.dataset.unpinAll)]=[],{immediate:true});
- if(target.dataset.toggleFocus)return commit("切换今日行动",draft=>{let task=draft.tasks.find(item=>item.id===target.dataset.toggleFocus);task.focus=!task.focus;if(task.focus)task.week=true},{immediate:true});
- if(target.dataset.toggleWeek)return commit("切换本周行动",draft=>{let task=draft.tasks.find(item=>item.id===target.dataset.toggleWeek);task.week=!task.week;if(!task.week)task.focus=false},{immediate:true});
+ if(target.dataset.toggleFocus)return commit("切换今日行动",draft=>{let task=draft.tasks.find(item=>item.id===target.dataset.toggleFocus);setTaskFocus(task,!task.focus,draft)},{immediate:true});
+ if(target.dataset.toggleWeek)return commit("切换本周行动",draft=>{let task=draft.tasks.find(item=>item.id===target.dataset.toggleWeek);task.week=!task.week;if(!task.week)setTaskFocus(task,false,draft)},{immediate:true});
  if(target.dataset.property)return openChoice(target,target.dataset.property,target.dataset.task);
  if(target.dataset.smartSort){
   let scope=target.dataset.smartSort,items=scope==="today"?todayAdvance():scope==="waiting"?todayWaiting():scope==="week"?weekTasks():scope==="long"?longTasks():filteredTasks();return applySmartOrder(items,scope);
@@ -1258,8 +1283,12 @@ document.addEventListener("change",event=>{
  else if(target.id==="projectTemplate"){collectProjectDraft();projectTemplateMode=target.value;projectDraft.milestones=projectTemplateMode==="hardware"?hardwareMilestoneTemplate():[];projectMilestoneIndex=0;renderProjectEditor()}
  else if(target.id==="draftProject"){taskDraft.project=target.value;taskDraft.milestone="";$("#draftMilestone").innerHTML=milestoneOptions(taskDraft.project,"");syncHoverSelect($("#draftMilestone"))}
  else if(target.id==="draftStatus"){taskDraft.status=target.value;syncTaskCompletedField()}
- else if(target.id==="draftFocus"){if(target.checked)$("#draftWeek").checked=true}
- else if(target.id==="draftWeek"){if(!target.checked)$("#draftFocus").checked=false}
+ else if(target.id==="draftFocus"){
+  if(target.checked){if(taskDraft.archived||["已完成"].includes($("#draftStatus").value)){target.checked=false;return toast("请先恢复事项，再加入今日")}$("#draftWeek").checked=true;$("#draftStatus").value="进行中";syncHoverSelect($("#draftStatus"));syncTaskCompletedField()}
+  else if(isPlanDue({planDate:$("#draftPlanDate").value})){$("#draftPlanDate").value="";toast("已取消今日安排和已到期的计划日期")}
+ }
+ else if(target.id==="draftWeek"){if(!target.checked){$("#draftFocus").checked=false;if(isPlanDue({planDate:$("#draftPlanDate").value})){$("#draftPlanDate").value="";toast("已取消本周、今日安排和已到期的计划日期")}}}
+ else if(target.id==="draftPlanDate"){let eligible=!taskDraft.archived&&!["待处理","等待","暂停","已完成"].includes($("#draftStatus").value);if(target.value>todayKey())$("#draftFocus").checked=false;else if(target.value&&eligible){$("#draftFocus").checked=true;$("#draftWeek").checked=true}}
  else if(target.id==="decisionProject"){decisionDraft.project=target.value;decisionDraft.milestone="";$("#decisionMilestone").innerHTML=milestoneOptions(decisionDraft.project,"");syncHoverSelect($("#decisionMilestone"))}
  else if(target.id==="decisionSourceTask"&&target.value){let source=taskById(target.value);if(source){decisionDraft.sourceTaskId=source.id;decisionDraft.project=source.project;decisionDraft.milestone=source.milestone;$("#decisionProject").innerHTML=decisionProjectOptions(source.project);$("#decisionMilestone").innerHTML=milestoneOptions(source.project,source.milestone);syncHoverSelect($("#decisionProject"));syncHoverSelect($("#decisionMilestone"))}}
  else if(target.dataset.checkDone!==undefined)taskDraft.checklist[Number(target.dataset.checkDone)].done=target.checked;
@@ -1353,7 +1382,7 @@ function cloudHash(value){let text=typeof value==="string"?value:JSON.stringify(
 function deviceId(){let value=localStorage.getItem(CLOUD_DEVICE_KEY);if(!value){value=uid("device");localStorage.setItem(CLOUD_DEVICE_KEY,value)}return value}
 function hasBusinessData(value=state){let quick=(value.quickNote?.delta?.ops||[]).some(op=>String(op.insert||"").trim());return!!(value.tasks.length||value.projects.length||value.memos.length||value.decisions?.length||quick||Object.values(value.weeks||{}).some(week=>week.top?.length))}
 const Cloud={
- client:null,user:null,channel:null,version:0,rowExists:false,device:deviceId(),lastHash:"",timer:0,pushing:false,applying:false,pendingRemote:null,importPending:false,authMode:"login",status:"local",
+ client:null,user:null,channel:null,version:0,rowExists:false,device:deviceId(),lastHash:"",timer:0,pushing:false,pendingPush:false,syncEpoch:0,applying:false,pendingRemote:null,importPending:false,authMode:"login",status:"local",
  config(){try{return{...DEFAULT_CLOUD_CONFIG,...JSON.parse(localStorage.getItem(CLOUD_CONFIG_KEY)||"null")}}catch(error){return DEFAULT_CLOUD_CONFIG}},
  renderAccount(){let button=$("#accountEmail"),email=this.user?.email||this.user?.user_metadata?.email||"";if(!button)return;button.hidden=!email;button.textContent=email},
  setStatus(status,label){this.status=status;let button=$("#syncButton");button.className="sync-badge "+status;button.textContent=label||({local:"本地模式",connecting:"连接中",syncing:"同步中",synced:"已同步",error:"同步失败",conflict:"待处理冲突"}[status]||status);this.renderAccount()},
@@ -1363,7 +1392,7 @@ const Cloud={
   if(!window.supabase?.createClient){this.setStatus("local","本地模式");$("#cloudGate").hidden=true;return}
   try{
    this.client=window.supabase.createClient(config.url,config.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"pkce"}});
-   this.client.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"){this.user=null;this.setStatus("local","本地模式")}else if(event==="SIGNED_IN"&&session?.user&&!this.user)setTimeout(()=>this.startSession(session),0)});
+   this.client.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"){this.syncEpoch++;this.pendingPush=false;this.pushing=false;clearTimeout(this.timer);this.user=null;this.setStatus("local","本地模式")}else if(event==="SIGNED_IN"&&session?.user&&!this.user)setTimeout(()=>this.startSession(session),0)});
    let result=await this.client.auth.getSession();
    if(result.error)throw result.error;
    if(result.data.session)await this.startSession(result.data.session);
@@ -1372,9 +1401,9 @@ const Cloud={
   }catch(error){console.warn("云端连接失败",error);this.setStatus("error","连接失败");$("#cloudGate").hidden=localStorage.getItem(LOCAL_MODE_KEY)==="1"}
  },
  async startSession(session){
-  this.user=session.user;localStorage.removeItem(LOCAL_MODE_KEY);$("#cloudGate").hidden=true;this.setStatus("connecting","连接中");
+  this.syncEpoch++;this.pushing=false;this.pendingPush=false;clearTimeout(this.timer);this.pendingRemote=null;this.user=session.user;const sessionEpoch=this.syncEpoch;localStorage.removeItem(LOCAL_MODE_KEY);$("#cloudGate").hidden=true;this.setStatus("connecting","连接中");
   try{
-   let row=await this.fetchRemote(),localSerialized=JSON.stringify(snapshotCore()),localHash=cloudHash(localSerialized),link=null;
+   let row=await this.fetchRemote();if(sessionEpoch!==this.syncEpoch||this.user?.id!==session.user.id)return;let localSerialized=JSON.stringify(snapshotCore()),localHash=cloudHash(localSerialized),link=null;
    try{link=JSON.parse(localStorage.getItem(CLOUD_LINK_KEY)||"null")}catch(error){}
    let accountChanged=!!(link?.userId&&String(link.userId)!==String(this.user.id));
    if(accountChanged&&hasBusinessData(state)){this.rowExists=!!row;this.version=Number(row?.version||0);this.pendingRemote=row||{state:emptyState(),version:0,device_id:"",updated_at:new Date().toISOString(),missing:true};this.setStatus("conflict","确认账号数据");this.showConflict(true)}
@@ -1394,32 +1423,47 @@ const Cloud={
   let result=await this.client.from("app_states").select("state,version,device_id,updated_at").eq("user_id",this.user.id).maybeSingle();
   if(result.error)throw result.error;return result.data;
  },
- acceptMeta(row,hash){
+ acceptMeta(row,hash,markSynced=true){
   this.rowExists=true;this.version=Number(row.version||this.version||0);this.lastHash=hash||cloudHash(JSON.stringify(snapshotCore()));
-  localStorage.setItem(CLOUD_LINK_KEY,JSON.stringify({userId:this.user.id,version:this.version,hash:this.lastHash,deviceId:this.device,updatedAt:row.updated_at||new Date().toISOString()}));this.setStatus("synced","已同步");
+  localStorage.setItem(CLOUD_LINK_KEY,JSON.stringify({userId:this.user.id,version:this.version,hash:this.lastHash,deviceId:this.device,updatedAt:row.updated_at||new Date().toISOString()}));if(markSynced)this.setStatus("synced","已同步");
  },
  schedule(){
-  if(this.applying||!this.user||!this.client||this.importPending)return;clearTimeout(this.timer);this.timer=setTimeout(()=>this.push(),650);this.setStatus("syncing","待同步");
+  if(this.applying||!this.user||!this.client||this.importPending||this.pendingRemote||this.status==="conflict")return;
+  this.pendingPush=true;clearTimeout(this.timer);if(!this.pushing)this.timer=setTimeout(()=>this.push(),650);this.setStatus("syncing","待同步");
  },
  async push(force=false){
-  if(this.pushing||this.applying||!this.user||!this.client||this.importPending)return false;if(!navigator.onLine){this.setStatus("syncing","离线待同步");return false}
-  let payload=snapshotCore(),serialized=JSON.stringify(payload),hash=cloudHash(serialized);if(!force&&hash===this.lastHash){this.setStatus("synced","已同步");return true}
-  this.pushing=true;this.setStatus("syncing","同步中");
+  if(this.applying||!this.user||!this.client||this.importPending||this.pendingRemote||this.status==="conflict")return false;
+  if(this.pushing){this.pendingPush=true;return false}
+  if(!navigator.onLine){this.pendingPush=true;this.setStatus("syncing","离线待同步");return false}
+  clearTimeout(this.timer);this.pushing=true;
+  const epoch=this.syncEpoch,userId=this.user.id,client=this.client,isCurrent=()=>epoch===this.syncEpoch&&this.user?.id===userId&&this.client===client;
   try{
-   let result;
-   if(!this.rowExists)result=await this.client.from("app_states").insert({user_id:this.user.id,state:payload,version:1,device_id:this.device,updated_at:new Date().toISOString()}).select("state,version,device_id,updated_at").single();
-   else result=await this.client.from("app_states").update({state:payload,version:this.version+1,device_id:this.device,updated_at:new Date().toISOString()}).eq("user_id",this.user.id).eq("version",this.version).select("state,version,device_id,updated_at").maybeSingle();
-   if(result.error)throw result.error;
-   if(!result.data){this.pendingRemote=await this.fetchRemote();this.setStatus("conflict","存在冲突");this.showConflict();return false}
-   this.acceptMeta(result.data,hash);return true;
-  }catch(error){console.error("云同步写入失败",error);this.setStatus("error","同步失败");return false}finally{this.pushing=false}
+   do{
+    this.pendingPush=false;
+    if(!navigator.onLine){this.pendingPush=true;this.setStatus("syncing","离线待同步");return false}
+    let payload=snapshotCore(),hash=cloudHash(JSON.stringify(payload));
+    if(!force&&hash===this.lastHash){this.setStatus("synced","已同步");return true}
+    force=false;this.setStatus("syncing","同步中");let result;
+    if(!this.rowExists)result=await client.from("app_states").insert({user_id:userId,state:payload,version:1,device_id:this.device,updated_at:new Date().toISOString()}).select("state,version,device_id,updated_at").single();
+    else result=await client.from("app_states").update({state:payload,version:this.version+1,device_id:this.device,updated_at:new Date().toISOString()}).eq("user_id",userId).eq("version",this.version).select("state,version,device_id,updated_at").maybeSingle();
+    if(!isCurrent())return false;
+    if(result.error)throw result.error;
+    if(!result.data){let remote=await this.fetchRemote();if(!isCurrent())return false;this.pendingRemote=remote;this.setStatus("conflict","存在冲突");this.showConflict();return false}
+    this.acceptMeta(result.data,hash,false);
+    if(this.pendingRemote||this.status==="conflict"||this.importPending)return false;
+    this.pendingPush=this.pendingPush||cloudHash(JSON.stringify(snapshotCore()))!==hash;
+   }while(this.pendingPush&&isCurrent());
+   if(!isCurrent())return false;this.setStatus("synced","已同步");return true;
+  }catch(error){if(isCurrent()){this.pendingPush=true;console.error("云同步写入失败",error);this.setStatus("error","同步失败")}return false}
+  finally{if(isCurrent())this.pushing=false}
  },
  applyRemote(row,backup=true){
-  this.applying=true;
+  this.syncEpoch++;this.pushing=false;this.pendingPush=false;clearTimeout(this.timer);this.applying=true;
   try{
    let recovery=backup&&hasBusinessData(state)?{id:uid("snapshot"),label:"采用云端前的本机安全快照",createdAt:new Date().toISOString(),state:snapshotCore()}:null;
    state=normalizeState(row.state);if(recovery){recovery.state.snapshots=[];state.snapshots.unshift(recovery);state.snapshots=state.snapshots.slice(0,12)}ensureCurrentWeek();localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshotCore()));this.acceptMeta(row,cloudHash(JSON.stringify(snapshotCore())));undoStack=[];redoStack=[];requestRender();
   }finally{this.applying=false}
+  refreshScheduledTasks();
  },
  subscribe(){
   if(this.channel)this.client.removeChannel(this.channel);
@@ -1431,15 +1475,15 @@ const Cloud={
   if(localHash===this.lastHash&&!this.pushing)this.applyRemote(row,false);
   else{this.pendingRemote=row;this.setStatus("conflict","存在冲突");this.showConflict()}
  },
- async useRemote(){if(!this.pendingRemote)return;let missing=!!this.pendingRemote.missing;this.applyRemote(this.pendingRemote,true);if(missing){this.rowExists=false;this.version=0}this.pendingRemote=null;this.importPending=false;closeDialog("conflictDialog");toast(missing?"已切换为空白云端账号，本机原数据已存入安全快照":"已采用云端版本")},
- async keepLocal(){if(this.pendingRemote){let recovery={id:uid("snapshot"),label:"覆盖云端前的云端安全快照",createdAt:new Date().toISOString(),state:snapshotCore(normalizeState(this.pendingRemote.state))};recovery.state.snapshots=[];state.snapshots.unshift(recovery);this.version=Number(this.pendingRemote.version||0);this.rowExists=!this.pendingRemote.missing}this.pendingRemote=null;this.importPending=false;closeDialog("conflictDialog");saveLocal(true);await this.push(true);toast("已保留本机版本")},
+ async useRemote(){if(!this.pendingRemote)return;let missing=!!this.pendingRemote.missing;this.applyRemote(this.pendingRemote,true);if(missing){this.rowExists=false;this.version=0}this.pendingRemote=null;this.importPending=false;if(cloudHash(JSON.stringify(snapshotCore()))!==this.lastHash)this.schedule();closeDialog("conflictDialog");toast(missing?"已切换为空白云端账号，本机原数据已存入安全快照":"已采用云端版本")},
+ async keepLocal(){if(this.pendingRemote){let recovery={id:uid("snapshot"),label:"覆盖云端前的云端安全快照",createdAt:new Date().toISOString(),state:snapshotCore(normalizeState(this.pendingRemote.state))};recovery.state.snapshots=[];state.snapshots.unshift(recovery);this.version=Number(this.pendingRemote.version||0);this.rowExists=!this.pendingRemote.missing}this.pendingRemote=null;this.importPending=false;this.setStatus("syncing","待同步");closeDialog("conflictDialog");saveLocal(true);await this.push(true);toast("已保留本机版本")},
  renderStatus(){
   let account=this.user?.email||this.user?.user_metadata?.email||"未登录",pending=this.importPending?'<div class="data-item"><div><b>JSON 已导入本机</b><small>云端尚未修改，请选择后续动作。</small></div><div><button class="btn" id="discardImport">恢复云端</button><button class="btn primary" id="uploadImport">替换云端</button></div></div>':"";
   $("#syncDialogBody").innerHTML='<div class="data-list"><div class="data-item"><div><b>'+esc(this.user?"已登录":"本地模式")+'</b><small>'+esc(account)+' · '+esc($("#syncButton").textContent)+'</small></div><button class="btn" id="syncNow" '+(this.user?"":"disabled")+'>立即同步</button></div>'+pending+'</div><div class="page-actions" style="margin-top:16px"><button class="btn" id="showLogin">'+(this.user?"切换账号":"登录云端")+'</button>'+(this.user?'<button class="btn danger" id="logoutCloud">退出登录</button>':"")+'</div>';
   $("#syncNow")?.addEventListener("click",()=>this.push(true));$("#showLogin")?.addEventListener("click",()=>{closeDialog("syncDialog");$("#cloudGate").hidden=false});$("#logoutCloud")?.addEventListener("click",()=>this.logout());
   $("#uploadImport")?.addEventListener("click",()=>{this.importPending=false;this.push(true);this.renderStatus()});$("#discardImport")?.addEventListener("click",async()=>{let row=await this.fetchRemote();if(row)this.applyRemote(row,true);this.importPending=false;this.renderStatus()});
  },
- async logout(){if(this.client&&this.channel){await this.client.removeChannel(this.channel);this.channel=null}if(this.client)await this.client.auth.signOut();this.user=null;this.version=0;this.rowExists=false;this.lastHash="";this.pendingRemote=null;clearTimeout(this.timer);localStorage.setItem(LOCAL_MODE_KEY,"1");this.setStatus("local","本地模式");closeDialog("syncDialog")},
+ async logout(){this.syncEpoch++;this.pendingPush=false;this.pushing=false;if(this.client&&this.channel){await this.client.removeChannel(this.channel);this.channel=null}if(this.client)await this.client.auth.signOut();this.user=null;this.version=0;this.rowExists=false;this.lastHash="";this.pendingRemote=null;clearTimeout(this.timer);localStorage.setItem(LOCAL_MODE_KEY,"1");this.setStatus("local","本地模式");closeDialog("syncDialog")},
  async uploadAttachments(taskId,files){
   if(!taskById(taskId))return toast("请先保存事项，再上传附件");
   if(!this.user||!this.client)return toast("附件需要登录云端后上传");
@@ -1474,12 +1518,15 @@ $("#authForm").addEventListener("submit",async event=>{
  try{let result=Cloud.authMode==="login"?await Cloud.client.auth.signInWithPassword({email,password}):await Cloud.client.auth.signUp({email,password});if(result.error)throw result.error;if(Cloud.authMode==="register"&&!result.data.session)message.textContent="注册成功，请检查邮箱完成验证。";else{message.textContent="";await Cloud.startSession(result.data.session)}}catch(error){message.textContent=error.message||"登录失败"}
 });
 let dateWatch=todayKey();
-setInterval(()=>{let next=todayKey();if(next===dateWatch)return;dateWatch=next;ensureCurrentWeek();selectedWeekKey=currentWeekKey();saveLocal(true);requestRender()},60000);
+function checkDateChange(){let next=todayKey();if(next===dateWatch)return;dateWatch=next;ensureCurrentWeek();selectedWeekKey=currentWeekKey();activateScheduledTasks();captureCurrentWeek();saveLocal(true);requestRender()}
+setInterval(checkDateChange,60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkDateChange()});
 window.addEventListener("online",()=>{if(Cloud.user)Cloud.push()});
 async function boot(){
  applyTheme(localStorage.getItem(THEME_KEY)||"system",false);
  renderApp();
  await Cloud.init();
+ refreshScheduledTasks();
  document.documentElement.classList.remove("booting");
 }
 boot().catch(error=>{console.error("应用启动失败",error);document.documentElement.classList.remove("booting");toast("启动时发生错误，本机数据未删除")});
