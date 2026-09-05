@@ -528,10 +528,10 @@ async function testUrl() {
   await page.click('[data-week-panel="plan"]');
   await page.waitForSelector('#page-week .top-card');
   await page.click('[data-add-top]'); await page.click('[data-add-top]'); await page.click('[data-add-top]');
-  await page.locator('[data-top-index="0"]').fill('重点一'); await page.locator('[data-top-index="1"]').fill('重点二'); await page.locator('[data-top-index="2"]').fill('重点三');
-  await dragAt(page, '[data-top-drag="0"]', '[data-top-drop="2"]', 0.9);
-  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
-	  const topOrderAfterDrag = saved.weeks[Object.keys(saved.weeks).sort().at(-1)].top.join(',');
+	  await page.locator('[data-top-index="0"]').fill('重点一'); await page.locator('[data-top-index="1"]').fill('重点二'); await page.locator('[data-top-index="2"]').fill('重点三');
+	  await dragAt(page, '[data-top-drag="0"]', '[data-top-drop="2"]', 0.9);
+	  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
+	  const topOrderAfterDrag = await page.evaluate(() => currentWeek().top.join(','));
 	  assert(topOrderAfterDrag === '重点二,重点三,重点一', `Top 3 downward drag did not insert after the release row: ${topOrderAfterDrag}`);
   await sortableDragAt(page, '[data-drag-handle="long"][data-task="t3"]', '[data-drop-zone="week"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
