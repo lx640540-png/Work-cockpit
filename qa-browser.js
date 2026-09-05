@@ -9,7 +9,7 @@ const dragAt = (page, sourceSelector, targetSelector, ratio = 0.5) => page.evalu
   const source = document.querySelector(sourceSelector), target = document.querySelector(targetSelector), data = new DataTransfer(), rect = target.getBoundingClientRect(), clientX = rect.left + rect.width / 2, clientY = rect.top + rect.height * ratio;
   source.dispatchEvent(new DragEvent('dragstart', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
   target.dispatchEvent(new DragEvent('dragover', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
-  if (target.dataset.dropScope) target.dataset.dropPosition = ratio < 0.5 ? 'before' : 'after';
+  if (target.matches('[data-drop-scope],[data-top-drop],[data-check-drop],[data-select-memo]')) target.dataset.dropPosition = ratio < 0.5 ? 'before' : 'after';
   target.dispatchEvent(new DragEvent('drop', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
   source.dispatchEvent(new DragEvent('dragend', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
 }, { sourceSelector, targetSelector, ratio });
@@ -531,7 +531,8 @@ async function testUrl() {
   await page.locator('[data-top-index="0"]').fill('重点一'); await page.locator('[data-top-index="1"]').fill('重点二'); await page.locator('[data-top-index="2"]').fill('重点三');
   await dragAt(page, '[data-top-drag="0"]', '[data-top-drop="2"]', 0.9);
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
-  assert(saved.weeks[Object.keys(saved.weeks).sort().at(-1)].top.join(',') === '重点二,重点三,重点一', 'Top 3 downward drag did not insert after the release row');
+	  const topOrderAfterDrag = saved.weeks[Object.keys(saved.weeks).sort().at(-1)].top.join(',');
+	  assert(topOrderAfterDrag === '重点二,重点三,重点一', `Top 3 downward drag did not insert after the release row: ${topOrderAfterDrag}`);
   await sortableDragAt(page, '[data-drag-handle="long"][data-task="t3"]', '[data-drop-zone="week"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't3').week && saved.tasks.find(task => task.id === 't3').type === '任务', 'long-term to weekly transition failed');
@@ -658,10 +659,12 @@ async function testUrl() {
   assert(await dividerLabel.textContent() === '阶段总结', 'plain text could not be pasted into the divider label');
   await dividerLabel.press('Enter');
   await page.waitForFunction(() => document.querySelector('[data-memo-content] .rich-divider')?.dataset.label === '阶段总结');
-  assert((await quillEditor.evaluate(node => serializeRichEditor(node))).includes('阶段总结'), 'edited divider label was not preserved by rich-text serialization');
-  await page.click('#undoButton');
-  await page.waitForFunction(() => document.querySelector('[data-memo-content] .rich-divider')?.dataset.label === '');
-  assert(await quillRoot.locator('.rich-divider').count() === 1, 'one-step divider label undo removed the divider itself');
+	  assert((await quillEditor.evaluate(node => serializeRichEditor(node))).includes('阶段总结'), 'edited divider label was not preserved by rich-text serialization');
+	  const dividerHistoryBeforeUndo = await quillEditor.evaluate(node => ({ contents:node.__quill.getContents().ops, undo:node.__quill.history.stack.undo.map(item => item.delta.ops), redo:node.__quill.history.stack.redo.map(item => item.delta.ops) }));
+	  await page.click('#undoButton');
+	  await page.waitForTimeout(160);
+	  const dividerUndoState = await quillEditor.evaluate(node => ({ labels:Array.from(node.querySelectorAll('.rich-divider')).map(divider => divider.dataset.label), contents:node.__quill.getContents().ops, undo:node.__quill.history.stack.undo.map(item => item.delta.ops), redo:node.__quill.history.stack.redo.map(item => item.delta.ops) }));
+	  assert(dividerUndoState.labels.length === 1 && dividerUndoState.labels[0] === '', `one-step divider label undo did not restore the empty divider: ${JSON.stringify({ before:dividerHistoryBeforeUndo, after:dividerUndoState })}`);
   await page.click('#redoButton');
   await page.waitForFunction(() => document.querySelector('[data-memo-content] .rich-divider')?.dataset.label === '阶段总结');
   assert(await quillRoot.locator('.rich-divider-label').textContent() === '阶段总结', 'divider label redo did not restore the edited text');
@@ -889,7 +892,7 @@ async function testUrl() {
   await page.evaluate(() => { projectById('p1').milestones = clone(window.__projectMilestoneFixture); delete window.__projectMilestoneFixture; saveLocal(true); requestRender(); });
   await page.waitForFunction(() => document.querySelectorAll('.project-milestone-filter .milestone-filter-choice').length === 1);
   const selectedStyle = await page.locator('[data-select-project="p1"]').evaluate(node => ({ background: getComputedStyle(node).backgroundColor, panel: getComputedStyle(document.querySelector('.project-list-panel')).backgroundColor, shadow: getComputedStyle(node).boxShadow, border: getComputedStyle(node).borderColor }));
-  assert(selectedStyle.background === selectedStyle.panel && selectedStyle.shadow === 'none', 'selected project retained a background or shadow instead of only a blue border');
+	  assert(selectedStyle.background !== selectedStyle.panel && selectedStyle.shadow.includes('inset') && selectedStyle.border !== 'rgb(222, 228, 238)', `selected project lacks the subtle fill, blue border, or inner accent: ${JSON.stringify(selectedStyle)}`);
   assert(await page.getByText('里程碑相关任务', { exact: true }).count() === 0, 'project main page still renders milestone-related tasks');
   const selectedBeforeDrag = await page.locator('.project-list-item.selected').getAttribute('data-select-project');
   await page.locator('[data-project-drag="p1"]').dragTo(page.locator('[data-project-drop="p3"]'), { targetPosition: { x: 80, y: 70 } });
