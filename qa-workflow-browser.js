@@ -39,7 +39,7 @@ async function fixture(t,tasks,{time='2026-09-05T12:00:00',route='today',project
 }
 const stored=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')));
 async function save(page){await page.click('#saveTaskButton');await page.waitForFunction(()=>!document.querySelector('#taskDialog').open);}
-async function edit(page,id){await page.click('[data-page="tasks"]');await page.click('#page-tasks [data-edit-task="'+id+'"]');}
+async function edit(page,id){await page.click('[data-page="tasks"]');await page.click('#page-tasks [data-open-task="'+id+'"]');}
 
 test('due plans light flags on load/reload; excluded states and historical flags remain unchanged',{timeout:30000},async t=>{
   const page=await fixture(t,[makeTask('due',{planDate:today}),makeTask('long',{type:'长期跟进',planDate:today}),
@@ -102,6 +102,38 @@ test('detail status changes agree with flags and do not lose tasks when generati
   assert.equal(new Set(data.tasks.map(t=>t.id)).size,data.tasks.length);
 });
 
+test('task titles open details and drafts save automatically before backdrop or Escape closes',{timeout:30000},async t=>{
+  const page=await fixture(t,[makeTask('auto',{focus:true,nextAction:'旧的下一步'})]);
+  await page.click('[data-drop-zone="today"] [data-task="auto"] .task-secondary-link');
+  await page.locator('#taskDialog[open]').waitFor({state:'visible'});
+  await page.fill('#taskNext','自动保存后的下一步');
+  await page.clock.fastForward(750);
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).tasks.find(task=>task.id==='auto')?.nextAction==='自动保存后的下一步');
+  assert.equal(await page.locator('#taskDialog').getAttribute('open'),'');
+  assert.match(await page.locator('#taskAutosaveStatus').textContent(),/已自动保存/);
+  await page.fill('#taskTitle','点击外部保存标题');
+  await page.mouse.click(2,2);
+  await page.waitForFunction(()=>!document.querySelector('#taskDialog')?.open);
+  assert.equal((await stored(page)).tasks.find(task=>task.id==='auto').title,'点击外部保存标题');
+
+  await edit(page,'auto');
+  await page.fill('#taskTitle','');
+  await page.mouse.click(2,2);
+  assert.equal(await page.locator('#taskDialog').getAttribute('open'),'','invalid draft must remain open');
+  assert.match(await page.locator('#taskAutosaveStatus').textContent(),/请先填写事项名称/);
+  await page.fill('#taskTitle','恢复后的标题');
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>!document.querySelector('#taskDialog')?.open);
+  assert.equal((await stored(page)).tasks.find(task=>task.id==='auto').title,'恢复后的标题');
+
+  const countBefore=(await stored(page)).tasks.length;
+  await page.keyboard.press('n');
+  await page.locator('#taskDialog[open]').waitFor({state:'visible'});
+  await page.mouse.click(2,2);
+  await page.waitForFunction(()=>!document.querySelector('#taskDialog')?.open);
+  assert.equal((await stored(page)).tasks.length,countBefore,'blank quick capture created an empty task');
+});
+
 const projectFixture=[{id:'p1',name:'项目甲',milestones:[]},{id:'p2',name:'尚未安排的项目',milestones:[]}];
 test('project overview edits original tasks, retains empty projects and schedules long-term work',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('long',{type:'长期跟进',project:'p1',nextAction:'发出目录确认',notes:'<p>收到初稿，等待目录确认。</p>'}),makeTask('paused',{project:'p1',status:'暂停'})],{route:'projects',projects:projectFixture});
@@ -145,8 +177,8 @@ test('weekly planning and review retain their action and results through complet
 
 test('Today highlights next actions and pins while dated waiting stays separate and expandable',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('do',{focus:true,nextAction:'发出样品确认'}),makeTask('fallback',{focus:true,nextAction:''}),makeTask('due',{status:'等待',followup:today}),makeTask('later',{status:'等待',followup:future}),makeTask('no-date',{status:'等待',followup:''})]);
- assert.equal(await page.locator('[data-task="do"] .task-name').textContent(),'发出样品确认');
- assert.equal(await page.locator('[data-task="fallback"] .task-name').textContent(),'事项 fallback');
+ assert.equal(await page.locator('[data-task="do"] .task-title-link').textContent(),'发出样品确认');
+ assert.equal(await page.locator('[data-task="fallback"] .task-title-link').textContent(),'事项 fallback');
  assert.equal(await page.locator('[data-drop-zone="today"] [data-task="due"]').count(),0);
  assert.equal(await page.locator('[data-drop-zone="waiting"] .task-row[data-task="due"]').isVisible(),true);
  assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),false);assert.equal(await page.locator('.task-row[data-task="no-date"]').isVisible(),false);

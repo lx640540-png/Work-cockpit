@@ -165,10 +165,10 @@ async function testUrl() {
   await page.click('#page-today [data-summary-target="done"]');
   await page.waitForSelector('#page-week.active [data-week-panel="review"].active');
   assert(await page.locator('#page-week .week-review-layout').count() === 1, 'Today completion summary did not open the current weekly review');
-  const completedTitle = page.locator('#page-week .week-review-layout .task-name').first();
+  const completedTitle = page.locator('#page-week .week-review-layout .task-title-link').first();
   assert(await completedTitle.count() === 1 && !!await completedTitle.getAttribute('title'), 'weekly completed title is missing its full-title hover text');
-  const ellipsisState = await completedTitle.evaluate(node => { node.style.width='72px'; node.textContent='用于验证实时省略号的超长完成事项名称'; const style=getComputedStyle(node); return { whiteSpace:style.whiteSpace, overflow:style.overflow, textOverflow:style.textOverflow, clipped:node.scrollWidth>node.clientWidth }; });
-  assert(ellipsisState.whiteSpace === 'nowrap' && ellipsisState.overflow === 'hidden' && ellipsisState.textOverflow === 'ellipsis' && ellipsisState.clipped, `weekly completed title did not use a live single-line ellipsis: ${JSON.stringify(ellipsisState)}`);
+  const ellipsisState = await completedTitle.evaluate(node => { node.style.width='72px'; node.textContent='用于验证两行截断的超长完成事项名称'; const style=getComputedStyle(node); return { overflow:style.overflow, clamp:style.webkitLineClamp, clipped:node.scrollHeight>node.clientHeight }; });
+  assert(ellipsisState.overflow === 'hidden' && ellipsisState.clamp === '2' && ellipsisState.clipped, `weekly completed title did not use compact two-line truncation: ${JSON.stringify(ellipsisState)}`);
   let splitterState = await page.locator('#weekReviewSplitter').evaluate(node => ({ cursor:getComputedStyle(node).cursor, opacity:getComputedStyle(node,'::before').opacity }));
   assert(splitterState.cursor === 'col-resize' && splitterState.opacity === '0', `weekly review splitter was not a hidden drag surface: ${JSON.stringify(splitterState)}`);
   let splitBefore = await page.evaluate(() => uiLayout.weekReviewLeft);
@@ -194,8 +194,8 @@ async function testUrl() {
     return key;
   });
   await page.waitForSelector('#page-week.active .history-row [data-view-task-history="t8"]');
-  assert((await page.locator('#page-week [data-task="t8"] .task-name').textContent()).includes('历史推进标题'), 'past week row drifted to the current task title');
-  await page.click('#page-week [data-view-task-history="t8"]');
+  assert((await page.locator('#page-week [data-task="t8"] .task-title-link').textContent()).includes('历史推进标题'), 'past week row drifted to the current task title');
+  await page.click('#page-week [data-task="t8"] .task-title-link');
   await page.waitForSelector('#taskHistoryDialog[open]');
   assert((await page.locator('#taskHistoryDialog .history-title').textContent()).includes('历史推进标题'), 'historical detail did not use the closed weekly snapshot');
   const historyLayout = await page.locator('#taskHistoryDialog').evaluate(dialog => { const shell=dialog.querySelector('.history-shell'), versions=dialog.querySelector('.history-versions'), detail=dialog.querySelector('.history-detail');return { display:getComputedStyle(dialog).display, shellOverflow:getComputedStyle(shell).overflowY, versionsOverflow:getComputedStyle(versions).overflowY, detailOverflow:getComputedStyle(detail).overflowY, divider:getComputedStyle(versions).borderRightWidth, fits:dialog.getBoundingClientRect().height<=innerHeight-10 }; });
@@ -252,7 +252,7 @@ async function testUrl() {
   taskWheel = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('#page-tasks .table-card').scrollTop }));
   assert(Math.abs(taskWheel.local - taskBoundary) < 2 && taskWheel.main === 0, `all-task boundary incorrectly chained to the page: ${JSON.stringify({ taskBoundary, taskWheel })}`);
   await page.evaluate(() => { const pageNode = document.querySelector('#page-tasks'), table = pageNode.querySelector('.table-card'); pageNode.style.minHeight = ''; table.style.maxHeight = ''; table.scrollTop = 0; mainScroll.scrollTop = 0; });
-  await page.click('[data-edit-task="t1"]');
+  await page.click('[data-open-task="t1"]');
   assert(await page.locator('#taskNotes[data-quill-version="2.0.3"] > .ql-editor').count() === 1, 'task notes did not initialize with Quill 2');
   await page.click('[data-add-check]');
   await page.click('[data-add-check]');
@@ -478,7 +478,8 @@ async function testUrl() {
   await sortableDragAt(page, '[data-drag-handle="week"][data-task="t3"]', '[data-drop-zone="long"] .card-head');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(!saved.tasks.find(task => task.id === 't3').week && saved.tasks.find(task => task.id === 't3').type === '长期跟进', 'weekly to long-term transition failed');
-  await page.fill('#globalSearch', 'TARGET');
+  await page.locator('#globalSearch').evaluate(input=>{input.value='TARGET';input.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:'TARGET'}));});
+  await page.waitForSelector('#page-search.active');
   await page.waitForSelector('#page-search.active [data-search-project="p1"]');
   assert(await page.locator('#page-search.active [data-search-task="t1"]').count() === 1, 'project code search did not find a related task');
   await page.fill('#searchPageInput', '回车保存');
@@ -715,10 +716,10 @@ async function testUrl() {
     return { verticalAlign:getComputedStyle(row.cells[8]).verticalAlign, statusCenter:status.y+status.height/2, priorityCenter:priority.y+priority.height/2, pinCenter:pin.y+pin.height/2 };
   });
   assert(tableAlignment.verticalAlign === 'middle' && Math.abs(tableAlignment.statusCenter-tableAlignment.priorityCenter) < 1 && Math.abs(tableAlignment.statusCenter-tableAlignment.pinCenter) < 1, `all-items status controls are not vertically aligned: ${JSON.stringify(tableAlignment)}`);
-  const taskTableType = await page.locator('#page-tasks').evaluate(root => ({ heading:parseFloat(getComputedStyle(root.querySelector('.task-table th')).fontSize), title:parseFloat(getComputedStyle(root.querySelector('.table-title')).fontSize), muted:getComputedStyle(root.querySelector('.table-sub')).color }));
+  const taskTableType = await page.locator('#page-tasks').evaluate(root => ({ heading:parseFloat(getComputedStyle(root.querySelector('.task-table th')).fontSize), title:parseFloat(getComputedStyle(root.querySelector('.table-title-link')).fontSize), muted:getComputedStyle(root.querySelector('.table-sub')).color }));
   assert(taskTableType.heading >= 12 && taskTableType.title >= 14, `all-items typography hierarchy remained too small: ${JSON.stringify(taskTableType)}`);
   await page.evaluate(() => { window.__taskDetailFixture = { state:clone(state), undo:clone(undoStack), redo:clone(redoStack) }; });
-  await page.click('#page-tasks.active [data-edit-task="t1"]');
+  await page.click('#page-tasks.active [data-open-task="t1"]');
   await page.waitForSelector('#taskDialog[open] #taskEditor .hover-select');
   const detailSelectState = await page.locator('#taskEditor').evaluate(node => ({ selects:node.querySelectorAll('select').length, enhanced:node.querySelectorAll('.hover-select').length }));
   assert(detailSelectState.selects > 0 && detailSelectState.selects === detailSelectState.enhanced, `task-detail dropdowns were not all hover-enabled: ${JSON.stringify(detailSelectState)}`);
@@ -778,8 +779,8 @@ async function testUrl() {
   assert(relatedCreation.parentLinks.includes(relatedCreation.childId) && relatedCreation.childLinks.includes('t1') && relatedCreation.parentNotes.includes('需要保留的富文本备注') && relatedCreation.project === 'p1' && relatedCreation.milestone === 'm1', `related-task creation did not atomically save and link both tasks: ${JSON.stringify(relatedCreation)}`);
   await page.evaluate(() => { state=normalizeState(clone(window.__taskDetailFixture.state));undoStack=clone(window.__taskDetailFixture.undo);redoStack=clone(window.__taskDetailFixture.redo);delete window.__taskDetailFixture;saveLocal(true);requestRender(); });
   await page.click('#taskForm .modal-actions [data-close="taskDialog"]');
-  await page.waitForSelector('#page-tasks.active [data-edit-task="t1"]');
-  await page.click('#page-tasks.active [data-edit-task="t1"]');
+  await page.waitForSelector('#page-tasks.active [data-open-task="t1"]');
+  await page.click('#page-tasks.active [data-open-task="t1"]');
   await page.click('[data-new-decision]');
   assert(await page.locator('#decisionDialog[open] .decision-rich-box .ql-container').count() === 2, 'key decision fields did not initialize as rich-text editors');
   assert(await page.locator('#decisionDialog[open] [data-rich-height-resizer]').count() === 2, 'key decision rich editors do not expose the shared bottom-edge resize area');
@@ -816,7 +817,7 @@ async function testUrl() {
   assert(await page.locator('#projectSearch').count() === 0, 'project list still contains the removed search box');
   await page.fill('#projectTaskSearch', '保持推进顺序');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length === 1);
-  assert((await page.locator('#page-projects .overview-row b').first().textContent()).includes('保持推进顺序'), 'project-local task search returned the wrong item');
+  assert((await page.locator('#page-projects .overview-row .task-title-link').first().textContent()).includes('保持推进顺序'), 'project-local task search returned the wrong item');
   await page.fill('#projectTaskSearch', '');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length > 1);
   await page.locator('.project-milestone-filter summary').hover();
