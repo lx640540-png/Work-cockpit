@@ -46,6 +46,9 @@ test('due plans light flags on load/reload; excluded states and historical flags
     ...['等待','暂停','已完成','待处理'].map((status,i)=>makeTask('excluded'+i,{status,planDate:today})),makeTask('archived',{archived:true,planDate:today})],{route:'tasks'});
   let data=await stored(page);
   for(const id of ['due','long']){assert.equal(data.tasks.find(t=>t.id===id).focus,true);assert.equal(await page.locator('#page-tasks [data-toggle-focus="'+id+'"].active').count(),1);}
+  assert.equal(await page.locator('#page-tasks .task-table thead th').count(),11);
+  assert.equal(await page.locator('#page-tasks .task-row').count(),0);
+  assert.equal(await page.locator('#page-tasks tr[data-task="due"] .task-marker-cell .flag-btn').count(),2);
   for(const task of data.tasks.filter(t=>!['due','long'].includes(t.id)))assert.equal(task.focus,false);
   assert.equal(data.weeks['2026-08-24'].taskSnapshots[0].focus,true,'historical paused task was rewritten');
   await page.reload();data=await stored(page);assert.equal(data.tasks.find(t=>t.id==='due').focus,true);
@@ -139,6 +142,8 @@ test('project overview edits original tasks, retains empty projects and schedule
  const page=await fixture(t,[makeTask('long',{type:'长期跟进',project:'p1',nextAction:'发出目录确认',notes:'<p>收到初稿，等待目录确认。</p>'}),makeTask('paused',{project:'p1',status:'暂停'})],{route:'projects',projects:projectFixture});
  assert.equal(await page.locator('[data-overview-project]').count(),2);
  assert.equal(await page.locator('[data-overview-task="paused"]').count(),0);
+ const overviewGeometry=await page.locator('[data-overview-task="long"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),main=box(row.querySelector('.project-overview-task-main')),next=box(row.querySelector('.overview-next-label')),schedule=box(row.querySelector('.overview-schedule')),whole=box(row);return{mainWidth:main.width,nextWidth:next.width,scheduleWidth:schedule.width,rowHeight:whole.height,gapA:next.left-main.right,gapB:schedule.left-next.right}});
+ assert(overviewGeometry.nextWidth>=overviewGeometry.mainWidth&&overviewGeometry.scheduleWidth<=260&&overviewGeometry.rowHeight<150&&overviewGeometry.gapA<=30&&overviewGeometry.gapB<=30,JSON.stringify(overviewGeometry));
  await page.locator('[data-overview-task="long"] [data-toggle-week]').click();
  let data=await stored(page);assert.equal(data.tasks.length,2);assert.equal(data.tasks[0].type,'长期跟进');assert.equal(data.tasks[0].week,true);
  assert.equal(data.weeks['2026-08-31'].actions.long.text,'发出目录确认');
@@ -155,6 +160,8 @@ test('project overview edits original tasks, retains empty projects and schedule
 
 test('weekly planning and review retain their action and results through completion and rollover',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('a',{week:true,project:'p1',nextAction:'确认目录'}),makeTask('b',{week:true,type:'长期跟进',nextAction:'确认交期'})],{route:'week',projects:projectFixture});
+ const weeklyGeometry=await page.locator('[data-drop-zone="week"] .task-row[data-task="a"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),action=box(row.querySelector('.week-action-label')),meta=box(row.querySelector('.task-meta')),whole=box(row);return{rowHeight:whole.height,actionLeft:action.left,actionRight:action.right,metaLeft:meta.left,metaRight:meta.right}});
+ assert(weeklyGeometry.rowHeight<150&&weeklyGeometry.metaLeft>=weeklyGeometry.actionLeft-1&&Math.abs(weeklyGeometry.metaRight-weeklyGeometry.actionRight)<2,JSON.stringify(weeklyGeometry));
  await page.locator('[data-week-action="a"]').fill('确认目录并完成初稿');await page.locator('[data-week-action="a"]').press('Tab');
  await page.click('[data-add-top]');await page.locator('[data-top-index="0"]').fill('形成可审核初稿');await page.locator('[data-top-index="0"]').press('Tab');
  await page.click('[data-week-panel="review"]');assert.match(await page.locator('.week-comparison').textContent(),/确认目录并完成初稿/);

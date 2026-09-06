@@ -231,27 +231,14 @@ async function testUrl() {
   assert(!await page.locator('[data-bulk-select="t1"]').isChecked(), 'hidden bulk selection returned after restoring the filter');
   await page.evaluate(() => {
     const pageNode = document.querySelector('#page-tasks');
-    const table = pageNode.querySelector('.table-card');
     pageNode.style.minHeight = '1800px';
-    table.style.maxHeight = '170px';
-    table.scrollTop = 0;
     mainScroll.scrollTop = 0;
   });
   const taskTableScroller = page.locator('#page-tasks .table-card');
   await taskTableScroller.hover(); await page.mouse.wheel(0, 90); await page.waitForTimeout(80);
-  let taskWheel = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('#page-tasks .table-card').scrollTop }));
-  assert(taskWheel.local > 70 && taskWheel.main === 0, `all-task local wheel did not stay in the table: ${JSON.stringify(taskWheel)}`);
-  const taskBoundary = await page.evaluate(() => {
-    const local = document.querySelector('#page-tasks .table-card');
-    const maximum = local.scrollHeight - local.clientHeight;
-    local.scrollTop = maximum - 15;
-    mainScroll.scrollTop = 0;
-    return maximum;
-  });
-  await taskTableScroller.hover(); await page.mouse.wheel(0, 80); await page.waitForTimeout(80);
-  taskWheel = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('#page-tasks .table-card').scrollTop }));
-  assert(Math.abs(taskWheel.local - taskBoundary) < 2 && taskWheel.main === 0, `all-task boundary incorrectly chained to the page: ${JSON.stringify({ taskBoundary, taskWheel })}`);
-  await page.evaluate(() => { const pageNode = document.querySelector('#page-tasks'), table = pageNode.querySelector('.table-card'); pageNode.style.minHeight = ''; table.style.maxHeight = ''; table.scrollTop = 0; mainScroll.scrollTop = 0; });
+  const taskWheel = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('#page-tasks .table-card').scrollTop, maxHeight:getComputedStyle(document.querySelector('#page-tasks .table-card')).maxHeight }));
+  assert(taskWheel.main > 70 && taskWheel.local === 0 && taskWheel.maxHeight === 'none', `all-task wheel did not use the main page: ${JSON.stringify(taskWheel)}`);
+  await page.evaluate(() => { document.querySelector('#page-tasks').style.minHeight = ''; mainScroll.scrollTop = 0; });
   await page.click('[data-open-task="t1"]');
   assert(await page.locator('#taskNotes[data-quill-version="2.0.3"] > .ql-editor').count() === 1, 'task notes did not initialize with Quill 2');
   await page.click('[data-add-check]');
