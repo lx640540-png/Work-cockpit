@@ -21,18 +21,18 @@ before(async()=>{
 });
 after(async()=>{await browser?.close();if(server)await new Promise(resolve=>server.close(resolve));});
 
-async function fixture(t,tasks,{time='2026-09-05T12:00:00',route='today'}={}){
+async function fixture(t,tasks,{time='2026-09-05T12:00:00',route='today',projects=[]}={}){
   const context=await browser.newContext({viewport:{width:1600,height:1000},timezoneId:'Asia/Shanghai'});
   t.after(()=>context.close());
   await context.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.abort());
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   t.after(()=>assert.deepEqual(errors,[]));
   await page.clock.install({time:new Date(time+'+08:00')});
-  await page.addInitScript(({tasks})=>{
+  await page.addInitScript(({tasks,projects})=>{
     localStorage.setItem('work-cockpit-local-mode-v1','1');
-    if(!localStorage.getItem('work-cockpit-v6'))localStorage.setItem('work-cockpit-v6',JSON.stringify({version:8,tasks,projects:[],memos:[],
+    if(!localStorage.getItem('work-cockpit-v6'))localStorage.setItem('work-cockpit-v6',JSON.stringify({version:8,tasks,projects,memos:[],
       meta:{activeWeekKey:'2026-08-31'},weeks:{'2026-08-24':{closedAt:'2026-08-30',top:['历史目标'],taskSnapshots:[{id:'historical',title:'历史事项',status:'暂停',type:'任务',focus:true,planDate:'2026-08-24'}]}},order:{long:tasks.map(t=>t.id)}}));
-  },{tasks});
+  },{tasks,projects});
   await page.goto(origin+'/index.html#'+route);
   await page.waitForFunction(()=>!document.documentElement.classList.contains('booting'));
   return page;
@@ -100,4 +100,72 @@ test('detail status changes agree with flags and do not lose tasks when generati
   assert.equal(data.tasks.find(t=>t.id==='repeat').status,'已完成');assert(data.tasks.some(t=>t.id==='other'));
   assert.equal(data.tasks.length,3,'exactly one next occurrence must be generated');
   assert.equal(new Set(data.tasks.map(t=>t.id)).size,data.tasks.length);
+});
+
+const projectFixture=[{id:'p1',name:'项目甲',milestones:[]},{id:'p2',name:'尚未安排的项目',milestones:[]}];
+test('project overview edits original tasks, retains empty projects and schedules long-term work',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('long',{type:'长期跟进',project:'p1',nextAction:'发出目录确认',notes:'<p>收到初稿，等待目录确认。</p>'}),makeTask('paused',{project:'p1',status:'暂停'})],{route:'projects',projects:projectFixture});
+ assert.equal(await page.locator('[data-overview-project]').count(),2);
+ assert.equal(await page.locator('[data-overview-task="paused"]').count(),0);
+ await page.locator('[data-overview-task="long"] [data-toggle-week]').click();
+ let data=await stored(page);assert.equal(data.tasks.length,2);assert.equal(data.tasks[0].type,'长期跟进');assert.equal(data.tasks[0].week,true);
+ assert.equal(data.weeks['2026-08-31'].actions.long.text,'发出目录确认');
+ await page.locator('[data-overview-next="long"]').fill('根据反馈修改目录');await page.locator('[data-overview-next="long"]').press('Tab');await page.clock.fastForward(250);
+ data=await stored(page);assert.equal(data.tasks[0].nextAction,'根据反馈修改目录');assert.equal(data.weeks['2026-08-31'].actions.long.text,'发出目录确认');
+ await page.locator('[data-overview-date="long"]').fill(future);await page.locator('[data-overview-date="long"]').press('Tab');
+ data=await stored(page);assert.equal(data.tasks[0].planDate,future);assert.equal(data.tasks[0].focus,false);
+ await page.click('[data-collapse-project="p1"]');await page.locator('[data-overview-task="long"]').waitFor({state:'hidden'});assert.equal(await page.locator('[data-overview-task="long"]').isVisible(),false);
+ await page.click('[data-expand-projects]');await page.locator('[data-overview-task="long"]').waitFor({state:'visible'});assert.equal(await page.locator('[data-overview-task="long"]').isVisible(),true);
+ await page.click('[data-overview-filter="paused"]');await page.locator('[data-overview-task="paused"]').waitFor({state:'visible'});assert.equal(await page.locator('[data-overview-task="paused"]').count(),1);
+ await page.click('[data-project-detail="p1"]');await page.locator('.project-master-detail').waitFor({state:'visible'});
+ await page.reload();assert.equal((await stored(page)).tasks[0].nextAction,'根据反馈修改目录');
+});
+
+test('weekly planning and review retain their action and results through completion and rollover',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('a',{week:true,project:'p1',nextAction:'确认目录'}),makeTask('b',{week:true,type:'长期跟进',nextAction:'确认交期'})],{route:'week',projects:projectFixture});
+ await page.locator('[data-week-action="a"]').fill('确认目录并完成初稿');await page.locator('[data-week-action="a"]').press('Tab');
+ await page.click('[data-add-top]');await page.locator('[data-top-index="0"]').fill('形成可审核初稿');await page.locator('[data-top-index="0"]').press('Tab');
+ await page.click('[data-week-panel="review"]');assert.match(await page.locator('.week-comparison').textContent(),/确认目录并完成初稿/);
+ await page.locator('[data-week-result="a"]').fill('目录已确认，初稿完成一半');await page.locator('[data-week-result="a"]').press('Tab');
+ await page.locator('[data-top-result="0"]').fill('部分达成，待补插图');await page.locator('[data-top-result="0"]').press('Tab');
+ await page.clock.fastForward(250);
+ await page.evaluate(()=>updateTask('a','test next action',task=>{task.nextAction='补充插图'}));
+ assert.equal((await stored(page)).weeks['2026-08-31'].actions.a.text,'确认目录并完成初稿');
+ await page.click('[data-week-panel="plan"]');await page.locator('[data-toggle-task="b"]').click();
+ await page.click('[data-week-panel="review"]');assert.match(await page.locator('.week-comparison').textContent(),/事项 b/);
+ const before=(await stored(page)).weeks['2026-08-31'];
+ await page.clock.fastForward(3*86400000);await page.waitForFunction(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).meta.activeWeekKey==='2026-09-07');
+ let data=await stored(page);assert.equal(data.weeks['2026-08-31'].actions.a.text,'确认目录并完成初稿');assert.equal(data.weeks['2026-08-31'].actions.a.result,'目录已确认，初稿完成一半');assert.equal(data.weeks['2026-08-31'].topResults[0],'部分达成，待补插图');
+ assert.deepEqual(data.weeks['2026-08-31'].taskSnapshots,before.taskSnapshots);
+ assert.equal(data.weeks['2026-09-07'].actions.a.text,'补充插图');assert.equal(data.weeks['2026-09-07'].actions.a.result,'');assert.equal(data.weeks['2026-09-07'].taskIds.includes('b'),false);assert.equal(data.weeks['2026-09-07'].taskSnapshots.some(task=>task.id==='b'),false);
+ await page.click('[data-week-shift="-1"]');await page.locator('[data-week-result="a"][readonly]').waitFor({state:'visible'});
+ assert.equal(await page.locator('[data-week-result="a"]').getAttribute('readonly'),'');
+ await page.reload();data=await stored(page);assert.equal(data.weeks['2026-08-31'].actions.a.result,'目录已确认，初稿完成一半');
+});
+
+test('Today highlights next actions and pins while dated waiting stays separate and expandable',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('do',{focus:true,nextAction:'发出样品确认'}),makeTask('fallback',{focus:true,nextAction:''}),makeTask('due',{status:'等待',followup:today}),makeTask('later',{status:'等待',followup:future}),makeTask('no-date',{status:'等待',followup:''})]);
+ assert.equal(await page.locator('[data-task="do"] .task-name').textContent(),'发出样品确认');
+ assert.equal(await page.locator('[data-task="fallback"] .task-name').textContent(),'事项 fallback');
+ assert.equal(await page.locator('[data-drop-zone="today"] [data-task="due"]').count(),0);
+ assert.equal(await page.locator('[data-drop-zone="waiting"] .task-row[data-task="due"]').isVisible(),true);
+ assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),false);assert.equal(await page.locator('.task-row[data-task="no-date"]').isVisible(),false);
+ await page.click('[data-waiting-group="future"] summary');assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true);
+ await page.locator('[data-pin-task="do"]').click();await page.locator('.section-caption').waitFor({state:'visible'});assert.match(await page.locator('.section-caption').textContent(),/今日先做/);
+ assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true,'expanded state survives render');
+ const modes=await page.locator('.today-task-scroll').evaluateAll(nodes=>nodes.map(node=>getComputedStyle(node).overflowY));assert.deepEqual(modes,['visible','visible']);
+ const positions=await page.evaluate(()=>{const box=s=>document.querySelector(s).getBoundingClientRect();return {actionBottom:box('[data-drop-zone="today"]').bottom,noteTop:box('.quick-note-card').top,waitTop:box('[data-drop-zone="waiting"]').top,actionTop:box('[data-drop-zone="today"]').top,inboxTop:box('#todayCapture').top,flowBottom:box('#todayExecution').bottom}});
+ assert(positions.noteTop>=positions.actionBottom);assert(Math.abs(positions.waitTop-positions.actionTop)<2);assert(positions.inboxTop>=positions.flowBottom);
+ await page.locator('[data-toggle-task="do"]').click();assert.equal((await stored(page)).tasks.find(task=>task.id==='do').status,'已完成');
+});
+
+test('overview preserves notes verbatim, uses waiting follow-up dates, and supports narrow viewports',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('wait',{project:'p1',status:'等待',notes:'<p>第一段记录</p><p>第二段记录，尚未收到最终确认。</p>'})],{route:'projects',projects:projectFixture});
+ const before=(await stored(page)).tasks[0];await page.locator('[data-overview-date="wait"]').fill(today);await page.locator('[data-overview-date="wait"]').press('Tab');
+ let data=await stored(page);assert.equal(data.tasks[0].followup,today);assert.equal(data.tasks[0].planDate,before.planDate);assert.equal(data.tasks[0].notes,before.notes);assert.equal(data.tasks[0].focus,false);
+ await page.locator('.progress-record summary').click();assert.match(await page.locator('.progress-record>div').textContent(),/第二段记录/);
+ await page.locator('.inline-help summary').focus();assert.equal(await page.locator('.inline-help').getAttribute('open'),'');await page.keyboard.press('Escape');assert.equal(await page.locator('.inline-help').getAttribute('open'),null);
+ await page.setViewportSize({width:390,height:844});
+ const width=await page.evaluate(()=>({body:document.documentElement.scrollWidth,viewport:innerWidth,main:mainScroll.scrollWidth,client:mainScroll.clientWidth}));assert(width.body<=width.viewport+1&&width.main<=width.client+1,JSON.stringify(width));
+ assert.equal(await page.locator('[data-overview-next="wait"]').isVisible(),true);
 });
