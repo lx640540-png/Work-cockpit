@@ -73,7 +73,7 @@ test('cross-card movement only clears follow-up when leaving waiting status', ()
   const t = task(); c.applyTaskCardTransition(t,'week','long',{tasks:[t]});
   assert.equal(t.followup,'2026-09-10');assert.equal(t.week,false);assert.equal(t.type,'长期跟进');
   c.applyTaskCardTransition(t,'long','week',{tasks:[t]});
-  assert.equal(t.followup,'2026-09-10');assert.equal(t.type,'任务');assert.equal(t.week,true);
+  assert.equal(t.followup,'2026-09-10');assert.equal(t.type,'长期跟进');assert.equal(t.week,true);
   const waiting = task({status:'等待'});
   c.applyTaskCardTransition(waiting,'waiting','today',{tasks:[waiting]});
   assert.equal(waiting.followup,'');assert.equal(waiting.status,'进行中');assert.equal(waiting.focus,true);
@@ -107,11 +107,11 @@ test('manual removal cancels an expired plan, preserves future plans and follow-
   }
 });
 
-test('changing type to long-term follows the drop rule without deleting dates', () => {
+test('changing type preserves schedule; moving to the long backlog explicitly removes this week', () => {
   const c=ruleContext(), previous=task({focus:true,week:true,planDate:'2026-09-09'});
   const edited={...previous,type:'长期跟进'}, dropped=copy(previous);
   c.reconcileTaskEdit(edited,previous);c.applyTaskCardTransition(dropped,'week','long',{tasks:[dropped]});
-  assert.deepEqual(edited,dropped);
+  assert.equal(edited.focus,true);assert.equal(edited.week,true);assert.equal(dropped.focus,false);assert.equal(dropped.week,false);assert.equal(edited.type,dropped.type);assert.equal(edited.planDate,dropped.planDate);assert.equal(edited.followup,dropped.followup);
 });
 
 test('normalization never activates dated historical task snapshots', () => {
@@ -207,4 +207,11 @@ test('an older session cannot acknowledge or queue writes for a newer account',a
   const h=cloudContext();h.context.state.tasks[0].title='first';const upload=h.cloud.push();
   h.cloud.syncEpoch++;h.cloud.user={id:'user-b'};h.cloud.version=19;h.cloud.status='connecting';h.cloud.pushing=false;
   h.finish(0);assert.equal(await upload,false);assert.equal(h.cloud.version,19);assert.equal(h.cloud.status,'connecting');assert.equal(h.writes.length,1);
+});
+
+
+test('moving a due plan to the long backlog does not immediately reactivate it',()=>{
+ const c=ruleContext(),t=task({focus:true,week:true,planDate:'2026-09-05'});c.state.tasks=[t];
+ c.applyTaskCardTransition(t,'week','long',c.state);assert.equal(c.activateScheduledTasks(),false);
+ assert.equal(t.week,false);assert.equal(t.focus,false);assert.equal(t.type,'长期跟进');assert.equal(t.followup,'2026-09-10');
 });
