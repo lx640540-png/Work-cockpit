@@ -131,7 +131,7 @@ test('status transitions clear incompatible focus and generate repeats once', ()
 function cloudContext() {
   const timers=new Map(), writes=[], labels=[], storage=new Map();let timerId=0;
   const context=vm.createContext({ Date, state:{tasks:[task()],meta:{}},
-    snapshotCore:()=>copy(context.state), deviceId:()=> 'device-a',
+    snapshotCore:()=>copy(context.state), serializeState:()=>JSON.stringify(context.state), deviceId:()=> 'device-a',
     navigator:{onLine:true}, console:{error:()=>{}}, CLOUD_LINK_KEY:'link',LOCAL_MODE_KEY:'local',
     localStorage:{setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k),getItem:k=>storage.get(k)||null},
     setTimeout:fn=>{timers.set(++timerId,fn);return timerId},clearTimeout:id=>timers.delete(id),
@@ -215,3 +215,4 @@ test('moving a due plan to the long backlog does not immediately reactivate it',
  c.applyTaskCardTransition(t,'week','long',c.state);assert.equal(c.activateScheduledTasks(),false);
  assert.equal(t.week,false);assert.equal(t.focus,false);assert.equal(t.type,'长期跟进');assert.equal(t.followup,'2026-09-10');
 });
+

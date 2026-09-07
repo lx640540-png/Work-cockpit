@@ -40,3 +40,7 @@ Configure the Codex Cloud environment setup command as:
 
 This installs the locked npm dependencies and Playwright's Chromium binary. The test command
 for the environment can then be `npm test`. No long-running development server is required.
+# 源码维护
+
+应用源码已按职责拆分到 `src/`。请修改源码后运行 `npm run build`，同时提交生成的 `index.html`；不要直接修改发布文件。详见 [代码维护边界](docs/code-structure.md)。
+

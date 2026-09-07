@@ -1,0 +1,15 @@
+/* Unified task rows and project-first planning surfaces. */
+.drop-card,.week-card,.project-overview-group{container-type:inline-size}
+.task-row,.task-row.has-focus-toggle,.today-flow .task-row{grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;min-height:68px;padding:11px 8px}
+.task-row.history-row{grid-template-columns:auto minmax(0,1fr) auto auto}
+.task-leading{display:flex;align-items:center;gap:7px;align-self:center}.task-leading:empty{display:none}
+.task-main,.today-flow .task-main{display:block;grid-column:auto;min-width:0}
+.task-title-link,.task-secondary-link,.table-title-link,.milestone-task-link{max-width:100%;padding:0;border:0;background:transparent;color:var(--text);font:inherit;font-weight:700;text-align:left;line-height:1.5;overflow-wrap:anywhere}
+.readonly .task-title-link{pointer-events:auto}
+.task-title-link{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14.5px}
+.task-title-link:hover,.task-title-link:focus-visible,.task-secondary-link:hover,.task-secondary-link:focus-visible,.table-title-link:hover,.table-title-link:focus-visible,.milestone-task-link:hover,.milestone-task-link:focus-visible{color:var(--blue);text-decoration:underline;text-underline-offset:3px}
+.task-secondary-link{display:inline;font-size:inherit;font-weight:650;color:inherit}
+.task-next,.task-project,.today-flow .task-next{white-space:normal;overflow-wrap:anywhere;line-height:1.5}
+.task-meta,.today-flow .task-meta{position:static;grid-column:auto;grid-row:auto;display:flex;align-items:center;justify-content:flex-end;gap:6px;max-width:330px;flex-wrap:wrap}
+.task-meta .followup,.task-meta>.muted{flex-basis:100%;text-align:right}
+.task-row.scope-week{grid-template-columns:auto minmax(0,1fr);align-items:center;min-height:74px}.task-row.scope-week .task-main{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(320px,1.4fr) minmax(176px,auto);column-gap:22px;align-items:center}.task-row.scope-week .week-task-identity{min-width:0}.task-row.scope-week .week-action-label{margin:0}.task-row.scope-week .task-meta{align-self:center;padding-top:0}
