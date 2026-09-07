@@ -147,6 +147,10 @@ test('project overview edits original tasks, retains empty projects and schedule
  await page.locator('[data-overview-task="long"] [data-toggle-week]').click();
  let data=await stored(page);assert.equal(data.tasks.length,2);assert.equal(data.tasks[0].type,'长期跟进');assert.equal(data.tasks[0].week,true);
  assert.equal(data.weeks['2026-08-31'].actions.long.text,'发出目录确认');
+ const longNext='需要等外壳一起寄送，先整理清单以及需要提前处理的事项，再联系供应商确认寄送时间，并把确认结果更新到项目记录中。';
+ await page.locator('[data-overview-next="long"]').fill(longNext);
+ const overviewTextarea=await page.locator('[data-overview-next="long"]').evaluate(node=>{const box=node.getBoundingClientRect(),parent=node.parentElement.getBoundingClientRect();return{clientHeight:node.clientHeight,scrollHeight:node.scrollHeight,width:box.width,parentWidth:parent.width,overflowY:getComputedStyle(node).overflowY,resize:getComputedStyle(node).resize}});
+ assert(overviewTextarea.width>=overviewTextarea.parentWidth-2&&overviewTextarea.clientHeight>=overviewTextarea.scrollHeight-2&&overviewTextarea.overflowY==='hidden'&&overviewTextarea.resize==='none',JSON.stringify(overviewTextarea));
  await page.locator('[data-overview-next="long"]').fill('根据反馈修改目录');await page.locator('[data-overview-next="long"]').press('Tab');await page.clock.fastForward(250);
  data=await stored(page);assert.equal(data.tasks[0].nextAction,'根据反馈修改目录');assert.equal(data.weeks['2026-08-31'].actions.long.text,'发出目录确认');
  await page.locator('[data-overview-date="long"]').fill(future);await page.locator('[data-overview-date="long"]').press('Tab');
@@ -162,6 +166,10 @@ test('weekly planning and review retain their action and results through complet
  const page=await fixture(t,[makeTask('a',{week:true,project:'p1',nextAction:'确认目录'}),makeTask('b',{week:true,type:'长期跟进',nextAction:'确认交期'})],{route:'week',projects:projectFixture});
  const weeklyGeometry=await page.locator('[data-drop-zone="week"] .task-row[data-task="a"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),action=box(row.querySelector('.week-action-label')),meta=box(row.querySelector('.task-meta')),whole=box(row);return{rowHeight:whole.height,actionLeft:action.left,actionRight:action.right,metaLeft:meta.left,metaRight:meta.right}});
  assert(weeklyGeometry.rowHeight<150&&weeklyGeometry.metaLeft>=weeklyGeometry.actionLeft-1&&Math.abs(weeklyGeometry.metaRight-weeklyGeometry.actionRight)<2,JSON.stringify(weeklyGeometry));
+ const longWeekAction='确认目录并完成初稿，同时补齐结构示意、测试结论和仍待确认的问题，提交给相关人员审核后记录下一轮修改项。';
+ await page.locator('[data-week-action="a"]').fill(longWeekAction);
+ const weekTextarea=await page.locator('[data-week-action="a"]').evaluate(node=>{const box=node.getBoundingClientRect(),parent=node.parentElement.getBoundingClientRect();return{clientHeight:node.clientHeight,scrollHeight:node.scrollHeight,width:box.width,parentWidth:parent.width,overflowY:getComputedStyle(node).overflowY,resize:getComputedStyle(node).resize}});
+ assert(weekTextarea.width>=weekTextarea.parentWidth-2&&weekTextarea.clientHeight>=weekTextarea.scrollHeight-2&&weekTextarea.overflowY==='hidden'&&weekTextarea.resize==='none',JSON.stringify(weekTextarea));
  await page.locator('[data-week-action="a"]').fill('确认目录并完成初稿');await page.locator('[data-week-action="a"]').press('Tab');
  await page.click('[data-add-top]');await page.locator('[data-top-index="0"]').fill('形成可审核初稿');await page.locator('[data-top-index="0"]').press('Tab');
  await page.click('[data-week-panel="review"]');assert.match(await page.locator('.week-comparison').textContent(),/确认目录并完成初稿/);
