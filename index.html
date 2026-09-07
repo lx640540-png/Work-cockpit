@@ -164,7 +164,7 @@ body{line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimize
 .task-meta,.today-flow .task-meta{position:static;grid-column:auto;grid-row:auto;display:flex;align-items:center;justify-content:flex-end;gap:6px;max-width:330px;flex-wrap:wrap}
 .task-meta .followup,.task-meta>.muted{flex-basis:100%;text-align:right}
 .task-row.scope-week{grid-template-columns:auto minmax(0,1fr);align-items:center;min-height:74px}.task-row.scope-week .task-main{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(320px,1.4fr) minmax(176px,auto);column-gap:22px;align-items:center}.task-row.scope-week .week-task-identity{min-width:0}.task-row.scope-week .week-action-label{margin:0}.task-row.scope-week .task-meta{align-self:center;padding-top:0}
-.week-action-label>span,.overview-next-label>span{display:block;margin-bottom:4px;color:var(--muted);font-size:12px}.week-action-label textarea,.overview-next-label textarea{min-height:48px;padding:7px 9px;border-color:transparent;background:transparent;resize:none;transition:border-color .16s,background .16s}.week-action-label textarea:hover,.overview-next-label textarea:hover{border-color:var(--line);background:var(--soft)}.week-action-label textarea:focus,.overview-next-label textarea:focus{border-color:var(--blue);background:var(--panel);resize:vertical}
+.week-action-label>span,.overview-next-label>span{display:block;margin-bottom:4px;color:var(--muted);font-size:12px}.week-action-label textarea,.overview-next-label textarea{display:block;width:100%;min-width:0;height:48px;min-height:48px;padding:7px 9px;border-color:transparent;background:transparent;overflow-y:hidden;resize:none;transition:border-color .16s,background .16s}.week-action-label textarea:hover,.overview-next-label textarea:hover{border-color:var(--line);background:var(--soft)}.week-action-label textarea:focus,.overview-next-label textarea:focus{border-color:var(--blue);background:var(--panel);resize:none}
 .task-autosave-status{align-self:center;color:var(--muted);font-size:12px}.task-autosave-status.saving{color:var(--orange)}.task-autosave-status.saved{color:var(--green)}.task-autosave-status.error{color:var(--red)}
 .table-title-link{display:block;width:100%;max-width:290px}.task-table th:last-child,.task-table td:last-child{display:none}.table-card{max-height:none;overflow-x:auto;overflow-y:visible;overscroll-behavior:auto}.task-table{min-width:960px}.task-marker-cell{display:flex;align-items:center;justify-content:center;gap:3px}.task-marker-cell .flag-btn{width:28px;height:28px}.table-next b{color:var(--blue)}.table-note{margin-top:3px;color:var(--muted)}
 .overview-row{grid-template-columns:minmax(0,1fr) auto auto}.overview-row .task-title-link{font-size:14px}
@@ -732,11 +732,20 @@ function renderApp(){
  if(currentPage==="today")renderToday();else if(currentPage==="week")renderWeek();else if(currentPage==="tasks")renderTasks();else if(currentPage==="projects")renderProjects();else if(currentPage==="memos")renderMemos();else if(currentPage==="data")renderData();else renderSearchPage();
  bindTransientInputs();
  enhanceHoverSelects($("#page-"+currentPage));
+ resizePlanningTextareas($("#page-"+currentPage));
  initQuillEditors($("#page-"+currentPage));
  initTaskSortables($("#page-"+currentPage));
  scheduleTodayScrollability();
 }
 function bindTransientInputs(){}
+const PLANNING_TEXTAREA_SELECTOR="[data-overview-next],[data-week-action]";
+function resizePlanningTextarea(textarea){
+ if(!textarea?.matches?.(PLANNING_TEXTAREA_SELECTOR))return;
+ textarea.style.height="0px";
+ textarea.style.height=Math.max(48,Math.ceil(textarea.scrollHeight)+2)+"px";
+ textarea.style.overflowY="hidden";
+}
+function resizePlanningTextareas(root=document){if(!root)return;root.querySelectorAll(PLANNING_TEXTAREA_SELECTOR).forEach(resizePlanningTextarea)}
 function showDialog(dialog){if(dialog&&!dialog.open)dialog.showModal()}
 function closeDialog(id){let dialog=typeof id==="string"?$("#"+id):id;if(dialog?.open)dialog.close()}
 function requestDialogClose(id){let dialog=typeof id==="string"?$("#"+id):id;if(!dialog?.open)return;if(dialog.id==="taskDialog")return closeTaskDialog();closeDialog(dialog)}
@@ -1367,6 +1376,7 @@ $("#deleteDecisionButton").addEventListener("click",()=>decisionDraft&&deleteDec
 $("#choicePopover").addEventListener("click",event=>{let button=event.target.closest("[data-choice]");if(!button)return;let pop=$("#choicePopover");updateProperty(pop.dataset.task,pop.dataset.field,button.dataset.choice);closeChoice()});
 document.addEventListener("input",event=>{
  let target=event.target;
+ if(target.matches?.(PLANNING_TEXTAREA_SELECTOR))resizePlanningTextarea(target);
  if(target.matches?.(".rich-editor")){richInput(target);if(event.inputType==="insertText"&&event.data===" ")setTimeout(()=>richShortcutAfterInput(target),0)}
  if(target.dataset.overviewNext){let task=taskById(target.dataset.overviewNext);if(task&&!task.archived&&!isDone(task)){recordDirectEdit('next:'+task.id,'修改下一步');task.nextAction=target.value;task.updatedAt=new Date().toISOString();captureCurrentWeek();saveLocal()}}
  else if(target.dataset.weekAction||target.dataset.weekResult){if(weekMode(selectedWeekKey)!=='current')return;let id=target.dataset.weekAction||target.dataset.weekResult,field=target.dataset.weekAction?'text':'result',week=currentWeek();recordDirectEdit('week:'+selectedWeekKey+':'+id+':'+field,'编辑本周推进记录');week.actions=week.actions||{};if(!Object.hasOwn(week.actions,id))week.actions[id]={text:'',result:''};week.actions[id][field]=target.value;saveLocal()}
@@ -1437,7 +1447,7 @@ const TODAY_LOCAL_SCROLL_SELECTOR=".quick-note-editor>.ql-editor";
 let todayScrollabilityFrame=0;
 function syncTodayScrollability(root=document){$$(TODAY_LOCAL_SCROLL_SELECTOR,root).forEach(node=>node.classList.toggle("can-local-scroll",node.scrollHeight>node.clientHeight+1))}
 function scheduleTodayScrollability(){cancelAnimationFrame(todayScrollabilityFrame);todayScrollabilityFrame=requestAnimationFrame(()=>{todayScrollabilityFrame=0;syncTodayScrollability()})}
-window.addEventListener("resize",scheduleTodayScrollability);
+window.addEventListener("resize",()=>{scheduleTodayScrollability();resizePlanningTextareas($("#page-"+currentPage))});
 const DRAG_SCROLL_SELECTORS=["#mainScroll",".today-task-scroll",".quick-note-editor>.ql-editor",".project-list-panel",".project-detail-panel",".memo-list",".task-content-column"];
 function captureDragScroll(){return DRAG_SCROLL_SELECTORS.flatMap(selector=>$$(selector).map((node,index)=>({selector,index,top:node.scrollTop,left:node.scrollLeft})))}
 function restoreDragScroll(snapshot){requestAnimationFrame(()=>snapshot.forEach(item=>{let node=$$(item.selector)[item.index];if(node){node.scrollTop=item.top;node.scrollLeft=item.left}}))}
@@ -1502,7 +1512,7 @@ document.addEventListener("pointermove",event=>{
  if(todayResizeState)scheduleTodayScrollability();
  if(checklistResizeState){let height=Math.max(checklistResizeState.min,Math.min(checklistResizeState.max,checklistResizeState.startHeight+event.clientY-checklistResizeState.startY)),section=$(".checklist-section");taskChecklistHeight=Math.round(height);if(section)section.style.height=taskChecklistHeight+"px"}
 });
-function finishResize(){if(todayResizeState){todayResizeState.owner?.classList.remove("active");saveUiLayout();scheduleTodayScrollability()}todayResizeState=null;checklistResizeState=null;$("#checklistResizer")?.classList.remove("active")}
+function finishResize(){if(todayResizeState){todayResizeState.owner?.classList.remove("active");saveUiLayout();scheduleTodayScrollability();resizePlanningTextareas($("#page-"+currentPage))}todayResizeState=null;checklistResizeState=null;$("#checklistResizer")?.classList.remove("active")}
 document.addEventListener("pointerup",finishResize);document.addEventListener("pointercancel",finishResize);
 document.addEventListener("dblclick",event=>{let richHandle=event.target.closest?.("[data-rich-height-resizer]");if(richHandle){let key=richHandle.dataset.richHeightResizer,spec=RICH_HEIGHT_SPECS[key],box=richHandle.closest("[data-rich-resize]");if(!spec||!box)return;uiLayout[key]=spec.default;saveUiLayout();box.style.setProperty("--rich-editor-height",spec.default+"px");toast("文本框高度已恢复默认");return}if(event.target.id==="checklistResizer"){taskChecklistHeight=0;$(".checklist-section")?.style.removeProperty("height");toast("检查清单高度已恢复自适应")}else if(event.target.id==="todayHeightResizer"){uiLayout.todayHeight=460;saveUiLayout();$("#todayExecution")?.style.setProperty("--today-height","460px");scheduleTodayScrollability();toast("执行区高度已恢复默认")}else if(event.target.id==="quickNoteHeightResizer"){uiLayout.quickNoteHeight=190;saveUiLayout();$(".quick-note-card")?.style.setProperty("--quick-note-height","190px");scheduleTodayScrollability();toast("速记输入区高度已恢复默认")}else if(event.target.id==="weekPlanSplitter"||event.target.id==="weekReviewSplitter"){let review=event.target.id==="weekReviewSplitter",key=review?"weekReviewLeft":"weekPlanLeft",value=review ? .46 : .5;uiLayout[key]=value;saveUiLayout();$(review?"#weekReviewSplit":"#weekPlanSplit")?.style.setProperty("--week-left",(value*100)+"%");toast("本周页面分栏已恢复默认")}});
 function cloudHash(value){let text=typeof value==="string"?value:JSON.stringify(value),hash=2166136261;for(let index=0;index<text.length;index++){hash^=text.charCodeAt(index);hash=Math.imul(hash,16777619)}return(hash>>>0).toString(16).padStart(8,"0")}
