@@ -139,7 +139,7 @@ function cloudContext() {
   vm.runInContext(source('cloudHash'),context);
   vm.runInContext(js.slice(js.indexOf('const Cloud={'),js.indexOf('window.CloudSync=Cloud;'))+'\nglobalThis.cloud=Cloud;',context);
   const cloud=context.cloud;
-  cloud.user={id:'user-a'};cloud.rowExists=true;cloud.version=1;cloud.lastHash=context.cloudHash(JSON.stringify(context.state));
+  cloud.user={id:'user-a'};cloud.remoteReady=true;cloud.rowExists=true;cloud.version=1;cloud.lastHash=context.cloudHash(JSON.stringify(context.state));
   cloud.setStatus=(status,label)=>{cloud.status=status;labels.push({status,label})};cloud.showConflict=()=>{};
   cloud.client={auth:{signOut:async()=>{}},from:()=>{
     const query={};
