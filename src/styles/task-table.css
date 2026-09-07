@@ -1,0 +1,3 @@
+.table-title-link{display:block;width:100%;max-width:290px}.task-table th:last-child,.task-table td:last-child{display:none}.table-card{max-height:none;overflow-x:auto;overflow-y:visible;overscroll-behavior:auto}.task-table{min-width:960px}.task-marker-cell{display:flex;align-items:center;justify-content:center;gap:3px}.task-marker-cell .flag-btn{width:28px;height:28px}.table-next b{color:var(--blue)}.table-note{margin-top:3px;color:var(--muted)}
+.overview-row{grid-template-columns:minmax(0,1fr) auto auto}.overview-row .task-title-link{font-size:14px}
+.milestone-task-link{display:block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.milestone-task-row>p{margin-top:5px}

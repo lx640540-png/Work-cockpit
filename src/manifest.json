@@ -1,0 +1,35 @@
+{
+  "styles": [
+    "styles/base.css",
+    "styles/task-rows.css",
+    "styles/planning-inputs.css",
+    "styles/task-table.css",
+    "styles/week-review.css",
+    "styles/project-overview.css",
+    "styles/responsive.css"
+  ],
+  "scripts": [
+    "core/runtime.js",
+    "core/model.js",
+    "core/store.js",
+    "domain/week.js",
+    "domain/tasks.js",
+    "ui/task-list.js",
+    "pages/today.js",
+    "pages/week.js",
+    "pages/tasks.js",
+    "pages/projects.js",
+    "pages/memos.js",
+    "pages/data.js",
+    "ui/shell.js",
+    "ui/task-detail.js",
+    "domain/records.js",
+    "pages/search.js",
+    "ui/choices.js",
+    "ui/rich-editor.js",
+    "ui/events.js",
+    "ui/drag-resize.js",
+    "core/cloud.js",
+    "boot.js"
+  ]
+}

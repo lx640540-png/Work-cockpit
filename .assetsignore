@@ -7,3 +7,12 @@ package.json
 package-lock.json
 README.md
 wrangler.jsonc
+
+src
+scripts
+qa-reliability.js
+qa-workflow-browser.js
+qa-structure.js
+artifacts
+docs
+.github
