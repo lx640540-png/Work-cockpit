@@ -815,7 +815,7 @@ async function testUrl() {
   assert(await page.locator('[data-return-task="t1"]').count() === 1, 'task-to-project jump did not preserve a return path');
   await page.click('[data-return-task="t1"]');
   await page.waitForSelector('#taskDialog[open] #taskTitle');
-  assert(await page.locator('#taskTitle').inputValue() === '确认样机测试', 'project return path opened the wrong task');
+  assert(await page.locator('#taskTitle').inputValue() === '回车保存测试', 'project return path opened the wrong task');
   await page.click('#taskForm .modal-actions [data-close="taskDialog"]');
   await page.locator('.project-milestone-filter summary').hover();
   await page.waitForFunction(() => document.querySelector('.project-milestone-filter')?.open === true);
