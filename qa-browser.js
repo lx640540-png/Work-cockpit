@@ -130,7 +130,7 @@ async function testUrl() {
   assert(exclusiveFixture.locations.join(',') === 'waiting,inbox', 'independent inbox classification was lost');
   assert(!exclusiveFixture.task.focus && exclusiveFixture.task.inbox, 'waiting state changed inbox classification');
   await page.click('[data-organize-task="t9"]');
-  assert(await page.locator('[data-drop-scope="inbox"][data-task="t9"]').count() === 0, 'organize action did not remove inbox membership');
+  await page.locator('[data-drop-scope="inbox"][data-task="t9"]').waitFor({state:'detached'});
   // Both task columns scroll with the main page, even when many rows are present.
   await page.evaluate(() => { document.querySelector('#page-today').style.minHeight='1800px'; mainScroll.scrollTop=0;ui.waitingExpanded.add('undated');renderNow(); });
   const todayLocal=page.locator('.today-task-scroll').first();
