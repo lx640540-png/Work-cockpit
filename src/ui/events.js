@@ -13,6 +13,9 @@ function handleClick(event){
  if(target.dataset.expandProjects!==undefined){ui.collapsedProjects.clear();return requestRender()}
  if(target.dataset.collapseProjects!==undefined){ui.collapsedProjects=new Set(state.projects.map(project=>project.id).concat(''));return requestRender()}
  if(target.dataset.quickNoteToTask!==undefined)return quickNoteToTask();
+ if(target.dataset.goTaskProject!==undefined)return goToTaskProject();
+ if(target.dataset.returnTask)return openTask(target.dataset.returnTask);
+ if(target.dataset.clearProjectTaskFilters!==undefined){ui.projectTaskQuery="";ui.projectMilestoneFilter="all";ui.projectOverviewFilter="all";return requestRender()}
  if(target.dataset.close)return requestDialogClose(target.dataset.close);
  if(target.id==="backButton"&&navigationDepth>0)return history.back();
  if(target.id==="undoButton"){if(richHistoryAvailable(activeRichEditor,-1))return richApplyHistory(activeRichEditor,-1);return undo()}
@@ -46,7 +49,7 @@ function handleClick(event){
  if(target.dataset.bulkClear!==undefined){ui.selectedTasks.clear();return requestRender()}
  if(target.dataset.bulkArchive!==undefined){let ids=new Set(ui.selectedTasks);ui.selectedTasks.clear();return commit("批量归档事项",draft=>draft.tasks.forEach(task=>{if(ids.has(task.id))task.archived=true}),{immediate:true})}
  if(target.dataset.bulkDelete!==undefined){let ids=new Set(ui.selectedTasks);return confirmAction("删除选中的 "+ids.size+" 项事项？","这些事项会进入回收站；已形成的关键决策会保留。",()=>{commit("批量删除事项",draft=>{draft.tasks.filter(task=>ids.has(task.id)).forEach(task=>draft.trash.unshift({id:uid("trash"),type:"task",deletedAt:new Date().toISOString(),data:clone(task),decisionLinks:draft.decisions.filter(decision=>decision.sourceTaskId===task.id).map(decision=>decision.id)}));draft.tasks=draft.tasks.filter(task=>!ids.has(task.id));draft.tasks.forEach(task=>task.relatedTaskIds=task.relatedTaskIds.filter(id=>!ids.has(id)));draft.decisions.forEach(decision=>{if(ids.has(decision.sourceTaskId))decision.sourceTaskId=""})},{immediate:true});ui.selectedTasks.clear()},"删除")}
- if(target.dataset.selectProject){let pane=target.closest('.project-list-panel'),scrollTop=pane?.scrollTop||0;selectedProjectId=target.dataset.selectProject;ui.projectTaskQuery="";ui.projectMilestoneFilter="all";requestRender();return requestAnimationFrame(()=>{let next=$('.project-list-panel');if(next)next.scrollTop=scrollTop})}
+ if(target.dataset.selectProject){let pane=target.closest('.project-list-panel'),scrollTop=pane?.scrollTop||0;selectedProjectId=target.dataset.selectProject;ui.projectTaskQuery="";ui.projectMilestoneFilter="all";ui.projectFocusTaskId="";ui.projectReturnTaskId="";requestRender();return requestAnimationFrame(()=>{let next=$('.project-list-panel');if(next)next.scrollTop=scrollTop})}
  if(target.dataset.projectOverview){ui.projectOverviewFilter=target.dataset.projectOverview;return requestRender()}
  if(target.dataset.projectMilestoneFilter){ui.projectMilestoneFilter=target.dataset.projectMilestoneFilter;return requestRender()}
  let favoriteButton=event.target.closest?.("[data-favorite-project]");if(favoriteButton){let id=favoriteButton.dataset.favoriteProject;event.stopPropagation();return commit("切换项目收藏",draft=>draft.favorites=draft.favorites.includes(id)?draft.favorites.filter(value=>value!==id):draft.favorites.concat(id),{immediate:true})}
@@ -176,7 +179,7 @@ document.addEventListener("change",event=>{
  else if(target.id==="weekPicker"){selectedWeekKey=weekKeyFromInput(target.value);ui.showAllWeekDone=false;requestRender()}
  else if(target.dataset.memoProject!==undefined){let memo=memoById(selectedMemoId);if(memo)commit("修改备忘录关联项目",draft=>{let item=draft.memos.find(value=>value.id===memo.id);item.project=target.value;item.updatedAt=new Date().toISOString()},{immediate:true})}
  else if(target.id==="projectTemplate"){collectProjectDraft();projectTemplateMode=target.value;projectDraft.milestones=projectTemplateMode==="hardware"?hardwareMilestoneTemplate():[];projectMilestoneIndex=0;renderProjectEditor()}
- else if(target.id==="draftProject"){taskDraft.project=target.value;taskDraft.milestone="";$("#draftMilestone").innerHTML=milestoneOptions(taskDraft.project,"");syncHoverSelect($("#draftMilestone"))}
+ else if(target.id==="draftProject"){taskDraft.project=target.value;taskDraft.milestone="";$("#draftMilestone").innerHTML=milestoneOptions(taskDraft.project,"");syncHoverSelect($("#draftMilestone"));let jump=$("[data-go-task-project]");if(jump)jump.disabled=!taskDraft.project}
  else if(target.id==="draftStatus"){taskDraft.status=target.value;syncTaskCompletedField()}
  else if(target.id==="draftFocus"){
   if(target.checked){if(taskDraft.archived||["已完成"].includes($("#draftStatus").value)){target.checked=false;return toast("请先恢复事项，再加入今日")}$("#draftWeek").checked=true;$("#draftStatus").value="进行中";syncHoverSelect($("#draftStatus"));syncTaskCompletedField()}

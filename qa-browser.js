@@ -807,6 +807,16 @@ async function testUrl() {
   assert((await page.locator('#page-projects .overview-row .task-title-link').first().textContent()).includes('保持推进顺序'), 'project-local task search returned the wrong item');
   await page.fill('#projectTaskSearch', '');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length > 1);
+  await page.click('#page-projects.active [data-open-task="t1"]');
+  await page.waitForSelector('#taskDialog[open] [data-go-task-project]:not([disabled])');
+  await page.click('[data-go-task-project]');
+  await page.waitForSelector('#page-projects.active [data-project-task="t1"].project-task-target');
+  assert(await page.locator('[data-select-project="p1"].selected').count() === 1, 'task-to-project jump did not select the owning project');
+  assert(await page.locator('[data-return-task="t1"]').count() === 1, 'task-to-project jump did not preserve a return path');
+  await page.click('[data-return-task="t1"]');
+  await page.waitForSelector('#taskDialog[open] #taskTitle');
+  assert(await page.locator('#taskTitle').inputValue() === '回车保存测试', 'project return path opened the wrong task');
+  await page.click('#taskForm .modal-actions [data-close="taskDialog"]');
   await page.locator('.project-milestone-filter summary').hover();
   await page.waitForFunction(() => document.querySelector('.project-milestone-filter')?.open === true);
   const milestoneChoices = await page.locator('.project-milestone-filter .milestone-filter-choice').evaluateAll(nodes => nodes.map(node => node.textContent.replace(/\s+/g, ' ').trim()));
