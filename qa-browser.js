@@ -801,6 +801,16 @@ async function testUrl() {
   assert(await page.locator('.project-master-detail').count() === 1, 'project master-detail workspace missing');
   const projectOverflow = await page.locator('.project-list-panel,.project-detail-panel').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).overflowY));
   assert(projectOverflow.every(value => value === 'auto'), 'project panes are not independently scrollable');
+  await page.click('[data-select-project="p2"] .project-list-content');
+  await page.waitForSelector('[data-select-project="p2"].selected');
+  await page.evaluate(() => { mainScroll.scrollTop = 0; document.querySelector('.project-detail-panel').scrollTop = 0; });
+  const shortProjectDetail = page.locator('.project-detail-panel');
+  await shortProjectDetail.hover(); await page.mouse.wheel(0, 120); await page.waitForTimeout(100);
+  const projectWheel = await page.evaluate(() => { const panel=document.querySelector('.project-detail-panel');return { main:mainScroll.scrollTop, local:panel.scrollTop, localRange:panel.scrollHeight-panel.clientHeight, behavior:getComputedStyle(panel).overscrollBehaviorY }; });
+  assert(projectWheel.main > 0 && projectWheel.local === 0 && projectWheel.localRange <= 1 && projectWheel.behavior === 'auto', `project detail wheel did not fall through to the main page: ${JSON.stringify(projectWheel)}`);
+  await page.click('[data-select-project="p1"] .project-list-content');
+  await page.waitForSelector('[data-select-project="p1"].selected');
+  await page.evaluate(() => { mainScroll.scrollTop = 0; });
   assert(await page.locator('#projectSearch').count() === 0, 'project list still contains the removed search box');
   await page.fill('#projectTaskSearch', '保持推进顺序');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length === 1);
