@@ -161,23 +161,17 @@ body{line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimize
 .task-meta,.today-flow .task-meta{position:static;grid-column:auto;grid-row:auto;display:flex;align-items:center;justify-content:flex-end;gap:6px;max-width:330px;flex-wrap:wrap}
 .task-meta .followup,.task-meta>.muted{flex-basis:100%;text-align:right}
 .task-row.scope-week{grid-template-columns:auto minmax(0,1fr);align-items:center;min-height:74px}.task-row.scope-week .task-main{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(320px,1.4fr) minmax(176px,auto);column-gap:22px;align-items:center}.task-row.scope-week .week-task-identity{min-width:0}.task-row.scope-week .week-action-label{margin:0}.task-row.scope-week .task-meta{align-self:center;padding-top:0}
-
 .week-action-label>span,.overview-next-label>span{display:block;margin-bottom:4px;color:var(--muted);font-size:12px}.week-action-label textarea,.overview-next-label textarea{display:block;width:100%;min-width:0;height:48px;min-height:48px;padding:7px 9px;border-color:transparent;background:transparent;overflow-y:hidden;resize:none;transition:border-color .16s,background .16s}.week-action-label textarea:hover,.overview-next-label textarea:hover{border-color:var(--line);background:var(--soft)}.week-action-label textarea:focus,.overview-next-label textarea:focus{border-color:var(--blue);background:var(--panel);resize:none}
 .task-autosave-status{align-self:center;color:var(--muted);font-size:12px}.task-autosave-status.saving{color:var(--orange)}.task-autosave-status.saved{color:var(--green)}.task-autosave-status.error{color:var(--red)}
-
 .table-title-link{display:block;width:100%;max-width:290px}.task-table th:last-child,.task-table td:last-child{display:none}.table-card{max-height:none;overflow-x:auto;overflow-y:visible;overscroll-behavior:auto}.task-table{min-width:960px}.task-marker-cell{display:flex;align-items:center;justify-content:center;gap:3px}.task-marker-cell .flag-btn{width:28px;height:28px}.table-next b{color:var(--blue)}.table-note{margin-top:3px;color:var(--muted)}
 .overview-row{grid-template-columns:minmax(0,1fr) auto auto}.overview-row .task-title-link{font-size:14px}
 .milestone-task-link{display:block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.milestone-task-row>p{margin-top:5px}
-
 .week-comparison-table :is(th,td){vertical-align:middle}.week-comparison-table th[scope=row]{width:28%}.week-plan-text{width:30%}.week-result-cell{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center}.week-result-cell textarea{margin-top:0}.week-result-cell .pill{align-self:center}
-
 .project-overview-groups{gap:16px}.project-overview-head{align-items:flex-start;padding:15px 18px}.project-overview-heading{min-width:0}.project-overview-heading>button{padding:0;border:0;background:transparent;color:var(--text);font-size:17px;font-weight:800;text-align:left}.project-overview-context{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px;color:var(--muted);font-size:12px}.project-overview-stats{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}.project-overview-tasks{padding:0 18px 10px}.project-overview-task{display:grid;grid-template-columns:minmax(260px,.9fr) minmax(320px,1.35fr) minmax(210px,250px);gap:24px;align-items:center;min-height:82px;padding:12px 0;border-top:1px solid var(--line)}.project-overview-task:first-child{border-top:0}.project-overview-task-main{min-width:0}.project-overview-task-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}.project-overview-task .progress-record{margin-top:5px}.project-overview-task .progress-excerpt{-webkit-line-clamp:1;color:var(--muted);font-size:12px}.project-overview-task .progress-record summary small{display:inline;margin-top:0;margin-left:5px}.overview-next-label{display:block;width:100%;min-width:0;color:var(--muted);font-size:12px}.project-overview-task .overview-schedule{width:100%;gap:7px}.project-overview-task .overview-schedule .btn{width:100%}.project-overview-task .overview-schedule label{font-size:12px}.project-overview-task .overview-schedule input{margin-top:4px;padding:6px 9px}.project-overview-empty{border-top:1px solid var(--line)}
-
 @container (max-width:900px){.project-overview-task{grid-template-columns:minmax(220px,.9fr) minmax(280px,1.2fr);gap:14px 20px}.project-overview-task .overview-schedule{grid-column:1/-1;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end}.task-row.scope-week .task-main{grid-template-columns:minmax(190px,.85fr) minmax(260px,1.15fr);row-gap:7px}.task-row.scope-week .task-meta{grid-column:2;justify-content:flex-end;max-width:none}.task-row.scope-week .task-meta .followup,.task-row.scope-week .task-meta>.muted{text-align:right}}
 @container (max-width:560px){.task-row,.task-row.has-focus-toggle,.today-flow .task-row{grid-template-columns:auto minmax(0,1fr);align-items:start}.task-row.history-row{grid-template-columns:auto minmax(0,1fr)}.task-leading{padding-top:2px}.task-meta,.today-flow .task-meta,.history-row-actions{grid-column:2;justify-content:flex-start;max-width:none}.task-meta .followup,.task-meta>.muted{text-align:left}.task-row.scope-week .task-main{display:block}.task-row.scope-week .week-action-label{margin-top:9px}.task-row.scope-week .task-meta{margin-top:8px;justify-content:flex-start}.project-overview-task{grid-template-columns:1fr;gap:9px}.project-overview-task .overview-schedule{grid-column:auto;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end}.project-overview-head{position:static;display:block}.project-overview-stats{justify-content:flex-start;margin-top:10px}}
 @media(max-width:1000px){.project-overview-head{position:static}.week-comparison-table,.week-comparison-table tbody,.week-comparison-table tr,.week-comparison-table :is(th,td){display:block;width:100%}.week-comparison-table thead{display:none}.week-comparison-table tr{padding:12px 16px;border-bottom:1px solid var(--line)}.week-comparison-table :is(th,td){padding:5px 0;border:0}.week-plan-text:before{content:'原推进安排';display:block;margin-bottom:5px;color:var(--muted);font-size:12px}.week-result-cell{margin-top:5px}.week-review-layout{grid-template-columns:1fr}.task-table{min-width:900px}}
 @media(max-width:820px){.task-autosave-status{order:2;width:100%;text-align:right}.project-overview-head{padding:14px}.project-overview-tasks{padding:0 12px 12px}.week-result-cell{grid-template-columns:1fr}.week-result-cell .pill{justify-self:start}}
-
 
 </style>
 </head>
@@ -209,7 +203,7 @@ body{line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimize
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>'use strict';
 const $=(selector,root=document)=>root.querySelector(selector);
-const $$=(selector,root=document)=>Array.from(root.querySelectorAll(selector));
+const $=(selector,root=document)=>Array.from(root.querySelectorAll(selector));
 const clone=value=>JSON.parse(JSON.stringify(value));
 const uid=prefix=>(prefix||"id")+"-"+(crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2));
 const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
@@ -248,7 +242,6 @@ const RICH_HEIGHT_SPECS={taskNotesHeight:{default:220,min:160,max:520},decisionC
 function loadUiLayout(){let value={};try{value=JSON.parse(localStorage.getItem(LAYOUT_KEY)||"{}")}catch(error){}let layout={todayHeight:Math.max(400,Math.min(900,Number(value.todayHeight)||460)),todayLeft:Math.max(.38,Math.min(.66,Number(value.todayLeft)||.52)),quickNoteLeft:Math.max(.34,Math.min(.66,Number(value.quickNoteLeft)||.5)),quickNoteHeight:Math.max(155,Math.min(520,Number(value.quickNoteHeight)||190)),projectListWidth:Math.max(280,Math.min(420,Number(value.projectListWidth)||300)),weekPlanLeft:Math.max(.34,Math.min(.66,Number(value.weekPlanLeft)||.5)),weekReviewLeft:Math.max(.34,Math.min(.66,Number(value.weekReviewLeft)||.46))};Object.entries(RICH_HEIGHT_SPECS).forEach(([key,spec])=>layout[key]=Math.max(spec.min,Math.min(spec.max,Number(value[key])||spec.default)));return layout}
 let uiLayout=loadUiLayout();
 function saveUiLayout(){localStorage.setItem(LAYOUT_KEY,JSON.stringify(uiLayout))}
-
 
 function emptyWeek(){return{actions:{},topResults:[],top:[],taskIds:[],carriedTaskIds:[],taskSnapshots:[],projectSnapshots:[],reviewDone:"",reviewMiss:"",reviewNext:"",carriedFromWeek:"",activatedAt:"",closedAt:""}}
 function emptyOrder(){return{today:[],week:[],waiting:[],inbox:[],done:[],long:[],all:[],memoActive:[],memoArchived:[],projects:[],pinToday:[],pinWaiting:[],pinInbox:[],pinWeek:[],pinLong:[],pinAll:[],todayGroup:false,weekGroup:false}}
@@ -324,7 +317,6 @@ function loadLocalState(){
  if(!raw)for(let key of LEGACY_KEYS){try{raw=JSON.parse(localStorage.getItem(key)||"null")}catch(error){}if(raw)break}
  return normalizeState(raw);
 }
-
 let state=loadLocalState();
 let currentPage=(location.hash||"#today").slice(1);
 if(!["today","week","tasks","projects","memos","data","search"].includes(currentPage))currentPage="today";
@@ -367,7 +359,6 @@ function createSnapshot(label){
  let item={id:uid("snapshot"),label:label||"安全快照",createdAt:new Date().toISOString(),state:snapshotCore()};
  item.state.snapshots=[];state.snapshots.unshift(item);state.snapshots=state.snapshots.slice(0,12);return item;
 }
-
 function currentWeek(){return state.weeks[selectedWeekKey]||(state.weeks[selectedWeekKey]=emptyWeek())}
 function captureWeek(key,close=false){
  let week=state.weeks[key]||emptyWeek(),start=key,end=weekEnd(key),isCurrent=key===currentWeekKey(),member=new Set(week.taskIds||[]);
@@ -396,7 +387,6 @@ function ensureCurrentWeek(){
  existing.actions=existing.actions||{};state.tasks.filter(task=>task.week&&!task.archived&&(!isDone(task)||task.completed>=now&&task.completed<=weekEnd(now))).forEach(task=>{if(!Object.hasOwn(existing.actions,task.id))existing.actions[task.id]={text:task.nextAction||"",result:""}});
  state.weeks[now]=existing;state.meta.activeWeekKey=now;
 }
-
 function taskPriority(task){return priorities.indexOf(task.priority)}
 function smartSort(items,scope){
  let today=todayKey();
@@ -497,7 +487,6 @@ function applyTaskDraftToState(saved){
  reconcileTaskEdit(saved,previous);index=state.tasks.findIndex(task=>task.id===saved.id);if(index>=0)state.tasks[index]=saved;else state.tasks.unshift(saved);
  state.tasks.forEach(task=>{if(task.id===saved.id)return;let related=new Set(task.relatedTaskIds||[]);links.has(task.id)?related.add(saved.id):related.delete(saved.id);task.relatedTaskIds=Array.from(related)});
 }
-
 function toolbar(){
  return'<div class="rich-toolbar"><button type="button" data-command="bold" data-tip="加粗（Ctrl/Cmd+B）">B</button><button type="button" data-command="underline" data-tip="下划线（Ctrl/Cmd+U）"><u>U</u></button><button type="button" data-command="insertUnorderedList" data-tip="项目符号列表；选中多行可批量转换（- 加空格）">•</button><button type="button" data-command="insertOrderedList" data-tip="编号列表；选中多行可批量转换（1. 加空格）">1.</button><button type="button" data-command="divider" data-tip="插入分割线（-- 加空格）；双击可编辑文字">—</button><button type="button" data-command="outdent" data-tip="减少缩进（Shift+Tab）">←</button><button type="button" data-command="indent" data-tip="增加缩进（Tab）">→</button><button type="button" data-command="removeFormat" data-tip="清除所选文字格式">清除格式</button></div>';
 }
@@ -561,7 +550,6 @@ function initTaskSortables(root){
   } })));
  });
 }
-
 function summaryCard(icon,value,label,target){return'<button type="button" class="card summary" data-summary-target="'+target+'" aria-label="查看'+esc(label)+'，'+value+'项"><div class="summary-icon">'+icon+'</div><div><strong>'+value+'</strong><small>'+esc(label)+'</small></div><span class="summary-arrow" aria-hidden="true">›</span></button>'}
 function pageHead(eyebrow,title,subtitle,actions){return'<div class="page-head"><div><div class="eyebrow">'+esc(eyebrow)+'</div><h1>'+esc(title)+'</h1><p>'+esc(subtitle)+'</p></div><div class="page-actions">'+(actions||"")+'</div></div>'}
 function renderToday(){
@@ -577,7 +565,6 @@ function renderToday(){
  '<article class="card drop-card today-waiting" data-drop-zone="waiting" data-drop-label="移至等待与催办">'+cardHead("等待与催办","到期催办 "+due.length+" 项；未到期与无日期事项可展开",controls("waiting"),"orange")+'<div class="drop-hint">移至等待与催办</div><div class="items today-task-scroll">'+waitingBody+'</div></article></div>'+
  '<div class="today-capture today-inbox" id="todayCapture"><article class="card drop-card" data-drop-zone="inbox" data-drop-label="移至临时收件箱">'+cardHead("临时收件箱","先记录，再决定项目、状态和计划日期",'<button class="link-btn" data-action="new-task" data-inbox="1">先记下来 ＋</button>',"orange")+'<div class="items">'+groupedTaskList(inbox,{scope:"inbox",empty:"临时收件箱已清空。"})+'</div></article></div></div>';
 }
-
 
 function isoWeekNumber(date){
  let target=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())),day=target.getUTCDay()||7;target.setUTCDate(target.getUTCDate()+4-day);let start=new Date(Date.UTC(target.getUTCFullYear(),0,1));return Math.ceil((((target-start)/86400000)+1)/7);
@@ -618,7 +605,6 @@ function renderWeek(){
  $("#page-week").innerHTML=pageHead("WEEKLY CONTROL",title,"只在每周规划与复盘时进入这里；日常工作回到“今天”。",actions)+'<div class="week-banner '+(banner?"show":"")+'">'+esc(banner)+'</div>'+
  modeBar+(panel==="review"?weekComparison(week,mode)+reviewMarkup:planMarkup);
 }
-
 function quickCounts(){
  let open=openTasks(),today=todayKey();
  return{open:open.length,inbox:open.filter(task=>task.inbox||task.status==="待处理").length,waiting:open.filter(task=>task.status==="等待").length,followup:open.filter(task=>task.status==="等待"&&task.followup&&task.followup<=today).length,overdue:open.filter(task=>task.due&&task.due<today).length,paused:open.filter(task=>task.status==="暂停").length,done:state.tasks.filter(task=>isDone(task)&&!task.archived).length,archived:state.tasks.filter(task=>task.archived).length};
@@ -662,7 +648,6 @@ function renderTasks(){
  '<div class="quickviews">'+quickHtml+'</div><div class="task-primary-toolbar"><label class="search-field"><span>⌕</span><input id="taskSearch" value="'+esc(taskFilter.query)+'" placeholder="搜索事项、项目编号、里程碑、状态……"></label><button class="btn task-options-toggle '+(ui.taskOptionsOpen?'active':'')+'" type="button" data-hover-task-options data-toggle-task-options aria-expanded="'+(ui.taskOptionsOpen?'true':'false')+'">'+advancedLabel+' '+(ui.taskOptionsOpen?'收起':'展开')+'</button></div><div class="task-advanced-panel" data-hover-task-options-panel '+(ui.taskOptionsOpen?'':'hidden')+'>'+multiFilter("项目","project",projectOptions)+multiFilter("类型","type",taskTypes)+multiFilter("状态","status",statuses)+'<span class="muted">分组</span><div class="segmented"><button data-task-group="none" class="'+(taskFilter.group==="none"?"active":"")+'">不分组</button><button data-task-group="project" class="'+(taskFilter.group==="project"?"active":"")+'">项目</button><button data-task-group="status" class="'+(taskFilter.group==="status"?"active":"")+'">状态</button><button data-task-group="type" class="'+(taskFilter.group==="type"?"active":"")+'">类型</button></div><button class="btn soft" data-smart-sort="all">✦ 智能排序</button><button class="btn" data-reset-filter>清除筛选</button><span class="filter-note">同类筛选按“或”，不同类别按“且”；隐藏事项不会保留批量选择。</span></div>'+
  bulk+'<div class="card table-card"><table class="task-table"><thead><tr><th></th><th><input class="bulk-check" type="checkbox" data-bulk-all '+(items.length&&items.every(task=>ui.selectedTasks.has(task.id))?"checked":"")+'></th><th>行动</th><th>完成</th><th>事项</th><th>下一步 / 备注</th><th>项目 / 里程碑</th><th>状态</th><th>优先级</th><th>日期</th><th></th></tr></thead><tbody>'+(body||'<tr><td colspan="11"><div class="empty">没有符合条件的事项。</div></td></tr>')+'</tbody></table></div>';
 }
-
 function currentMilestone(project){return project.milestones.find(item=>item.status==="当前阶段")||project.milestones.find(item=>item.status!=="已完成")}
 function nextMilestone(project){let current=project.milestones.indexOf(currentMilestone(project));return project.milestones.slice(Math.max(0,current+1)).find(item=>item.status!=="已完成")}
 function projectProgress(project){if(!project.milestones.length)return 0;return Math.round(project.milestones.filter(item=>item.status==="已完成").length/project.milestones.length*100)}
@@ -745,13 +730,11 @@ function renderMemos(){
  let count=ui.selectedMemos.size,bulk=ui.memoMultiSelect?'<div class="memo-bulk-bar"><span>已选择 '+count+' 条备忘录</span><button class="btn danger" type="button" data-memo-bulk-delete '+(count?"":"disabled")+'>删除所选</button><button class="btn" type="button" data-toggle-memo-multi>退出多选</button></div>':'<div class="memo-bulk-bar" hidden></div>';
  $("#page-memos").innerHTML=pageHead("QUICK NOTES","备忘录","记录暂时没有明确行动要求的信息；需要推进时可转为事项。",'<button class="btn primary" data-action="new-memo">＋ 新建备忘录</button>')+'<div class="memo-layout"><article class="card memo-list-card"><div class="memo-search"><input id="memoSearch" value="'+esc(query)+'" placeholder="搜索备忘录……"></div><div class="memo-tabs"><button class="memo-tab '+(!memoArchived?"active":"")+'" data-memo-tab="active">进行中</button><button class="memo-tab '+(memoArchived?"active":"")+'" data-memo-tab="archived">已归档</button><button class="btn memo-multi-toggle" type="button" data-toggle-memo-multi>'+(ui.memoMultiSelect?"退出多选":"多选")+'</button></div>'+bulk+'<div class="memo-list">'+(list||'<div class="empty">这里还没有备忘录。</div>')+'</div></article>'+editor+'</div>';
 }
-
 function renderData(){
  let snapshots=state.snapshots.map(item=>'<div class="data-item"><div><b>'+esc(item.label)+'</b><small>'+dateTime(item.createdAt)+'</small></div><button class="btn" data-restore-snapshot="'+item.id+'">恢复</button></div>').join("");
  let trash=state.trash.map(item=>'<div class="data-item"><div><b>'+esc(item.data?.title||item.data?.name||item.type)+'</b><small>'+esc(item.type)+' · '+dateTime(item.deletedAt)+'</small></div><button class="btn" data-restore-trash="'+item.id+'">恢复</button></div>').join("");
  $("#page-data").innerHTML=pageHead("DATA SAFETY","数据与恢复","导出、快照、回收站与清空都经过统一数据仓库。",'<button class="btn" data-export>导出 JSON</button><button class="btn" data-import>导入 JSON</button>')+'<div class="data-grid"><article class="card feature-card"><div class="feature-head"><h2>恢复快照</h2><button class="btn danger" data-clear-snapshots>清除全部</button></div><p>导入、清空、云端覆盖等高风险操作前自动创建。</p><div class="data-list">'+(snapshots||'<div class="empty">暂无快照。</div>')+'</div></article><article class="card feature-card"><div class="feature-head"><h2>回收站</h2><button class="btn danger" data-clear-trash>清除全部</button></div><p>删除的事项、项目、备忘录和关键决策可在这里恢复。</p><div class="data-list">'+(trash||'<div class="empty">回收站为空。</div>')+'</div></article><article class="card feature-card danger-zone"><div class="feature-head"><div><h2>清空业务数据</h2><p>清空事项、项目、备忘录、关键决策与周计划；账号和云连接配置不会删除。</p></div><button class="btn danger" data-clear-business>一键清空</button></div></article></div>';
 }
-
 const ui={projectView:"overview",overviewFilter:"open",collapsedProjects:new Set(),waitingExpanded:new Set(),projectQuery:"",projectTaskQuery:"",projectMilestoneFilter:"all",projectFocusTaskId:"",projectReturnTaskId:"",memoQuery:"",memoMultiSelect:false,selectedMemos:new Set(),showArchivedProjects:false,projectOverviewFilter:"open",selectedTasks:new Set(),showAllWeekDone:false,weekPanel:"plan",taskOptionsOpen:false};
 const THEME_KEY="work-cockpit-theme-v1";
 function applyTheme(value,remember=true){let preference=value||"system",dark=preference==="dark"||preference==="system"&&matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.dataset.theme=dark?"dark":"light";if(remember)localStorage.setItem(THEME_KEY,preference);let button=$("#themeButton");if(button){button.textContent=dark?"☀":"◐";button.dataset.tip=dark?"切换到浅色模式":"切换到暗夜模式"}let meta=$("meta[name=theme-color]");if(meta)meta.content=dark?"#080f1c":"#2468f2"}
@@ -760,14 +743,14 @@ const sidebarNotes={today:["今天 · 执行入口","拖动任务调整顺序；
 function renderSidebar(){
  let counts={today:todayAdvance().length,week:weekTasks().length,tasks:openTasks().length,projects:state.projects.filter(project=>!project.archived).length,memos:state.memos.filter(memo=>!memo.archived).length};
  Object.entries(counts).forEach(([key,value])=>{let element=$('[data-count="'+key+'"]');if(element)element.textContent=value});
- $$(".nav-button").forEach(button=>button.classList.toggle("active",button.dataset.page===currentPage));
+ $(".nav-button").forEach(button=>button.classList.toggle("active",button.dataset.page===currentPage));
  let note=sidebarNotes[currentPage];$("#sidebarNote").innerHTML="<b>"+note[0]+"</b>"+note[1];
  $("#favoriteProjects").innerHTML=state.favorites.map(id=>projectById(id)).filter(project=>project&&!project.archived).map(project=>'<button class="favorite-link" data-favorite-open="'+project.id+'"><i></i>'+esc(project.name)+'</button>').join("")||'<span class="muted" style="font-size:11px">在项目卡片点击 ☆ 收藏</span>';
  $("#undoButton").disabled=!undoStack.length;$("#redoButton").disabled=!redoStack.length;$("#backButton").hidden=navigationDepth<=0;
 }
 function renderApp(){
  renderSidebar();
- $$(".page").forEach(page=>page.classList.toggle("active",page.id==="page-"+currentPage));
+ $(".page").forEach(page=>page.classList.toggle("active",page.id==="page-"+currentPage));
  if(currentPage==="today")renderToday();else if(currentPage==="week")renderWeek();else if(currentPage==="tasks")renderTasks();else if(currentPage==="projects")renderProjects();else if(currentPage==="memos")renderMemos();else if(currentPage==="data")renderData();else renderSearchPage();
  bindTransientInputs();
  enhanceHoverSelects($("#page-"+currentPage));
@@ -1015,7 +998,6 @@ function restoreTrash(id){
 function restoreSnapshot(id){
  let item=state.snapshots.find(value=>value.id===id);if(!item)return;confirmAction("恢复快照？","当前数据会先再生成一份快照，然后恢复所选版本。",()=>{let current=snapshotCore();replaceState(item.state,"恢复快照");state.snapshots.unshift({id:uid("snapshot"),label:"恢复前的安全快照",createdAt:new Date().toISOString(),state:current});saveLocal(true)},"恢复");
 }
-
 function searchRank(primary,secondary,q,inactive=false){let title=String(primary||"").normalize("NFKC").toLocaleLowerCase("zh-CN"),rest=String(secondary||"").normalize("NFKC").toLocaleLowerCase("zh-CN"),score=title===q?120:title.startsWith(q)?90:title.includes(q)?65:rest.includes(q)?35:0;return score-(inactive?8:0)}
 function globalResults(query){
  let q=String(query||"").normalize("NFKC").trim().toLocaleLowerCase("zh-CN");if(!q)return'<div class="empty">输入关键词搜索项目、事项、里程碑、决策和备忘录。</div>';
@@ -1047,7 +1029,6 @@ function closeGlobalSearch(){
  globalSearchQuery="";let top=$("#globalSearch");if(top)top.value="";
  if(currentPage!=="search")return;let page=["today","week","tasks","projects","memos","data"].includes(searchReturnPage)?searchReturnPage:"today";currentPage=page;navigationDepth=Math.max(0,navigationDepth-1);history.replaceState({page,appRoute:true,appNavDepth:navigationDepth},"","#"+page);$("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender();
 }
-
 function openChoice(trigger,field,id){
  let pop=$("#choicePopover"),values=field==="priority"?priorities:statuses,current=taskById(id)?.[field];pop.innerHTML=values.map(value=>'<button class="'+(value===current?"active":"")+'" data-choice="'+esc(value)+'">'+esc(value)+'</button>').join("");let rect=trigger.getBoundingClientRect();pop.style.left=Math.min(rect.left,innerWidth-145)+"px";pop.style.top=Math.min(rect.bottom+5,innerHeight-values.length*34-20)+"px";pop.hidden=false;pop.dataset.field=field;pop.dataset.task=id;
 }
@@ -1073,7 +1054,6 @@ function enhanceHoverSelects(root=document){
   menu.addEventListener("keydown",event=>{if(event.key==="Escape"){event.preventDefault();closeHoverSelect(owner);trigger.focus({preventScroll:true})}});
  });
 }
-
 function richNormalizeListStructure(root){
  let changed=true;while(changed){changed=false;
   Array.from(root.querySelectorAll("ul,ol")).reverse().forEach(list=>{if(!Array.from(list.children).some(child=>child.tagName==="LI")){list.remove();changed=true}});
@@ -1111,7 +1091,7 @@ function sanitizeRichValue(value){
  let meaningful=(canonical.textContent||"").replace(/\u00a0/g," ").trim()||canonical.querySelector(".focus-marker,.rich-divider");return meaningful?canonical.innerHTML:"";
 }
 function richDividerContext(node){let editor=node?.closest(".rich-editor"),quill=quillFor(editor),blot=quill&&typeof Quill==="function"?Quill.find(node):null;if(!editor||!quill||!blot)return null;return{editor,quill,blot,index:quill.getIndex(blot)}}
-function selectRichDivider(node){let context=richDividerContext(node);if(!context)return;$$(".rich-divider.selected").forEach(item=>item.classList.remove("selected"));node.classList.add("selected");context.quill.setSelection(context.index,1,"silent");activeRichEditor=context.editor;updateRichToolbar(context.editor)}
+function selectRichDivider(node){let context=richDividerContext(node);if(!context)return;$(".rich-divider.selected").forEach(item=>item.classList.remove("selected"));node.classList.add("selected");context.quill.setSelection(context.index,1,"silent");activeRichEditor=context.editor;updateRichToolbar(context.editor)}
 function cleanRichDividerLabel(value){return String(value||"").replace(/\u00a0/g," ").replace(/\s+/g," ").trim().slice(0,120)}
 function dividerLabelRange(label){let selection=getSelection();if(!selection.rangeCount)return null;let range=selection.getRangeAt(0);return label.contains(range.startContainer)&&label.contains(range.endContainer)?range:null}
 function pasteIntoRichDividerLabel(label,text){let range=dividerLabelRange(label);if(!range){range=document.createRange();range.selectNodeContents(label);range.collapse(false)}let selected=range.toString().length,current=label.textContent||"",room=Math.max(0,120-(current.length-selected)),value=String(text||"").replace(/\r?\n+/g," ").replace(/\s+/g," ").slice(0,room);range.deleteContents();let node=document.createTextNode(value);range.insertNode(node);range.setStartAfter(node);range.collapse(true);let selection=getSelection();selection.removeAllRanges();selection.addRange(range)}
@@ -1300,7 +1280,6 @@ function richKeydown(event){
  let editor=event.target.closest(".rich-editor");if(!editor||quillFor(editor))return false;let key=event.key.toLowerCase();if((event.ctrlKey||event.metaKey)&&key==="z"){event.preventDefault();richApplyHistory(editor,event.shiftKey?1:-1);return true}if((event.ctrlKey||event.metaKey)&&key==="y"){event.preventDefault();richApplyHistory(editor,1);return true}if((event.ctrlKey||event.metaKey)&&(key==="b"||key==="u")){event.preventDefault();rememberRichSelection(editor);applyRichCommand(key==="b"?"bold":"underline",editor.closest(".editor-box,.review-field,.memo-editor-body,.quick-note-body")?.querySelector('[data-command="'+(key==="b"?'bold':'underline')+'"]'));return true}return richListIndent(event,editor)||richListBoundary(event,editor)||richShortcut(event)
 }
 function serializeRichEditor(editor){if(!editor)return"";let quill=quillFor(editor);if(quill)return sanitizeRichValue(quill.getSemanticHTML());richNormalizeListStructure(editor);return sanitizeRichValue(editor.innerHTML||"")}
-
 function saveRelationsNow(label){
  let existing=taskById(taskDraft.id);if(!existing)return;
  let next=Array.from(relatedDraft);
@@ -1413,7 +1392,7 @@ function handleClick(event){
 document.addEventListener("click",event=>{
  if(!event.target.closest("#choicePopover,[data-property]"))closeChoice();
  if(!event.target.closest(".hover-select"))closeHoverSelect();
- let divider=event.target.closest?.(".rich-divider");if(divider&&!event.target.isContentEditable)selectRichDivider(divider);else if(!divider)$$(".rich-divider.selected").forEach(item=>item.classList.remove("selected"));
+ let divider=event.target.closest?.(".rich-divider");if(divider&&!event.target.isContentEditable)selectRichDivider(divider);else if(!divider)$(".rich-divider.selected").forEach(item=>item.classList.remove("selected"));
  handleClick(event);
 });
 document.addEventListener("dblclick",event=>{let divider=event.target.closest?.(".rich-divider");if(divider){event.preventDefault();event.stopPropagation();editRichDivider(divider)}});
@@ -1504,7 +1483,7 @@ document.addEventListener("keydown",event=>{
  let textEditing=!!event.target.closest?.("input,textarea,select,[contenteditable=true],.hover-select");
  if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==="z"){if(textEditing)return;event.preventDefault();event.shiftKey?redo():undo();return}
  if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==="y"){if(textEditing)return;event.preventDefault();redo();return}
- if(event.key==="Escape"){closeChoice();let dialogs=$$("dialog[open]"),dialog=dialogs.at(-1);if(dialog){event.preventDefault();requestDialogClose(dialog);return}if(currentPage==="search"){event.preventDefault();closeGlobalSearch();return}}
+ if(event.key==="Escape"){closeChoice();let dialogs=$("dialog[open]"),dialog=dialogs.at(-1);if(dialog){event.preventDefault();requestDialogClose(dialog);return}if(currentPage==="search"){event.preventDefault();closeGlobalSearch();return}}
  if(!textEditing&&!$("dialog[open]")&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.shiftKey&&event.key.toLowerCase()==="n"){event.preventDefault();openTask("",{inbox:true,status:"待处理"});return}
  if(!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.shiftKey&&["1","2","3","4","5"].includes(event.key)&&!event.target.closest("input,textarea,select,[contenteditable=true],.hover-select")&&!$("dialog[open]")){event.preventDefault();navigate(["today","week","tasks","projects","memos"][Number(event.key)-1])}
 });
@@ -1518,13 +1497,13 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 
 const TODAY_LOCAL_SCROLL_SELECTOR=".quick-note-editor>.ql-editor";
 let todayScrollabilityFrame=0;
-function syncTodayScrollability(root=document){$$(TODAY_LOCAL_SCROLL_SELECTOR,root).forEach(node=>node.classList.toggle("can-local-scroll",node.scrollHeight>node.clientHeight+1))}
+function syncTodayScrollability(root=document){$(TODAY_LOCAL_SCROLL_SELECTOR,root).forEach(node=>node.classList.toggle("can-local-scroll",node.scrollHeight>node.clientHeight+1))}
 function scheduleTodayScrollability(){cancelAnimationFrame(todayScrollabilityFrame);todayScrollabilityFrame=requestAnimationFrame(()=>{todayScrollabilityFrame=0;syncTodayScrollability()})}
 window.addEventListener("resize",()=>{scheduleTodayScrollability();schedulePlanningTextareaResize()});
 const DRAG_SCROLL_SELECTORS=["#mainScroll",".today-task-scroll",".quick-note-editor>.ql-editor",".project-list-panel",".project-detail-panel",".memo-list",".task-content-column"];
-function captureDragScroll(){return DRAG_SCROLL_SELECTORS.flatMap(selector=>$$(selector).map((node,index)=>({selector,index,top:node.scrollTop,left:node.scrollLeft})))}
-function restoreDragScroll(snapshot){requestAnimationFrame(()=>snapshot.forEach(item=>{let node=$$(item.selector)[item.index];if(node){node.scrollTop=item.top;node.scrollLeft=item.left}}))}
-function cleanupDrag(){dragState=null;activeSortableTask=null;$$('.dragging,.drag-target,.project-dragging,.drop-before,.drop-after,.drag-before,.drag-after').forEach(node=>{node.classList.remove("dragging","drag-target","project-dragging","drop-before","drop-after","drag-before","drag-after");delete node.dataset.dropPosition})}
+function captureDragScroll(){return DRAG_SCROLL_SELECTORS.flatMap(selector=>$(selector).map((node,index)=>({selector,index,top:node.scrollTop,left:node.scrollLeft})))}
+function restoreDragScroll(snapshot){requestAnimationFrame(()=>snapshot.forEach(item=>{let node=$(item.selector)[item.index];if(node){node.scrollTop=item.top;node.scrollLeft=item.left}}))}
+function cleanupDrag(){dragState=null;activeSortableTask=null;$('.dragging,.drag-target,.project-dragging,.drop-before,.drop-after,.drag-before,.drag-after').forEach(node=>{node.classList.remove("dragging","drag-target","project-dragging","drop-before","drop-after","drag-before","drag-after");delete node.dataset.dropPosition})}
 function dragAutoScroll(event){let owner=event.target.closest?.(".today-task-scroll,.quick-note-editor>.ql-editor,.project-list-panel,.memo-list,.task-content-column,#mainScroll");if(!owner||owner.scrollHeight<=owner.clientHeight+1)return;let rect=owner.getBoundingClientRect(),edge=Math.min(64,rect.height*.22),distance=event.clientY<rect.top+edge?event.clientY-(rect.top+edge):event.clientY>rect.bottom-edge?event.clientY-(rect.bottom-edge):0;if(distance)owner.scrollTop+=Math.sign(distance)*Math.max(8,Math.min(28,Math.abs(distance)*.55))}
 function markDropPosition(row,event,beforeClass="drag-before",afterClass="drag-after"){let rect=row.getBoundingClientRect(),position=event.clientY<=rect.top+rect.height/2?"before":"after";row.dataset.dropPosition=position;row.classList.remove(beforeClass,afterClass);row.classList.add(position==="before"?beforeClass:afterClass);return position}
 document.addEventListener("dragstart",event=>{
@@ -1534,16 +1513,16 @@ document.addEventListener("dragstart",event=>{
  let memo=event.target.closest("[data-memo-drag]");if(memo){dragState={kind:"memo",id:memo.dataset.memoDrag};event.dataTransfer.setData("text/plain",dragState.id);memo.closest(".memo-item")?.classList.add("dragging");return}
  let top=event.target.closest("[data-top-drag]");if(top){dragState={kind:"top",index:Number(top.dataset.topDrag)};event.dataTransfer.setData("text/plain",String(dragState.index))}
 });
-function trackSortableTaskPointer(event){if(!activeSortableTask)return;let point=Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?document.elementFromPoint(event.clientX,event.clientY):event.target,card=point?.closest?.(".drop-card[data-drop-zone]"),targetRow=point?.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;$$('.drop-card[data-drop-zone]').forEach(node=>node.classList.toggle("drag-target",node===card))}}
+function trackSortableTaskPointer(event){if(!activeSortableTask)return;let point=Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?document.elementFromPoint(event.clientX,event.clientY):event.target,card=point?.closest?.(".drop-card[data-drop-zone]"),targetRow=point?.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;$('.drop-card[data-drop-zone]').forEach(node=>node.classList.toggle("drag-target",node===card))}}
 document.addEventListener("dragover",trackSortableTaskPointer,true);
 document.addEventListener("pointermove",trackSortableTaskPointer,true);
 document.addEventListener("dragover",event=>{
- if(activeSortableTask){let card=event.target.closest?.(".drop-card[data-drop-zone]"),targetRow=event.target.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;event.preventDefault();$$(".drop-card[data-drop-zone]").forEach(node=>node.classList.toggle("drag-target",node===card))}return}
+ if(activeSortableTask){let card=event.target.closest?.(".drop-card[data-drop-zone]"),targetRow=event.target.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;event.preventDefault();$(".drop-card[data-drop-zone]").forEach(node=>node.classList.toggle("drag-target",node===card))}return}
  if(!dragState)return;
  dragAutoScroll(event);
- if(dragState.kind==="project"){let card=event.target.closest("[data-project-drop]");if(!card||card.dataset.projectDrop===dragState.id)return;event.preventDefault();$$(".project-list-item.drop-before,.project-list-item.drop-after").forEach(node=>node.classList.remove("drop-before","drop-after"));let before=event.clientY<card.getBoundingClientRect().top+card.offsetHeight/2;card.classList.add(before?"drop-before":"drop-after");card.dataset.dropPosition=before?"before":"after";return}
+ if(dragState.kind==="project"){let card=event.target.closest("[data-project-drop]");if(!card||card.dataset.projectDrop===dragState.id)return;event.preventDefault();$(".project-list-item.drop-before,.project-list-item.drop-after").forEach(node=>node.classList.remove("drop-before","drop-after"));let before=event.clientY<card.getBoundingClientRect().top+card.offsetHeight/2;card.classList.add(before?"drop-before":"drop-after");card.dataset.dropPosition=before?"before":"after";return}
  let row=event.target.closest("[data-drop-scope],[data-drop-zone],[data-select-memo],[data-top-drop],[data-check-drop]");if(!row)return;
- let accepts=dragState.kind==="task"&&row.dataset.dropScope==="all"||dragState.kind==="memo"&&row.dataset.selectMemo||dragState.kind==="top"&&row.dataset.topDrop!==undefined||dragState.kind==="check"&&row.dataset.checkDrop!==undefined;if(!accepts)return;event.preventDefault();$$(".drag-before,.drag-after").forEach(node=>{if(node!==row){node.classList.remove("drag-before","drag-after");delete node.dataset.dropPosition}});if(row.dataset.dropScope==="all"||row.dataset.selectMemo||row.dataset.topDrop!==undefined||row.dataset.checkDrop!==undefined)markDropPosition(row,event)
+ let accepts=dragState.kind==="task"&&row.dataset.dropScope==="all"||dragState.kind==="memo"&&row.dataset.selectMemo||dragState.kind==="top"&&row.dataset.topDrop!==undefined||dragState.kind==="check"&&row.dataset.checkDrop!==undefined;if(!accepts)return;event.preventDefault();$(".drag-before,.drag-after").forEach(node=>{if(node!==row){node.classList.remove("drag-before","drag-after");delete node.dataset.dropPosition}});if(row.dataset.dropScope==="all"||row.dataset.selectMemo||row.dataset.topDrop!==undefined||row.dataset.checkDrop!==undefined)markDropPosition(row,event)
 });
 document.addEventListener("dragleave",event=>{let row=event.target.closest?.(".drag-before,.drag-after");if(row&&!row.contains(event.relatedTarget)){row.classList.remove("drag-before","drag-after");delete row.dataset.dropPosition}});
 document.addEventListener("drop",event=>{
@@ -1588,7 +1567,6 @@ document.addEventListener("pointermove",event=>{
 function finishResize(){if(todayResizeState){todayResizeState.owner?.classList.remove("active");saveUiLayout();scheduleTodayScrollability();resizePlanningTextareas($("#page-"+currentPage))}todayResizeState=null;checklistResizeState=null;$("#checklistResizer")?.classList.remove("active")}
 document.addEventListener("pointerup",finishResize);document.addEventListener("pointercancel",finishResize);
 document.addEventListener("dblclick",event=>{let richHandle=event.target.closest?.("[data-rich-height-resizer]");if(richHandle){let key=richHandle.dataset.richHeightResizer,spec=RICH_HEIGHT_SPECS[key],box=richHandle.closest("[data-rich-resize]");if(!spec||!box)return;uiLayout[key]=spec.default;saveUiLayout();box.style.setProperty("--rich-editor-height",spec.default+"px");toast("文本框高度已恢复默认");return}if(event.target.id==="checklistResizer"){taskChecklistHeight=0;$(".checklist-section")?.style.removeProperty("height");toast("检查清单高度已恢复自适应")}else if(event.target.id==="todayHeightResizer"){uiLayout.todayHeight=460;saveUiLayout();$("#todayExecution")?.style.setProperty("--today-height","460px");scheduleTodayScrollability();toast("执行区高度已恢复默认")}else if(event.target.id==="quickNoteHeightResizer"){uiLayout.quickNoteHeight=190;saveUiLayout();$(".quick-note-card")?.style.setProperty("--quick-note-height","190px");scheduleTodayScrollability();toast("速记输入区高度已恢复默认")}else if(event.target.id==="weekPlanSplitter"||event.target.id==="weekReviewSplitter"){let review=event.target.id==="weekReviewSplitter",key=review?"weekReviewLeft":"weekPlanLeft",value=review ? .46 : .5;uiLayout[key]=value;saveUiLayout();$(review?"#weekReviewSplit":"#weekPlanSplit")?.style.setProperty("--week-left",(value*100)+"%");toast("本周页面分栏已恢复默认")}});
-
 function cloudHash(value){let text=typeof value==="string"?value:JSON.stringify(value),hash=2166136261;for(let index=0;index<text.length;index++){hash^=text.charCodeAt(index);hash=Math.imul(hash,16777619)}return(hash>>>0).toString(16).padStart(8,"0")}
 function deviceId(){let value=localStorage.getItem(CLOUD_DEVICE_KEY);if(!value){value=uid("device");localStorage.setItem(CLOUD_DEVICE_KEY,value)}return value}
 function hasBusinessData(value=state){let quick=(value.quickNote?.delta?.ops||[]).some(op=>String(op.insert||"").trim());return!!(value.tasks.length||value.projects.length||value.memos.length||value.decisions?.length||quick||Object.values(value.weeks||{}).some(week=>week.top?.length))}
@@ -1748,14 +1726,13 @@ const Cloud={
 window.CloudSync=Cloud;
 $("#keepLocalButton").addEventListener("click",()=>Cloud.keepLocal());
 $("#useRemoteButton").addEventListener("click",()=>Cloud.useRemote());
-$$("[data-auth-mode]").forEach(button=>button.addEventListener("click",()=>{Cloud.authMode=button.dataset.authMode;$$("[data-auth-mode]").forEach(item=>item.classList.toggle("active",item===button));$("#authSubmit").textContent=Cloud.authMode==="login"?"登录":"注册";$("#authPassword").autocomplete=Cloud.authMode==="login"?"current-password":"new-password"}));
+$("[data-auth-mode]").forEach(button=>button.addEventListener("click",()=>{Cloud.authMode=button.dataset.authMode;$("[data-auth-mode]").forEach(item=>item.classList.toggle("active",item===button));$("#authSubmit").textContent=Cloud.authMode==="login"?"登录":"注册";$("#authPassword").autocomplete=Cloud.authMode==="login"?"current-password":"new-password"}));
 $("#localModeButton").addEventListener("click",()=>{localStorage.setItem(LOCAL_MODE_KEY,"1");$("#cloudGate").hidden=true;Cloud.setStatus("local","本地模式")});
 $("#saveCloudConfig").addEventListener("click",()=>{let url=$("#cloudUrl").value.trim().replace(/\/$/,""),key=$("#cloudKey").value.trim();if(!url.startsWith("https://")||key.length<20)return toast("连接设置格式不正确");localStorage.setItem(CLOUD_CONFIG_KEY,JSON.stringify({url,key}));toast("连接设置已保存，请刷新页面")});
 $("#authForm").addEventListener("submit",async event=>{
  event.preventDefault();let email=$("#authEmail").value.trim(),password=$("#authPassword").value,message=$("#authMessage");message.textContent="正在处理……";
  try{let result=Cloud.authMode==="login"?await Cloud.client.auth.signInWithPassword({email,password}):await Cloud.client.auth.signUp({email,password});if(result.error)throw result.error;if(Cloud.authMode==="register"&&!result.data.session)message.textContent="注册成功，请检查邮箱完成验证。";else{message.textContent="";await Cloud.startSession(result.data.session)}}catch(error){message.textContent=error.message||"登录失败"}
 });
-
 let dateWatch=todayKey();
 function checkDateChange(){let next=todayKey();if(next===dateWatch)return;dateWatch=next;ensureCurrentWeek();selectedWeekKey=currentWeekKey();activateScheduledTasks();captureCurrentWeek();saveLocal(true);requestRender()}
 setInterval(checkDateChange,60000);
@@ -1769,5 +1746,5 @@ async function boot(){
  document.documentElement.classList.remove("booting");
 }
 boot().catch(error=>{console.error("应用启动失败",error);document.documentElement.classList.remove("booting");toast("启动时发生错误，本机数据未删除")});
-
 </script></body></html>
+
