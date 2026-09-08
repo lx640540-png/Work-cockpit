@@ -239,7 +239,7 @@ async function testUrl() {
   const taskWheel = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('#page-tasks .table-card').scrollTop, maxHeight:getComputedStyle(document.querySelector('#page-tasks .table-card')).maxHeight }));
   assert(taskWheel.main > 70 && taskWheel.local === 0 && taskWheel.maxHeight === 'none', `all-task wheel did not use the main page: ${JSON.stringify(taskWheel)}`);
   await page.evaluate(() => { document.querySelector('#page-tasks').style.minHeight = ''; mainScroll.scrollTop = 0; });
-  await page.click('#page-projects.active [data-open-task="t1"]');
+  await page.click('[data-open-task="t1"]');
   assert(await page.locator('#taskNotes[data-quill-version="2.0.3"] > .ql-editor').count() === 1, 'task notes did not initialize with Quill 2');
   await page.click('[data-add-check]');
   await page.click('[data-add-check]');
@@ -807,7 +807,7 @@ async function testUrl() {
   assert((await page.locator('#page-projects .overview-row .task-title-link').first().textContent()).includes('保持推进顺序'), 'project-local task search returned the wrong item');
   await page.fill('#projectTaskSearch', '');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length > 1);
-  await page.click('[data-open-task="t1"]');
+  await page.click('#page-projects.active [data-open-task="t1"]');
   await page.waitForSelector('#taskDialog[open] [data-go-task-project]:not([disabled])');
   await page.click('[data-go-task-project]');
   await page.waitForSelector('#page-projects.active [data-project-task="t1"].project-task-target');
