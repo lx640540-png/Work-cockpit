@@ -13,3 +13,4 @@
 .task-meta,.today-flow .task-meta{position:static;grid-column:auto;grid-row:auto;display:flex;align-items:center;justify-content:flex-end;gap:6px;max-width:330px;flex-wrap:wrap}
 .task-meta .followup,.task-meta>.muted{flex-basis:100%;text-align:right}
 .task-row.scope-week{grid-template-columns:auto minmax(0,1fr);align-items:center;min-height:74px}.task-row.scope-week .task-main{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(320px,1.4fr) minmax(176px,auto);column-gap:22px;align-items:center}.task-row.scope-week .week-task-identity{min-width:0}.task-row.scope-week .week-action-label{margin:0}.task-row.scope-week .task-meta{align-self:center;padding-top:0}
+

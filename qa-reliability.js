@@ -85,7 +85,7 @@ test('flag and Today drop use the same transition for inbox, waiting and paused 
     const a=task({status,inbox:status==='待处理'}), b=copy(a);
     c.setTaskFocus(a,true,{tasks:[a]});c.applyTaskCardTransition(b,'other','today',{tasks:[b]});
     delete a.updatedAt;delete b.updatedAt;assert.deepEqual(a,b);
-    assert.equal(a.focus,true);assert.equal(a.week,true);assert.equal(a.inbox,false);
+    assert.equal(a.focus,true);assert.equal(a.week,true);assert.equal(a.inbox,status==='待处理');
   }
 });
 
@@ -216,3 +216,19 @@ test('moving a due plan to the long backlog does not immediately reactivate it',
  assert.equal(t.week,false);assert.equal(t.focus,false);assert.equal(t.type,'长期跟进');assert.equal(t.followup,'2026-09-10');
 });
 
+
+
+test('inbox survives status edits, normalization, and plan activation independently', () => {
+ const c=ruleContext();
+ for(const status of ['待处理','进行中','等待','暂停','已完成']) {
+  const value=task({inbox:true});c.setTaskStatus(value,status,{tasks:[value]});
+  assert.equal(c.normalizeTask(value).inbox,true);
+ }
+ assert.equal(c.normalizeTask(task({status:'待处理',inbox:false})).inbox,false);
+ const legacy=task({status:'待处理'});delete legacy.inbox;assert.equal(c.normalizeTask(legacy).inbox,true);
+ const value=task({inbox:true,planDate:'2026-09-05'});c.state.tasks=[value];c.activateScheduledTasks();assert.equal(value.focus,true);assert.equal(value.inbox,true);
+});
+test('handled marker survives normalization without completing the task', () => {
+ const c=ruleContext(),value=c.normalizeTask(task({handledOn:'2026-09-05'}));
+ assert.equal(value.handledOn,'2026-09-05');assert.equal(value.status,'进行中');assert.equal(value.completed,'');
+});

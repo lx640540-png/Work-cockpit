@@ -1,1 +1,2 @@
 .week-comparison-table :is(th,td){vertical-align:middle}.week-comparison-table th[scope=row]{width:28%}.week-plan-text{width:30%}.week-result-cell{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center}.week-result-cell textarea{margin-top:0}.week-result-cell .pill{align-self:center}
+

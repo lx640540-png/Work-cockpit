@@ -3,3 +3,4 @@
 @media(max-width:1000px){.project-overview-head{position:static}.week-comparison-table,.week-comparison-table tbody,.week-comparison-table tr,.week-comparison-table :is(th,td){display:block;width:100%}.week-comparison-table thead{display:none}.week-comparison-table tr{padding:12px 16px;border-bottom:1px solid var(--line)}.week-comparison-table :is(th,td){padding:5px 0;border:0}.week-plan-text:before{content:'原推进安排';display:block;margin-bottom:5px;color:var(--muted);font-size:12px}.week-result-cell{margin-top:5px}.week-review-layout{grid-template-columns:1fr}.task-table{min-width:900px}}
 @media(max-width:820px){.task-autosave-status{order:2;width:100%;text-align:right}.project-overview-head{padding:14px}.project-overview-tasks{padding:0 12px 12px}.week-result-cell{grid-template-columns:1fr}.week-result-cell .pill{justify-self:start}}
 
+

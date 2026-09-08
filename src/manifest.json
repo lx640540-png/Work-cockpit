@@ -6,7 +6,8 @@
     "styles/task-table.css",
     "styles/week-review.css",
     "styles/project-overview.css",
-    "styles/responsive.css"
+    "styles/responsive.css",
+    "styles/project-settings.css"
   ],
   "scripts": [
     "core/runtime.js",
@@ -15,6 +16,7 @@
     "domain/week.js",
     "domain/tasks.js",
     "ui/task-list.js",
+    "ui/handled-panel.js",
     "pages/today.js",
     "pages/week.js",
     "pages/tasks.js",

@@ -164,3 +164,4 @@ $("#authForm").addEventListener("submit",async event=>{
  event.preventDefault();let email=$("#authEmail").value.trim(),password=$("#authPassword").value,message=$("#authMessage");message.textContent="正在处理……";
  try{let result=Cloud.authMode==="login"?await Cloud.client.auth.signInWithPassword({email,password}):await Cloud.client.auth.signUp({email,password});if(result.error)throw result.error;if(Cloud.authMode==="register"&&!result.data.session)message.textContent="注册成功，请检查邮箱完成验证。";else{message.textContent="";await Cloud.startSession(result.data.session)}}catch(error){message.textContent=error.message||"登录失败"}
 });
+

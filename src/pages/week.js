@@ -37,3 +37,4 @@ function renderWeek(){
  $("#page-week").innerHTML=pageHead("WEEKLY CONTROL",title,"只在每周规划与复盘时进入这里；日常工作回到“今天”。",actions)+'<div class="week-banner '+(banner?"show":"")+'">'+esc(banner)+'</div>'+
  modeBar+(panel==="review"?weekComparison(week,mode)+reviewMarkup:planMarkup);
 }
+

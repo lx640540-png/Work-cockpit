@@ -1,12 +1,12 @@
 function quickCounts(){
  let open=openTasks(),today=todayKey();
- return{open:open.length,inbox:open.filter(task=>task.inbox||task.status==="待处理").length,waiting:open.filter(task=>task.status==="等待").length,followup:open.filter(task=>task.status==="等待"&&task.followup&&task.followup<=today).length,overdue:open.filter(task=>task.due&&task.due<today).length,paused:open.filter(task=>task.status==="暂停").length,done:state.tasks.filter(task=>isDone(task)&&!task.archived).length,archived:state.tasks.filter(task=>task.archived).length};
+ return{open:open.length,inbox:open.filter(task=>task.inbox).length,waiting:open.filter(task=>task.status==="等待").length,followup:open.filter(task=>task.status==="等待"&&task.followup&&task.followup<=today).length,overdue:open.filter(task=>task.due&&task.due<today).length,paused:open.filter(task=>task.status==="暂停").length,done:state.tasks.filter(task=>isDone(task)&&!task.archived).length,archived:state.tasks.filter(task=>task.archived).length};
 }
 function filteredTasks(){
  let today=todayKey(),items=state.tasks.filter(task=>{
   if(taskFilter.quick==="all"&&task.archived)return false;
   if(taskFilter.quick==="open"&&(task.archived||isDone(task)))return false;
-  if(taskFilter.quick==="inbox"&&!(!task.archived&&!isDone(task)&&(task.inbox||task.status==="待处理")))return false;
+  if(taskFilter.quick==="inbox"&&!(!task.archived&&!isDone(task)&&(task.inbox)))return false;
   if(taskFilter.quick==="waiting"&&!(!task.archived&&!isDone(task)&&task.status==="等待"))return false;
   if(taskFilter.quick==="followup"&&!(!task.archived&&!isDone(task)&&task.status==="等待"&&task.followup&&task.followup<=today))return false;
   if(taskFilter.quick==="overdue"&&!(!task.archived&&!isDone(task)&&task.due&&task.due<today))return false;
@@ -41,3 +41,4 @@ function renderTasks(){
  '<div class="quickviews">'+quickHtml+'</div><div class="task-primary-toolbar"><label class="search-field"><span>⌕</span><input id="taskSearch" value="'+esc(taskFilter.query)+'" placeholder="搜索事项、项目编号、里程碑、状态……"></label><button class="btn task-options-toggle '+(ui.taskOptionsOpen?'active':'')+'" type="button" data-hover-task-options data-toggle-task-options aria-expanded="'+(ui.taskOptionsOpen?'true':'false')+'">'+advancedLabel+' '+(ui.taskOptionsOpen?'收起':'展开')+'</button></div><div class="task-advanced-panel" data-hover-task-options-panel '+(ui.taskOptionsOpen?'':'hidden')+'>'+multiFilter("项目","project",projectOptions)+multiFilter("类型","type",taskTypes)+multiFilter("状态","status",statuses)+'<span class="muted">分组</span><div class="segmented"><button data-task-group="none" class="'+(taskFilter.group==="none"?"active":"")+'">不分组</button><button data-task-group="project" class="'+(taskFilter.group==="project"?"active":"")+'">项目</button><button data-task-group="status" class="'+(taskFilter.group==="status"?"active":"")+'">状态</button><button data-task-group="type" class="'+(taskFilter.group==="type"?"active":"")+'">类型</button></div><button class="btn soft" data-smart-sort="all">✦ 智能排序</button><button class="btn" data-reset-filter>清除筛选</button><span class="filter-note">同类筛选按“或”，不同类别按“且”；隐藏事项不会保留批量选择。</span></div>'+
  bulk+'<div class="card table-card"><table class="task-table"><thead><tr><th></th><th><input class="bulk-check" type="checkbox" data-bulk-all '+(items.length&&items.every(task=>ui.selectedTasks.has(task.id))?"checked":"")+'></th><th>行动</th><th>完成</th><th>事项</th><th>下一步 / 备注</th><th>项目 / 里程碑</th><th>状态</th><th>优先级</th><th>日期</th><th></th></tr></thead><tbody>'+(body||'<tr><td colspan="11"><div class="empty">没有符合条件的事项。</div></td></tr>')+'</tbody></table></div>';
 }
+

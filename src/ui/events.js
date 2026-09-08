@@ -5,6 +5,9 @@ function saveRelationsNow(label){
 }
 function handleClick(event){
  let target=event.target.closest("button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
+ if(target.dataset.organizeTask)return updateTask(target.dataset.organizeTask,"整理完成",task=>task.inbox=false);
+ if(target.dataset.handleTask)return updateTask(target.dataset.handleTask,"本次已处理",task=>task.handledOn=todayKey());
+ if(target.dataset.undoHandled)return updateTask(target.dataset.undoHandled,"撤销本次处理",task=>task.handledOn="");
  if(target.dataset.page)return navigate(target.dataset.page);
  if(target.dataset.projectView){ui.projectView=target.dataset.projectView;return requestRender()}
  if(target.dataset.projectDetail)return navigate("projects",target.dataset.projectDetail);
@@ -88,7 +91,7 @@ function handleClick(event){
  if(target.dataset.selectMile!==undefined){collectProjectDraft();projectMilestoneIndex=Number(target.dataset.selectMile);return renderProjectEditor()}
  if(target.dataset.projectPanel){collectProjectDraft();projectPanelTab=target.dataset.projectPanel;return renderProjectEditor()}
  if(target.dataset.addMile!==undefined){collectProjectDraft();projectDraft.milestones.push(normalizeMilestone({name:"新里程碑"},projectDraft.milestones.length));projectMilestoneIndex=projectDraft.milestones.length-1;return renderProjectEditor()}
- if(target.dataset.removeCurrentMile!==undefined){collectProjectDraft();projectDraft.milestones.splice(projectMilestoneIndex,1);projectMilestoneIndex=Math.max(0,projectMilestoneIndex-1);return renderProjectEditor()}
+ if(target.dataset.removeCurrentMile!==undefined)return removeCurrentMilestone();
  if(target.dataset.mileState){collectProjectDraft();let item=projectDraft.milestones[projectMilestoneIndex];if(item){if(target.dataset.mileState==="当前阶段")projectDraft.milestones.forEach(milestone=>{if(milestone!==item&&milestone.status==="当前阶段")milestone.status="未开始"});item.status=target.dataset.mileState;renderProjectEditor()}return}
  if(target.dataset.newDecision!==undefined)return openDecision("",{sourceTaskId:target.dataset.task||"",project:target.dataset.project||"",milestone:target.dataset.milestone||""});
  if(target.dataset.editDecision)return openDecision(target.dataset.editDecision);
@@ -213,3 +216,5 @@ document.addEventListener('focusin',event=>{let owner=event.target.closest?.('.i
 document.addEventListener('focusout',event=>{let owner=event.target.closest?.('.inline-help');if(owner&&!owner.contains(event.relatedTarget))owner.open=false});
 document.addEventListener('keydown',event=>{if(event.key==='Escape')document.querySelectorAll('.inline-help[open]').forEach(owner=>owner.open=false)});
 
+
+$("#projectDialog").addEventListener("cancel",event=>{event.preventDefault();requestProjectClose()});

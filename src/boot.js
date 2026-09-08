@@ -11,3 +11,4 @@ async function boot(){
  document.documentElement.classList.remove("booting");
 }
 boot().catch(error=>{console.error("应用启动失败",error);document.documentElement.classList.remove("booting");toast("启动时发生错误，本机数据未删除")});
+

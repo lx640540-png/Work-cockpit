@@ -1,6 +1,7 @@
 function decisionProjectOptions(selected){return'<option value="">暂不关联项目</option>'+state.projects.filter(project=>!project.archived||project.id===selected).map(project=>'<option value="'+project.id+'" '+(selected===project.id?"selected":"")+'>'+esc(project.name)+(project.archived?'（已归档）':'')+'</option>').join("")}
 function decisionSourceOptions(selected){return'<option value="">不关联来源任务</option>'+state.tasks.filter(task=>!task.archived).map(task=>'<option value="'+task.id+'" '+(selected===task.id?"selected":"")+'>'+esc(task.title)+'</option>').join("")}
 function openDecision(id,prefill={}){
+ if($("#projectDialog").open)collectProjectDraft();
  let existing=id?decisionById(id):null,source=prefill.sourceTaskId?taskById(prefill.sourceTaskId):null;
  decisionDraft=normalizeDecision(existing?clone(existing):{id:uid("decision"),title:"",...prefill,project:source?.project||prefill.project||"",milestone:source?.milestone||prefill.milestone||"",sourceTaskId:source?.id||prefill.sourceTaskId||"",date:todayKey()});
  $("#decisionDialogTitle").textContent=existing?"编辑关键决策":"记录关键决策";$("#deleteDecisionButton").hidden=!existing;renderDecisionEditor();showDialog($("#decisionDialog"));requestAnimationFrame(()=>$("#decisionTitle")?.focus());
