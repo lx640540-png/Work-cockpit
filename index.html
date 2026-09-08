@@ -203,7 +203,7 @@ body{line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimize
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>'use strict';
 const $=(selector,root=document)=>root.querySelector(selector);
-const $=(selector,root=document)=>Array.from(root.querySelectorAll(selector));
+const $$=(selector,root=document)=>Array.from(root.querySelectorAll(selector));
 const clone=value=>JSON.parse(JSON.stringify(value));
 const uid=prefix=>(prefix||"id")+"-"+(crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2));
 const esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
@@ -743,14 +743,14 @@ const sidebarNotes={today:["今天 · 执行入口","拖动任务调整顺序；
 function renderSidebar(){
  let counts={today:todayAdvance().length,week:weekTasks().length,tasks:openTasks().length,projects:state.projects.filter(project=>!project.archived).length,memos:state.memos.filter(memo=>!memo.archived).length};
  Object.entries(counts).forEach(([key,value])=>{let element=$('[data-count="'+key+'"]');if(element)element.textContent=value});
- $(".nav-button").forEach(button=>button.classList.toggle("active",button.dataset.page===currentPage));
+ $$(".nav-button").forEach(button=>button.classList.toggle("active",button.dataset.page===currentPage));
  let note=sidebarNotes[currentPage];$("#sidebarNote").innerHTML="<b>"+note[0]+"</b>"+note[1];
  $("#favoriteProjects").innerHTML=state.favorites.map(id=>projectById(id)).filter(project=>project&&!project.archived).map(project=>'<button class="favorite-link" data-favorite-open="'+project.id+'"><i></i>'+esc(project.name)+'</button>').join("")||'<span class="muted" style="font-size:11px">在项目卡片点击 ☆ 收藏</span>';
  $("#undoButton").disabled=!undoStack.length;$("#redoButton").disabled=!redoStack.length;$("#backButton").hidden=navigationDepth<=0;
 }
 function renderApp(){
  renderSidebar();
- $(".page").forEach(page=>page.classList.toggle("active",page.id==="page-"+currentPage));
+ $$(".page").forEach(page=>page.classList.toggle("active",page.id==="page-"+currentPage));
  if(currentPage==="today")renderToday();else if(currentPage==="week")renderWeek();else if(currentPage==="tasks")renderTasks();else if(currentPage==="projects")renderProjects();else if(currentPage==="memos")renderMemos();else if(currentPage==="data")renderData();else renderSearchPage();
  bindTransientInputs();
  enhanceHoverSelects($("#page-"+currentPage));
@@ -1091,7 +1091,7 @@ function sanitizeRichValue(value){
  let meaningful=(canonical.textContent||"").replace(/\u00a0/g," ").trim()||canonical.querySelector(".focus-marker,.rich-divider");return meaningful?canonical.innerHTML:"";
 }
 function richDividerContext(node){let editor=node?.closest(".rich-editor"),quill=quillFor(editor),blot=quill&&typeof Quill==="function"?Quill.find(node):null;if(!editor||!quill||!blot)return null;return{editor,quill,blot,index:quill.getIndex(blot)}}
-function selectRichDivider(node){let context=richDividerContext(node);if(!context)return;$(".rich-divider.selected").forEach(item=>item.classList.remove("selected"));node.classList.add("selected");context.quill.setSelection(context.index,1,"silent");activeRichEditor=context.editor;updateRichToolbar(context.editor)}
+function selectRichDivider(node){let context=richDividerContext(node);if(!context)return;$$(".rich-divider.selected").forEach(item=>item.classList.remove("selected"));node.classList.add("selected");context.quill.setSelection(context.index,1,"silent");activeRichEditor=context.editor;updateRichToolbar(context.editor)}
 function cleanRichDividerLabel(value){return String(value||"").replace(/\u00a0/g," ").replace(/\s+/g," ").trim().slice(0,120)}
 function dividerLabelRange(label){let selection=getSelection();if(!selection.rangeCount)return null;let range=selection.getRangeAt(0);return label.contains(range.startContainer)&&label.contains(range.endContainer)?range:null}
 function pasteIntoRichDividerLabel(label,text){let range=dividerLabelRange(label);if(!range){range=document.createRange();range.selectNodeContents(label);range.collapse(false)}let selected=range.toString().length,current=label.textContent||"",room=Math.max(0,120-(current.length-selected)),value=String(text||"").replace(/\r?\n+/g," ").replace(/\s+/g," ").slice(0,room);range.deleteContents();let node=document.createTextNode(value);range.insertNode(node);range.setStartAfter(node);range.collapse(true);let selection=getSelection();selection.removeAllRanges();selection.addRange(range)}
@@ -1392,7 +1392,7 @@ function handleClick(event){
 document.addEventListener("click",event=>{
  if(!event.target.closest("#choicePopover,[data-property]"))closeChoice();
  if(!event.target.closest(".hover-select"))closeHoverSelect();
- let divider=event.target.closest?.(".rich-divider");if(divider&&!event.target.isContentEditable)selectRichDivider(divider);else if(!divider)$(".rich-divider.selected").forEach(item=>item.classList.remove("selected"));
+ let divider=event.target.closest?.(".rich-divider");if(divider&&!event.target.isContentEditable)selectRichDivider(divider);else if(!divider)$$(".rich-divider.selected").forEach(item=>item.classList.remove("selected"));
  handleClick(event);
 });
 document.addEventListener("dblclick",event=>{let divider=event.target.closest?.(".rich-divider");if(divider){event.preventDefault();event.stopPropagation();editRichDivider(divider)}});
@@ -1483,7 +1483,7 @@ document.addEventListener("keydown",event=>{
  let textEditing=!!event.target.closest?.("input,textarea,select,[contenteditable=true],.hover-select");
  if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==="z"){if(textEditing)return;event.preventDefault();event.shiftKey?redo():undo();return}
  if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==="y"){if(textEditing)return;event.preventDefault();redo();return}
- if(event.key==="Escape"){closeChoice();let dialogs=$("dialog[open]"),dialog=dialogs.at(-1);if(dialog){event.preventDefault();requestDialogClose(dialog);return}if(currentPage==="search"){event.preventDefault();closeGlobalSearch();return}}
+ if(event.key==="Escape"){closeChoice();let dialogs=$$("dialog[open]"),dialog=dialogs.at(-1);if(dialog){event.preventDefault();requestDialogClose(dialog);return}if(currentPage==="search"){event.preventDefault();closeGlobalSearch();return}}
  if(!textEditing&&!$("dialog[open]")&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.shiftKey&&event.key.toLowerCase()==="n"){event.preventDefault();openTask("",{inbox:true,status:"待处理"});return}
  if(!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.shiftKey&&["1","2","3","4","5"].includes(event.key)&&!event.target.closest("input,textarea,select,[contenteditable=true],.hover-select")&&!$("dialog[open]")){event.preventDefault();navigate(["today","week","tasks","projects","memos"][Number(event.key)-1])}
 });
@@ -1497,13 +1497,13 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 
 const TODAY_LOCAL_SCROLL_SELECTOR=".quick-note-editor>.ql-editor";
 let todayScrollabilityFrame=0;
-function syncTodayScrollability(root=document){$(TODAY_LOCAL_SCROLL_SELECTOR,root).forEach(node=>node.classList.toggle("can-local-scroll",node.scrollHeight>node.clientHeight+1))}
+function syncTodayScrollability(root=document){$$(TODAY_LOCAL_SCROLL_SELECTOR,root).forEach(node=>node.classList.toggle("can-local-scroll",node.scrollHeight>node.clientHeight+1))}
 function scheduleTodayScrollability(){cancelAnimationFrame(todayScrollabilityFrame);todayScrollabilityFrame=requestAnimationFrame(()=>{todayScrollabilityFrame=0;syncTodayScrollability()})}
 window.addEventListener("resize",()=>{scheduleTodayScrollability();schedulePlanningTextareaResize()});
 const DRAG_SCROLL_SELECTORS=["#mainScroll",".today-task-scroll",".quick-note-editor>.ql-editor",".project-list-panel",".project-detail-panel",".memo-list",".task-content-column"];
-function captureDragScroll(){return DRAG_SCROLL_SELECTORS.flatMap(selector=>$(selector).map((node,index)=>({selector,index,top:node.scrollTop,left:node.scrollLeft})))}
-function restoreDragScroll(snapshot){requestAnimationFrame(()=>snapshot.forEach(item=>{let node=$(item.selector)[item.index];if(node){node.scrollTop=item.top;node.scrollLeft=item.left}}))}
-function cleanupDrag(){dragState=null;activeSortableTask=null;$('.dragging,.drag-target,.project-dragging,.drop-before,.drop-after,.drag-before,.drag-after').forEach(node=>{node.classList.remove("dragging","drag-target","project-dragging","drop-before","drop-after","drag-before","drag-after");delete node.dataset.dropPosition})}
+function captureDragScroll(){return DRAG_SCROLL_SELECTORS.flatMap(selector=>$$(selector).map((node,index)=>({selector,index,top:node.scrollTop,left:node.scrollLeft})))}
+function restoreDragScroll(snapshot){requestAnimationFrame(()=>snapshot.forEach(item=>{let node=$$(item.selector)[item.index];if(node){node.scrollTop=item.top;node.scrollLeft=item.left}}))}
+function cleanupDrag(){dragState=null;activeSortableTask=null;$$('.dragging,.drag-target,.project-dragging,.drop-before,.drop-after,.drag-before,.drag-after').forEach(node=>{node.classList.remove("dragging","drag-target","project-dragging","drop-before","drop-after","drag-before","drag-after");delete node.dataset.dropPosition})}
 function dragAutoScroll(event){let owner=event.target.closest?.(".today-task-scroll,.quick-note-editor>.ql-editor,.project-list-panel,.memo-list,.task-content-column,#mainScroll");if(!owner||owner.scrollHeight<=owner.clientHeight+1)return;let rect=owner.getBoundingClientRect(),edge=Math.min(64,rect.height*.22),distance=event.clientY<rect.top+edge?event.clientY-(rect.top+edge):event.clientY>rect.bottom-edge?event.clientY-(rect.bottom-edge):0;if(distance)owner.scrollTop+=Math.sign(distance)*Math.max(8,Math.min(28,Math.abs(distance)*.55))}
 function markDropPosition(row,event,beforeClass="drag-before",afterClass="drag-after"){let rect=row.getBoundingClientRect(),position=event.clientY<=rect.top+rect.height/2?"before":"after";row.dataset.dropPosition=position;row.classList.remove(beforeClass,afterClass);row.classList.add(position==="before"?beforeClass:afterClass);return position}
 document.addEventListener("dragstart",event=>{
@@ -1513,16 +1513,16 @@ document.addEventListener("dragstart",event=>{
  let memo=event.target.closest("[data-memo-drag]");if(memo){dragState={kind:"memo",id:memo.dataset.memoDrag};event.dataTransfer.setData("text/plain",dragState.id);memo.closest(".memo-item")?.classList.add("dragging");return}
  let top=event.target.closest("[data-top-drag]");if(top){dragState={kind:"top",index:Number(top.dataset.topDrag)};event.dataTransfer.setData("text/plain",String(dragState.index))}
 });
-function trackSortableTaskPointer(event){if(!activeSortableTask)return;let point=Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?document.elementFromPoint(event.clientX,event.clientY):event.target,card=point?.closest?.(".drop-card[data-drop-zone]"),targetRow=point?.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;$('.drop-card[data-drop-zone]').forEach(node=>node.classList.toggle("drag-target",node===card))}}
+function trackSortableTaskPointer(event){if(!activeSortableTask)return;let point=Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?document.elementFromPoint(event.clientX,event.clientY):event.target,card=point?.closest?.(".drop-card[data-drop-zone]"),targetRow=point?.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;$$('.drop-card[data-drop-zone]').forEach(node=>node.classList.toggle("drag-target",node===card))}}
 document.addEventListener("dragover",trackSortableTaskPointer,true);
 document.addEventListener("pointermove",trackSortableTaskPointer,true);
 document.addEventListener("dragover",event=>{
- if(activeSortableTask){let card=event.target.closest?.(".drop-card[data-drop-zone]"),targetRow=event.target.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;event.preventDefault();$(".drop-card[data-drop-zone]").forEach(node=>node.classList.toggle("drag-target",node===card))}return}
+ if(activeSortableTask){let card=event.target.closest?.(".drop-card[data-drop-zone]"),targetRow=event.target.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;event.preventDefault();$$(".drop-card[data-drop-zone]").forEach(node=>node.classList.toggle("drag-target",node===card))}return}
  if(!dragState)return;
  dragAutoScroll(event);
- if(dragState.kind==="project"){let card=event.target.closest("[data-project-drop]");if(!card||card.dataset.projectDrop===dragState.id)return;event.preventDefault();$(".project-list-item.drop-before,.project-list-item.drop-after").forEach(node=>node.classList.remove("drop-before","drop-after"));let before=event.clientY<card.getBoundingClientRect().top+card.offsetHeight/2;card.classList.add(before?"drop-before":"drop-after");card.dataset.dropPosition=before?"before":"after";return}
+ if(dragState.kind==="project"){let card=event.target.closest("[data-project-drop]");if(!card||card.dataset.projectDrop===dragState.id)return;event.preventDefault();$$(".project-list-item.drop-before,.project-list-item.drop-after").forEach(node=>node.classList.remove("drop-before","drop-after"));let before=event.clientY<card.getBoundingClientRect().top+card.offsetHeight/2;card.classList.add(before?"drop-before":"drop-after");card.dataset.dropPosition=before?"before":"after";return}
  let row=event.target.closest("[data-drop-scope],[data-drop-zone],[data-select-memo],[data-top-drop],[data-check-drop]");if(!row)return;
- let accepts=dragState.kind==="task"&&row.dataset.dropScope==="all"||dragState.kind==="memo"&&row.dataset.selectMemo||dragState.kind==="top"&&row.dataset.topDrop!==undefined||dragState.kind==="check"&&row.dataset.checkDrop!==undefined;if(!accepts)return;event.preventDefault();$(".drag-before,.drag-after").forEach(node=>{if(node!==row){node.classList.remove("drag-before","drag-after");delete node.dataset.dropPosition}});if(row.dataset.dropScope==="all"||row.dataset.selectMemo||row.dataset.topDrop!==undefined||row.dataset.checkDrop!==undefined)markDropPosition(row,event)
+ let accepts=dragState.kind==="task"&&row.dataset.dropScope==="all"||dragState.kind==="memo"&&row.dataset.selectMemo||dragState.kind==="top"&&row.dataset.topDrop!==undefined||dragState.kind==="check"&&row.dataset.checkDrop!==undefined;if(!accepts)return;event.preventDefault();$$(".drag-before,.drag-after").forEach(node=>{if(node!==row){node.classList.remove("drag-before","drag-after");delete node.dataset.dropPosition}});if(row.dataset.dropScope==="all"||row.dataset.selectMemo||row.dataset.topDrop!==undefined||row.dataset.checkDrop!==undefined)markDropPosition(row,event)
 });
 document.addEventListener("dragleave",event=>{let row=event.target.closest?.(".drag-before,.drag-after");if(row&&!row.contains(event.relatedTarget)){row.classList.remove("drag-before","drag-after");delete row.dataset.dropPosition}});
 document.addEventListener("drop",event=>{
@@ -1726,7 +1726,7 @@ const Cloud={
 window.CloudSync=Cloud;
 $("#keepLocalButton").addEventListener("click",()=>Cloud.keepLocal());
 $("#useRemoteButton").addEventListener("click",()=>Cloud.useRemote());
-$("[data-auth-mode]").forEach(button=>button.addEventListener("click",()=>{Cloud.authMode=button.dataset.authMode;$("[data-auth-mode]").forEach(item=>item.classList.toggle("active",item===button));$("#authSubmit").textContent=Cloud.authMode==="login"?"登录":"注册";$("#authPassword").autocomplete=Cloud.authMode==="login"?"current-password":"new-password"}));
+$$("[data-auth-mode]").forEach(button=>button.addEventListener("click",()=>{Cloud.authMode=button.dataset.authMode;$$("[data-auth-mode]").forEach(item=>item.classList.toggle("active",item===button));$("#authSubmit").textContent=Cloud.authMode==="login"?"登录":"注册";$("#authPassword").autocomplete=Cloud.authMode==="login"?"current-password":"new-password"}));
 $("#localModeButton").addEventListener("click",()=>{localStorage.setItem(LOCAL_MODE_KEY,"1");$("#cloudGate").hidden=true;Cloud.setStatus("local","本地模式")});
 $("#saveCloudConfig").addEventListener("click",()=>{let url=$("#cloudUrl").value.trim().replace(/\/$/,""),key=$("#cloudKey").value.trim();if(!url.startsWith("https://")||key.length<20)return toast("连接设置格式不正确");localStorage.setItem(CLOUD_CONFIG_KEY,JSON.stringify({url,key}));toast("连接设置已保存，请刷新页面")});
 $("#authForm").addEventListener("submit",async event=>{
