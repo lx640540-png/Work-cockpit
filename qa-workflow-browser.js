@@ -233,11 +233,11 @@ test('inbox classification, handled undo and next-day visibility survive reload'
 });
 
 test('project settings preserves drafts across decisions and protects close on short screens',{timeout:30000},async t=>{
- const page=await fixture(t,[],{projects:projectFixture,route:'projects'});
+ const page=await fixture(t,[],{projects:projectFixture,route:'projects'});page.setDefaultTimeout(5000);
  await page.evaluate(()=>openProject('p1'));await page.fill('#projectName','未保存名称');
  await page.click('[data-project-panel="decisions"]');await page.fill('#projectDescription','尚未保存的说明');
  await page.click('#projectDialog [data-new-decision]');await page.fill('#decisionTitle','草稿保护验证');
- await page.locator('#decisionForm button[type="submit"]').click();
+ await page.locator('#decisionForm button[value="default"]').click();
  assert.equal(await page.inputValue('#projectName'),'未保存名称');assert.equal(await page.inputValue('#projectDescription'),'尚未保存的说明');
  for(const width of [1366,800]){
   await page.setViewportSize({width,height:600});

@@ -232,3 +232,12 @@ test('handled marker survives normalization without completing the task', () => 
  const c=ruleContext(),value=c.normalizeTask(task({handledOn:'2026-09-05'}));
  assert.equal(value.handledOn,'2026-09-05');assert.equal(value.status,'进行中');assert.equal(value.completed,'');
 });
+
+test('dragging to inbox preserves source status, dates, order and pin',()=>{
+ const c=ruleContext();c.state={tasks:[task({focus:true})],order:{today:['a','task-1','b'],inbox:['other'],pinToday:['task-1'],pinInbox:[]}};
+ c.pinKey=s=>'pin'+s[0].toUpperCase()+s.slice(1);c.commit=(_,fn)=>fn(c.state);
+ vm.runInContext(source('moveTask'),c);const before=copy(c.state.tasks[0]);
+ c.moveTask('task-1','today','inbox','other','before');
+ assert.equal(c.state.tasks[0].status,before.status);assert.equal(c.state.tasks[0].focus,true);assert.equal(c.state.tasks[0].followup,before.followup);assert.equal(c.state.tasks[0].inbox,true);
+ assert.deepEqual(c.state.order.today,['a','task-1','b']);assert.deepEqual(c.state.order.pinToday,['task-1']);assert.deepEqual([...c.state.order.inbox],['task-1','other']);
+});
