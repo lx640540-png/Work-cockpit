@@ -5,7 +5,6 @@ function saveRelationsNow(label){
 }
 function handleClick(event){
  let target=event.target.closest("button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
- if(target.dataset.organizeTask)return updateTask(target.dataset.organizeTask,"整理完成",task=>task.inbox=false);
  if(target.dataset.handleTask)return updateTask(target.dataset.handleTask,"本次已处理",task=>task.handledOn=todayKey());
  if(target.dataset.undoHandled)return updateTask(target.dataset.undoHandled,"撤销本次处理",task=>task.handledOn="");
  if(target.dataset.page)return navigate(target.dataset.page);

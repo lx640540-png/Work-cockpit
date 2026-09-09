@@ -1,12 +1,11 @@
 function quickCounts(){
  let open=openTasks(),today=todayKey();
- return{open:open.length,inbox:open.filter(task=>task.inbox).length,waiting:open.filter(task=>task.status==="等待").length,followup:open.filter(task=>task.status==="等待"&&task.followup&&task.followup<=today).length,overdue:open.filter(task=>task.due&&task.due<today).length,paused:open.filter(task=>task.status==="暂停").length,done:state.tasks.filter(task=>isDone(task)&&!task.archived).length,archived:state.tasks.filter(task=>task.archived).length};
+ return{open:open.length,waiting:open.filter(task=>task.status==="等待").length,followup:open.filter(task=>task.status==="等待"&&task.followup&&task.followup<=today).length,overdue:open.filter(task=>task.due&&task.due<today).length,paused:open.filter(task=>task.status==="暂停").length,done:state.tasks.filter(task=>isDone(task)&&!task.archived).length,archived:state.tasks.filter(task=>task.archived).length};
 }
 function filteredTasks(){
  let today=todayKey(),items=state.tasks.filter(task=>{
   if(taskFilter.quick==="all"&&task.archived)return false;
   if(taskFilter.quick==="open"&&(task.archived||isDone(task)))return false;
-  if(taskFilter.quick==="inbox"&&!(!task.archived&&!isDone(task)&&(task.inbox)))return false;
   if(taskFilter.quick==="waiting"&&!(!task.archived&&!isDone(task)&&task.status==="等待"))return false;
   if(taskFilter.quick==="followup"&&!(!task.archived&&!isDone(task)&&task.status==="等待"&&task.followup&&task.followup<=today))return false;
   if(taskFilter.quick==="overdue"&&!(!task.archived&&!isDone(task)&&task.due&&task.due<today))return false;
@@ -28,7 +27,7 @@ function multiFilter(label,field,options){
  return'<details class="multi-filter" data-hover-expand data-filter-detail="'+field+'"><summary>'+esc(title)+'</summary><div class="multi-menu">'+options.map(option=>{let value=typeof option==="string"?option:option.value,text=typeof option==="string"?option:option.label;return'<label><input type="checkbox" data-filter-check="'+field+'" value="'+esc(value)+'" '+(selected.includes(value)?"checked":"")+'><span>'+esc(text)+'</span></label>'}).join("")+'</div></details>';
 }
 function renderTasks(){
- let counts=quickCounts(),quick=[["open","所有待办"],["inbox","待整理"],["waiting","等待回复"],["followup","今日催办"],["overdue","已逾期"],["paused","已暂停"],["done","已完成"],["archived","已归档"]],items=filteredTasks();
+ let counts=quickCounts(),quick=[["open","所有待办"],["waiting","等待回复"],["followup","今日催办"],["overdue","已逾期"],["paused","已暂停"],["done","已完成"],["archived","已归档"]],items=filteredTasks();
  let visibleIds=new Set(items.map(task=>task.id));ui.selectedTasks=new Set(Array.from(ui.selectedTasks).filter(id=>visibleIds.has(id)));
  let quickHtml=quick.map(item=>'<button class="quick-btn '+(taskFilter.quick===item[0]?"active":"")+'" data-quick="'+item[0]+'">'+item[1]+' <em>'+counts[item[0]]+'</em></button>').join("");
  let projectOptions=state.projects.filter(project=>!project.archived).map(project=>({value:project.id,label:project.name}));
