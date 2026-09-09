@@ -248,3 +248,25 @@ test('project settings preserves drafts across decisions and protects close on s
  assert.equal(await page.locator('#projectDialog').evaluate(n=>n.open),true);
  await page.click('#confirmAccept');assert.equal((await stored(page)).projects[0].name,projectFixture[0].name);
 });
+
+test('row icons and shared width handles support pointer resizing, reload and responsive controls',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('a',{focus:true,week:true,project:'p1'}),makeTask('b',{week:true,project:'p1'})],{projects:projectFixture});
+ const button=page.locator('[data-handle-task="a"]');assert.equal((await button.textContent()).trim(),'');assert.equal(await button.getAttribute('aria-label'),'本次已处理');await button.hover();await page.locator('#tooltip').filter({hasText:'本次已处理'}).waitFor({state:'visible'});
+ await page.click('[data-page="projects"]');
+ assert.equal(await page.locator('[data-overview-next][placeholder]').count(),0);
+ let handle=page.locator('[data-planning-resize]').first();await handle.scrollIntoViewIfNeeded();let box=await handle.boundingBox();
+ const before=await page.locator('.overview-next-label').first().evaluate(n=>n.getBoundingClientRect().width);
+ await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2+100,box.y+box.height/2,{steps:10});await page.mouse.up();
+ const widths=await page.locator('.overview-next-label').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().width));assert(widths[0]>before+40);assert(Math.abs(widths[0]-widths[1])<2);
+ const savedWidth=await page.evaluate(()=>localStorage.getItem('work-cockpit-planning-width-v1'));assert(Number(savedWidth)>45);
+ await page.reload();assert.equal(await page.locator('[data-planning-resize]').first().getAttribute('aria-valuenow'),String(Math.round(Number(savedWidth))));
+ await page.click('[data-page="week"]');assert.equal(await page.locator('[data-week-action][placeholder]').count(),0);assert.equal(await page.locator('.week-action-label [data-planning-resize]').count(),2);
+ await page.setViewportSize({width:800,height:700});const overflow=await page.locator('#mainScroll').evaluate(n=>n.scrollWidth-n.clientWidth);assert(overflow<=1);
+});
+
+test('wheel scrolls while holding a dragged task without completing or reclassifying it',{timeout:30000},async t=>{
+ const page=await fixture(t,Array.from({length:24},(_,i)=>makeTask('drag'+i,{focus:true,week:true})));const handle=page.locator('[data-drag-handle="today"][data-task="drag0"]');await handle.scrollIntoViewIfNeeded();const box=await handle.boundingBox();
+ await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+20,box.y+15,{steps:5});await page.waitForFunction(()=>!!activeSortableTask);
+ const before=await page.locator('#mainScroll').evaluate(n=>n.scrollTop);await page.mouse.wheel(0,380);await page.waitForFunction(before=>document.querySelector('#mainScroll').scrollTop>before+50,before);
+ await page.mouse.up();await page.waitForFunction(()=>!activeSortableTask);const tasks=(await stored(page)).tasks;assert.equal(tasks.length,24);assert(tasks.every(task=>task.status==='进行中'&&task.focus&&!task.inbox));
+});
