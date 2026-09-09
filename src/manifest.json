@@ -7,7 +7,8 @@
     "styles/week-review.css",
     "styles/project-overview.css",
     "styles/responsive.css",
-    "styles/project-settings.css"
+    "styles/project-settings.css",
+    "styles/planning-resize.css"
   ],
   "scripts": [
     "core/runtime.js",
@@ -36,6 +37,7 @@
     "pages/search.js",
     "ui/choices.js",
     "ui/rich-editor.js",
+    "ui/planning-resize.js",
     "ui/events.js",
     "ui/drag-resize.js",
     "core/cloud.js",

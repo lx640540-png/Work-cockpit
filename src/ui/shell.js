@@ -22,7 +22,7 @@ function renderApp(){
  initTaskSortables($("#page-"+currentPage));
  scheduleTodayScrollability();
 }
-function bindTransientInputs(){}
+function bindTransientInputs(){initPlanningResize();initTableSorting()}
 const PLANNING_TEXTAREA_SELECTOR="[data-overview-next],[data-week-action]";
 function resizePlanningTextarea(textarea){
  if(!textarea?.matches?.(PLANNING_TEXTAREA_SELECTOR))return;
