@@ -17,7 +17,7 @@ before(async()=>{
     fs.createReadStream(path.join(__dirname,name)).pipe(res);
   });
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));origin=`http://127.0.0.1:${server.address().port}`;
-  browser=await chromium.launch({headless:true});
+  browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined,headless:true});
 });
 after(async()=>{await browser?.close();if(server)await new Promise(resolve=>server.close(resolve));});
 
@@ -215,4 +215,36 @@ test('overview preserves notes verbatim, uses waiting follow-up dates, and suppo
  await page.setViewportSize({width:390,height:844});
  const width=await page.evaluate(()=>({body:document.documentElement.scrollWidth,viewport:innerWidth,main:mainScroll.scrollWidth,client:mainScroll.clientWidth}));assert(width.body<=width.viewport+1&&width.main<=width.client+1,JSON.stringify(width));
  assert.equal(await page.locator('[data-overview-next="wait"]').isVisible(),true);
+});
+
+
+test('inbox classification, handled undo and next-day visibility survive reload',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('active',{focus:true,week:true,inbox:true,nextAction:''})]);
+ assert.equal(await page.locator('[data-drop-zone="today"] [data-task="active"] .task-next').count(),0);
+ await page.click('[data-organize-task="active"]');
+ assert.equal((await stored(page)).tasks[0].inbox,false);
+ await page.click('[data-handle-task="active"]');
+ assert.equal((await stored(page)).tasks[0].status,'进行中');
+ await page.reload();assert.equal(await page.locator('[data-drop-zone="today"] .task-row').count(),0);
+ await page.locator('.handled-panel summary').click();await page.click('[data-undo-handled="active"]');
+ await page.click('[data-handle-task="active"]');
+ await page.clock.setSystemTime(new Date('2026-09-06T12:00:00+08:00'));await page.evaluate(()=>checkDateChange());
+ await page.locator('[data-drop-zone="today"] .task-row[data-task="active"]').waitFor();
+});
+
+test('project settings preserves drafts across decisions and protects close on short screens',{timeout:30000},async t=>{
+ const page=await fixture(t,[],{projects:projectFixture,route:'projects'});page.setDefaultTimeout(5000);
+ await page.evaluate(()=>openProject('p1'));await page.fill('#projectName','未保存名称');
+ await page.click('[data-project-panel="decisions"]');await page.fill('#projectDescription','尚未保存的说明');
+ await page.click('#projectDialog [data-new-decision]');await page.fill('#decisionTitle','草稿保护验证');
+ await page.locator('#decisionForm button[value="default"]').click();
+ assert.equal(await page.inputValue('#projectName'),'未保存名称');assert.equal(await page.inputValue('#projectDescription'),'尚未保存的说明');
+ for(const width of [1366,800]){
+  await page.setViewportSize({width,height:600});
+  const box=await page.locator('#projectDialog .modal-actions').boundingBox();assert(box.y>=0&&box.y+box.height<=600);
+  const overflow=await page.locator('#projectDialog').evaluate(n=>n.scrollWidth-n.clientWidth);assert(overflow<=1);
+ }
+ await page.click('#projectDialog [data-close="projectDialog"]');await page.locator('#confirmDialog[open]').waitFor();
+ assert.equal(await page.locator('#projectDialog').evaluate(n=>n.open),true);
+ await page.click('#confirmAccept');assert.equal((await stored(page)).projects[0].name,projectFixture[0].name);
 });

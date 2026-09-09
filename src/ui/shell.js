@@ -45,7 +45,7 @@ function schedulePlanningTextareaResize(){
 }
 function showDialog(dialog){if(dialog&&!dialog.open)dialog.showModal()}
 function closeDialog(id){let dialog=typeof id==="string"?$("#"+id):id;if(dialog?.open)dialog.close()}
-function requestDialogClose(id){let dialog=typeof id==="string"?$("#"+id):id;if(!dialog?.open)return;if(dialog.id==="taskDialog")return closeTaskDialog();closeDialog(dialog)}
+function requestDialogClose(id){let dialog=typeof id==="string"?$("#"+id):id;if(!dialog?.open)return;if(dialog.id==="taskDialog")return closeTaskDialog();if(dialog.id==="projectDialog")return requestProjectClose();closeDialog(dialog)}
 function outsideDialogPanel(event,dialog){let rect=dialog.getBoundingClientRect();return event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom}
 let backdropDialogPress=null;
 document.addEventListener("pointerdown",event=>{backdropDialogPress=event.target instanceof HTMLDialogElement&&event.target.open&&outsideDialogPanel(event,event.target)?event.target:null},true);

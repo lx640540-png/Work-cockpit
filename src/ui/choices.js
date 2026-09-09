@@ -23,3 +23,4 @@ function enhanceHoverSelects(root=document){
   menu.addEventListener("keydown",event=>{if(event.key==="Escape"){event.preventDefault();closeHoverSelect(owner);trigger.focus({preventScroll:true})}});
  });
 }
+

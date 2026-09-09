@@ -29,3 +29,4 @@ function closeGlobalSearch(){
  globalSearchQuery="";let top=$("#globalSearch");if(top)top.value="";
  if(currentPage!=="search")return;let page=["today","week","tasks","projects","memos","data"].includes(searchReturnPage)?searchReturnPage:"today";currentPage=page;navigationDepth=Math.max(0,navigationDepth-1);history.replaceState({page,appRoute:true,appNavDepth:navigationDepth},"","#"+page);$("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender();
 }
+

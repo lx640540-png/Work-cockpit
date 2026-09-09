@@ -40,3 +40,4 @@ function createSnapshot(label){
  let item={id:uid("snapshot"),label:label||"安全快照",createdAt:new Date().toISOString(),state:snapshotCore()};
  item.state.snapshots=[];state.snapshots.unshift(item);state.snapshots=state.snapshots.slice(0,12);return item;
 }
+

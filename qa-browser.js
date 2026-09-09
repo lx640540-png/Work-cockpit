@@ -69,7 +69,7 @@ async function testUrl() {
 (async () => {
   const url = await testUrl();
   let browser;
-  try { browser = await chromium.launch({ headless: true }); }
+  try { browser = await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined, headless: true }); }
   catch (error) {
     if (String(error.message).includes('Executable doesn\'t exist') && process.env.ALLOW_BROWSER_SKIP === '1') {
       console.log('SKIP: Playwright browser binary is not installed');
@@ -127,9 +127,10 @@ async function testUrl() {
     const task = state.tasks.find(item => item.id === 't9');
     return { locations, task, order: state.order };
   });
-  assert(exclusiveFixture.locations.join(',') === 'waiting', `legacy duplicate task remained in multiple today cards: ${exclusiveFixture.locations.join(',')}`);
-  assert(!exclusiveFixture.task.focus && !exclusiveFixture.task.inbox, 'legacy waiting task kept incompatible focus/inbox flags');
-  assert(!exclusiveFixture.order.today.includes('t9') && !exclusiveFixture.order.inbox.includes('t9') && !exclusiveFixture.order.pinToday.includes('t9') && !exclusiveFixture.order.pinInbox.includes('t9'), 'legacy duplicate order and pin pollution was not pruned');
+  assert(exclusiveFixture.locations.join(',') === 'waiting,inbox', 'independent inbox classification was lost');
+  assert(!exclusiveFixture.task.focus && exclusiveFixture.task.inbox, 'waiting state changed inbox classification');
+  await page.click('[data-organize-task="t9"]');
+  await page.locator('[data-drop-scope="inbox"][data-task="t9"]').waitFor({state:'detached'});
   // Both task columns scroll with the main page, even when many rows are present.
   await page.evaluate(() => { document.querySelector('#page-today').style.minHeight='1800px'; mainScroll.scrollTop=0;ui.waitingExpanded.add('undated');renderNow(); });
   const todayLocal=page.locator('.today-task-scroll').first();
@@ -335,11 +336,12 @@ async function testUrl() {
   assert(saved.tasks.find(task => task.id === 't1').status === '等待', 'today inline status was not saved');
   await page.click('[data-task="t1"] [data-property="status"]');
   await page.click('#choicePopover [data-choice="待处理"]');
-  await page.waitForSelector('[data-drop-scope="inbox"][data-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
-  assert(saved.tasks.find(task => task.id === 't1').inbox, 'waiting task did not migrate to the inbox');
-  await page.click('[data-task="t1"] [data-property="status"]');
-  await page.click('#choicePopover [data-choice="进行中"]');
+  assert(!saved.tasks.find(task => task.id === 't1').inbox, 'status edit changed independent inbox flag');
+  await page.evaluate(() => { openTask('t1'); });
+  await page.selectOption('#draftStatus', '进行中');
+  await page.check('#draftFocus');
+  await page.click('#taskDialog [data-close="taskDialog"]');
   await page.waitForSelector('[data-drop-scope="today"][data-task="t1"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(!saved.tasks.find(task => task.id === 't1').inbox && saved.tasks.find(task => task.id === 't1').focus && saved.tasks.find(task => task.id === 't1').week, 'inbox task did not return to today and week');
@@ -882,6 +884,7 @@ async function testUrl() {
   await page.selectOption('#projectTemplate', 'hardware');
   assert(await page.locator('#projectDialog .milestone-nav').count() === 6, 'switching back to hardware template did not restore stages');
   await page.click('#projectDialog [data-close="projectDialog"]');
+  if(await page.locator('#confirmDialog').evaluate(n=>n.open))await page.click('#confirmAccept');
   await page.click('[data-select-project="p1"] .project-list-content');
   await page.click('[data-edit-project="p1"]');
   await page.click('[data-project-panel="decisions"]');

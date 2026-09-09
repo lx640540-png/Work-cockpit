@@ -25,7 +25,7 @@ const decisionById=id=>state.decisions.find(decision=>String(decision.id)===Stri
 const projectName=id=>projectById(id)?.name||"通用事项";
 const statuses=["待处理","进行中","等待","已完成","暂停"];
 const priorities=["P0","P1","P2","P3"];
-const taskTypes=["任务","临时事项","长期跟进"];
+const taskTypes=["任务","长期跟进"];
 const STORAGE_KEY="work-cockpit-v6";
 const LEGACY_KEYS=["smart-hardware-work-cockpit-v3","smart-hardware-work-cockpit-v2"];
 const CLOUD_CONFIG_KEY="work-cockpit-supabase-config-v2";
@@ -39,4 +39,5 @@ const RICH_HEIGHT_SPECS={taskNotesHeight:{default:220,min:160,max:520},decisionC
 function loadUiLayout(){let value={};try{value=JSON.parse(localStorage.getItem(LAYOUT_KEY)||"{}")}catch(error){}let layout={todayHeight:Math.max(400,Math.min(900,Number(value.todayHeight)||460)),todayLeft:Math.max(.38,Math.min(.66,Number(value.todayLeft)||.52)),quickNoteLeft:Math.max(.34,Math.min(.66,Number(value.quickNoteLeft)||.5)),quickNoteHeight:Math.max(155,Math.min(520,Number(value.quickNoteHeight)||190)),projectListWidth:Math.max(280,Math.min(420,Number(value.projectListWidth)||300)),weekPlanLeft:Math.max(.34,Math.min(.66,Number(value.weekPlanLeft)||.5)),weekReviewLeft:Math.max(.34,Math.min(.66,Number(value.weekReviewLeft)||.46))};Object.entries(RICH_HEIGHT_SPECS).forEach(([key,spec])=>layout[key]=Math.max(spec.min,Math.min(spec.max,Number(value[key])||spec.default)));return layout}
 let uiLayout=loadUiLayout();
 function saveUiLayout(){localStorage.setItem(LAYOUT_KEY,JSON.stringify(uiLayout))}
+
 

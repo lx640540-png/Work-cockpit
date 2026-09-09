@@ -31,7 +31,7 @@ function moveOrder(scope,fromId,toId,position="before"){
  let order=state.order[scope]||(state.order[scope]=[]);if(order.indexOf(fromId)<0||fromId===toId)return;
  commit("手动调整顺序",draft=>reorderId(draft.order[scope],fromId,toId,position),{immediate:true});
 }
-function canAdvanceToday(task){return!task.archived&&!isDone(task)&&!task.inbox&&!["待处理","等待","暂停"].includes(task.status)}
+function canAdvanceToday(task){return!task.archived&&!isDone(task)&&!["待处理","等待","暂停"].includes(task.status)}
 function isPlanDue(task,today=todayKey()){return!!task.planDate&&task.planDate<=today}
 function activateScheduledTasks(value=state){
  let changed=false,today=todayKey();
@@ -53,17 +53,17 @@ function applyTaskCardTransition(task,fromScope,toScope,draft){
  let previous={...task},transition=TASK_CARD_TRANSITIONS[toScope];if(!transition?.accept)return;
  transition.apply(task,draft);reconcileTaskEdit(task,previous);
 }
-const TASK_CARD_TRANSITIONS=Object.freeze({today:{label:"我来推进",accept:true,apply(task,draft){setTaskFocus(task,true,draft)}},waiting:{label:"等待与催办",accept:true,apply(task,draft){setTaskStatus(task,"等待",draft)}},inbox:{label:"临时收件箱",accept:true,apply(task,draft){setTaskStatus(task,"待处理",draft)}},week:{label:"本周推进事项",accept:true,apply(task){task.week=true}},long:{label:"长期跟进",accept:true,apply(task,draft){task.type="长期跟进";task.week=false;setTaskFocus(task,false,draft)}},done:{label:"本周完成",accept:false}});
+const TASK_CARD_TRANSITIONS=Object.freeze({today:{label:"我来推进",accept:true,apply(task,draft){setTaskFocus(task,true,draft)}},waiting:{label:"等待与催办",accept:true,apply(task,draft){setTaskStatus(task,"等待",draft)}},inbox:{label:"临时收件箱",accept:true,apply(task,draft){task.inbox=true}},week:{label:"本周推进事项",accept:true,apply(task){task.week=true}},long:{label:"长期跟进",accept:true,apply(task,draft){task.type="长期跟进";task.week=false;setTaskFocus(task,false,draft)}},done:{label:"本周完成",accept:false}});
 const pinKey=scope=>"pin"+scope.charAt(0).toUpperCase()+scope.slice(1);
 function isPinned(taskId,scope){return(state.order[pinKey(scope)]||[]).includes(taskId)}
 function pinOrdered(items,scope){let rows=ordered(items,scope),pins=new Set(state.order[pinKey(scope)]||[]);return rows.filter(task=>pins.has(task.id)).concat(rows.filter(task=>!pins.has(task.id)))}
 function updateTask(id,label,updater){commit(label,draft=>{let task=draft.tasks.find(item=>item.id===id);if(!task)return;updater(task,draft);task.updatedAt=new Date().toISOString()},{immediate:true})}
-function moveTask(id,fromScope,toScope,toId="",position="before"){let transition=TASK_CARD_TRANSITIONS[toScope];if(!transition?.accept||id===toId)return;commit("移动事项至"+transition.label,draft=>{let task=draft.tasks.find(item=>item.id===id);if(!task)return;let sourcePinKey=pinKey(fromScope),targetPinKey=pinKey(toScope),wasPinned=(draft.order[sourcePinKey]||[]).includes(id);applyTaskCardTransition(task,fromScope,toScope,draft);task.updatedAt=new Date().toISOString();let source=draft.order[fromScope]||[],target=(draft.order[toScope]||[]).filter(value=>value!==id);draft.order[fromScope]=source.filter(value=>value!==id);let at=toId?target.indexOf(toId):-1;target.splice(at<0?target.length:at+(position==="after"?1:0),0,id);draft.order[toScope]=target;draft.order[sourcePinKey]=(draft.order[sourcePinKey]||[]).filter(value=>value!==id);let targetPins=new Set((draft.order[targetPinKey]||[]).filter(value=>value!==id));if(wasPinned)targetPins.add(id);draft.order[targetPinKey]=target.filter(value=>targetPins.has(value))},{immediate:true})}
+function moveTask(id,fromScope,toScope,toId="",position="before"){let transition=TASK_CARD_TRANSITIONS[toScope];if(!transition?.accept||id===toId)return;commit("移动事项至"+transition.label,draft=>{let task=draft.tasks.find(item=>item.id===id);if(!task)return;let sourcePinKey=pinKey(fromScope),targetPinKey=pinKey(toScope),wasPinned=(draft.order[sourcePinKey]||[]).includes(id);applyTaskCardTransition(task,fromScope,toScope,draft);task.updatedAt=new Date().toISOString();let source=draft.order[fromScope]||[],target=(draft.order[toScope]||[]).filter(value=>value!==id);draft.order[fromScope]=(fromScope==="inbox"||toScope==="inbox")?source:source.filter(value=>value!==id);let at=toId?target.indexOf(toId):-1;target.splice(at<0?target.length:at+(position==="after"?1:0),0,id);draft.order[toScope]=target;if(fromScope!=="inbox"&&toScope!=="inbox")draft.order[sourcePinKey]=(draft.order[sourcePinKey]||[]).filter(value=>value!==id);let targetPins=new Set((draft.order[targetPinKey]||[]).filter(value=>value!==id));if(wasPinned)targetPins.add(id);draft.order[targetPinKey]=target.filter(value=>targetPins.has(value))},{immediate:true})}
 function followupReminder(task){if(!task.followup||task.followup>todayKey()||isDone(task)||task.archived||["暂停"].includes(task.status))return"";let days=Math.round((parseDate(todayKey())-parseDate(task.followup))/86400000),text=days?"跟进逾期 "+days+" 天":"今日跟进";return'<span class="followup reminder" data-tip="跟进日期已到，请确认进展">◷ '+text+'</span>'}
 function openTasks(){return state.tasks.filter(task=>!task.archived&&!isDone(task))}
-function todayAdvance(){return openTasks().filter(task=>canAdvanceToday(task)&&task.focus)}
-function todayWaiting(){return openTasks().filter(task=>task.status==="等待")}
-function inboxTasks(){return openTasks().filter(task=>task.inbox||task.status==="待处理")}
+function todayAdvance(){return openTasks().filter(task=>canAdvanceToday(task)&&task.focus&&task.handledOn!==todayKey())}
+function todayWaiting(){return openTasks().filter(task=>task.status==="等待"&&task.handledOn!==todayKey())}
+function inboxTasks(){return openTasks().filter(task=>task.inbox)}
 function weekTasks(){return openTasks().filter(task=>task.week)}
 function longTasks(){return openTasks().filter(task=>task.type==="长期跟进")}
 ensureCurrentWeek();captureCurrentWeek();
@@ -75,11 +75,11 @@ function nextRepeatDate(task){
 }
 function generateRepeat(task,draft){
  let date=nextRepeatDate(task);if(!date||task.repeatUntil&&date>task.repeatUntil)return;
- let copy=normalizeTask({...clone(task),id:uid("task"),status:"待处理",completed:"",planDate:date,due:"",focus:false,week:false,inbox:true,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),attachments:[],relatedTaskIds:[]});draft.tasks.unshift(copy);
+ let copy=normalizeTask({...clone(task),id:uid("task"),status:"待处理",completed:"",planDate:date,due:"",focus:false,week:false,inbox:true,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),attachments:[],relatedTaskIds:[],handledOn:""});draft.tasks.unshift(copy);
 }
 function setTaskStatus(item,value,draft,options={}){
  let wasDone=isDone(item),previousStatus=item.status;item.status=value;
- item.inbox=value==="待处理";
+ // Inbox classification is independent of status.
  if(previousStatus==="等待"&&value!=="等待")item.followup="";
  if(["待处理","等待","暂停","已完成"].includes(value))item.focus=false;
  if(options.fromToday&&value==="进行中"){item.focus=true;item.week=true}
@@ -98,3 +98,4 @@ function applyTaskDraftToState(saved){
  reconcileTaskEdit(saved,previous);index=state.tasks.findIndex(task=>task.id===saved.id);if(index>=0)state.tasks[index]=saved;else state.tasks.unshift(saved);
  state.tasks.forEach(task=>{if(task.id===saved.id)return;let related=new Set(task.relatedTaskIds||[]);links.has(task.id)?related.add(saved.id):related.delete(saved.id);task.relatedTaskIds=Array.from(related)});
 }
+
