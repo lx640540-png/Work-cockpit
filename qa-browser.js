@@ -34,6 +34,8 @@ const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5)
   const release = await target.boundingBox();
   assert(release, `missing release geometry after Sortable auto-scroll: ${targetSelector}`);
   await page.mouse.move(release.x + release.width / 2, release.y + release.height * ratio, { steps: 3 });
+  // Fallback dragging samples pointer movement on a timer; let the final move settle.
+  await page.waitForTimeout(180);
   await page.mouse.up();
   await page.waitForTimeout(180);
 };
