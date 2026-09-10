@@ -145,6 +145,7 @@ test('project overview edits original tasks, retains empty projects and schedule
  const overviewGeometry=await page.locator('[data-overview-task="long"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),main=box(row.querySelector('.project-overview-task-main')),next=box(row.querySelector('.overview-next-label')),schedule=box(row.querySelector('.overview-schedule')),whole=box(row);return{mainWidth:main.width,nextWidth:next.width,scheduleWidth:schedule.width,rowHeight:whole.height,gapA:next.left-main.right,gapB:schedule.left-next.right}});
  assert(overviewGeometry.nextWidth>=overviewGeometry.mainWidth&&overviewGeometry.scheduleWidth<=260&&overviewGeometry.rowHeight<150&&overviewGeometry.gapA<=30&&overviewGeometry.gapB<=30,JSON.stringify(overviewGeometry));
  await page.locator('[data-overview-task="long"] [data-toggle-week]').click();
+ await page.clock.runFor(250);
  let data=await stored(page);assert.equal(data.tasks.length,2);assert.equal(data.tasks[0].type,'长期跟进');assert.equal(data.tasks[0].week,true);
  assert.equal(data.weeks['2026-08-31'].actions.long.text,'发出目录确认');
  const longNext='需要等外壳一起寄送，先整理清单以及需要提前处理的事项，再联系供应商确认寄送时间，并把确认结果更新到项目记录中。';
