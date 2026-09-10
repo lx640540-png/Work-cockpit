@@ -145,6 +145,7 @@ test('project overview edits original tasks, retains empty projects and schedule
  const overviewGeometry=await page.locator('[data-overview-task="long"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),main=box(row.querySelector('.project-overview-task-main')),next=box(row.querySelector('.overview-next-label')),schedule=box(row.querySelector('.overview-schedule')),whole=box(row);return{mainWidth:main.width,nextWidth:next.width,scheduleWidth:schedule.width,rowHeight:whole.height,gapA:next.left-main.right,gapB:schedule.left-next.right}});
  assert(overviewGeometry.nextWidth>=overviewGeometry.mainWidth&&overviewGeometry.scheduleWidth<=260&&overviewGeometry.rowHeight<150&&overviewGeometry.gapA<=30&&overviewGeometry.gapB<=30,JSON.stringify(overviewGeometry));
  await page.locator('[data-overview-task="long"] [data-toggle-week]').click();
+ await page.clock.runFor(250);
  let data=await stored(page);assert.equal(data.tasks.length,2);assert.equal(data.tasks[0].type,'长期跟进');assert.equal(data.tasks[0].week,true);
  assert.equal(data.weeks['2026-08-31'].actions.long.text,'发出目录确认');
  const longNext='需要等外壳一起寄送，先整理清单以及需要提前处理的事项，再联系供应商确认寄送时间，并把确认结果更新到项目记录中。';
@@ -218,10 +219,10 @@ test('overview preserves notes verbatim, uses waiting follow-up dates, and suppo
 });
 
 
-test('inbox classification, handled undo and next-day visibility survive reload',{timeout:30000},async t=>{
+test('removed classification, handled undo and next-day visibility survive reload',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('active',{focus:true,week:true,inbox:true,nextAction:''})]);
  assert.equal(await page.locator('[data-drop-zone="today"] [data-task="active"] .task-next').count(),0);
- await page.click('[data-organize-task="active"]');
+ assert.equal(await page.locator('[data-organize-task]').count(),0);
  assert.equal((await stored(page)).tasks[0].inbox,false);
  await page.click('[data-handle-task="active"]');
  assert.equal((await stored(page)).tasks[0].status,'进行中');
@@ -269,4 +270,22 @@ test('wheel scrolls while holding a dragged task without completing or reclassif
  await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+20,box.y+15,{steps:5});await page.waitForFunction(()=>!!activeSortableTask);
  const before=await page.locator('#mainScroll').evaluate(n=>n.scrollTop);await page.mouse.wheel(0,380);await page.waitForFunction(before=>document.querySelector('#mainScroll').scrollTop>before+50,before);
  await page.mouse.up();await page.waitForFunction(()=>!activeSortableTask);const tasks=(await stored(page)).tasks;assert.equal(tasks.length,24);assert(tasks.every(task=>task.status==='进行中'&&task.focus&&!task.inbox));
+});
+
+
+test('pending inbox needs no classification and detail saves keep task content', {timeout:30000}, async t=>{
+ const page=await fixture(t,[makeTask('pending',{status:'待处理',inbox:false,project:'p1',notes:'保留记录'})],{projects:projectFixture});
+ await page.locator('[data-drop-zone="inbox"] .task-row[data-task="pending"]').waitFor();
+ await page.evaluate(()=>openTask('pending'));
+ assert.equal(await page.locator('#draftInbox').count(),0);
+ await page.selectOption('#draftStatus','进行中');await page.check('#draftFocus');
+ await page.click('#taskDialog [data-close="taskDialog"]');
+ await page.locator('[data-drop-zone="today"] .task-row[data-task="pending"]').waitFor();
+ await page.reload();
+ assert.equal(await page.locator('[data-drop-zone="inbox"] .task-row[data-task="pending"]').count(),0);
+ const value=(await stored(page)).tasks.find(task=>task.id==='pending');
+ assert.equal(value.project,'p1');assert(value.notes.includes('保留记录'));assert.equal(value.status,'进行中');
+ await page.evaluate(()=>navigate('tasks'));await page.locator('#page-tasks.active').waitFor();
+ assert.equal(await page.locator('#page-tasks [data-quick="inbox"]').count(),0);
+ assert(!(await page.locator('#page-tasks').innerText()).includes('待整理'));
 });

@@ -34,6 +34,8 @@ const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5)
   const release = await target.boundingBox();
   assert(release, `missing release geometry after Sortable auto-scroll: ${targetSelector}`);
   await page.mouse.move(release.x + release.width / 2, release.y + release.height * ratio, { steps: 3 });
+  // Fallback dragging samples pointer movement on a timer; let the final move settle.
+  await page.waitForTimeout(180);
   await page.mouse.up();
   await page.waitForTimeout(180);
 };
@@ -127,9 +129,8 @@ async function testUrl() {
     const task = state.tasks.find(item => item.id === 't9');
     return { locations, task, order: state.order };
   });
-  assert(exclusiveFixture.locations.join(',') === 'waiting,inbox', 'independent inbox classification was lost');
-  assert(!exclusiveFixture.task.focus && exclusiveFixture.task.inbox, 'waiting state changed inbox classification');
-  await page.click('[data-organize-task="t9"]');
+  assert(exclusiveFixture.locations.join(',') === 'waiting', 'legacy inbox flag overrode waiting status');
+  assert(!exclusiveFixture.task.focus && !exclusiveFixture.task.inbox, 'waiting state changed inbox classification');
   await page.locator('[data-drop-scope="inbox"][data-task="t9"]').waitFor({state:'detached'});
   // Both task columns scroll with the main page, even when many rows are present.
   await page.evaluate(() => { document.querySelector('#page-today').style.minHeight='1800px'; mainScroll.scrollTop=0;ui.waitingExpanded.add('undated');renderNow(); });
@@ -337,7 +338,7 @@ async function testUrl() {
   await page.click('[data-task="t1"] [data-property="status"]');
   await page.click('#choicePopover [data-choice="待处理"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
-  assert(!saved.tasks.find(task => task.id === 't1').inbox, 'status edit changed independent inbox flag');
+  assert(saved.tasks.find(task => task.id === 't1').inbox, 'pending task did not return to inbox');
   await page.evaluate(() => { openTask('t1'); });
   await page.selectOption('#draftStatus', '进行中');
   await page.check('#draftFocus');
