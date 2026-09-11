@@ -1,2 +1,10 @@
-.week-comparison-table :is(th,td){vertical-align:middle}.week-comparison-table th[scope=row]{width:28%}.week-plan-text{width:30%}.week-result-cell{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center}.week-result-cell textarea{margin-top:0}.week-result-cell .pill{align-self:center}
-
+/* Compact review rows; retain vertical resizing for longer written results. */
+.week-comparison-table :is(th,td){vertical-align:middle;padding:8px 12px}
+.week-comparison-table th[scope=row]{width:28%}
+.week-comparison-table th[scope=row] small{margin-top:3px}
+.week-plan-text{width:30%}
+.week-result-cell{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center}
+.week-comparison-table .week-result-cell textarea{height:52px;min-height:52px;margin-top:0;padding:5px 8px;line-height:20px;overflow-y:auto;resize:vertical}
+.week-result-cell .pill{align-self:center}
+#weekReviewSplit .task-row{min-height:56px;padding-top:7px;padding-bottom:7px}
+@media(max-width:1000px){.week-comparison-table th[scope=row],.week-comparison-table .week-plan-text{width:100%}}
