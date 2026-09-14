@@ -34,10 +34,10 @@ function persistStateChanges(options={}){
 function replaceState(next,label){
  undoStack.push({label:label||"替换数据",state:snapshotCore()});if(undoStack.length>24)undoStack.shift();redoStack=[];state=normalizeState(next);ensureCurrentWeek();activateScheduledTasks();captureCurrentWeek();saveLocal(true);requestRender();
 }
-function undo(){directEditSessions.clear();let entry=undoStack.pop();if(!entry)return;redoStack.push({label:entry.label,state:snapshotCore()});state=normalizeState(entry.state);activateScheduledTasks();saveLocal(true);requestRender();toast("已撤回："+entry.label)}
-function redo(){directEditSessions.clear();let entry=redoStack.pop();if(!entry)return;undoStack.push({label:entry.label,state:snapshotCore()});state=normalizeState(entry.state);activateScheduledTasks();saveLocal(true);requestRender();toast("已恢复："+entry.label)}
+function syncOpenTaskAfterHistory(){if(typeof syncOpenTaskDraftFromState==="function")syncOpenTaskDraftFromState()}
+function undo(){directEditSessions.clear();let entry=undoStack.pop();if(!entry)return;redoStack.push({label:entry.label,state:snapshotCore()});state=normalizeState(entry.state);activateScheduledTasks();saveLocal(true);syncOpenTaskAfterHistory();requestRender();toast("已撤回："+entry.label)}
+function redo(){directEditSessions.clear();let entry=redoStack.pop();if(!entry)return;undoStack.push({label:entry.label,state:snapshotCore()});state=normalizeState(entry.state);activateScheduledTasks();saveLocal(true);syncOpenTaskAfterHistory();requestRender();toast("已恢复："+entry.label)}
 function createSnapshot(label){
  let item={id:uid("snapshot"),label:label||"安全快照",createdAt:new Date().toISOString(),state:snapshotCore()};
  item.state.snapshots=[];state.snapshots.unshift(item);state.snapshots=state.snapshots.slice(0,12);return item;
 }
-
