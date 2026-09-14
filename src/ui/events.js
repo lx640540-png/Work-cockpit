@@ -6,6 +6,10 @@ function saveRelationsNow(label){
 function handleClick(event){
  let target=event.target.closest("button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
  if(target.dataset.addProgress!==undefined)return addTaskProgress();
+ if(target.dataset.editProgress)return beginEditTaskProgress(target.dataset.editProgress);
+ if(target.dataset.cancelProgressEdit!==undefined)return refreshTaskProgressList();
+ if(target.dataset.saveProgress)return saveTaskProgressEdit(target.dataset.saveProgress);
+ if(target.dataset.deleteProgress)return deleteTaskProgress(target.dataset.deleteProgress);
  if(target.dataset.quickDate)return openTaskDateMenu(target,target.dataset.quickDate);
  if(target.dataset.setTaskDate!==undefined)return applyQuickTaskDate(target.dataset.setTaskDate);
  if(target.dataset.applyTaskDate!==undefined)return applyQuickTaskDate($("#quickTaskDate").value);
@@ -110,6 +114,7 @@ function handleClick(event){
  if(target.dataset.closeSearchPage!==undefined)return closeGlobalSearch();
  if(target.dataset.searchCategory)return changeSearchCategory(target.dataset.searchCategory);
  if(target.dataset.searchMore)return loadMoreSearch(target.dataset.searchMore);
+ if(target.dataset.searchProjectGroup!==undefined)return toggleSearchProjectGrouping();
  if(target.dataset.searchTask||target.dataset.searchProject||target.dataset.searchMemo||target.dataset.searchDecision)rememberSearchPosition();
  if(target.dataset.clearSearch!==undefined){resetSearchView();globalSearchQuery="";syncSearchInputs("");let input=$("#searchPageInput");if(input){input.focus({preventScroll:true});input.setSelectionRange(0,0)}let results=$("#searchPageResults");if(results)results.innerHTML=globalResults("");restoreSearchPosition();return}
  if(target.dataset.searchTask)return openTask(target.dataset.searchTask);
@@ -180,7 +185,8 @@ $("#globalSearch").addEventListener("focus",event=>{if(currentPage==="search")fo
 document.addEventListener("focusout",event=>{let editor=event.target.closest?.(".rich-editor");if(editor&&!quillFor(editor)){richFlush(editor);let clean=serializeRichEditor(editor),live=clean||"<p><br></p>";if(live!==editor.innerHTML){editor.innerHTML=live;updateRichEmpty(editor);richSyncCurrent(editor);notifyRichInput(editor,"formatBlock")}}if(event.target.matches?.("[data-overview-next],[data-week-action],[data-week-result],[data-top-result],[data-top-index],[data-week-review],[data-memo-title],[data-memo-content]")||editor?.matches?.("[data-week-review],[data-memo-content]"))directEditSessions.clear()});
 document.addEventListener("change",event=>{
  let target=event.target;
- if(target.dataset.overviewDate){let id=target.dataset.overviewDate,value=target.value,field=target.dataset.dateField;if(!['planDate','followup'].includes(field))return;return setTaskDate(id,field,value)}
+ if(target.id==="searchTaskSort")return changeSearchTaskSort(target.value);
+ else if(target.dataset.overviewDate){let id=target.dataset.overviewDate,value=target.value,field=target.dataset.dateField;if(!['planDate','followup'].includes(field))return;return setTaskDate(id,field,value)}
  else if(target.dataset.filterCheck){let field=target.dataset.filterCheck,value=target.value,list=taskFilter[field];target.checked?list.push(value):taskFilter[field]=list.filter(item=>item!==value);taskFilter[field]=[...new Set(taskFilter[field])];renderTasks();requestAnimationFrame(()=>{$('[data-filter-detail="'+field+'"]')?.setAttribute("open","")})}
  else if(target.dataset.bulkSelect){target.checked?ui.selectedTasks.add(target.dataset.bulkSelect):ui.selectedTasks.delete(target.dataset.bulkSelect);requestRender()}
  else if(target.dataset.bulkAll!==undefined){let items=filteredTasks();target.checked?items.forEach(task=>ui.selectedTasks.add(task.id)):items.forEach(task=>ui.selectedTasks.delete(task.id));requestRender()}
@@ -196,7 +202,7 @@ document.addEventListener("change",event=>{
   else if(isPlanDue({planDate:$("#draftPlanDate").value})){$("#draftPlanDate").value="";toast("已取消今日安排和已到期的计划日期")}
  }
  else if(target.id==="draftWeek"){if(!target.checked){$("#draftFocus").checked=false;if(isPlanDue({planDate:$("#draftPlanDate").value})){$("#draftPlanDate").value="";toast("已取消本周、今日安排和已到期的计划日期")}}}
- else if(target.id==="draftPlanDate"){let eligible=!taskDraft.archived&&!["待处理","等待","暂停","已完成"].includes($("#draftStatus").value);if(target.value>todayKey())$("#draftFocus").checked=false;else if(target.value&&eligible){$("#draftFocus").checked=true;$("#draftWeek").checked=true}}
+ else if(target.id==="draftPlanDate"){let eligible=!taskDraft.archived&&!["待处理","等待","暂停","已完成"].includes($("#draftStatus").value);if(!target.value||target.value>todayKey())$("#draftFocus").checked=false;else if(eligible){$("#draftFocus").checked=true;$("#draftWeek").checked=true}}
  else if(target.id==="decisionProject"){decisionDraft.project=target.value;decisionDraft.milestone="";$("#decisionMilestone").innerHTML=milestoneOptions(decisionDraft.project,"");syncHoverSelect($("#decisionMilestone"))}
  else if(target.id==="decisionSourceTask"&&target.value){let source=taskById(target.value);if(source){decisionDraft.sourceTaskId=source.id;decisionDraft.project=source.project;decisionDraft.milestone=source.milestone;$("#decisionProject").innerHTML=decisionProjectOptions(source.project);$("#decisionMilestone").innerHTML=milestoneOptions(source.project,source.milestone);syncHoverSelect($("#decisionProject"));syncHoverSelect($("#decisionMilestone"))}}
  else if(target.dataset.checkDone!==undefined)taskDraft.checklist[Number(target.dataset.checkDone)].done=target.checked;

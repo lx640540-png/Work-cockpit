@@ -54,6 +54,11 @@ function renderTaskEditor(){
  initQuillEditors($("#taskEditor"));
  enhanceHoverSelects($("#taskEditor"));
 }
+function syncOpenTaskDraftFromState(){
+ if(!taskDraft||!$("#taskDialog")?.open)return;
+ let current=taskById(taskDraft.id);if(!current)return finishTaskDialogClose();
+ clearTimeout(taskAutosaveTimer);taskAutosaveTimer=0;taskDraft=clone(current);relatedDraft=new Set(taskDraft.relatedTaskIds||[]);taskAutosaveSignature=taskDraftSignature(taskDraft);renderTaskEditor();setTaskAutosaveStatus("saved","已与撤销记录同步");
+}
 function refreshChecklist(options={}){
  let section=$(".checklist-section"),list=$("#draftChecklist"),toggle=$("[data-toggle-checklist]");if(!section||!list)return;section.classList.toggle("collapsed",taskChecklistCollapsed);section.style.height=taskChecklistHeight&&!taskChecklistCollapsed?Math.round(taskChecklistHeight)+"px":"";toggle.textContent=(taskChecklistCollapsed?"展开":"收起")+" · "+taskDraft.checklist.length;list.innerHTML=checklistMarkup();if(options.focusLast)requestAnimationFrame(()=>{let input=$("#draftChecklist .attachment-item:last-child [data-check-text]");input?.focus();input?.scrollIntoView({block:"nearest"})});
 }
