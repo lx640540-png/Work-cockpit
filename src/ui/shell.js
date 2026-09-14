@@ -60,6 +60,7 @@ function confirmTwice(title,message,callback,label){
 }
 function navigate(page,projectId){
  if(!["today","week","tasks","projects","memos","data","search"].includes(page))return;
+ rememberSearchPosition();closeTaskDateMenu();
  if(projectId){selectedProjectId=projectId;ui.projectView="detail"}
  if(page!==currentPage){currentPage=page;navigationDepth+=1;history.pushState({page,appRoute:true,appNavDepth:navigationDepth},"","#"+page)}
  $("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender();

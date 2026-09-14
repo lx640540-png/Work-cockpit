@@ -30,7 +30,7 @@ function ruleContext() {
     priorities: ['P0','P1','P2','P3'], taskTypes: ['任务','临时事项','长期跟进'],
     sanitizeRichValue: x => x, normalizeRich: x => x, uid: () => 'new-id' });
   for (const name of ['canAdvanceToday','isPlanDue','activateScheduledTasks','setTaskFocus',
-    'setTaskStatus','reconcileTaskEdit','applyTaskCardTransition','normalizeTask']) {
+    'setTaskStatus','reconcileTaskEdit','applyTaskCardTransition','normalizeProgressLog','normalizeTask']) {
     vm.runInContext(source(name), context);
   }
   vm.runInContext(js.split('\n').find(line => line.startsWith('const TASK_CARD_TRANSITIONS=')), context);

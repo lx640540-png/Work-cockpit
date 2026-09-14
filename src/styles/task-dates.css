@@ -1,0 +1,15 @@
+/* Shared task scheduling controls. */
+.task-date-button{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:7px;padding:5px 7px;font:inherit;font-size:11px;white-space:nowrap;cursor:pointer}
+.task-date-button:hover,.task-date-button:focus-visible{border-color:var(--blue);color:var(--blue)}
+.task-date-label,.date-warning{font-size:11px;white-space:nowrap}
+.date-warning.plan{color:var(--muted)}.date-warning.followup{color:var(--orange)}.date-warning.deadline{color:var(--red,#c73a42)}
+.task-date-popover{position:fixed;z-index:250;box-sizing:border-box;width:min(270px,calc(100vw - 16px));padding:14px;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 32px #0002;background:var(--panel);color:var(--ink)}
+.task-date-popover[hidden]{display:none}.task-date-popover b{display:block;margin-bottom:10px}
+.date-shortcuts,.date-menu-actions{display:flex;gap:7px;justify-content:space-between;margin-top:10px}
+.task-date-popover label{display:grid;gap:6px;margin-top:12px;font-size:12px}
+.task-date-popover input{min-width:0;width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:inherit}
+.table-date{display:flex;flex-direction:column;gap:4px;align-items:flex-start}.table-date br{display:none}
+.overview-schedule .task-date-button{padding:3px 7px}.overview-schedule:has(.date-warning){gap:4px}
+.overview-date-field{display:grid;gap:0}.overview-date-field .task-date-button{text-align:left;justify-self:start;padding:0;border:0;background:transparent;font-size:12px}.overview-date-field input{width:100%;box-sizing:border-box}
+
+.task-meta .task-date-button.followup{flex-basis:auto;text-align:center}

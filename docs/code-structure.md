@@ -16,7 +16,7 @@
 | `core/cloud.js` | 云同步、冲突、会话隔离与附件传输 |
 | `domain/tasks.js` | 任务状态、今日安排、重复事项、排序与跨卡片规则 |
 | `domain/week.js` | 周切换、当周捕获和历史周边界 |
-| `domain/records.js` | 决策、项目、备忘录、导入和恢复的现有操作 |
+| `domain/projects.js`、`domain/memos.js`、`domain/data-transfer.js`、`domain/recovery.js` | 项目、备忘录、导入导出和恢复操作 |
 | `pages/` | 今天、本周、事项、项目、备忘录、数据及搜索页面呈现 |
 | `ui/task-list.js` | 共用任务条、列表分组和排序组件 |
 | `ui/task-detail.js` | 任务详情、草稿、历史查看及自动保存 |

@@ -5,6 +5,11 @@ function saveRelationsNow(label){
 }
 function handleClick(event){
  let target=event.target.closest("button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
+ if(target.dataset.addProgress!==undefined)return addTaskProgress();
+ if(target.dataset.quickDate)return openTaskDateMenu(target,target.dataset.quickDate);
+ if(target.dataset.setTaskDate!==undefined)return applyQuickTaskDate(target.dataset.setTaskDate);
+ if(target.dataset.applyTaskDate!==undefined)return applyQuickTaskDate($("#quickTaskDate").value);
+ if(target.dataset.openAllWaiting!==undefined){taskFilter={...taskFilter,quick:"waiting",query:"",project:[],type:[],status:[]};return navigate("tasks")}
  if(target.dataset.handleTask)return updateTask(target.dataset.handleTask,"本次已处理",task=>task.handledOn=todayKey());
  if(target.dataset.undoHandled)return updateTask(target.dataset.undoHandled,"撤销本次处理",task=>task.handledOn="");
  if(target.dataset.page)return navigate(target.dataset.page);
@@ -103,9 +108,12 @@ function handleClick(event){
  if(target.dataset.clearTrash!==undefined)return confirmTwice("永久清空回收站？","回收站中的全部内容都会被永久删除。",()=>commit("清空回收站",draft=>draft.trash=[],{immediate:true,history:false}),"确认清空");
  if(target.dataset.clearBusiness!==undefined)return confirmTwice("一键清空业务数据？","系统会先生成安全快照，再清空事项、项目、速记、备忘录、关键决策和周计划。",()=>{createSnapshot("一键清空前的完整快照");commit("一键清空业务数据",draft=>{draft.tasks=[];draft.projects=[];draft.memos=[];draft.decisions=[];draft.quickNote=emptyQuickNote();draft.weeks={[currentWeekKey()]:emptyWeek()};draft.trash=[];draft.favorites=[];draft.order=emptyOrder()},{immediate:true})},"确认清空数据");
  if(target.dataset.closeSearchPage!==undefined)return closeGlobalSearch();
- if(target.dataset.clearSearch!==undefined){globalSearchQuery="";syncSearchInputs("");let input=$("#searchPageInput");if(input){input.focus({preventScroll:true});input.setSelectionRange(0,0)}let results=$("#searchPageResults");if(results)results.innerHTML=globalResults("");return}
+ if(target.dataset.searchCategory)return changeSearchCategory(target.dataset.searchCategory);
+ if(target.dataset.searchMore)return loadMoreSearch(target.dataset.searchMore);
+ if(target.dataset.searchTask||target.dataset.searchProject||target.dataset.searchMemo||target.dataset.searchDecision)rememberSearchPosition();
+ if(target.dataset.clearSearch!==undefined){resetSearchView();globalSearchQuery="";syncSearchInputs("");let input=$("#searchPageInput");if(input){input.focus({preventScroll:true});input.setSelectionRange(0,0)}let results=$("#searchPageResults");if(results)results.innerHTML=globalResults("");restoreSearchPosition();return}
  if(target.dataset.searchTask)return openTask(target.dataset.searchTask);
- if(target.dataset.searchProject)return navigate("projects",target.dataset.searchProject);
+ if(target.dataset.searchProject){ui.showArchivedProjects=!!projectById(target.dataset.searchProject)?.archived;return navigate("projects",target.dataset.searchProject)}
  if(target.dataset.searchMemo){selectedMemoId=target.dataset.searchMemo;memoArchived=!!memoById(selectedMemoId)?.archived;return navigate("memos")}
  if(target.dataset.searchDecision)return openDecision(target.dataset.searchDecision);
 }
@@ -136,7 +144,7 @@ document.addEventListener("beforeinput",event=>{let editor=event.target.closest?
 $("#confirmAccept").addEventListener("click",()=>{let callback=confirmCallback;confirmCallback=null;closeDialog("confirmDialog");if(typeof callback==="function")callback()});
 $("#taskForm").addEventListener("submit",event=>{event.preventDefault();saveTaskDraft()});
 $("#taskForm").addEventListener("keydown",event=>{
- if(event.key!=="Enter"||event.isComposing||event.keyCode===229||event.target.closest(".rich-editor"))return;
+ if(event.key!=="Enter"||event.isComposing||event.keyCode===229||event.target.closest(".rich-editor")||event.target.id==="taskProgressInput"||event.target.closest("button"))return;
  event.preventDefault();event.stopPropagation();saveTaskDraft();
 });
 $("#projectForm").addEventListener("submit",event=>{event.preventDefault();saveProjectDraft()});
@@ -172,7 +180,7 @@ $("#globalSearch").addEventListener("focus",event=>{if(currentPage==="search")fo
 document.addEventListener("focusout",event=>{let editor=event.target.closest?.(".rich-editor");if(editor&&!quillFor(editor)){richFlush(editor);let clean=serializeRichEditor(editor),live=clean||"<p><br></p>";if(live!==editor.innerHTML){editor.innerHTML=live;updateRichEmpty(editor);richSyncCurrent(editor);notifyRichInput(editor,"formatBlock")}}if(event.target.matches?.("[data-overview-next],[data-week-action],[data-week-result],[data-top-result],[data-top-index],[data-week-review],[data-memo-title],[data-memo-content]")||editor?.matches?.("[data-week-review],[data-memo-content]"))directEditSessions.clear()});
 document.addEventListener("change",event=>{
  let target=event.target;
- if(target.dataset.overviewDate){let id=target.dataset.overviewDate,value=target.value,field=target.dataset.dateField;if(!['planDate','followup'].includes(field))return;return updateTask(id,'调整处理日期',task=>{let previous={...task};task[field]=value;reconcileTaskEdit(task,previous)})}
+ if(target.dataset.overviewDate){let id=target.dataset.overviewDate,value=target.value,field=target.dataset.dateField;if(!['planDate','followup'].includes(field))return;return setTaskDate(id,field,value)}
  else if(target.dataset.filterCheck){let field=target.dataset.filterCheck,value=target.value,list=taskFilter[field];target.checked?list.push(value):taskFilter[field]=list.filter(item=>item!==value);taskFilter[field]=[...new Set(taskFilter[field])];renderTasks();requestAnimationFrame(()=>{$('[data-filter-detail="'+field+'"]')?.setAttribute("open","")})}
  else if(target.dataset.bulkSelect){target.checked?ui.selectedTasks.add(target.dataset.bulkSelect):ui.selectedTasks.delete(target.dataset.bulkSelect);requestRender()}
  else if(target.dataset.bulkAll!==undefined){let items=filteredTasks();target.checked?items.forEach(task=>ui.selectedTasks.add(task.id)):items.forEach(task=>ui.selectedTasks.delete(task.id));requestRender()}
