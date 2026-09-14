@@ -419,3 +419,26 @@ test('iteration: dates and compact layout remain usable on narrow screens',{time
  }
  await page.setViewportSize({width:1600,height:1000});await edit(page,'narrow');await page.screenshot({path:path.join(shots,'iteration-task-detail.png')});
 });
+
+test('rich text: headings highlights expanded editing and three-level indentation persist',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('rich',{title:'富文本第一轮',notes:''})],{route:'tasks'});await edit(page,'rich');
+ const editor=page.locator('#taskNotes');
+ await editor.evaluate(node=>{let q=node.__quill;q.setText('当前结论\n待确认内容\n段落说明\n第一项\n第二项\n','user');q.setSelection(0,4,'silent')});
+ await page.click('.task-notes-editor [data-command="heading2"]');
+ await editor.evaluate(node=>node.__quill.setSelection(5,5,'silent'));await page.click('.task-notes-editor [data-command="highlightYellow"]');
+ await editor.evaluate(node=>node.__quill.setSelection(11,0,'silent'));for(let level=0;level<3;level++)await page.click('.task-notes-editor [data-command="indent"]');
+ assert.equal(await page.locator('.task-notes-editor [data-command="indent"]').isDisabled(),true,'paragraph indent did not stop at level three');
+ await editor.evaluate(node=>node.__quill.setSelection(16,7,'silent'));await page.click('.task-notes-editor [data-command="insertOrderedList"]');
+ await editor.evaluate(node=>{node.__quill.setSelection(20,0,'silent');node.__quill.focus()});await page.keyboard.press('Tab');
+ const formats=await editor.evaluate(node=>{let q=node.__quill;return{heading:q.getFormat(0,1).header,highlight:q.getFormat(5,5).highlight,paragraphIndent:q.getFormat(11,1).indent,list:q.getFormat(16,7).list,child:q.getFormat(20,1)}});
+ assert.equal(formats.heading,2);assert.equal(formats.highlight,'yellow');assert.equal(formats.paragraphIndent,3);assert.equal(formats.list,'ordered');assert.equal(formats.child.list,'ordered');assert.equal(formats.child.indent,1);
+ await editor.evaluate(node=>{node.__quill.__expandedIdentity='same-editor';node.__quill.setSelection(node.__quill.getLength()-1,0,'silent')});await page.click('.task-notes-editor [data-command="expand"]');
+ assert.equal(await page.locator('.task-notes-editor').evaluate(node=>node.classList.contains('rich-expanded')&&document.body.classList.contains('rich-expanded-open')&&node.querySelector('.rich-editor').__quill.__expandedIdentity==='same-editor'),true,'expanded mode replaced the editor or did not lock the background');
+ await editor.evaluate(node=>node.__quill.insertText(node.__quill.getLength()-1,'展开中编辑','user'));await editor.press('Escape');
+ assert.equal(await page.locator('.task-notes-editor').evaluate(node=>!node.classList.contains('rich-expanded')&&!document.body.classList.contains('rich-expanded-open')),true,'Escape did not leave expanded mode');assert.equal(await page.locator('#taskDialog').getAttribute('open'),'','Escape closed task detail together with expanded mode');
+ await save(page);let notes=(await stored(page)).tasks.find(task=>task.id==='rich').notes;
+ assert.match(notes,/<h2>当前结论<\/h2>/);assert.match(notes,/rich-highlight-yellow/);assert.match(notes,/ql-indent-3/);assert.match(notes,/<ol>/);assert.match(notes,/展开中编辑/);
+ await page.reload();await page.waitForFunction(()=>!document.documentElement.classList.contains('booting'));await edit(page,'rich');
+ const restored=await page.locator('#taskNotes').evaluate(node=>{let q=node.__quill;return{html:q.getSemanticHTML(),heading:q.getFormat(0,1).header,highlight:q.getFormat(5,5).highlight,paragraphIndent:q.getFormat(11,1).indent,child:q.getFormat(20,1)}});
+ assert.equal(restored.heading,2);assert.equal(restored.highlight,'yellow');assert.equal(restored.paragraphIndent,3);assert.equal(restored.child.list,'ordered');assert.equal(restored.child.indent,1);assert.match(restored.html,/展开中编辑/);
+});
