@@ -193,7 +193,50 @@ body{line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimize
 .handled-action{order:10;flex:none;margin-left:auto}.handled-action svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.sortable-fallback{pointer-events:none!important;opacity:.8}.planning-resizable{position:relative;min-width:0;padding-right:12px;box-sizing:border-box}.planning-width-handle{position:absolute;right:0;top:22px;bottom:0;width:12px;cursor:col-resize;touch-action:none;display:flex;align-items:center;justify-content:center}.planning-width-handle:after{content:'';width:3px;height:28px;border-radius:3px;background:var(--line)}.planning-width-handle:hover:after,.planning-width-handle:focus-visible:after,.planning-width-handle.active:after{background:var(--blue)}.planning-width-handle:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 .project-overview-task,.task-row.scope-week .task-main{display:flex;flex-wrap:wrap;align-items:center;gap:14px}.project-overview-task-main,.task-row.scope-week .week-task-identity{flex:1 1 180px;min-width:0}.project-overview-task>.overview-next-label,.task-row.scope-week .week-action-label{flex:0 1 var(--planning-width,45%);min-width:min(220px,100%);margin:0}.project-overview-task>.overview-schedule,.task-row.scope-week .task-meta{flex:1 1 150px;min-width:0;max-width:none}.project-overview-task>.overview-schedule{width:auto}.task-row.scope-week .task-meta{justify-content:flex-end}.project-overview-task input{max-width:100%}
 @container(max-width:560px){.project-overview-task-main,.task-row.scope-week .week-task-identity{flex-basis:100%}.project-overview-task>.overview-next-label,.task-row.scope-week .week-action-label{flex-grow:0;min-width:0}.project-overview-task>.overview-schedule,.task-row.scope-week .task-meta{flex-basis:150px}}
-.project-overview-task>.overview-schedule{flex:0 1 200px}.task-row.scope-week .task-meta{flex-grow:0;margin-left:auto}
+.project-overview-task>.overview-schedule{flex:0 1 200px}.task-row.scope-week .task-meta{flex-grow:1;margin-left:auto}
+/* Today summary is a compact navigation row. */
+#page-today .page-head{margin-bottom:12px;align-items:center}
+#page-today .page-head .eyebrow,#page-today .page-head p{display:none}
+#page-today .page-head h1{font-size:23px;margin:0}
+#page-today .summary-grid{gap:8px;margin-bottom:12px}
+#page-today .summary{min-height:48px;padding:8px 12px;gap:9px;transform:none}
+#page-today .summary-icon{width:26px;height:26px;font-size:15px;border-radius:8px;flex-shrink:0}
+#page-today .summary>div:nth-child(2){display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#page-today .summary strong{font-size:19px}
+#page-today .summary small{margin:0;font-size:12px}
+#page-today .summary-arrow{font-size:17px}
+@media(max-width:620px){#page-today .summary{padding:8px}#page-today .page-head{align-items:flex-start}#page-today .page-head h1{font-size:21px}}
+/* Shared task scheduling controls. */
+.task-date-button{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:7px;padding:5px 7px;font:inherit;font-size:11px;white-space:nowrap;cursor:pointer}
+.task-date-button:hover,.task-date-button:focus-visible{border-color:var(--blue);color:var(--blue)}
+.task-date-label,.date-warning{font-size:11px;white-space:nowrap}
+.date-warning.plan{color:var(--muted)}.date-warning.followup{color:var(--orange)}.date-warning.deadline{color:var(--red,#c73a42)}
+.task-date-popover{position:fixed;z-index:250;box-sizing:border-box;width:min(270px,calc(100vw - 16px));padding:14px;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 32px #0002;background:var(--panel);color:var(--ink)}
+.task-date-popover[hidden]{display:none}.task-date-popover b{display:block;margin-bottom:10px}
+.date-shortcuts,.date-menu-actions{display:flex;gap:7px;justify-content:space-between;margin-top:10px}
+.task-date-popover label{display:grid;gap:6px;margin-top:12px;font-size:12px}
+.task-date-popover input{min-width:0;width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:inherit}
+.table-date{display:flex;flex-direction:column;gap:4px;align-items:flex-start}.table-date br{display:none}
+.overview-schedule .task-date-button{padding:3px 7px}.overview-schedule:has(.date-warning){gap:4px}
+.overview-date-field{display:grid;gap:0}.overview-date-field .task-date-button{text-align:left;justify-self:start;padding:0;border:0;background:transparent;font-size:12px}.overview-date-field input{width:100%;box-sizing:border-box}
+
+.task-meta .task-date-button.followup{flex-basis:auto;text-align:center}
+/* Complete search results, counts and category navigation. */
+.search-category-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.search-result-count{font-size:12px;color:var(--muted)}
+.search-result-group{min-width:0;display:grid;gap:6px;margin-bottom:14px}
+.search-result-heading,.search-result-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
+.search-result-footer{font-size:12px;color:var(--muted)}
+.search-result{width:100%;text-align:left;min-width:0}.search-result>span:first-child{min-width:0}
+.search-result b,.search-result small{overflow-wrap:anywhere}.search-excerpt{white-space:normal;line-height:1.6}
+/* Task progress stays subordinate to next action and weekly outcome. */
+.progress-log-section textarea{display:block;box-sizing:border-box;width:100%;min-height:52px;resize:vertical;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:inherit;font:inherit}
+.progress-log-section>small{display:block;font-size:11px;margin-top:5px}
+.progress-log-list{list-style:none;margin:8px 0 0;padding:0;max-height:240px;overflow:auto}
+.progress-log-list li{padding:7px 0;border-bottom:1px solid var(--line)}
+.progress-log-list time{font-size:11px;color:var(--muted)}
+.progress-log-list p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.6}
+.week-progress-records{width:100%;font-size:11px;margin-top:5px}.week-progress-records summary{cursor:pointer;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -265,6 +308,11 @@ let uiLayout=loadUiLayout();
 function saveUiLayout(){localStorage.setItem(LAYOUT_KEY,JSON.stringify(uiLayout))}
 
 
+function normalizeProgressLog(value){
+ if(!Array.isArray(value))return [];
+ return value.filter(entry=>entry&&typeof entry.text==="string"&&entry.text.trim()).map(entry=>({id:String(entry.id||uid("progress")),text:entry.text,createdAt:String(entry.createdAt||"")}));
+}
+function progressEntriesForWeek(task,key){return (task.progressLog||[]).filter(entry=>{let date=fmt(new Date(entry.createdAt));return date>=key&&date<=weekEnd(key)})}
 function emptyWeek(){return{actions:{},topResults:[],top:[],taskIds:[],carriedTaskIds:[],taskSnapshots:[],projectSnapshots:[],reviewDone:"",reviewMiss:"",reviewNext:"",carriedFromWeek:"",activatedAt:"",closedAt:""}}
 function emptyOrder(){return{today:[],week:[],waiting:[],inbox:[],done:[],long:[],all:[],memoActive:[],memoArchived:[],projects:[],pinToday:[],pinWaiting:[],pinInbox:[],pinWeek:[],pinLong:[],pinAll:[],todayGroup:false,weekGroup:false}}
 function emptyQuickNote(){return{delta:{ops:[{insert:"\n",attributes:{quickDone:"0"}}]},updatedAt:""}}
@@ -292,7 +340,7 @@ function normalizeProject(raw,index){
 function normalizeTask(raw,index){
  let status=statuses.includes(raw?.status)?raw.status:(raw?.completed?"已完成":"待处理"),priority=priorities.includes(raw?.priority)?raw.priority:(raw?.priority==="A"?"P0":raw?.priority==="B"?"P1":raw?.priority==="C"?"P2":"P1"),completed=status==="已完成"?String(raw?.completed||raw?.updatedAt||todayKey()).slice(0,10):"";
  let inbox=status==="待处理",focus=!!raw?.focus&&status!=="等待";
- return{id:String(raw?.id||uid("task")),title:String(raw?.title||"未命名事项"),nextAction:String(raw?.nextAction||raw?.next||""),notes:sanitizeRichValue(normalizeRich(raw?.notes||raw?.note||"")),project:raw?.project?String(raw.project):"",milestone:raw?.milestone?String(raw.milestone):"",type:taskTypes.includes(raw?.type)?raw.type:"任务",status,priority,handledOn:String(raw?.handledOn||""),focus,week:!!raw?.week||focus,inbox,archived:!!raw?.archived,planDate:String(raw?.planDate||""),due:String(raw?.due||""),followup:String(raw?.followup||""),completed,repeat:String(raw?.repeat||""),repeatUntil:String(raw?.repeatUntil||""),checklist:Array.isArray(raw?.checklist)?raw.checklist.map((item,itemIndex)=>({id:String(item?.id||uid("check")),text:String(item?.text||""),done:!!item?.done})):[],attachments:Array.isArray(raw?.attachments)?raw.attachments.filter(item=>item&&item.path).map(item=>({id:String(item.id||uid("attachment")),name:String(item.name||"附件"),type:String(item.type||"application/octet-stream"),size:Number(item.size||0),path:String(item.path),createdAt:item.createdAt||new Date().toISOString()})):[],relatedTaskIds:Array.isArray(raw?.relatedTaskIds)?raw.relatedTaskIds.map(String):[],createdAt:raw?.createdAt||new Date().toISOString(),updatedAt:raw?.updatedAt||new Date().toISOString()};
+ return{id:String(raw?.id||uid("task")),title:String(raw?.title||"未命名事项"),nextAction:String(raw?.nextAction??raw?.next??""),notes:sanitizeRichValue(normalizeRich(raw?.notes||raw?.note||"")),project:raw?.project?String(raw.project):"",milestone:raw?.milestone?String(raw.milestone):"",type:taskTypes.includes(raw?.type)?raw.type:"任务",status,priority,handledOn:String(raw?.handledOn||""),progressLog:normalizeProgressLog(raw?.progressLog),progressDraft:String(raw?.progressDraft||""),focus,week:!!raw?.week||focus,inbox,archived:!!raw?.archived,planDate:String(raw?.planDate||""),due:String(raw?.due||""),followup:String(raw?.followup||""),completed,repeat:String(raw?.repeat||""),repeatUntil:String(raw?.repeatUntil||""),checklist:Array.isArray(raw?.checklist)?raw.checklist.map((item,itemIndex)=>({id:String(item?.id||uid("check")),text:String(item?.text||""),done:!!item?.done})):[],attachments:Array.isArray(raw?.attachments)?raw.attachments.filter(item=>item&&item.path).map(item=>({id:String(item.id||uid("attachment")),name:String(item.name||"附件"),type:String(item.type||"application/octet-stream"),size:Number(item.size||0),path:String(item.path),createdAt:item.createdAt||new Date().toISOString()})):[],relatedTaskIds:Array.isArray(raw?.relatedTaskIds)?raw.relatedTaskIds.map(String):[],createdAt:raw?.createdAt||new Date().toISOString(),updatedAt:raw?.updatedAt||new Date().toISOString()};
 }
 function normalizeMemo(raw,index){
  return{id:String(raw?.id||uid("memo")),title:String(raw?.title||"新备忘录"),content:sanitizeRichValue(normalizeRich(raw?.content||raw?.body||"")),project:raw?.project?String(raw.project):"",pinned:!!raw?.pinned,archived:!!raw?.archived,createdAt:raw?.createdAt||new Date().toISOString(),updatedAt:raw?.updatedAt||new Date().toISOString()};
@@ -412,6 +460,33 @@ function ensureCurrentWeek(){
  state.weeks[now]=existing;state.meta.activeWeekKey=now;
 }
 
+// Scheduling changes dates and Today membership, never task status or historical weeks.
+function isFollowupDue(task,today=todayKey()){
+ return !task.archived&&!isDone(task)&&task.status==="等待"&&!!task.followup&&task.followup<=today&&task.handledOn!==today;
+}
+function taskScheduleField(task){return task.status==="等待"?"followup":"planDate"}
+function validTaskDate(value){return value===""||/^\d{4}-\d{2}-\d{2}$/.test(value)&&fmt(parseDate(value))===value}
+function taskDateFlags(task,today=todayKey()){
+ let open=!task.archived&&!isDone(task);
+ return {plan:open&&canAdvanceToday(task)&&!!task.planDate&&task.planDate<today,
+  followup:open&&task.status==="等待"&&!!task.followup&&task.followup<today,
+  due:open&&!!task.due&&task.due<today};
+}
+function setTaskDate(id,field,value){
+ let task=taskById(id);if(!task||task.archived||isDone(task)||!["planDate","followup","due"].includes(field))return false;
+ if(!validTaskDate(value)){toast("请选择有效日期");return false}
+ updateTask(id,"调整"+({planDate:"计划日期",followup:"跟进日期",due:"截止日期"}[field]),item=>{
+  let previous={...item};item[field]=value;
+  if(field==="planDate"&&!value)item.focus=false;
+  reconcileTaskEdit(item,previous);
+ });return true;
+}
+function taskDateWarnings(task){
+ let flags=taskDateFlags(task);
+ return (flags.plan?'<span class="date-warning plan">计划已过 '+dateShort(task.planDate)+'</span>':"")+
+  (flags.followup&&!isFollowupDue(task)?'<span class="date-warning followup">跟进逾期 '+dateShort(task.followup)+'</span>':"")+
+  (flags.due?'<span class="date-warning deadline">截止逾期 '+dateShort(task.due)+'</span>':"");
+}
 function taskPriority(task){return priorities.indexOf(task.priority)}
 function smartSort(items,scope){
  let today=todayKey();
@@ -458,7 +533,7 @@ function setTaskFocus(task,active,draft){
  else{task.focus=false;if(isPlanDue(task))task.planDate=""}
 }
 function reconcileTaskEdit(task,previous){
- if(previous&&task.planDate!==previous.planDate&&task.planDate>todayKey())task.focus=false;
+ if(previous&&task.planDate!==previous.planDate&&(!task.planDate||task.planDate>todayKey()))task.focus=false;
  if(!canAdvanceToday(task))task.focus=false;
  if(task.focus)task.week=true;
 }
@@ -473,7 +548,7 @@ function isPinned(taskId,scope){return(state.order[pinKey(scope)]||[]).includes(
 function pinOrdered(items,scope){let rows=ordered(items,scope),pins=new Set(state.order[pinKey(scope)]||[]);return rows.filter(task=>pins.has(task.id)).concat(rows.filter(task=>!pins.has(task.id)))}
 function updateTask(id,label,updater){commit(label,draft=>{let task=draft.tasks.find(item=>item.id===id);if(!task)return;updater(task,draft);task.updatedAt=new Date().toISOString()},{immediate:true})}
 function moveTask(id,fromScope,toScope,toId="",position="before"){let transition=TASK_CARD_TRANSITIONS[toScope];if(!transition?.accept||id===toId)return;commit("移动事项至"+transition.label,draft=>{let task=draft.tasks.find(item=>item.id===id);if(!task)return;let sourcePinKey=pinKey(fromScope),targetPinKey=pinKey(toScope),wasPinned=(draft.order[sourcePinKey]||[]).includes(id);applyTaskCardTransition(task,fromScope,toScope,draft);task.updatedAt=new Date().toISOString();let source=draft.order[fromScope]||[],target=(draft.order[toScope]||[]).filter(value=>value!==id);draft.order[fromScope]=source.filter(value=>value!==id);let at=toId?target.indexOf(toId):-1;target.splice(at<0?target.length:at+(position==="after"?1:0),0,id);draft.order[toScope]=target;draft.order[sourcePinKey]=(draft.order[sourcePinKey]||[]).filter(value=>value!==id);let targetPins=new Set((draft.order[targetPinKey]||[]).filter(value=>value!==id));if(wasPinned)targetPins.add(id);draft.order[targetPinKey]=target.filter(value=>targetPins.has(value))},{immediate:true})}
-function followupReminder(task){if(!task.followup||task.followup>todayKey()||isDone(task)||task.archived||["暂停"].includes(task.status))return"";let days=Math.round((parseDate(todayKey())-parseDate(task.followup))/86400000),text=days?"跟进逾期 "+days+" 天":"今日跟进";return'<span class="followup reminder" data-tip="跟进日期已到，请确认进展">◷ '+text+'</span>'}
+function followupReminder(task){if(!isFollowupDue(task))return"";let days=Math.round((parseDate(todayKey())-parseDate(task.followup))/86400000),text=days?"跟进逾期 "+days+" 天":"今日跟进";return'<span class="followup reminder" data-tip="跟进日期已到，请确认进展">◷ '+text+'</span>'}
 function openTasks(){return state.tasks.filter(task=>!task.archived&&!isDone(task))}
 function todayAdvance(){return openTasks().filter(task=>canAdvanceToday(task)&&task.focus&&task.handledOn!==todayKey())}
 function todayWaiting(){return openTasks().filter(task=>task.status==="等待"&&task.handledOn!==todayKey())}
@@ -489,7 +564,7 @@ function nextRepeatDate(task){
 }
 function generateRepeat(task,draft){
  let date=nextRepeatDate(task);if(!date||task.repeatUntil&&date>task.repeatUntil)return;
- let copy=normalizeTask({...clone(task),id:uid("task"),status:"待处理",completed:"",planDate:date,due:"",focus:false,week:false,inbox:true,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),attachments:[],relatedTaskIds:[],handledOn:""});draft.tasks.unshift(copy);
+ let copy=normalizeTask({...clone(task),id:uid("task"),status:"待处理",completed:"",planDate:date,due:"",focus:false,week:false,inbox:true,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),attachments:[],relatedTaskIds:[],handledOn:"",nextAction:"",progressLog:[],progressDraft:""});draft.tasks.unshift(copy);
 }
 function setTaskStatus(item,value,draft,options={}){
  let wasDone=isDone(item),previousStatus=item.status;item.status=value;
@@ -535,13 +610,13 @@ function taskRow(task,options={}){
  let focusToggle=scope==="week"&&!readonly?'<button class="flag-btn focus '+(task.focus?'active':'')+'" type="button" data-toggle-focus="'+task.id+'" data-tip="'+(task.focus?'移出今日行动（取消已到期计划）':'加入今日行动')+'">★</button>':'';
  let check=readonly?'<span class="check '+(isDone(task)?"done":"")+'">'+(isDone(task)?"✓":"")+'</span>':'<button class="check '+(isDone(task)?"done":"")+'" type="button" data-toggle-task="'+task.id+'" data-tip="'+(isDone(task)?"恢复事项":"完成事项")+'">'+(isDone(task)?"✓":"")+'</button>';
  let actionFirst=scope==="today"&&!isDone(task),primary=actionFirst?(task.nextAction||task.title):task.title;
- let next=!isDone(task)?'<div class="task-next"><b>下一步 · </b>'+esc(task.nextAction||"继续推进并更新结果")+'</div>':"";
+ let next=!isDone(task)&&task.nextAction?'<div class="task-next"><b>下一步 · </b>'+esc(task.nextAction)+'</div>':"";
  let openAttrs=options.historyWeek?'data-view-task-history="'+esc(task.id)+'" data-history-week="'+esc(options.historyWeek)+'"':'data-open-task="'+esc(task.id)+'"';
  let primaryLink='<button class="task-title-link '+(isDone(task)?"done":"")+'" type="button" '+openAttrs+' title="'+esc(primary)+'">'+esc(primary)+'</button>';
  if(actionFirst)next=task.nextAction?'<div class="task-next">事项 · <button class="task-secondary-link" type="button" data-open-task="'+esc(task.id)+'">'+esc(task.title)+'</button></div>':"";
  if(scope==="week"&&!readonly)next='<label class="week-action-label"><span>本周推进</span><textarea rows="2" data-week-action="'+esc(task.id)+'" aria-label="'+esc(task.title)+'的本周推进内容">'+esc(currentWeek().actions?.[task.id]?.text||"")+'</textarea></label>';
  let projectLine='<div class="task-project"><i></i>'+esc(project?.name||"通用事项")+(milestone?" · "+esc(milestone.name):"")+'</div>';
- let dates=followupReminder(task)+(task.followup&&task.status==="等待"&&task.followup>todayKey()?'<span class="followup">跟进 '+dateShort(task.followup)+'</span>':"")+(task.due?'<span class="muted" style="font-size:11px">截止 '+dateShort(task.due)+'</span>':"")+(task.completed?'<span class="muted" style="font-size:11px">完成 '+dateShort(task.completed)+'</span>':"");
+ let dates=taskDateButton(task,readonly)+taskDateWarnings(task)+(task.due?'<span class="muted" style="font-size:11px">截止 '+dateShort(task.due)+'</span>':"")+(task.completed?'<span class="muted" style="font-size:11px">完成 '+dateShort(task.completed)+'</span>':"");
  let pin=!readonly&&scope&&options.allowPin!==false?'<button class="pin-task '+(isPinned(task.id,scope)?'active':'')+'" data-pin-task="'+task.id+'" data-pin-scope="'+scope+'" data-tip="'+(scope==='today'?(isPinned(task.id,scope)?'取消今日先做':'设为今日先做'):(isPinned(task.id,scope)?'取消置顶':'置顶当前卡片'))+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2l8 8-3 1-4 4 1 5-1 1-5-6-5 5-1-1 5-5-6-5 1-1 5 1 4-4z"/></svg></button>':'';
  let extra=!readonly&&['today','waiting'].includes(scope)?'<button class="icon-btn handled-action" type="button" aria-label="本次已处理" data-tip="本次已处理：今天已跟进，事项尚未完成" data-handle-task="'+esc(task.id)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12l2 2 4-4M20 12a8 8 0 1 1-8-8"/></svg></button>':'';
  let meta='<div class="task-meta">'+extra+pin+propertyButton(task,"status",readonly)+propertyButton(task,"priority",readonly)+(carry?'<span class="pill carry">上周遗留</span>':"")+dates+'</div>';
@@ -589,14 +664,14 @@ function pageHead(eyebrow,title,subtitle,actions){return'<div class="page-head">
 function renderToday(){
  let advance=pinOrdered(todayAdvance(),"today"),waiting=pinOrdered(todayWaiting(),"waiting"),inbox=pinOrdered(inboxTasks(),"inbox"),doneThisWeek=state.tasks.filter(task=>task.completed&&task.completed>=currentWeekKey()&&task.completed<=weekEnd(currentWeekKey())).length;
  let controls=scope=>((scope!=="today"||!state.order.todayGroup)&&state.order[pinKey(scope)]?.length?'<button class="link-btn" data-unpin-all="'+scope+'">'+(scope==='today'?'取消全部先做':'取消所有置顶')+'</button>':'')+'<button class="btn soft" type="button" data-smart-sort="'+scope+'">✦ 智能排序</button>'+(scope==="today"?'<button class="btn soft" type="button" data-toggle-group="today">'+(state.order.todayGroup?"取消项目分组":"按项目分组")+'</button>':"");
- let due=waiting.filter(task=>task.followup&&task.followup<=todayKey()),future=waiting.filter(task=>task.followup>todayKey()),undated=waiting.filter(task=>!task.followup),nearest=future.map(task=>task.followup).sort()[0];
+ let totalWaiting=openTasks().filter(task=>task.status==="等待").length,due=waiting.filter(task=>isFollowupDue(task)),future=waiting.filter(task=>task.followup>todayKey()),undated=waiting.filter(task=>!task.followup),nearest=future.map(task=>task.followup).sort()[0];
  let waitingGroup=(key,label,items)=>items.length?'<details class="waiting-group" data-waiting-group="'+key+'" '+(ui.waitingExpanded.has(key)?'open':'')+'><summary>'+label+' · '+items.length+' 项</summary>'+groupedTaskList(items,{scope:'waiting'})+'</details>':'';
  let waitingBody=groupedTaskList(due,{scope:'waiting',empty:waiting.length?'今天没有到期催办':'目前没有等待回复的事项。'})+waitingGroup('undated','未设跟进日期',undated)+waitingGroup('future','未到期 · 最近 '+dateShort(nearest),future);
  $("#page-today").innerHTML=pageHead("TODAY","今天，先做下一步。","先做事项可置顶排序；完成框表示整个事项完成。",'<span class="date-chip">'+new Date().toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric",weekday:"long"})+'</span>')+
- '<div class="summary-grid">'+summaryCard("☑",advance.length,"今日行动","today")+summaryCard("◷",waiting.length,"等待与催办","waiting")+summaryCard("◇",weekTasks().length,"本周推进","week")+summaryCard("✓",doneThisWeek,"本周完成","done")+'</div>'+
+ '<div class="summary-grid">'+summaryCard("☑",advance.length,"今日行动","today")+summaryCard("◷",due.length,"今日催办","waiting")+summaryCard("◇",weekTasks().length,"本周推进","week")+summaryCard("✓",doneThisWeek,"本周完成","done")+'</div>'+
  '<div class="today-grid" id="todayGrid"><div class="today-execution today-flow" id="todayExecution" style="--today-left:'+(uiLayout.todayLeft*100).toFixed(2)+'%"><div class="today-action-stack"><article class="card drop-card" data-drop-zone="today" data-drop-label="移至今日行动">'+cardHead("今日行动","今天具体做什么；到期事项自动加入",controls("today"))+'<div class="drop-hint">移至今日行动</div><div class="items today-task-scroll">'+groupedTaskList(advance,{scope:"today",empty:"今天没有计划推进的事项。",grouped:state.order.todayGroup})+'</div></article>'+quickNoteCard()+handledPanel()+'</div>'+
  '<button class="column-resizer" id="todayResizer" type="button" aria-label="调整行动与等待区宽度" data-tip="拖动调整行动与等待区宽度"></button>'+
- '<article class="card drop-card today-waiting" data-drop-zone="waiting" data-drop-label="移至等待与催办">'+cardHead("等待与催办","到期催办 "+due.length+" 项；未到期与无日期事项可展开",controls("waiting"),"orange")+'<div class="drop-hint">移至等待与催办</div><div class="items today-task-scroll">'+waitingBody+'</div></article></div>'+
+ '<article class="card drop-card today-waiting" data-drop-zone="waiting" data-drop-label="移至等待与催办">'+cardHead("等待与催办","待催办 "+due.length+" 项 · 等待总数 "+totalWaiting+" 项（含本日已处理）",'<button class="link-btn" type="button" data-open-all-waiting>全部等待 '+totalWaiting+'</button>'+controls("waiting"),"orange")+'<div class="drop-hint">移至等待与催办</div><div class="items today-task-scroll">'+waitingBody+'</div></article></div>'+
  '<div class="today-capture today-inbox" id="todayCapture"><article class="card drop-card" data-drop-zone="inbox" data-drop-label="移至临时收件箱">'+cardHead("临时收件箱","先记录，再决定项目、状态和计划日期",'<button class="link-btn" data-action="new-task" data-inbox="1">先记下来 ＋</button>',"orange")+'<div class="items">'+groupedTaskList(inbox,{scope:"inbox",empty:"临时收件箱已清空。"})+'</div></article></div></div>';
 }
 
@@ -643,14 +718,14 @@ function renderWeek(){
 
 function quickCounts(){
  let open=openTasks(),today=todayKey();
- return{open:open.length,waiting:open.filter(task=>task.status==="等待").length,followup:open.filter(task=>task.status==="等待"&&task.followup&&task.followup<=today).length,overdue:open.filter(task=>task.due&&task.due<today).length,paused:open.filter(task=>task.status==="暂停").length,done:state.tasks.filter(task=>isDone(task)&&!task.archived).length,archived:state.tasks.filter(task=>task.archived).length};
+ return{open:open.length,waiting:open.filter(task=>task.status==="等待").length,followup:open.filter(task=>isFollowupDue(task,today)).length,overdue:open.filter(task=>task.due&&task.due<today).length,paused:open.filter(task=>task.status==="暂停").length,done:state.tasks.filter(task=>isDone(task)&&!task.archived).length,archived:state.tasks.filter(task=>task.archived).length};
 }
 function filteredTasks(){
  let today=todayKey(),items=state.tasks.filter(task=>{
   if(taskFilter.quick==="all"&&task.archived)return false;
   if(taskFilter.quick==="open"&&(task.archived||isDone(task)))return false;
   if(taskFilter.quick==="waiting"&&!(!task.archived&&!isDone(task)&&task.status==="等待"))return false;
-  if(taskFilter.quick==="followup"&&!(!task.archived&&!isDone(task)&&task.status==="等待"&&task.followup&&task.followup<=today))return false;
+  if(taskFilter.quick==="followup"&&!isFollowupDue(task,today))return false;
   if(taskFilter.quick==="overdue"&&!(!task.archived&&!isDone(task)&&task.due&&task.due<today))return false;
   if(taskFilter.quick==="paused"&&!(!task.archived&&!isDone(task)&&task.status==="暂停"))return false;
   if(taskFilter.quick==="done"&&!(!task.archived&&isDone(task)))return false;
@@ -663,14 +738,14 @@ function filteredTasks(){
 function tableRow(task){
  let project=projectById(task.project),milestone=milestoneOf(task,project);
  let note=strip(task.notes).trim();
- return'<tr data-drop-scope="all" data-task="'+task.id+'"><td><button class="drag-handle" data-drag-handle="all" data-task="'+task.id+'">⠿</button></td><td><input class="bulk-check" type="checkbox" data-bulk-select="'+task.id+'" '+(ui.selectedTasks.has(task.id)?"checked":"")+'></td><td><div class="task-marker-cell"><button class="flag-btn focus '+(task.focus?"active":"")+'" data-toggle-focus="'+task.id+'" data-tip="切换今日行动；加入时同时加入本周，移出时取消已到期的计划日期">★</button><button class="flag-btn '+(task.week?"active":"")+'" data-toggle-week="'+task.id+'" data-tip="切换本周行动">◆</button></div></td><td><button class="check '+(isDone(task)?"done":"")+'" data-toggle-task="'+task.id+'">'+(isDone(task)?"✓":"")+'</button></td><td><button class="table-title-link" type="button" data-open-task="'+esc(task.id)+'">'+esc(task.title)+'</button><span class="pill">'+esc(task.type)+'</span></td><td><div class="table-sub table-next"><b>下一步 · </b>'+esc(task.nextAction||"—")+'</div>'+(note?'<div class="table-sub table-note">'+esc(note)+'</div>':'')+'</td><td><b>'+esc(project?.name||"通用事项")+'</b><div class="muted" style="font-size:11px">'+esc(milestone?.name||"")+'</div></td><td><div class="table-status-cell"><button class="pin-task '+(isPinned(task.id,'all')?'active':'')+'" data-pin-task="'+task.id+'" data-pin-scope="all" data-tip="置顶全部事项视图"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2l8 8-3 1-4 4 1 5-1 1-5-6-5 5-1-1 5-5-6-5 1-1 5 1 4-4z"/></svg></button>'+propertyButton(task,"status",false)+'</div></td><td>'+propertyButton(task,"priority",false)+'</td><td><div class="table-date"><span class="muted">计划：'+dateShort(task.planDate)+'</span><br><span class="muted">完成：'+dateShort(task.completed)+'</span></div></td><td aria-hidden="true"></td></tr>';
+ return'<tr data-drop-scope="all" data-task="'+task.id+'"><td><button class="drag-handle" data-drag-handle="all" data-task="'+task.id+'">⠿</button></td><td><input class="bulk-check" type="checkbox" data-bulk-select="'+task.id+'" '+(ui.selectedTasks.has(task.id)?"checked":"")+'></td><td><div class="task-marker-cell"><button class="flag-btn focus '+(task.focus?"active":"")+'" data-toggle-focus="'+task.id+'" data-tip="切换今日行动；加入时同时加入本周，移出时取消已到期的计划日期">★</button><button class="flag-btn '+(task.week?"active":"")+'" data-toggle-week="'+task.id+'" data-tip="切换本周行动">◆</button></div></td><td><button class="check '+(isDone(task)?"done":"")+'" data-toggle-task="'+task.id+'">'+(isDone(task)?"✓":"")+'</button></td><td><button class="table-title-link" type="button" data-open-task="'+esc(task.id)+'">'+esc(task.title)+'</button><span class="pill">'+esc(task.type)+'</span></td><td><div class="table-sub table-next"><b>下一步 · </b>'+esc(task.nextAction||"—")+'</div>'+(note?'<div class="table-sub table-note">'+esc(note)+'</div>':'')+'</td><td><b>'+esc(project?.name||"通用事项")+'</b><div class="muted" style="font-size:11px">'+esc(milestone?.name||"")+'</div></td><td><div class="table-status-cell"><button class="pin-task '+(isPinned(task.id,'all')?'active':'')+'" data-pin-task="'+task.id+'" data-pin-scope="all" data-tip="置顶全部事项视图"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2l8 8-3 1-4 4 1 5-1 1-5-6-5 5-1-1 5-5-6-5 1-1 5 1 4-4z"/></svg></button>'+propertyButton(task,"status",false)+'</div></td><td>'+propertyButton(task,"priority",false)+'</td><td><div class="table-date">'+taskDateButton(task)+taskDateWarnings(task)+(task.due?'<span class="muted">截止：'+dateShort(task.due)+'</span>':'')+'<br><span class="muted">完成：'+dateShort(task.completed)+'</span></div></td><td aria-hidden="true"></td></tr>';
 }
 function multiFilter(label,field,options){
  let selected=taskFilter[field],title=selected.length?label+" "+selected.length:label;
  return'<details class="multi-filter" data-hover-expand data-filter-detail="'+field+'"><summary>'+esc(title)+'</summary><div class="multi-menu">'+options.map(option=>{let value=typeof option==="string"?option:option.value,text=typeof option==="string"?option:option.label;return'<label><input type="checkbox" data-filter-check="'+field+'" value="'+esc(value)+'" '+(selected.includes(value)?"checked":"")+'><span>'+esc(text)+'</span></label>'}).join("")+'</div></details>';
 }
 function renderTasks(){
- let counts=quickCounts(),quick=[["open","所有待办"],["waiting","等待回复"],["followup","今日催办"],["overdue","已逾期"],["paused","已暂停"],["done","已完成"],["archived","已归档"]],items=filteredTasks();
+ let counts=quickCounts(),quick=[["open","所有待办"],["waiting","等待回复"],["followup","今日催办"],["overdue","截止逾期"],["paused","已暂停"],["done","已完成"],["archived","已归档"]],items=filteredTasks();
  let visibleIds=new Set(items.map(task=>task.id));ui.selectedTasks=new Set(Array.from(ui.selectedTasks).filter(id=>visibleIds.has(id)));
  let quickHtml=quick.map(item=>'<button class="quick-btn '+(taskFilter.quick===item[0]?"active":"")+'" data-quick="'+item[0]+'">'+item[1]+' <em>'+counts[item[0]]+'</em></button>').join("");
  let projectOptions=state.projects.filter(project=>!project.archived).map(project=>({value:project.id,label:project.name}));
@@ -701,20 +776,20 @@ function renderProjectOverview(){
  let groups=projects.map(project=>({id:project.id,name:project.name,project,tasks:state.tasks.filter(task=>task.project===project.id&&overviewTaskMatches(task))}));
  let common=state.tasks.filter(task=>!task.project&&overviewTaskMatches(task));if(common.length)groups.push({id:'',name:'通用事项',tasks:common});
  let body=groups.map(group=>{
-  let closed=ui.collapsedProjects.has(group.id),allGroupTasks=state.tasks.filter(task=>(group.id?task.project===group.id:!task.project)&&!task.archived),open=allGroupTasks.filter(task=>!isDone(task)&&task.status!=="暂停"),waiting=open.filter(task=>task.status==="等待"),overdue=open.filter(task=>(task.followup||task.due||task.planDate)&&Math.min(...[task.followup,task.due,task.planDate].filter(Boolean).map(value=>parseDate(value).getTime()))<parseDate(todayKey()).getTime()),planned=open.filter(task=>task.week),milestone=group.project?currentMilestone(group.project):null;
+  let closed=ui.collapsedProjects.has(group.id),allGroupTasks=state.tasks.filter(task=>(group.id?task.project===group.id:!task.project)&&!task.archived),open=allGroupTasks.filter(task=>!isDone(task)&&task.status!=="暂停"),waiting=open.filter(task=>task.status==="等待"),overdue=open.filter(task=>taskDateFlags(task).due),planPast=open.filter(task=>taskDateFlags(task).plan),followupPast=open.filter(task=>taskDateFlags(task).followup),planned=open.filter(task=>task.week),milestone=group.project?currentMilestone(group.project):null;
   let rows=group.tasks.map(task=>{
    let editable=!task.archived&&!isDone(task),dateField=task.status==='等待'?'followup':'planDate',dateLabel=dateField==='followup'?'跟进日期':'计划日期';
-   return '<article class="project-overview-task" data-overview-task="'+esc(task.id)+'"><div class="project-overview-task-main"><button class="task-title-link" type="button" data-open-task="'+esc(task.id)+'">'+esc(task.title)+'</button><div class="project-overview-task-meta"><span class="pill status-'+esc(task.status)+'">'+esc(task.status)+'</span><span class="pill">'+esc(task.type)+'</span></div>'+overviewProgress(task)+'</div><label class="overview-next-label"><span>下一步</span><textarea rows="2" data-overview-next="'+esc(task.id)+'" aria-label="'+esc(task.title)+'的下一步" '+(!editable?'readonly':'')+'>'+esc(task.nextAction)+'</textarea></label><div class="overview-schedule"><button class="btn '+(task.week?'soft':'')+'" data-toggle-week="'+esc(task.id)+'" '+(!editable?'disabled':'')+' aria-pressed="'+task.week+'">'+(task.week?'已加入本周':'加入本周')+'</button><label>'+dateLabel+'<input type="date" data-overview-date="'+esc(task.id)+'" data-date-field="'+dateField+'" value="'+esc(task[dateField])+'" aria-label="'+esc(task.title)+'的'+dateLabel+'" '+(!editable?'disabled':'')+'></label></div></article>';
+   return '<article class="project-overview-task" data-overview-task="'+esc(task.id)+'"><div class="project-overview-task-main"><button class="task-title-link" type="button" data-open-task="'+esc(task.id)+'">'+esc(task.title)+'</button><div class="project-overview-task-meta"><span class="pill status-'+esc(task.status)+'">'+esc(task.status)+'</span><span class="pill">'+esc(task.type)+'</span></div>'+overviewProgress(task)+'</div><label class="overview-next-label"><span>下一步</span><textarea rows="2" data-overview-next="'+esc(task.id)+'" aria-label="'+esc(task.title)+'的下一步" '+(!editable?'readonly':'')+'>'+esc(task.nextAction)+'</textarea></label><div class="overview-schedule"><button class="btn '+(task.week?'soft':'')+'" data-toggle-week="'+esc(task.id)+'" '+(!editable?'disabled':'')+' aria-pressed="'+task.week+'">'+(task.week?'已加入本周':'加入本周')+'</button><div class="overview-date-field">'+taskDateButton(task,!editable)+'<input type="date" data-overview-date="'+esc(task.id)+'" data-date-field="'+dateField+'" value="'+esc(task[dateField])+'" aria-label="'+esc(task.title)+'的'+dateLabel+'" '+(!editable?'disabled':'')+'></div>'+taskDateWarnings(task)+'</div></article>';
   }).join('');
   let context=group.project?'<span>当前里程碑 · '+esc(milestone?.name||'暂无')+'</span><span>·</span><span>'+esc(projectHealth(group.project))+'</span>':'<span>未关联具体项目</span>';
-  return '<section class="card project-overview-group" data-overview-project="'+esc(group.id)+'"><div class="project-overview-head"><div class="project-overview-heading"><button data-collapse-project="'+esc(group.id)+'" aria-expanded="'+!closed+'">'+(closed?'▸':'▾')+' '+esc(group.name)+'</button><div class="project-overview-context">'+context+(group.project?'<button class="link-btn" data-project-detail="'+esc(group.id)+'">查看项目详情 →</button>':'')+'</div></div><div class="project-overview-stats"><span class="pill">未完成 '+open.length+'</span><span class="pill '+(planned.length?'status-进行中':'')+'">本周 '+planned.length+'</span><span class="pill '+(waiting.length?'status-等待':'')+'">等待 '+waiting.length+'</span><span class="pill '+(overdue.length?'priority-P0':'')+'">逾期 '+overdue.length+'</span></div></div><div class="project-overview-tasks" '+(closed?'hidden':'')+'>'+(rows||'<div class="empty project-overview-empty">当前筛选下没有事项；项目仍保留在总览中。</div>')+'</div></section>';
+  return '<section class="card project-overview-group" data-overview-project="'+esc(group.id)+'"><div class="project-overview-head"><div class="project-overview-heading"><button data-collapse-project="'+esc(group.id)+'" aria-expanded="'+!closed+'">'+(closed?'▸':'▾')+' '+esc(group.name)+'</button><div class="project-overview-context">'+context+(group.project?'<button class="link-btn" data-project-detail="'+esc(group.id)+'">查看项目详情 →</button>':'')+'</div></div><div class="project-overview-stats"><span class="pill">未完成 '+open.length+'</span><span class="pill '+(planned.length?'status-进行中':'')+'">本周 '+planned.length+'</span><span class="pill '+(waiting.length?'status-等待':'')+'">等待 '+waiting.length+'</span><span class="pill '+(overdue.length?'priority-P0':'')+'">截止逾期 '+overdue.length+'</span>'+(planPast.length?'<span class="pill">计划已过 '+planPast.length+'</span>':'')+(followupPast.length?'<span class="pill status-等待">跟进逾期 '+followupPast.length+'</span>':'')+'</div></div><div class="project-overview-tasks" '+(closed?'hidden':'')+'>'+(rows||'<div class="empty project-overview-empty">当前筛选下没有事项；项目仍保留在总览中。</div>')+'</div></section>';
  }).join('');
  $("#page-projects").innerHTML=pageHead('PROJECT OVERVIEW','项目总览','连续浏览项目，明确下一步，再安排本周或处理日期。',projectViewTabs()+'<button class="btn" data-toggle-archived-projects>'+(ui.showArchivedProjects?'返回活跃项目':'已归档项目')+'</button><button class="btn primary" data-action="new-project">＋ 新增项目</button>')+'<div class="overview-toolbar"><div class="segmented">'+filters+'</div><button class="link-btn" data-expand-projects>全部展开</button><button class="link-btn" data-collapse-projects>全部收起</button>'+helpDisclosure('当前进展展示事项状态和已有备注，不自动判断最新结论。下一步直接修改原事项；加入本周时带入当周推进内容，之后分别维护。等待事项设置跟进日期，其余事项设置计划日期。')+'</div><div class="project-overview-groups">'+(body||'<article class="card"><div class="empty">还没有项目，可新增项目或在所有事项中记录内容。</div></article>')+'</div>';
 }
 function weekComparison(week,mode){
  let readonly=mode!=="current",snapshots=week.taskSnapshots||[],planned=snapshots.filter(task=>(week.taskIds||[]).includes(task.id)||task.week&&!task.archived);
  let tops=(week.top||[]).map((text,index)=>'<div class="week-outcome"><b>'+(index+1)+' · '+esc(text)+'</b><label>实际结果<textarea rows="2" data-top-result="'+index+'" '+(readonly?'readonly':'')+' placeholder="达成了什么？还有哪些差距？">'+esc(week.topResults?.[index]||'')+'</textarea></label></div>').join('');
- let rows=planned.map(task=>{let action=week.actions?.[task.id],project=week.projectSnapshots?.find(project=>project.id===task.project),openAttrs=readonly?'data-view-task-history="'+esc(task.id)+'" data-history-week="'+esc(Object.keys(state.weeks).find(key=>state.weeks[key]===week)||selectedWeekKey)+'"':'data-open-task="'+esc(task.id)+'"';return '<tr><th scope="row"><button class="task-title-link" type="button" '+openAttrs+'>'+esc(task.title)+'</button><small class="muted">'+esc(project?.name||'通用事项')+'</small></th><td class="week-plan-text">'+esc(action?.text||'未记录当周推进内容')+'</td><td><div class="week-result-cell"><span class="pill status-'+esc(task.status)+'">'+esc(task.status)+'</span><textarea rows="3" data-week-result="'+esc(task.id)+'" '+(readonly?'readonly':'')+' aria-label="'+esc(task.title)+'的本周实际结果" placeholder="实际推进到了哪里？">'+esc(action?.result||'')+'</textarea></div></td></tr>'}).join('');
+ let rows=planned.map(task=>{let action=week.actions?.[task.id],project=week.projectSnapshots?.find(project=>project.id===task.project),openAttrs=readonly?'data-view-task-history="'+esc(task.id)+'" data-history-week="'+esc(Object.keys(state.weeks).find(key=>state.weeks[key]===week)||selectedWeekKey)+'"':'data-open-task="'+esc(task.id)+'"';return '<tr><th scope="row"><button class="task-title-link" type="button" '+openAttrs+'>'+esc(task.title)+'</button><small class="muted">'+esc(project?.name||'通用事项')+'</small></th><td class="week-plan-text">'+esc(action?.text||'未记录当周推进内容')+'</td><td><div class="week-result-cell"><span class="pill status-'+esc(task.status)+'">'+esc(task.status)+'</span><textarea rows="3" data-week-result="'+esc(task.id)+'" '+(readonly?'readonly':'')+' aria-label="'+esc(task.title)+'的本周实际结果" placeholder="实际推进到了哪里？">'+esc(action?.result||'')+'</textarea>'+weekProgressMarkup(task,selectedWeekKey)+'</div></td></tr>'}).join('');
  return '<section class="card week-comparison"><div class="card-head"><div><h2>本周目标与推进对照</h2><p class="field-hint">对照原安排记录实际结果；阶段推进不等于整个事项完成。</p></div>'+helpDisclosure('本周推进内容在首次加入时由下一步带入，之后不会随当前下一步变化。历史周只读；旧周未保存的内容显示未记录，不用当前内容补写。')+'</div><div class="week-outcomes">'+(tops||'<p class="muted">这周没有设置 Top 3。</p>')+'</div><table class="week-comparison-table"><thead><tr><th>本周事项</th><th>原推进安排</th><th>实际进展</th></tr></thead><tbody>'+rows+'</tbody></table>'+(!rows?'<div class="empty">这周没有推进事项记录。</div>':'')+'</section>';
 }
 function renderProjects(){
@@ -726,7 +801,7 @@ function renderProjects(){
   let current=currentMilestone(project),progress=projectProgress(project),health=projectHealth(project),favorite=state.favorites.includes(project.id),projectTasks=state.tasks.filter(task=>task.project===project.id&&!task.archived),open=projectTasks.filter(task=>!isDone(task)),overdue=open.filter(task=>task.due&&task.due<todayKey());
   let healthBadge=health==="健康"?"":'<span class="pill '+(health==="阻塞"?"priority-P0":"priority-P1")+'">'+health+"</span>";
   let progressBar=project.milestones.length?'<div class="progress" aria-label="里程碑完成 '+progress+'%"><span style="width:'+progress+'%"></span></div>':"";
-  let overdueText=overdue.length?' · <strong>逾期 '+overdue.length+"</strong>":"";
+  let overdueText=overdue.length?' · <strong>截止逾期 '+overdue.length+"</strong>":"";
   return '<article class="project-list-item '+(favorite?"pinned-project ":"")+(selectedProjectId===project.id?"selected":"")+'" data-select-project="'+project.id+'" data-project-drop="'+project.id+'" tabindex="0"><button class="project-order-handle" type="button" draggable="true" data-project-drag="'+project.id+'" data-tip="拖动调整项目顺序" aria-label="拖动调整项目顺序"><svg viewBox="0 0 12 18" aria-hidden="true"><circle cx="3" cy="3" r="1.3"/><circle cx="9" cy="3" r="1.3"/><circle cx="3" cy="9" r="1.3"/><circle cx="9" cy="9" r="1.3"/><circle cx="3" cy="15" r="1.3"/><circle cx="9" cy="15" r="1.3"/></svg></button><div class="project-list-content"><div class="project-list-head"><b>'+esc(project.name)+"</b>"+healthBadge+'</div><div class="project-list-milestone">'+(current?"当前里程碑 · "+esc(current.name):"暂无里程碑")+"</div>"+progressBar+'<div class="project-list-stats"><span>未完成 '+open.length+overdueText+'</span><button type="button" class="favorite '+(favorite?"active":"")+'" data-favorite-project="'+project.id+'" data-tip="'+(favorite?"取消置顶收藏":"置顶并收藏项目")+'" aria-label="'+(favorite?"取消置顶收藏":"置顶并收藏项目")+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2l8 8-3 1-4 4 1 5-1 1-5-6-5 5-1-1 5-5-6-5 1-1 5 1 4-4z"/></svg></button></div></div></article>';
  });
  let pinCount=visible.filter(project=>state.favorites.includes(project.id)).length;
@@ -745,7 +820,7 @@ function renderProjects(){
  let hasFilters=ui.projectOverviewFilter!=="all"||ui.projectMilestoneFilter!=="all"||!!projectQuery;
  let emptyText=allProjectTasks.length?(hasFilters?"当前条件下 0 项，项目共 "+allProjectTasks.length+" 项。":"项目中暂时没有可显示的事项。"):"这个项目还没有事项。";
  let emptyAction=allProjectTasks.length&&hasFilters?'<button class="btn" type="button" data-clear-project-task-filters>查看全部事项</button>':project?'<button class="btn primary" type="button" data-action="new-project-task" data-project="'+project.id+'">＋ 新增事项</button>':"";
- let taskRows=tasks.map(task=>'<div class="overview-row '+(ui.projectFocusTaskId===task.id?"project-task-target":"")+'" data-project-task="'+esc(task.id)+'"><div><button class="task-title-link" type="button" data-open-task="'+esc(task.id)+'">'+esc(task.title)+"</button><small>"+esc(isDone(task)?"完成 "+dateShort(task.completed):task.nextAction||"暂无下一步")+"</small></div>"+propertyButton(task,"status",false)+propertyButton(task,"priority",false)+"</div>").join("");
+ let taskRows=tasks.map(task=>'<div class="overview-row '+(ui.projectFocusTaskId===task.id?"project-task-target":"")+'" data-project-task="'+esc(task.id)+'"><div><button class="task-title-link" type="button" data-open-task="'+esc(task.id)+'">'+esc(task.title)+"</button><small>"+esc(isDone(task)?"完成 "+dateShort(task.completed):task.nextAction||"暂无下一步")+"</small></div>"+taskDateButton(task)+propertyButton(task,"status",false)+propertyButton(task,"priority",false)+"</div>").join("");
  let detail=project?'<article class="card portfolio project-detail-card"><div class="portfolio-head compact"><div class="portfolio-title"><div><h2>'+esc(project.name)+'</h2>'+(project.code?'<small>'+esc(project.code)+"</small>":"")+'</div></div><div class="page-actions">'+(ui.projectReturnTaskId?'<button class="btn" data-return-task="'+esc(ui.projectReturnTaskId)+'">← 返回事项</button>':"")+'<span class="pill">'+projectHealth(project)+'</span><button class="btn" data-edit-project="'+project.id+'">项目设置</button><button class="btn primary" data-action="new-project-task" data-project="'+project.id+'">＋ 新增事项</button></div></div><div class="project-context-row"><button class="project-current compact" type="button" data-edit-project="'+project.id+'"><small>当前里程碑</small><b>'+esc(current?.name||"暂无里程碑 · 添加")+'</b>'+(current?.due?'<span class="muted">'+dateShort(current.due)+"</span>":"")+'</button>'+(project.description?'<details class="project-description"><summary>项目说明</summary><p>'+esc(project.description)+"</p></details>":"")+'</div><div class="project-task-head"><div><b>事项</b><span class="project-result-count">当前显示 '+tasks.length+" 项 · 项目共 "+allProjectTasks.length+' 项</span></div><div class="project-task-tools"><label class="project-task-search"><span>⌕</span><input id="projectTaskSearch" value="'+esc(ui.projectTaskQuery)+'" placeholder="查找事项、下一步、里程碑……"></label>'+filters+milestoneFilter+'<button class="link-btn project-full-view" type="button" data-open-project-tasks="'+project.id+'">完整事项视图 →</button></div></div><div class="overview-list">'+(taskRows||'<div class="empty project-filter-empty"><p>'+esc(emptyText)+"</p>"+emptyAction+"</div>")+"</div></article>":'<article class="card"><div class="empty">选择一个项目查看详情。</div></article>';
  $("#page-projects").innerHTML='<div class="project-detail-page">'+pageHead("PROJECTS","项目","选择项目后可直接查找和处理事项。",projectViewTabs()+'<button class="btn" data-toggle-archived-projects>'+(ui.showArchivedProjects?"返回进行中项目":"已归档 "+state.projects.filter(project=>project.archived).length)+'</button><button class="btn primary" data-action="new-project">＋ 新增项目</button>')+'<div class="project-master-detail" id="projectWorkspace" style="--project-list:'+uiLayout.projectListWidth+'px"><aside class="card project-list-panel"><div class="project-list">'+(rows.join("")||'<div class="empty">没有匹配项目。</div>')+'</div></aside><button class="project-splitter" id="projectSplitter" aria-label="调整项目列表宽度"></button><section class="project-detail-panel">'+detail+"</section></div></div>";
  if(ui.projectFocusTaskId){
@@ -835,9 +910,28 @@ function confirmTwice(title,message,callback,label){
 }
 function navigate(page,projectId){
  if(!["today","week","tasks","projects","memos","data","search"].includes(page))return;
+ rememberSearchPosition();closeTaskDateMenu();
  if(projectId){selectedProjectId=projectId;ui.projectView="detail"}
  if(page!==currentPage){currentPage=page;navigationDepth+=1;history.pushState({page,appRoute:true,appNavDepth:navigationDepth},"","#"+page)}
  $("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender();
+}
+function progressLogRows(entries){
+ return [...entries].reverse().map(entry=>{let date=new Date(entry.createdAt),label=Number.isFinite(date.getTime())?date.toLocaleString("zh-CN",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}):"未记录时间";return '<li><time>'+esc(label)+'</time><p>'+esc(entry.text)+'</p></li>'}).join('');
+}
+function taskProgressMarkup(task){return '<section class="task-section progress-log-section"><div class="task-section-title"><span>推进记录 · '+(task.progressLog||[]).length+'</span><button type="button" class="link-btn" data-add-progress>记录进展</button></div><label for="taskProgressInput">本次进展</label><textarea id="taskProgressInput" rows="2" maxlength="2000" aria-label="本次进展">'+esc(task.progressDraft||'')+'</textarea><small class="muted">输入自动保存为草稿，点击“记录进展”后加入时间记录。</small><div id="taskProgressList"><ol class="progress-log-list">'+progressLogRows(task.progressLog||[])+'</ol></div></section>'}
+function addTaskProgress(){
+ if(!taskDraft)return;let text=$("#taskProgressInput")?.value.trim();if(!text)return toast("请先填写本次进展");
+ if(!persistTaskDraft())return;
+ let id=taskDraft.id;
+ updateTask(id,"记录推进进展",task=>{task.progressLog.push({id:uid("progress"),text,createdAt:new Date().toISOString()});task.progressDraft=""});
+ taskDraft=clone(taskById(id));taskAutosaveSignature=taskDraftSignature(taskDraft);directEditSessions.delete("task:auto:"+id);
+ $("#taskProgressInput").value="";$("#taskProgressList").innerHTML='<ol class="progress-log-list">'+progressLogRows(taskDraft.progressLog)+'</ol>';
+ $(".progress-log-section .task-section-title span").textContent="推进记录 · "+taskDraft.progressLog.length;
+ setTaskAutosaveStatus("saved","推进记录已保存");
+}
+function weekProgressMarkup(task,key){
+ let entries=progressEntriesForWeek(task,key);if(!entries.length)return "";
+ return '<details class="week-progress-records"><summary>本周推进记录 · '+entries.length+'</summary><ol class="progress-log-list">'+progressLogRows(entries)+'</ol></details>';
 }
 function projectOptions(selected){return'<option value="">通用事项</option>'+state.projects.filter(project=>!project.archived||project.id===selected).map(project=>'<option value="'+project.id+'" '+(selected===project.id?"selected":"")+'>'+esc(project.name)+(project.archived?'（已归档）':'')+'</option>').join("")}
 function milestoneOptions(projectId,selected){
@@ -867,7 +961,7 @@ function taskHistoryEntries(taskId){
 function historyWeekLabel(key){let start=parseDate(key);return start.getFullYear()+" 年第 "+isoWeekNumber(start)+" 周"}
 function taskHistoryDetail(task,entry,current=false){
  let week=entry?.week,project=current?projectById(task.project):week?.projectSnapshots.find(item=>item.id===task.project)||projectById(task.project),milestone=milestoneOf(task,project),checklist=(task.checklist||[]).map(item=>'<div><span>'+(item.done?'✓':'○')+'</span><span>'+esc(item.text||'未命名检查项')+'</span></div>').join("")||'<div class="muted">没有检查项</div>',attachments=(task.attachments||[]).map(item=>'<span class="pill">'+esc(item.name)+'</span>').join("")||'<span class="muted">没有附件记录</span>';
- return'<div class="history-banner">'+(current?'当前事项 · 可返回任务详情继续编辑':historyWeekLabel(entry.weekKey)+'结束时的只读快照；不会随当前事项变化')+'</div><h3 class="history-title">'+esc(task.title)+'</h3><div class="history-meta"><span class="pill status-'+esc(task.status)+'">'+esc(task.status)+'</span><span class="pill priority-'+esc(task.priority)+'">'+esc(task.priority)+'</span><span class="pill">'+esc(task.type)+'</span></div><div class="history-grid"><div class="history-field"><small>所属项目</small><b>'+esc(project?.name||'通用事项')+'</b></div><div class="history-field"><small>所属里程碑</small><b>'+esc(milestone?.name||'未关联里程碑')+'</b></div><div class="history-field"><small>计划日期</small><b>'+dateShort(task.planDate)+'</b></div><div class="history-field"><small>完成日期</small><b>'+dateShort(task.completed)+'</b></div></div><section class="history-section"><h3>下一步动作</h3><div>'+esc(task.nextAction||'暂无下一步')+'</div></section><section class="history-section"><h3>备注与关键结论</h3><div class="history-notes">'+(task.notes||'<span class="muted">暂无备注</span>')+'</div></section><section class="history-section"><h3>检查清单</h3><div class="history-checklist">'+checklist+'</div></section><section class="history-section"><h3>附件记录</h3><div class="history-meta">'+attachments+'</div></section>';
+ return'<div class="history-banner">'+(current?'当前事项 · 可返回任务详情继续编辑':historyWeekLabel(entry.weekKey)+'结束时的只读快照；不会随当前事项变化')+'</div><h3 class="history-title">'+esc(task.title)+'</h3><div class="history-meta"><span class="pill status-'+esc(task.status)+'">'+esc(task.status)+'</span><span class="pill priority-'+esc(task.priority)+'">'+esc(task.priority)+'</span><span class="pill">'+esc(task.type)+'</span></div><div class="history-grid"><div class="history-field"><small>所属项目</small><b>'+esc(project?.name||'通用事项')+'</b></div><div class="history-field"><small>所属里程碑</small><b>'+esc(milestone?.name||'未关联里程碑')+'</b></div><div class="history-field"><small>计划日期</small><b>'+dateShort(task.planDate)+'</b></div><div class="history-field"><small>完成日期</small><b>'+dateShort(task.completed)+'</b></div></div><section class="history-section"><h3>下一步动作</h3><div>'+esc(task.nextAction||'暂无下一步')+'</div></section><section class="history-section"><h3>备注与关键结论</h3><div class="history-notes">'+(task.notes||'<span class="muted">暂无备注</span>')+'</div></section><section class="history-section"><h3>检查清单</h3><div class="history-checklist">'+checklist+'</div></section><section class="history-section"><h3>推进记录</h3><ol class="progress-log-list">'+progressLogRows(task.progressLog||[])+'</ol></section><section class="history-section"><h3>附件记录</h3><div class="history-meta">'+attachments+'</div></section>';
 }
 function renderTaskHistory(){
  let current=taskById(historyTaskId),entries=taskHistoryEntries(historyTaskId);if(historySelection==="current"&&!current)historySelection=entries[0]?.weekKey||"";if(historySelection!=="current"&&!entries.some(item=>item.weekKey===historySelection))historySelection=current?"current":entries[0]?.weekKey||"";
@@ -878,7 +972,7 @@ function openTaskHistory(taskId,selection="current"){historyTaskId=taskId;histor
 function openTask(id,prefill={}){
  let existing=id?taskById(id):null;
  clearTimeout(taskAutosaveTimer);taskAutosaveClosing=false;
- taskDraft=normalizeTask(existing?clone(existing):{id:uid("task"),title:"",status:"待处理",priority:"P1",type:"任务",...prefill});
+ taskDraft=normalizeTask(existing?clone(existing):{id:uid("task"),title:"",status:"待处理",priority:"P1",type:"任务",...prefill,nextAction:""});
  relatedDraft=new Set(taskDraft.relatedTaskIds||[]);attachmentPreviewId="";taskChecklistCollapsed=false;taskChecklistHeight=0;
  $("#taskDialogTitle").textContent=existing?"编辑事项":"新增事项";$("#deleteTaskButton").hidden=!existing;
  taskAutosaveSignature=taskDraftSignature(taskDraft);renderTaskEditor();setTaskAutosaveStatus("","修改会自动保存");showDialog($("#taskDialog"));requestAnimationFrame(()=>$("#taskTitle")?.focus());
@@ -886,10 +980,10 @@ function openTask(id,prefill={}){
 function renderTaskEditor(){
  let existing=!!taskById(taskDraft.id),project=projectById(taskDraft.project);
  let repeatHelp="完成事项时，系统会按规则生成下一次事项；原事项仍保留完成记录。",notesEditor=resizableRichBox("taskNotesHeight",toolbar()+'<div class="rich-editor" id="taskNotes" contenteditable="true" data-placeholder="补充背景、判断和结果……">'+taskDraft.notes+'</div>',"task-notes-editor");
- $("#taskEditor").innerHTML='<aside class="task-column"><section class="task-section"><div class="task-section-title">任务属性</div><div class="form-grid"><div class="field"><label>类型</label><select id="draftType">'+taskTypes.map(value=>'<option '+(taskDraft.type===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>状态</label><select id="draftStatus">'+statuses.map(value=>'<option '+(taskDraft.status===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>优先级</label><select id="draftPriority">'+priorities.map(value=>'<option '+(taskDraft.priority===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>计划日期</label><input id="draftPlanDate" type="date" value="'+esc(taskDraft.planDate)+'"></div><div class="field"><label>完成日期</label><input id="draftCompleted" type="date" value="'+esc(taskDraft.completed)+'" '+(taskDraft.status==="已完成"?"":"disabled")+'></div><div class="field"><label>跟进日期</label><input id="draftFollowup" type="date" value="'+esc(taskDraft.followup)+'"></div></div><label style="display:flex;gap:8px;margin-top:11px"><input id="draftFocus" type="checkbox" '+(taskDraft.focus?"checked":"")+'> 加入今日行动（同时加入本周）</label><label style="display:flex;gap:8px;margin-top:7px"><input id="draftWeek" type="checkbox" '+(taskDraft.week?"checked":"")+'> 加入本周行动</label></section>'+
+ $("#taskEditor").innerHTML='<aside class="task-column"><section class="task-section"><div class="task-section-title">任务属性</div><div class="form-grid"><div class="field"><label>类型</label><select id="draftType">'+taskTypes.map(value=>'<option '+(taskDraft.type===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>状态</label><select id="draftStatus">'+statuses.map(value=>'<option '+(taskDraft.status===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>优先级</label><select id="draftPriority">'+priorities.map(value=>'<option '+(taskDraft.priority===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>计划日期 <small>准备哪天做</small></label><input id="draftPlanDate" type="date" value="'+esc(taskDraft.planDate)+'"></div><div class="field"><label>截止日期 <small>最晚何时完成</small></label><input id="draftDue" type="date" value="'+esc(taskDraft.due)+'"></div><div class="field"><label>完成日期</label><input id="draftCompleted" type="date" value="'+esc(taskDraft.completed)+'" '+(taskDraft.status==="已完成"?"":"disabled")+'></div><div class="field"><label>跟进日期 <small>等待时何时再问</small></label><input id="draftFollowup" type="date" value="'+esc(taskDraft.followup)+'"></div></div><label style="display:flex;gap:8px;margin-top:11px"><input id="draftFocus" type="checkbox" '+(taskDraft.focus?"checked":"")+'> 加入今日行动（同时加入本周）</label><label style="display:flex;gap:8px;margin-top:7px"><input id="draftWeek" type="checkbox" '+(taskDraft.week?"checked":"")+'> 加入本周行动</label></section>'+
  '<section class="task-section"><div class="task-section-title task-project-section-title"><span>项目关系</span><button class="link-btn task-project-link" type="button" data-go-task-project '+(taskDraft.project?'':'disabled')+'>进入项目 ↗</button></div><div class="field"><label>所属项目</label><select id="draftProject">'+projectOptions(taskDraft.project)+'</select></div><div class="field" style="margin-top:9px"><label>里程碑</label><select id="draftMilestone">'+milestoneOptions(taskDraft.project,taskDraft.milestone)+'</select></div></section>'+
  '<section class="task-section"><div class="task-section-title">重复规则 <button class="help" type="button" data-tip="'+esc(repeatHelp)+'">?</button></div><div class="form-grid"><div class="field"><label>重复频率</label><select id="draftRepeat"><option value="">不重复</option><option value="daily" '+(taskDraft.repeat==="daily"?"selected":"")+'>每天</option><option value="weekdays" '+(taskDraft.repeat==="weekdays"?"selected":"")+'>工作日</option><option value="weekly" '+(taskDraft.repeat==="weekly"?"selected":"")+'>每周</option><option value="monthly" '+(taskDraft.repeat==="monthly"?"selected":"")+'>每月</option><option value="after7" '+(taskDraft.repeat==="after7"?"selected":"")+'>完成 7 天后</option></select></div><div class="field"><label>重复截止</label><input id="draftRepeatUntil" type="date" value="'+esc(taskDraft.repeatUntil)+'"></div></div></section></aside>'+
- '<section class="task-column task-content-column"><div class="field"><label>事项名称</label><input class="title-input" id="taskTitle" value="'+esc(taskDraft.title)+'" placeholder="写清楚要推动的结果"></div><div class="field"><label>下一步动作</label><textarea id="taskNext" rows="1" placeholder="下一步具体要做什么？">'+esc(taskDraft.nextAction)+'</textarea></div><section class="task-section checklist-section '+(taskChecklistCollapsed?'collapsed':'')+'" '+(taskChecklistHeight&&!taskChecklistCollapsed?'style="height:'+Math.round(taskChecklistHeight)+'px"':'')+'><div class="task-section-title"><span>检查清单</span><div class="checklist-tools"><button class="checklist-toggle" type="button" data-toggle-checklist>'+(taskChecklistCollapsed?'展开':'收起')+' · '+taskDraft.checklist.length+'</button><button class="link-btn" type="button" data-add-check>＋ 添加</button></div></div><div id="draftChecklist">'+checklistMarkup()+'</div></section><button class="checklist-resizer" id="checklistResizer" type="button" data-tip="上下拖动调整检查清单高度；双击恢复自适应" aria-label="上下拖动调整检查清单高度"></button><div class="field task-notes-field"><label>备注与关键结论</label>'+notesEditor+'</div></section>'+
+ '<section class="task-column task-content-column"><div class="field"><label>事项名称</label><input class="title-input" id="taskTitle" value="'+esc(taskDraft.title)+'" placeholder="写清楚要推动的结果"></div><div class="field"><label>下一步动作</label><textarea id="taskNext" rows="1">'+esc(taskDraft.nextAction)+'</textarea></div><section class="task-section checklist-section '+(taskChecklistCollapsed?'collapsed':'')+'" '+(taskChecklistHeight&&!taskChecklistCollapsed?'style="height:'+Math.round(taskChecklistHeight)+'px"':'')+'><div class="task-section-title"><span>检查清单</span><div class="checklist-tools"><button class="checklist-toggle" type="button" data-toggle-checklist>'+(taskChecklistCollapsed?'展开':'收起')+' · '+taskDraft.checklist.length+'</button><button class="link-btn" type="button" data-add-check>＋ 添加</button></div></div><div id="draftChecklist">'+checklistMarkup()+'</div></section><button class="checklist-resizer" id="checklistResizer" type="button" data-tip="上下拖动调整检查清单高度；双击恢复自适应" aria-label="上下拖动调整检查清单高度"></button><div class="field task-notes-field"><label>备注与关键结论</label>'+notesEditor+'</div>'+taskProgressMarkup(taskDraft)+'</section>'+
  '<aside class="task-column attachment-column"><section class="task-section"><div class="task-section-title">附件与预览</div><div class="dropzone"><div>图片、PDF、Office、TXT、ZIP<br><label>＋ 选择文件</label></div></div><div class="attachment-list">'+attachmentMarkup()+'</div><div class="preview '+(attachmentPreviewId?'has-preview':'')+'" id="attachmentPreview">'+(attachmentPreviewId?"正在加载预览……":"选择附件后在这里预览")+'</div><p class="muted" style="font-size:10px">附件存入 Supabase Storage；事项数据只保存元数据与路径，不保存 Base64。</p></section>'+ 
  '<section class="task-section"><div class="task-section-title" style="display:flex;align-items:center;justify-content:space-between"><span>关联任务 <span class="muted">双向关联</span></span><button class="link-btn" type="button" data-new-related-task>＋ 新建</button></div><input class="related-search" id="relatedSearch" placeholder="搜索任务名称或下一步……"><div id="relationResults"></div><div class="related-list" id="relatedList">'+relationMarkup()+'</div><p class="muted" style="font-size:10px">新建时会先保存当前事项，并自动建立双向关联；关系不参与状态和排序。</p></section><section class="task-section"><div class="task-section-title" style="display:flex;align-items:center;justify-content:space-between"><span>关键决策</span><button class="link-btn" type="button" data-new-decision data-task="'+taskDraft.id+'" '+(existing?"":"disabled")+'>＋ 记录</button></div><div class="decision-list" id="taskDecisionList">'+taskDecisionMarkup()+'</div><p class="muted" style="font-size:10px">记录会自动关联当前任务、项目与里程碑；不改变任务排序。</p></section><section class="task-section"><div class="task-section-title">周记录</div><button class="btn" style="width:100%" type="button" data-view-task-history="'+taskDraft.id+'" '+(existing?"":"disabled")+'>查看周记录 · '+(existing?taskHistoryEntries(taskDraft.id).length:0)+'</button><p class="muted" style="font-size:10px;margin-bottom:0">历史周为只读快照；当前事项仍是唯一可编辑数据源。</p></section></aside>';
  initQuillEditors($("#taskEditor"));
@@ -899,10 +993,10 @@ function refreshChecklist(options={}){
  let section=$(".checklist-section"),list=$("#draftChecklist"),toggle=$("[data-toggle-checklist]");if(!section||!list)return;section.classList.toggle("collapsed",taskChecklistCollapsed);section.style.height=taskChecklistHeight&&!taskChecklistCollapsed?Math.round(taskChecklistHeight)+"px":"";toggle.textContent=(taskChecklistCollapsed?"展开":"收起")+" · "+taskDraft.checklist.length;list.innerHTML=checklistMarkup();if(options.focusLast)requestAnimationFrame(()=>{let input=$("#draftChecklist .attachment-item:last-child [data-check-text]");input?.focus();input?.scrollIntoView({block:"nearest"})});
 }
 function collectTaskDraft(){
- taskDraft.title=$("#taskTitle").value.trim();taskDraft.nextAction=$("#taskNext").value.trim();taskDraft.notes=serializeRichEditor($("#taskNotes"));taskDraft.type=$("#draftType").value;taskDraft.status=$("#draftStatus").value;taskDraft.priority=$("#draftPriority").value;taskDraft.planDate=$("#draftPlanDate").value;taskDraft.completed=taskDraft.status==="已完成"?($("#draftCompleted").value||taskDraft.completed||todayKey()):"";taskDraft.followup=$("#draftFollowup").value;taskDraft.project=$("#draftProject").value;taskDraft.milestone=$("#draftMilestone").value;taskDraft.repeat=$("#draftRepeat").value;taskDraft.repeatUntil=$("#draftRepeatUntil").value;taskDraft.focus=$("#draftFocus").checked;taskDraft.week=$("#draftWeek").checked||taskDraft.focus;taskDraft.inbox=taskDraft.status==="待处理";taskDraft.relatedTaskIds=Array.from(relatedDraft);taskDraft.updatedAt=new Date().toISOString();
+ taskDraft.progressDraft=$("#taskProgressInput").value;taskDraft.title=$("#taskTitle").value.trim();taskDraft.nextAction=$("#taskNext").value.trim();taskDraft.notes=serializeRichEditor($("#taskNotes"));taskDraft.type=$("#draftType").value;taskDraft.status=$("#draftStatus").value;taskDraft.priority=$("#draftPriority").value;taskDraft.planDate=$("#draftPlanDate").value;taskDraft.due=$("#draftDue").value;taskDraft.completed=taskDraft.status==="已完成"?($("#draftCompleted").value||taskDraft.completed||todayKey()):"";taskDraft.followup=$("#draftFollowup").value;taskDraft.project=$("#draftProject").value;taskDraft.milestone=$("#draftMilestone").value;taskDraft.repeat=$("#draftRepeat").value;taskDraft.repeatUntil=$("#draftRepeatUntil").value;taskDraft.focus=$("#draftFocus").checked;taskDraft.week=$("#draftWeek").checked||taskDraft.focus;taskDraft.inbox=taskDraft.status==="待处理";taskDraft.relatedTaskIds=Array.from(relatedDraft);taskDraft.updatedAt=new Date().toISOString();
 }
 function taskDraftSignature(task){let value=clone(task||{});delete value.updatedAt;return JSON.stringify(value)}
-function taskDraftHasContent(task){return!!(task?.title||task?.nextAction||strip(task?.notes||"").trim()||task?.project||task?.milestone||task?.planDate||task?.followup||task?.focus||task?.week||task?.repeat||(task?.checklist||[]).some(item=>item.text?.trim())||(task?.relatedTaskIds||[]).length||(task?.attachments||[]).length)}
+function taskDraftHasContent(task){return!!(task?.title||task?.nextAction||task?.progressDraft||task?.due||strip(task?.notes||"").trim()||task?.project||task?.milestone||task?.planDate||task?.followup||task?.focus||task?.week||task?.repeat||(task?.checklist||[]).some(item=>item.text?.trim())||(task?.relatedTaskIds||[]).length||(task?.attachments||[]).length)}
 function setTaskAutosaveStatus(kind,text){let status=$("#taskAutosaveStatus");if(!status)return;status.className="task-autosave-status "+(kind||"");status.textContent=text}
 function persistTaskDraft(options={}){
  if(!taskDraft||!$("#taskDialog")?.open)return false;clearTimeout(taskAutosaveTimer);taskAutosaveTimer=0;
@@ -1021,7 +1115,7 @@ function moveMemosToTrash(ids,label="删除备忘录"){
 function deleteMemo(id){
  let memo=memoById(id);if(!memo)return;confirmAction("删除备忘录？","备忘录会进入回收站，可稍后恢复。",()=>moveMemosToTrash([id]),"删除");
 }
-function memoToTask(id){let memo=memoById(id);if(!memo)return;openTask("",{title:memo.title,nextAction:"根据备忘录内容明确下一步",notes:memo.content,project:memo.project,status:"待处理",inbox:true})}
+function memoToTask(id){let memo=memoById(id);if(!memo)return;openTask("",{title:memo.title,nextAction:"",notes:memo.content,project:memo.project,status:"待处理",inbox:true})}
 function exportData(){
  let blob=new Blob([JSON.stringify({product:"工作台",formatVersion:8,exportedAt:new Date().toISOString(),...snapshotCore()},null,2)],{type:"application/json"}),link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download="工作台-"+todayKey()+".json";link.click();URL.revokeObjectURL(link.href);toast("JSON 已导出");
 }
@@ -1043,21 +1137,62 @@ function restoreSnapshot(id){
  let item=state.snapshots.find(value=>value.id===id);if(!item)return;confirmAction("恢复快照？","当前数据会先再生成一份快照，然后恢复所选版本。",()=>{let current=snapshotCore();replaceState(item.state,"恢复快照");state.snapshots.unshift({id:uid("snapshot"),label:"恢复前的安全快照",createdAt:new Date().toISOString(),state:current});saveLocal(true)},"恢复");
 }
 
-function searchRank(primary,secondary,q,inactive=false){let title=String(primary||"").normalize("NFKC").toLocaleLowerCase("zh-CN"),rest=String(secondary||"").normalize("NFKC").toLocaleLowerCase("zh-CN"),score=title===q?120:title.startsWith(q)?90:title.includes(q)?65:rest.includes(q)?35:0;return score-(inactive?8:0)}
-function globalResults(query){
- let q=String(query||"").normalize("NFKC").trim().toLocaleLowerCase("zh-CN");if(!q)return'<div class="empty">输入关键词搜索项目、事项、里程碑、决策和备忘录。</div>';
- let rows=[],rank=(items,primary,secondary,inactive,limit)=>items.map(item=>({item,score:searchRank(primary(item),secondary(item),q,inactive(item))})).filter(value=>value.score>0).sort((a,b)=>b.score-a.score||String(b.item.updatedAt||"").localeCompare(String(a.item.updatedAt||""))).slice(0,limit).map(value=>value.item);
- rank(state.tasks,task=>task.title,task=>{let project=projectById(task.project),milestone=milestoneOf(task,project);return[task.nextAction,strip(task.notes),task.status,task.priority,project?.name,project?.code,milestone?.name].join(" ")},task=>task.archived||isDone(task),10).forEach(task=>{let project=projectById(task.project),milestone=milestoneOf(task,project),stateLabel=task.archived?"已归档":task.status;rows.push('<button class="data-item" style="width:100%;text-align:left" data-search-task="'+task.id+'"><span><b>事项 · '+esc(task.title)+'</b><small>'+esc([stateLabel,project?.code,project?.name,milestone?.name,task.nextAction].filter(Boolean).join(" · "))+'</small></span><span>↗</span></button>')});
- rank(state.projects,project=>project.name,project=>[project.code,project.description,...project.milestones.flatMap(item=>[item.name,item.criteria])].join(" "),project=>project.archived,8).forEach(project=>rows.push('<button class="data-item" style="width:100%;text-align:left" data-search-project="'+project.id+'"><span><b>项目 · '+esc(project.name)+'</b><small>'+esc([project.archived?"已归档":"进行中",project.code,currentMilestone(project)?.name||"暂无里程碑"].filter(Boolean).join(" · "))+'</small></span><span>↗</span></button>'));
- rank(state.decisions,decision=>decision.title,decision=>[strip(decision.conclusion),strip(decision.rationale),projectName(decision.project)].join(" "),decision=>decision.archived,6).forEach(decision=>rows.push('<button class="data-item" style="width:100%;text-align:left" data-search-decision="'+decision.id+'"><span><b>决策 · '+esc(decision.title)+'</b><small>'+esc([decision.archived?"已归档":"有效",projectName(decision.project),strip(decision.conclusion)].filter(Boolean).join(" · "))+'</small></span><span>↗</span></button>'));
- rank(state.memos,memo=>memo.title,memo=>[strip(memo.content),projectName(memo.project)].join(" "),memo=>memo.archived,6).forEach(memo=>rows.push('<button class="data-item" style="width:100%;text-align:left" data-search-memo="'+memo.id+'"><span><b>备忘录 · '+esc(memo.title)+'</b><small>'+esc([memo.archived?"已归档":"进行中",projectName(memo.project),strip(memo.content).slice(0,80)].filter(Boolean).join(" · "))+'</small></span><span>↗</span></button>'));
- return rows.join("")||'<div class="empty">没有匹配结果。</div>';
+// One ranking pipeline for previews, category totals and complete results.
+const searchView={category:"all",limits:{task:10,project:8,decision:6,memo:6},scrollTop:0,windowY:0,restoring:false};
+const SEARCH_CATEGORIES={task:"事项",project:"项目",decision:"决策",memo:"备忘录"};
+function resetSearchView(){searchView.category="all";searchView.limits={task:10,project:8,decision:6,memo:6};searchView.scrollTop=0;searchView.windowY=0}
+function normalizedSearchText(value){return String(value||"").normalize("NFKC").toLocaleLowerCase("zh-CN")}
+function searchRank(primary,secondary,q,inactive=false){let title=normalizedSearchText(primary),rest=normalizedSearchText(secondary),score=title===q?120:title.startsWith(q)?90:title.includes(q)?65:rest.includes(q)?35:0;return score-(inactive?8:0)}
+function collectGlobalResults(query){
+ let q=normalizedSearchText(query).trim(),result={task:[],project:[],decision:[],memo:[]};if(!q)return result;
+ let rank=(items,primary,secondary,inactive)=>items.map(item=>({item,score:searchRank(primary(item),secondary(item),q,inactive(item))})).filter(value=>value.score>0).sort((a,b)=>b.score-a.score||String(b.item.updatedAt||"").localeCompare(String(a.item.updatedAt||""))).map(value=>value.item);
+ result.task=rank(state.tasks,task=>task.title,task=>{let project=projectById(task.project),milestone=milestoneOf(task,project);return[task.nextAction,strip(task.notes),...(task.progressLog||[]).map(entry=>entry.text),task.status,task.priority,project?.name,project?.code,milestone?.name].join(" ")},task=>task.archived||isDone(task));
+ result.project=rank(state.projects,project=>project.name,project=>[project.code,project.description,...project.milestones.flatMap(item=>[item.name,item.criteria])].join(" "),project=>project.archived);
+ result.decision=rank(state.decisions,decision=>decision.title,decision=>[strip(decision.conclusion),strip(decision.rationale),projectName(decision.project)].join(" "),decision=>decision.archived);
+ result.memo=rank(state.memos,memo=>memo.title,memo=>[strip(memo.content),projectName(memo.project)].join(" "),memo=>memo.archived);
+ return result;
 }
+function searchExcerpt(text,query){
+ let content=String(text||""),at=normalizedSearchText(content).indexOf(normalizedSearchText(query).trim()),start=Math.max(0,at-24),end=Math.min(content.length,start+120);
+ return (start?'…':'')+content.slice(start,end)+(end<content.length?'…':'');
+}
+function searchResultRow(kind,item,query){
+ let label=SEARCH_CATEGORIES[kind],title=item.title||item.name,meta=[],body="";
+ if(kind==="task"){let project=projectById(item.project);meta=[item.archived?"已归档":item.status,project?.name,milestoneOf(item,project)?.name,item.nextAction];body=[strip(item.notes),...(item.progressLog||[]).map(entry=>entry.text)].join(" ")}
+ else if(kind==="project"){meta=[item.archived?"已归档":"进行中",item.code,currentMilestone(item)?.name];body=[item.description,...item.milestones.flatMap(m=>[m.name,m.criteria])].join(" ")}
+ else if(kind==="decision"){meta=[item.archived?"已归档":"有效",projectName(item.project)];body=[strip(item.conclusion),strip(item.rationale)].join(" ")}
+ else{meta=[item.archived?"已归档":"进行中",projectName(item.project)];body=strip(item.content)}
+ let excerpt=body.trim()?searchExcerpt(body,query):"";
+ return '<button class="data-item search-result" type="button" data-search-'+kind+'="'+esc(item.id)+'"><span><b>'+label+' · '+esc(title)+'</b><small>'+esc(meta.filter(Boolean).join(" · "))+'</small>'+(excerpt?'<small class="search-excerpt">'+esc(excerpt)+'</small>':'')+'</span><span aria-hidden="true">↗</span></button>';
+}
+function globalResults(query){
+ if(!String(query||"").trim())return '<div class="empty">输入关键词搜索项目、事项、里程碑、决策和备忘录。</div>';
+ let results=collectGlobalResults(query),total=Object.values(results).reduce((sum,rows)=>sum+rows.length,0);
+ let tabs=[['all','全部',total],...Object.entries(SEARCH_CATEGORIES).map(([kind,label])=>[kind,label,results[kind].length])].map(([kind,label,count])=>'<button type="button" class="btn '+(searchView.category===kind?'soft':'')+'" data-search-category="'+kind+'" aria-pressed="'+(searchView.category===kind)+'">'+label+' '+count+'</button>').join('');
+ let groups=Object.entries(results).filter(([kind])=>searchView.category==='all'||searchView.category===kind).map(([kind,items])=>{
+  if(!items.length)return '';
+  let shown=items.slice(0,searchView.limits[kind]),more=shown.length<items.length;
+  return '<section class="search-result-group" data-result-group="'+kind+'"><div class="search-result-heading"><b>'+SEARCH_CATEGORIES[kind]+' · '+items.length+' 项</b>'+(more&&searchView.category==='all'?'<button type="button" class="link-btn" data-search-category="'+kind+'">查看全部 '+items.length+' 项 →</button>':'')+'</div>'+shown.map(item=>searchResultRow(kind,item,query)).join('')+'<div class="search-result-footer">已显示 '+shown.length+' / '+items.length+' 项'+(more?'<button type="button" class="btn" data-search-more="'+kind+'">加载更多</button>':'')+'</div></section>';
+ }).join('');
+ return '<div class="search-result-count" role="status">共找到 '+total+' 项匹配结果</div><div class="search-category-tabs">'+tabs+'</div>'+(groups||'<div class="empty">当前分类没有匹配结果。</div>');
+}
+function rememberSearchPosition(){if(currentPage!=="search"||searchView.restoring)return;searchView.scrollTop=$("#mainScroll").scrollTop;searchView.windowY=window.scrollY}
+function restoreSearchPosition(){searchView.restoring=true;requestAnimationFrame(()=>{if(currentPage==="search"){$("#mainScroll").scrollTo({top:searchView.scrollTop,behavior:"auto"});window.scrollTo({top:searchView.windowY,behavior:"auto"})}searchView.restoring=false})}
+function changeSearchCategory(category){
+ if(category!=="all"&&!Object.hasOwn(SEARCH_CATEGORIES,category))return;
+ searchView.category=category;if(category!=="all")searchView.limits[category]=Math.max(20,searchView.limits[category]);searchView.scrollTop=0;searchView.windowY=0;
+ $("#searchPageResults").innerHTML=globalResults(globalSearchQuery);restoreSearchPosition();
+}
+function loadMoreSearch(kind){
+ if(!Object.hasOwn(SEARCH_CATEGORIES,kind))return;
+ rememberSearchPosition();searchView.limits[kind]+=20;$("#searchPageResults").innerHTML=globalResults(globalSearchQuery);restoreSearchPosition();
+}
+document.addEventListener("scroll",event=>{if(event.target===$("#mainScroll")||event.target===document)rememberSearchPosition()},true);
 function renderSearchPage(){
  let value=globalSearchQuery;
  $("#page-search").innerHTML=pageHead("GLOBAL SEARCH","全局搜索","在一个页面中查找并打开事项、项目、里程碑、关键决策与备忘录。",'<button class="btn" type="button" data-close-search-page>关闭搜索</button>')+
- '<div class="search-page-shell"><article class="card search-page-main"><div class="search-page-field"><span aria-hidden="true">⌕</span><input id="searchPageInput" value="'+esc(value)+'" placeholder="输入中文、英文、项目名或下一步行动……" autocomplete="off" enterkeyhint="search"><button class="search-page-clear" type="button" data-clear-search aria-label="清空搜索">×</button></div><div class="search-page-results" id="searchPageResults">'+globalResults(value)+'</div></article><aside class="card search-page-help"><h3>搜索范围</h3><p>事项名称、下一步、备注、项目与里程碑、关键决策、备忘录正文。</p><h3>快捷操作</h3><p><kbd>Ctrl/⌘ K</kbd> 从任意页面进入搜索；<kbd>Esc</kbd> 返回上一页。</p><p>点击任意结果即可进入对应详情，返回时仍保留本次关键词。</p></aside></div>';
- let top=$("#globalSearch");if(top&&top.value!==value)top.value=value;
+ '<div class="search-page-shell"><article class="card search-page-main"><div class="search-page-field"><span aria-hidden="true">⌕</span><input id="searchPageInput" value="'+esc(value)+'" placeholder="输入中文、英文、项目名或下一步行动……" autocomplete="off" enterkeyhint="search"><button class="search-page-clear" type="button" data-clear-search aria-label="清空搜索">×</button></div><div class="search-page-results" id="searchPageResults">'+globalResults(value)+'</div></article><aside class="card search-page-help"><h3>搜索范围</h3><p>事项名称、下一步、备注、项目与里程碑、关键决策、备忘录正文。</p><h3>快捷操作</h3><p><kbd>Ctrl/⌘ K</kbd> 从任意页面进入搜索；<kbd>Esc</kbd> 返回上一页。</p><p>点击任意结果即可进入对应详情，返回时保留关键词、分类、已加载结果和滚动位置。</p></aside></div>';
+ let top=$("#globalSearch");if(top&&top.value!==value)top.value=value;restoreSearchPosition();
 }
 function focusSearchPage(){
  requestAnimationFrame(()=>{let input=$("#searchPageInput");if(!input)return;if(input.value!==globalSearchQuery)input.value=globalSearchQuery;input.focus({preventScroll:true});input.setSelectionRange(input.value.length,input.value.length)});
@@ -1066,12 +1201,12 @@ function syncSearchInputs(sourceId){
  let top=$("#globalSearch"),page=$("#searchPageInput");if(top&&sourceId!=="globalSearch"&&top.value!==globalSearchQuery)top.value=globalSearchQuery;if(page&&sourceId!=="searchPageInput"&&page.value!==globalSearchQuery)page.value=globalSearchQuery;
 }
 function updateGlobalSearch(query,sourceId=""){
- let entering=currentPage!=="search";globalSearchQuery=String(query??"");
+ let entering=currentPage!=="search",next=String(query??"");if(next!==globalSearchQuery)resetSearchView();globalSearchQuery=next;
  if(entering){searchReturnPage=currentPage;navigate("search");focusSearchPage();return}
- syncSearchInputs(sourceId);let results=$("#searchPageResults");if(results)results.innerHTML=globalResults(globalSearchQuery);
+ syncSearchInputs(sourceId);let results=$("#searchPageResults");if(results)results.innerHTML=globalResults(globalSearchQuery);restoreSearchPosition();
 }
 function closeGlobalSearch(){
- globalSearchQuery="";let top=$("#globalSearch");if(top)top.value="";
+ resetSearchView();globalSearchQuery="";let top=$("#globalSearch");if(top)top.value="";
  if(currentPage!=="search")return;let page=["today","week","tasks","projects","memos","data"].includes(searchReturnPage)?searchReturnPage:"today";currentPage=page;navigationDepth=Math.max(0,navigationDepth-1);history.replaceState({page,appRoute:true,appNavDepth:navigationDepth},"","#"+page);$("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender();
 }
 
@@ -1349,6 +1484,30 @@ function initTableSorting(){
  tableSortables.forEach(sortable=>sortable.destroy());tableSortables=[];if(typeof Sortable!=='function')return;
  document.querySelectorAll('#page-tasks .task-table tbody').forEach(body=>{let before=[];tableSortables.push(new Sortable(body,{draggable:'tr[data-task]',handle:'[data-drag-handle="all"]',forceFallback:true,fallbackOnBody:true,fallbackTolerance:4,animation:150,scroll:true,onStart(){before=Array.from(body.querySelectorAll('tr[data-task]'),row=>row.dataset.task)},onEnd(){let after=Array.from(body.querySelectorAll('tr[data-task]'),row=>row.dataset.task);commit('调整事项顺序',draft=>{draft.order.all=reconcileVisibleOrder(draft.order.all,before,after)},{immediate:true})}}))});
 }
+let taskDateTrigger=null;
+function taskDateButton(task,readonly=false){
+ let field=taskScheduleField(task),label=field==="followup"?"跟进":"计划",reminder=isFollowupDue(task),days=reminder?Math.round((parseDate(todayKey())-parseDate(task.followup))/86400000):0,text=reminder?(days?"跟进逾期 "+days+" 天":"今日跟进"):label+" "+(task[field]?dateShort(task[field]):"未安排");
+ if(readonly||task.archived||isDone(task))return '<span class="task-date-label">'+label+' '+dateShort(task[field])+'</span>';
+ return '<button type="button" class="task-date-button '+(reminder?'followup reminder':'')+'" data-quick-date="'+esc(task.id)+'" aria-label="调整'+esc(task.title)+'的'+label+'日期" aria-haspopup="dialog" aria-expanded="false">'+text+' ⌄</button>';
+}
+function closeTaskDateMenu(restoreFocus=false){
+ let pop=$("#taskDatePopover");if(pop)pop.hidden=true;
+ taskDateTrigger?.setAttribute("aria-expanded","false");if(restoreFocus&&taskDateTrigger?.isConnected)taskDateTrigger.focus({preventScroll:true});taskDateTrigger=null;
+}
+function openTaskDateMenu(trigger,id){
+ let task=taskById(id);if(!task||task.archived||isDone(task))return;
+ closeChoice();closeTaskDateMenu();taskDateTrigger=trigger;trigger.setAttribute("aria-expanded","true");
+ let pop=$("#taskDatePopover");if(!pop){pop=document.createElement("div");pop.id="taskDatePopover";pop.className="task-date-popover";pop.setAttribute("role","dialog");document.body.appendChild(pop)}
+ let field=taskScheduleField(task),label=field==="followup"?"跟进日期":"计划日期",today=parseDate(todayKey()),nextMonday=fmt(addDays(today,((8-today.getDay())%7)||7));
+ pop.dataset.task=id;pop.dataset.field=field;pop.setAttribute("aria-label","调整"+label);
+ pop.innerHTML='<b>'+label+'</b><div class="date-shortcuts">'+[[todayKey(),'今天'],[fmt(addDays(today,1)),'明天'],[nextMonday,'下周一']].map(([date,text])=>'<button class="btn" type="button" data-set-task-date="'+date+'">'+text+'</button>').join('')+'</div><label>指定日期<input type="date" id="quickTaskDate" value="'+esc(task[field])+'"></label><div class="date-menu-actions"><button type="button" class="link-btn" data-set-task-date="">清除日期</button><button type="button" class="btn primary" data-apply-task-date>应用</button></div>';
+ pop.hidden=false;let rect=trigger.getBoundingClientRect();pop.style.left=Math.max(8,Math.min(rect.left,innerWidth-pop.offsetWidth-8))+"px";pop.style.top=Math.max(8,Math.min(rect.bottom+6,innerHeight-pop.offsetHeight-8))+"px";pop.querySelector('button').focus({preventScroll:true});
+}
+function applyQuickTaskDate(value){let pop=$("#taskDatePopover");if(!pop||pop.hidden)return;if(setTaskDate(pop.dataset.task,pop.dataset.field,value))closeTaskDateMenu(true)}
+document.addEventListener("pointerdown",event=>{if(!event.target.closest?.("#taskDatePopover,[data-quick-date]"))closeTaskDateMenu()});
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!$("#taskDatePopover")?.hidden&&taskDateTrigger){event.preventDefault();event.stopImmediatePropagation();closeTaskDateMenu(true)}},true);
+document.addEventListener("scroll",event=>{if(taskDateTrigger&&!event.target.closest?.("#taskDatePopover"))closeTaskDateMenu()},true);
+window.addEventListener("resize",()=>closeTaskDateMenu());
 function saveRelationsNow(label){
  let existing=taskById(taskDraft.id);if(!existing)return;
  let next=Array.from(relatedDraft);
@@ -1356,6 +1515,11 @@ function saveRelationsNow(label){
 }
 function handleClick(event){
  let target=event.target.closest("button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
+ if(target.dataset.addProgress!==undefined)return addTaskProgress();
+ if(target.dataset.quickDate)return openTaskDateMenu(target,target.dataset.quickDate);
+ if(target.dataset.setTaskDate!==undefined)return applyQuickTaskDate(target.dataset.setTaskDate);
+ if(target.dataset.applyTaskDate!==undefined)return applyQuickTaskDate($("#quickTaskDate").value);
+ if(target.dataset.openAllWaiting!==undefined){taskFilter={...taskFilter,quick:"waiting",query:"",project:[],type:[],status:[]};return navigate("tasks")}
  if(target.dataset.handleTask)return updateTask(target.dataset.handleTask,"本次已处理",task=>task.handledOn=todayKey());
  if(target.dataset.undoHandled)return updateTask(target.dataset.undoHandled,"撤销本次处理",task=>task.handledOn="");
  if(target.dataset.page)return navigate(target.dataset.page);
@@ -1454,9 +1618,12 @@ function handleClick(event){
  if(target.dataset.clearTrash!==undefined)return confirmTwice("永久清空回收站？","回收站中的全部内容都会被永久删除。",()=>commit("清空回收站",draft=>draft.trash=[],{immediate:true,history:false}),"确认清空");
  if(target.dataset.clearBusiness!==undefined)return confirmTwice("一键清空业务数据？","系统会先生成安全快照，再清空事项、项目、速记、备忘录、关键决策和周计划。",()=>{createSnapshot("一键清空前的完整快照");commit("一键清空业务数据",draft=>{draft.tasks=[];draft.projects=[];draft.memos=[];draft.decisions=[];draft.quickNote=emptyQuickNote();draft.weeks={[currentWeekKey()]:emptyWeek()};draft.trash=[];draft.favorites=[];draft.order=emptyOrder()},{immediate:true})},"确认清空数据");
  if(target.dataset.closeSearchPage!==undefined)return closeGlobalSearch();
- if(target.dataset.clearSearch!==undefined){globalSearchQuery="";syncSearchInputs("");let input=$("#searchPageInput");if(input){input.focus({preventScroll:true});input.setSelectionRange(0,0)}let results=$("#searchPageResults");if(results)results.innerHTML=globalResults("");return}
+ if(target.dataset.searchCategory)return changeSearchCategory(target.dataset.searchCategory);
+ if(target.dataset.searchMore)return loadMoreSearch(target.dataset.searchMore);
+ if(target.dataset.searchTask||target.dataset.searchProject||target.dataset.searchMemo||target.dataset.searchDecision)rememberSearchPosition();
+ if(target.dataset.clearSearch!==undefined){resetSearchView();globalSearchQuery="";syncSearchInputs("");let input=$("#searchPageInput");if(input){input.focus({preventScroll:true});input.setSelectionRange(0,0)}let results=$("#searchPageResults");if(results)results.innerHTML=globalResults("");restoreSearchPosition();return}
  if(target.dataset.searchTask)return openTask(target.dataset.searchTask);
- if(target.dataset.searchProject)return navigate("projects",target.dataset.searchProject);
+ if(target.dataset.searchProject){ui.showArchivedProjects=!!projectById(target.dataset.searchProject)?.archived;return navigate("projects",target.dataset.searchProject)}
  if(target.dataset.searchMemo){selectedMemoId=target.dataset.searchMemo;memoArchived=!!memoById(selectedMemoId)?.archived;return navigate("memos")}
  if(target.dataset.searchDecision)return openDecision(target.dataset.searchDecision);
 }
@@ -1487,7 +1654,7 @@ document.addEventListener("beforeinput",event=>{let editor=event.target.closest?
 $("#confirmAccept").addEventListener("click",()=>{let callback=confirmCallback;confirmCallback=null;closeDialog("confirmDialog");if(typeof callback==="function")callback()});
 $("#taskForm").addEventListener("submit",event=>{event.preventDefault();saveTaskDraft()});
 $("#taskForm").addEventListener("keydown",event=>{
- if(event.key!=="Enter"||event.isComposing||event.keyCode===229||event.target.closest(".rich-editor"))return;
+ if(event.key!=="Enter"||event.isComposing||event.keyCode===229||event.target.closest(".rich-editor")||event.target.id==="taskProgressInput"||event.target.closest("button"))return;
  event.preventDefault();event.stopPropagation();saveTaskDraft();
 });
 $("#projectForm").addEventListener("submit",event=>{event.preventDefault();saveProjectDraft()});
@@ -1523,7 +1690,7 @@ $("#globalSearch").addEventListener("focus",event=>{if(currentPage==="search")fo
 document.addEventListener("focusout",event=>{let editor=event.target.closest?.(".rich-editor");if(editor&&!quillFor(editor)){richFlush(editor);let clean=serializeRichEditor(editor),live=clean||"<p><br></p>";if(live!==editor.innerHTML){editor.innerHTML=live;updateRichEmpty(editor);richSyncCurrent(editor);notifyRichInput(editor,"formatBlock")}}if(event.target.matches?.("[data-overview-next],[data-week-action],[data-week-result],[data-top-result],[data-top-index],[data-week-review],[data-memo-title],[data-memo-content]")||editor?.matches?.("[data-week-review],[data-memo-content]"))directEditSessions.clear()});
 document.addEventListener("change",event=>{
  let target=event.target;
- if(target.dataset.overviewDate){let id=target.dataset.overviewDate,value=target.value,field=target.dataset.dateField;if(!['planDate','followup'].includes(field))return;return updateTask(id,'调整处理日期',task=>{let previous={...task};task[field]=value;reconcileTaskEdit(task,previous)})}
+ if(target.dataset.overviewDate){let id=target.dataset.overviewDate,value=target.value,field=target.dataset.dateField;if(!['planDate','followup'].includes(field))return;return setTaskDate(id,field,value)}
  else if(target.dataset.filterCheck){let field=target.dataset.filterCheck,value=target.value,list=taskFilter[field];target.checked?list.push(value):taskFilter[field]=list.filter(item=>item!==value);taskFilter[field]=[...new Set(taskFilter[field])];renderTasks();requestAnimationFrame(()=>{$('[data-filter-detail="'+field+'"]')?.setAttribute("open","")})}
  else if(target.dataset.bulkSelect){target.checked?ui.selectedTasks.add(target.dataset.bulkSelect):ui.selectedTasks.delete(target.dataset.bulkSelect);requestRender()}
  else if(target.dataset.bulkAll!==undefined){let items=filteredTasks();target.checked?items.forEach(task=>ui.selectedTasks.add(task.id)):items.forEach(task=>ui.selectedTasks.delete(task.id));requestRender()}
@@ -1613,7 +1780,7 @@ document.addEventListener("dragend",cleanupDrag);
 let tooltipTimer=0;
 document.addEventListener("pointerover",event=>{let owner=event.target.closest("[data-tip]");if(!owner)return;clearTimeout(tooltipTimer);tooltipTimer=setTimeout(()=>{let tip=$("#tooltip"),rect=owner.getBoundingClientRect();tip.textContent=owner.dataset.tip;tip.hidden=false;tip.style.left=Math.max(8,Math.min(rect.left,innerWidth-270))+"px";tip.style.top=Math.min(rect.bottom+7,innerHeight-50)+"px"},350)});
 document.addEventListener("pointerout",event=>{if(event.target.closest("[data-tip]")){clearTimeout(tooltipTimer);$("#tooltip").hidden=true}});
-window.addEventListener("popstate",event=>{let page=(location.hash||"#today").slice(1);if(["today","week","tasks","projects","memos","data","search"].includes(page)){currentPage=page;navigationDepth=Number(event.state?.appNavDepth||0);$("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender()}});
+window.addEventListener("popstate",event=>{let page=(location.hash||"#today").slice(1);if(["today","week","tasks","projects","memos","data","search"].includes(page)){rememberSearchPosition();currentPage=page;navigationDepth=Number(event.state?.appNavDepth||0);$("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender()}});
 let todayResizeState=null;
 document.addEventListener("pointerdown",event=>{
  let richHandle=event.target.closest?.("[data-rich-height-resizer]");if(richHandle){let key=richHandle.dataset.richHeightResizer,spec=RICH_HEIGHT_SPECS[key],box=richHandle.closest("[data-rich-resize]"),editor=box?.querySelector(".rich-editor");if(!spec||!box||!editor)return;todayResizeState={kind:"richHeight",owner:richHandle,box,key,spec,startY:event.clientY,startHeight:editor.getBoundingClientRect().height};richHandle.classList.add("active");richHandle.setPointerCapture(event.pointerId);event.preventDefault();return}

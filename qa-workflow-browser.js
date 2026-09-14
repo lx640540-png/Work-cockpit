@@ -289,3 +289,89 @@ test('pending inbox needs no classification and detail saves keep task content',
  assert.equal(await page.locator('#page-tasks [data-quick="inbox"]').count(),0);
  assert(!(await page.locator('#page-tasks').innerText()).includes('待整理'));
 });
+
+test('iteration: quick dates preserve status, deadlines, week and historical records',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('schedule',{focus:true,week:true,planDate:today,due:'2026-09-12'}),makeTask('wait-date',{status:'等待',followup:today,planDate:'2026-09-01',handledOn:today})]);
+ const history=JSON.stringify((await stored(page)).weeks['2026-08-24']);
+ await page.click('#page-today [data-quick-date="schedule"]');
+ await page.click('[data-set-task-date="2026-09-06"]');
+ await page.waitForFunction(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).tasks.find(x=>x.id==='schedule').planDate==='2026-09-06');
+ let task=(await stored(page)).tasks.find(x=>x.id==='schedule');assert.equal(task.focus,false);assert.equal(task.week,true);assert.equal(task.status,'进行中');assert.equal(task.due,'2026-09-12');
+ await page.locator('#page-today [data-quick-date="schedule"]').waitFor({state:'detached'});
+ await page.click('[data-page="tasks"]');await page.click('#page-tasks [data-quick-date="wait-date"]');
+ await page.click('[data-set-task-date="2026-09-07"]');
+ await page.waitForFunction(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).tasks.find(x=>x.id==='wait-date').followup==='2026-09-07');
+ task=(await stored(page)).tasks.find(x=>x.id==='wait-date');assert.equal(task.status,'等待');assert.equal(task.handledOn,today);assert.equal(task.planDate,'2026-09-01');
+ await page.click('#page-tasks [data-quick-date="schedule"]');await page.click('[data-set-task-date=""]');
+ await page.waitForFunction(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).tasks.find(x=>x.id==='schedule').planDate==='');
+ assert.equal(JSON.stringify((await stored(page)).weeks['2026-08-24']),history);
+ await page.reload();task=(await stored(page)).tasks.find(x=>x.id==='schedule');assert.equal(task.planDate,'');assert.equal(task.week,true);assert.equal(task.due,'2026-09-12');
+});
+
+test('iteration: compact Today counts only actionable follow-ups and exposes total waiting',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('due-wait',{status:'等待',followup:today}),makeTask('past-wait',{status:'等待',followup:'2026-09-04'}),makeTask('later',{status:'等待'}),makeTask('undated',{status:'等待',followup:''}),makeTask('handled-wait',{status:'等待',followup:today,handledOn:today}),makeTask('archived-wait',{status:'等待',followup:today,archived:true})]);
+ assert.equal(await page.locator('[data-summary-target="waiting"] strong').textContent(),'2');
+ assert.match(await page.locator('[data-open-all-waiting]').textContent(),/5/);
+ assert((await page.locator('[data-summary-target="waiting"]').boundingBox()).height<=56);
+ await page.click('[data-handle-task="due-wait"]');await page.waitForFunction(()=>document.querySelector('[data-summary-target="waiting"] strong').textContent==='1');
+ assert.match(await page.locator('[data-open-all-waiting]').textContent(),/5/);
+ await page.click('[data-open-all-waiting]');await page.locator('#page-tasks.active').waitFor();assert.equal(await page.locator('#page-tasks tr[data-task]').count(),5);
+ await page.click('[data-quick="followup"]');await page.waitForFunction(()=>document.querySelectorAll('#page-tasks tr[data-task]').length===1);
+ assert.equal(await page.locator('#page-tasks tr[data-task="past-wait"]').count(),1);
+});
+
+test('iteration: complete search pages past previews and retains context after opening results',{timeout:30000},async t=>{
+ const tasks=Array.from({length:46},(_,i)=>makeTask('s'+i,{title:'查找目标 '+String(i).padStart(2,'0'),notes:'<p>较长的背景说明。'.repeat(12)+'独特正文命中</p>'}));
+ const page=await fixture(t,tasks,{projects:[{id:'search-project',name:'查找目标项目',milestones:[]}]});
+ await page.fill('#globalSearch','查找目标');await page.locator('#page-search.active').waitFor();
+ assert.match(await page.locator('.search-result-count').textContent(),/47/);assert.equal(await page.locator('[data-search-task]').count(),10);
+ await page.locator('.search-result-heading [data-search-category="task"]').click();assert.equal(await page.locator('[data-search-task]').count(),20);
+ await page.click('[data-search-more="task"]');assert.equal(await page.locator('[data-search-task]').count(),40);
+ await page.click('[data-search-more="task"]');assert.equal(await page.locator('[data-search-task]').count(),46);
+ await page.locator('[data-search-task="s40"]').scrollIntoViewIfNeeded();await page.clock.runFor(60);
+ const top=await page.locator('#mainScroll').evaluate(n=>n.scrollTop);assert(top>100);
+ await page.click('[data-search-task="s40"]');await page.locator('#taskDialog[open]').waitFor();await page.keyboard.press('Escape');await page.clock.runFor(100);
+ assert.equal(await page.locator('#searchPageInput').inputValue(),'查找目标');assert.equal(await page.locator('[data-search-task]').count(),46);
+ assert(Math.abs((await page.locator('#mainScroll').evaluate(n=>n.scrollTop))-top)<5);
+ await page.fill('#searchPageInput','独特正文命中');assert.equal(await page.locator('[data-search-task]').count(),10);
+ assert.match(await page.locator('[data-search-task]').first().textContent(),/独特正文命中/);
+ await page.fill('#searchPageInput','查找目标');await page.click('[data-search-project="search-project"]');await page.locator('#page-projects.active').waitFor();
+ await page.click('#backButton');await page.locator('#page-search.active').waitFor();assert.equal(await page.locator('#searchPageInput').inputValue(),'查找目标');
+ await page.click('[data-clear-search]');assert.equal(await page.locator('[data-search-task]').count(),0);
+});
+
+test('iteration: progress drafts, timestamped entries and weekly history survive saves',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('progress',{week:true,nextAction:'原有下一步'})],{route:'tasks'});
+ const history=JSON.stringify((await stored(page)).weeks['2026-08-24']);
+ await edit(page,'progress');await page.fill('#taskProgressInput','已收到初稿，待复核');await page.clock.fastForward(800);
+ await page.keyboard.press('Escape');await edit(page,'progress');assert.equal(await page.locator('#taskProgressInput').inputValue(),'已收到初稿，待复核');
+ await page.click('[data-add-progress]');assert.equal(await page.locator('#taskProgressList li').count(),1);assert.equal(await page.locator('#taskProgressInput').inputValue(),'');
+ await page.fill('#taskProgressInput','完成复核，待确认');await page.locator('[data-add-progress]').focus();await page.locator('[data-add-progress]').press('Enter');assert.equal(await page.locator('#taskDialog').getAttribute('open'),'');await page.keyboard.press('Escape');
+ let task=(await stored(page)).tasks.find(x=>x.id==='progress');assert.equal(task.progressLog.length,2);assert.equal(task.nextAction,'原有下一步');assert.equal(task.status,'进行中');assert.equal(task.progressDraft,'');assert(task.progressLog.every(e=>e.createdAt));
+ assert.equal(JSON.stringify((await stored(page)).weeks['2026-08-24']),history);
+ await page.click('[data-page="today"]');await page.click('[data-summary-target="done"]');await page.locator('.week-progress-records').waitFor();assert.match(await page.locator('.week-progress-records').textContent(),/已收到初稿/);
+ await page.reload();assert.equal((await stored(page)).tasks.find(x=>x.id==='progress').progressLog.length,2);
+});
+
+test('iteration: new task next action stays blank without placeholders across creation paths',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('source',{nextAction:'保留已有内容'})],{route:'tasks',projects:projectFixture});
+ await page.click('#page-tasks [data-action="new-task"]');assert.equal(await page.locator('#taskNext').inputValue(),'');assert.equal(await page.locator('#taskNext').getAttribute('placeholder'),null);
+ await page.fill('#taskTitle','新建空下一步');await save(page);
+ let task=(await stored(page)).tasks.find(x=>x.title==='新建空下一步');assert.equal(task.nextAction,'');
+ await edit(page,'source');assert.equal(await page.locator('#taskNext').inputValue(),'保留已有内容');await page.click('[data-new-related-task]');assert.equal(await page.locator('#taskNext').inputValue(),'');await page.keyboard.press('Escape');
+ await page.reload();task=(await stored(page)).tasks.find(x=>x.title==='新建空下一步');assert.equal(task.nextAction,'');
+});
+
+test('iteration: dates and compact layout remain usable on narrow screens',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('narrow',{focus:true,planDate:today}),makeTask('narrow-wait',{status:'等待',followup:today})]);
+ const shots=path.join(__dirname,'artifacts/browser-regression');fs.mkdirSync(shots,{recursive:true});
+ await page.screenshot({path:path.join(shots,'iteration-today-desktop.png')});
+ for(const width of [900,390]){
+  await page.setViewportSize({width,height:900});await page.clock.runFor(100);
+  await page.click('#page-today [data-quick-date="narrow"]');
+  const menu=await page.locator('#taskDatePopover').boundingBox();assert(menu&&menu.x>=0&&menu.x+menu.width<=width&&menu.y>=0&&menu.y+menu.height<=900,JSON.stringify(menu));
+  if(width===390)await page.screenshot({path:path.join(shots,'iteration-date-mobile.png')});
+  await page.keyboard.press('Escape');assert.equal(await page.locator('#taskDatePopover').isVisible(),false);
+ }
+ await page.setViewportSize({width:1600,height:1000});await edit(page,'narrow');await page.screenshot({path:path.join(shots,'iteration-task-detail.png')});
+});

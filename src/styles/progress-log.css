@@ -1,0 +1,8 @@
+/* Task progress stays subordinate to next action and weekly outcome. */
+.progress-log-section textarea{display:block;box-sizing:border-box;width:100%;min-height:52px;resize:vertical;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:inherit;font:inherit}
+.progress-log-section>small{display:block;font-size:11px;margin-top:5px}
+.progress-log-list{list-style:none;margin:8px 0 0;padding:0;max-height:240px;overflow:auto}
+.progress-log-list li{padding:7px 0;border-bottom:1px solid var(--line)}
+.progress-log-list time{font-size:11px;color:var(--muted)}
+.progress-log-list p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.6}
+.week-progress-records{width:100%;font-size:11px;margin-top:5px}.week-progress-records summary{cursor:pointer;color:var(--muted)}

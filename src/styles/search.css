@@ -1,0 +1,8 @@
+/* Complete search results, counts and category navigation. */
+.search-category-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.search-result-count{font-size:12px;color:var(--muted)}
+.search-result-group{min-width:0;display:grid;gap:6px;margin-bottom:14px}
+.search-result-heading,.search-result-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
+.search-result-footer{font-size:12px;color:var(--muted)}
+.search-result{width:100%;text-align:left;min-width:0}.search-result>span:first-child{min-width:0}
+.search-result b,.search-result small{overflow-wrap:anywhere}.search-excerpt{white-space:normal;line-height:1.6}

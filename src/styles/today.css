@@ -1,0 +1,12 @@
+/* Today summary is a compact navigation row. */
+#page-today .page-head{margin-bottom:12px;align-items:center}
+#page-today .page-head .eyebrow,#page-today .page-head p{display:none}
+#page-today .page-head h1{font-size:23px;margin:0}
+#page-today .summary-grid{gap:8px;margin-bottom:12px}
+#page-today .summary{min-height:48px;padding:8px 12px;gap:9px;transform:none}
+#page-today .summary-icon{width:26px;height:26px;font-size:15px;border-radius:8px;flex-shrink:0}
+#page-today .summary>div:nth-child(2){display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#page-today .summary strong{font-size:19px}
+#page-today .summary small{margin:0;font-size:12px}
+#page-today .summary-arrow{font-size:17px}
+@media(max-width:620px){#page-today .summary{padding:8px}#page-today .page-head{align-items:flex-start}#page-today .page-head h1{font-size:21px}}

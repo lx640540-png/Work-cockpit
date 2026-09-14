@@ -9,4 +9,4 @@ function moveMemosToTrash(ids,label="删除备忘录"){
 function deleteMemo(id){
  let memo=memoById(id);if(!memo)return;confirmAction("删除备忘录？","备忘录会进入回收站，可稍后恢复。",()=>moveMemosToTrash([id]),"删除");
 }
-function memoToTask(id){let memo=memoById(id);if(!memo)return;openTask("",{title:memo.title,nextAction:"根据备忘录内容明确下一步",notes:memo.content,project:memo.project,status:"待处理",inbox:true})}
+function memoToTask(id){let memo=memoById(id);if(!memo)return;openTask("",{title:memo.title,nextAction:"",notes:memo.content,project:memo.project,status:"待处理",inbox:true})}

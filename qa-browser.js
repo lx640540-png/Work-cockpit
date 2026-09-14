@@ -34,8 +34,11 @@ const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5)
   const release = await target.boundingBox();
   assert(release, `missing release geometry after Sortable auto-scroll: ${targetSelector}`);
   await page.mouse.move(release.x + release.width / 2, release.y + release.height * ratio, { steps: 3 });
-  // Fallback dragging samples pointer movement on a timer; let the final move settle.
+  // Sortable animation and scroll can move the target during the sampling delay.
   await page.waitForTimeout(180);
+  const settled = await target.boundingBox();
+  assert(settled, `missing settled release target: ${targetSelector}`);
+  await page.mouse.move(settled.x + settled.width / 2, settled.y + settled.height * ratio);
   await page.mouse.up();
   await page.waitForTimeout(180);
 };
@@ -715,7 +718,7 @@ async function testUrl() {
   assert(detailSelectState.selects > 0 && detailSelectState.selects === detailSelectState.enhanced, `task-detail dropdowns were not all hover-enabled: ${JSON.stringify(detailSelectState)}`);
   const taskDetailClarity = await page.locator('#taskEditor').evaluate(node => { const section=node.querySelector('.task-column:not(.task-content-column)>.task-section'),label=node.querySelector('.field label'),preview=node.querySelector('#attachmentPreview');return { sectionBorder:getComputedStyle(section).borderLeftWidth, labelSize:parseFloat(getComputedStyle(label).fontSize), previewDisplay:getComputedStyle(preview).display }; });
   assert(taskDetailClarity.sectionBorder === '0px' && taskDetailClarity.labelSize >= 12 && taskDetailClarity.previewDisplay === 'none', `task-detail clarity pass did not reduce nested borders or empty preview space: ${JSON.stringify(taskDetailClarity)}`);
-  assert(await page.locator('#draftDue').count() === 0 && await page.locator('#draftCompleted').isDisabled(), 'task detail did not replace deadline with a status-aware completion date');
+  assert(await page.locator('#draftDue').count() === 1 && await page.locator('#draftCompleted').isDisabled(), 'task detail did not separate deadline and status-aware completion date');
   await page.locator('#draftStatus + .hover-select-trigger').hover();
   await page.waitForFunction(() => document.querySelector('#draftStatus')?.closest('.hover-select')?.classList.contains('open'));
   await page.locator('#draftStatus').locator('xpath=..').locator('[data-hover-select-option]').filter({ hasText:'已完成' }).click();
