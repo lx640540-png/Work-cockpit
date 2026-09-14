@@ -340,6 +340,31 @@ test('iteration: complete search pages past previews and retains context after o
  await page.click('[data-clear-search]');assert.equal(await page.locator('[data-search-task]').count(),0);
 });
 
+test('search: task status, completion date, sorting and project grouping are visible',{timeout:30000},async t=>{
+ const tasks=[
+  makeTask('search-active',{title:'交付复核',status:'进行中',project:'project-b',updatedAt:'2026-09-14T08:00:00.000Z'}),
+  makeTask('search-waiting',{title:'交付等待',status:'等待',project:'project-a',updatedAt:'2026-09-13T08:00:00.000Z'}),
+  makeTask('search-done-new',{title:'交付新完成',status:'已完成',completed:'2026-09-12',project:'project-a'}),
+  makeTask('search-done-old',{title:'交付早完成',status:'已完成',completed:'2026-09-03',project:'project-b'}),
+  makeTask('search-general',{title:'交付通用',status:'待处理'})
+ ];
+ const projects=[{id:'project-b',name:'乙项目',milestones:[]},{id:'project-a',name:'甲项目',milestones:[]}];
+ const page=await fixture(t,tasks,{projects,route:'tasks'});await page.fill('#globalSearch','交付');await page.locator('#page-search.active').waitFor();
+ assert.equal(await page.locator('[data-search-task="search-done-new"] .search-status').textContent(),'已完成');
+ assert.equal(await page.locator('[data-search-task="search-done-new"] time').textContent(),'2026-09-12');
+ assert.equal(await page.locator('[data-search-task="search-active"] time').count(),0);
+ await page.selectOption('#searchTaskSort','completedDesc');
+ assert.deepEqual(await page.locator('[data-search-task]').evaluateAll(rows=>rows.map(row=>row.dataset.searchTask).slice(0,2)),['search-done-new','search-done-old']);
+ await page.selectOption('#searchTaskSort','completedAsc');
+ assert.deepEqual(await page.locator('[data-search-task]').evaluateAll(rows=>rows.map(row=>row.dataset.searchTask).slice(0,2)),['search-done-old','search-done-new']);
+ await page.selectOption('#searchTaskSort','status');
+ assert.deepEqual(await page.locator('[data-search-task]').evaluateAll(rows=>rows.map(row=>row.querySelector('.search-status').textContent)),['进行中','等待','待处理','已完成','已完成']);
+ await page.click('[data-search-project-group]');assert.equal(await page.locator('.search-project-group').count(),3);
+ assert.deepEqual(await page.locator('.search-project-heading b').allTextContents(),['甲项目','乙项目','通用事项']);
+ await page.click('[data-search-task="search-done-new"]');await page.locator('#taskDialog[open]').waitFor();await page.keyboard.press('Escape');
+ assert.equal(await page.locator('#searchTaskSort').inputValue(),'status');assert.equal(await page.locator('[data-search-project-group]').getAttribute('aria-pressed'),'true');
+});
+
 test('iteration: progress drafts, timestamped entries and weekly history survive saves',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('progress',{week:true,nextAction:'原有下一步'})],{route:'tasks'});
  const history=JSON.stringify((await stored(page)).weeks['2026-08-24']);
@@ -351,6 +376,25 @@ test('iteration: progress drafts, timestamped entries and weekly history survive
  assert.equal(JSON.stringify((await stored(page)).weeks['2026-08-24']),history);
  await page.click('[data-page="today"]');await page.click('[data-summary-target="done"]');await page.locator('.week-progress-records').waitFor();assert.match(await page.locator('.week-progress-records').textContent(),/已收到初稿/);
  await page.reload();assert.equal((await stored(page)).tasks.find(x=>x.id==='progress').progressLog.length,2);
+});
+
+test('fix: clearing a plan stays cleared after later detail autosaves',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('clear-plan',{focus:true,week:true,planDate:today,title:'原标题'})],{route:'tasks'});
+ await edit(page,'clear-plan');await page.fill('#draftPlanDate','');await page.clock.fastForward(800);
+ assert.equal(await page.locator('#draftFocus').isChecked(),false);
+ await page.fill('#taskTitle','修改后的标题');await page.clock.fastForward(800);await page.keyboard.press('Escape');
+ const task=(await stored(page)).tasks.find(x=>x.id==='clear-plan');assert.equal(task.planDate,'');assert.equal(task.focus,false);assert.equal(task.week,true);assert.equal(task.title,'修改后的标题');
+});
+
+test('fix: progress history syncs after undo and supports edit delete restore',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('progress-fix')],{route:'tasks'});page.setDefaultTimeout(3000);await edit(page,'progress-fix');
+ await page.fill('#taskProgressInput','第一条记录');await page.click('[data-add-progress]');assert.equal(await page.locator('#taskProgressList li').count(),1);
+ await page.locator('[data-add-progress]').focus();await page.keyboard.press('Control+z');assert.equal(await page.locator('#taskProgressList li').count(),0);
+ await page.fill('#taskTitle','撤销后改标题');await page.clock.fastForward(800);assert.equal((await stored(page)).tasks.find(x=>x.id==='progress-fix').progressLog.length,0);
+ await page.fill('#taskProgressInput','重新记录的进展');await page.click('[data-add-progress]');assert.equal(await page.locator('#taskProgressList li').count(),1);
+ await page.click('[data-edit-progress]');await page.fill('.progress-edit-input','修正后的记录');await page.click('[data-save-progress]');assert.match(await page.locator('#taskProgressList').textContent(),/修正后的记录/);
+ await page.click('[data-delete-progress]');await page.click('#confirmAccept');assert.equal(await page.locator('#taskProgressList li').count(),0);
+ await page.keyboard.press('Control+z');assert.equal(await page.locator('#taskProgressList li').count(),1);assert.match(await page.locator('#taskProgressList').textContent(),/修正后的记录/);
 });
 
 test('iteration: new task next action stays blank without placeholders across creation paths',{timeout:30000},async t=>{
