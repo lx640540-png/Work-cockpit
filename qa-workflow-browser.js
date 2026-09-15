@@ -442,3 +442,72 @@ test('rich text: headings highlights expanded editing and three-level indentatio
  const restored=await page.locator('#taskNotes').evaluate(node=>{let q=node.__quill;return{html:q.getSemanticHTML(),heading:q.getFormat(0,1).header,highlight:q.getFormat(5,5).highlight,paragraphIndent:q.getFormat(11,1).indent,child:q.getFormat(20,1)}});
  assert.equal(restored.heading,2);assert.equal(restored.highlight,'yellow');assert.equal(restored.paragraphIndent,3);assert.equal(restored.child.list,'ordered');assert.equal(restored.child.indent,1);assert.match(restored.html,/展开中编辑/);
 });
+
+const richLines=editor=>editor.evaluate(node=>node.__quill.getLines().map(line=>({text:line.domNode.textContent,list:line.formats().list||'',indent:line.formats().indent||0,header:line.formats().header||0,padding:parseFloat(getComputedStyle(line.domNode).paddingLeft)})));
+async function seedRich(editor,ops,index=0,length=0){await editor.evaluate(async(node,{ops,index,length})=>{const q=node.__quill;q.setContents({ops},'silent');q.history.clear();q.focus({preventScroll:true});q.setSelection(index,length,'silent');await new Promise(requestAnimationFrame);q.update('silent');q.focus({preventScroll:true});q.setSelection(index,length,'user')},{ops,index,length});}
+
+test('rich text: paragraph Tab keeps native focus, grouped indentation preserves levels and headings reset padding',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('indent')],{route:'tasks'});await edit(page,'indent');const editor=page.locator('#taskNotes'),indent=page.locator('.task-notes-editor [data-command="indent"]'),outdent=page.locator('.task-notes-editor [data-command="outdent"]');
+ for(const depth of [0,3]){
+  await seedRich(editor,[{insert:'段落'},{insert:'\n',attributes:depth?{indent:depth}:{}}]);
+  const before=await editor.evaluate(node=>node.__quill.getContents());await page.keyboard.press('Tab');
+  assert.deepEqual(await editor.evaluate(node=>node.__quill.getContents()),before,'Tab modified a paragraph');
+  assert.equal(await editor.evaluate(node=>node.contains(document.activeElement)),false,'Tab trapped focus in the editor');
+  await editor.evaluate(node=>node.__quill.setSelection(0,0,'user'));await page.keyboard.press('Shift+Tab');
+  assert.deepEqual(await editor.evaluate(node=>node.__quill.getContents()),before,'Shift+Tab modified a paragraph');
+  assert.equal(await editor.evaluate(node=>node.contains(document.activeElement)),false,'Shift+Tab trapped focus in the editor');
+ }
+ await seedRich(editor,[{insert:'甲'},{insert:'\n',attributes:{indent:1}},{insert:'乙'},{insert:'\n',attributes:{indent:2}}],0,3);
+ await indent.click();assert.deepEqual((await richLines(editor)).map(l=>l.indent),[2,3]);assert.deepEqual((await richLines(editor)).map(l=>l.padding),[48,72]);assert.equal(await indent.isDisabled(),true);
+ await outdent.click();assert.deepEqual((await richLines(editor)).map(l=>l.indent),[1,2]);
+ await outdent.click();assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,1]);assert.equal(await outdent.isDisabled(),true,'outdent would flatten the selected relative hierarchy');
+ await editor.evaluate(node=>node.__quill.setSelection(2,0,'user'));await page.click('.task-notes-editor [data-command="heading2"]');
+ assert.deepEqual((await richLines(editor)).map(l=>[l.header,l.indent,l.padding]),[[0,0,0],[2,0,0]]);
+ await save(page);await page.reload();await edit(page,'indent');assert.deepEqual((await richLines(page.locator('#taskNotes'))).map(l=>[l.header,l.indent]),[[0,0],[2,0]]);
+});
+
+test('rich text: list subtrees move atomically through toolbar and keyboard, keep decimal numbering and undo separately',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('tree')],{route:'tasks'});await edit(page,'tree');const editor=page.locator('#taskNotes'),root=editor.locator('.ql-editor');
+ const ops=[{insert:'甲'},{insert:'\n',attributes:{list:'ordered'}},{insert:'乙'},{insert:'\n',attributes:{list:'ordered'}},{insert:'丙'},{insert:'\n',attributes:{list:'ordered',indent:1}},{insert:'丁'},{insert:'\n',attributes:{list:'ordered',indent:2}},{insert:'戊'},{insert:'\n',attributes:{list:'ordered'}}];
+ await seedRich(editor,ops,2,3);await page.click('.task-notes-editor [data-command="indent"]');
+ assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,1,2,3,0],'an unselected descendant was left behind');
+ assert.deepEqual((await richLines(editor)).map(l=>l.list),Array(5).fill('ordered'));
+ const markers=await editor.locator('li[class*="ql-indent-"]>.ql-ui').evaluateAll(nodes=>nodes.map(n=>getComputedStyle(n,'::before').content));assert(markers.every(m=>/^counter\(list-[123](?:, decimal)?\) "\. "$/.test(m)),JSON.stringify(markers));
+ const moved=await editor.evaluate(node=>node.__quill.getContents());await root.press('Tab');assert.deepEqual(await editor.evaluate(node=>node.__quill.getContents()),moved,'Tab bypassed depth or parent validation');
+ await root.press('Control+z');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,0,1,2,0]);
+ await root.press('Control+Shift+z');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,1,2,3,0]);
+ await editor.evaluate(node=>node.__quill.setSelection(2,3,'user'));
+ await root.press('Shift+Tab');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,0,1,2,0]);
+ await editor.evaluate(node=>{const q=node.__quill;q.setSelection(2,0,'user');q.history.clear();q.insertText(2,'新','user');q.setSelection(2,0,'user')});
+ await root.press('Tab');await root.press('Control+z');assert.equal((await richLines(editor))[1].text,'新乙','undoing indent also erased recently typed text');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,0,1,2,0]);
+ await root.press('Control+Shift+z');await save(page);await page.reload();await edit(page,'tree');assert.deepEqual((await richLines(page.locator('#taskNotes'))).map(l=>l.indent),[0,1,2,3,0]);
+});
+
+test('rich text: empty Enter exits one list level, Backspace lifts children and composition is untouched',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('keys')],{route:'tasks'});await edit(page,'keys');const editor=page.locator('#taskNotes'),root=editor.locator('.ql-editor');
+ await seedRich(editor,[{insert:'甲'},{insert:'\n',attributes:{list:'ordered'}},{insert:'乙'},{insert:'\n',attributes:{list:'ordered',indent:1}},{insert:'丙'},{insert:'\n',attributes:{list:'ordered',indent:2}},{insert:'\n',attributes:{list:'ordered',indent:3}}],6);
+ for(const depth of [2,1,0]){await editor.evaluate(node=>{const q=node.__quill;q.focus({preventScroll:true});q.setSelection(q.getLength()-1,0,'user')});await root.press('Enter');const last=(await richLines(editor)).at(-1);assert.equal(last.indent,depth);assert.equal(last.list,'ordered');}
+ await editor.evaluate(node=>{const q=node.__quill;q.focus({preventScroll:true});q.setSelection(q.getLength()-1,0,'user')});await root.press('Enter');assert.equal((await richLines(editor)).at(-1).list,'');
+ await seedRich(editor,[{insert:'甲'},{insert:'\n',attributes:{list:'bullet'}},{insert:'乙'},{insert:'\n',attributes:{list:'bullet',indent:1}},{insert:'丙'},{insert:'\n',attributes:{list:'bullet',indent:2}}],2);
+ await root.press('Backspace');assert.deepEqual((await richLines(editor)).map(l=>[l.text,l.indent,l.list]),[['甲',0,'bullet'],['乙',0,'bullet'],['丙',1,'bullet']]);
+ await editor.evaluate(node=>node.__quill.setSelection(5,0,'user'));await root.press('Enter');assert.deepEqual((await richLines(editor)).at(-1).indent,1);assert.equal((await richLines(editor)).at(-1).list,'bullet');
+ const before=await editor.evaluate(node=>node.__quill.getContents());await editor.locator('.ql-editor').evaluate(node=>{node.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));for(const key of ['Tab','Enter','Backspace'])node.dispatchEvent(new KeyboardEvent('keydown',{key,isComposing:true,bubbles:true,cancelable:true}));node.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}))});assert.deepEqual(await editor.evaluate(node=>node.__quill.getContents()),before);
+});
+
+test('rich text: highlighter icons retain size and selection across colors, themes and expanded narrow view',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('colors')],{route:'tasks'});await edit(page,'colors');const editor=page.locator('#taskNotes');await seedRich(editor,[{insert:'重点内容\n'}],0,2);
+ for(const [color,label] of [['Yellow','黄'],['Green','绿'],['Blue','蓝']]){
+  const button=page.locator('.task-notes-editor [data-command="highlight'+color+'"]');await button.click();assert.equal(await button.getAttribute('aria-pressed'),'true');
+  assert.equal(await editor.evaluate(node=>node.__quill.getFormat(0,2).highlight),color.toLowerCase());assert.equal(await editor.evaluate(node=>node.__quill.getFormat(2,2).highlight||''),'');
+  await page.clock.fastForward(450);assert.equal(await page.locator('#tooltip').textContent(),label+'色高亮；再次点击清除');
+  await button.click();assert.equal(await button.getAttribute('aria-pressed'),'false');assert.equal(await editor.evaluate(node=>node.__quill.getFormat(0,2).highlight||''),'');
+ }
+ for(const [width,theme] of [[1600,'light'],[760,'dark']]){
+  await page.setViewportSize({width,height:1000});await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
+  if(width===760)await page.click('.task-notes-editor [data-command="expand"]');
+  const sizes=await page.locator('.task-notes-editor .rich-highlight-button').evaluateAll(nodes=>nodes.map(n=>{const b=n.getBoundingClientRect(),s=n.querySelector('svg').getBoundingClientRect();return[b.width,b.height,s.width,s.height,s.left>=b.left&&s.right<=b.right&&s.top>=b.top&&s.bottom<=b.bottom]}));
+  assert.deepEqual(sizes,Array(3).fill([29,29,18,18,true]));
+  assert.equal(await page.locator('.task-notes-editor .rich-toolbar').evaluate(n=>n.scrollWidth<=n.clientWidth),true,'toolbar overflowed');
+ }
+ await page.click('.task-notes-editor [data-command="highlightGreen"]');await page.keyboard.press('Escape');await save(page);await page.reload();await edit(page,'colors');assert.equal(await page.locator('#taskNotes').evaluate(node=>node.__quill.getFormat(0,2).highlight),'green');
+});
