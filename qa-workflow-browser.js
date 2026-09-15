@@ -444,7 +444,7 @@ test('rich text: headings highlights expanded editing and three-level indentatio
 });
 
 const richLines=editor=>editor.evaluate(node=>node.__quill.getLines().map(line=>({text:line.domNode.textContent,list:line.formats().list||'',indent:line.formats().indent||0,header:line.formats().header||0,padding:parseFloat(getComputedStyle(line.domNode).paddingLeft)})));
-async function seedRich(editor,ops,index=0,length=0){await editor.evaluate((node,{ops,index,length})=>{const q=node.__quill;q.setContents({ops},'silent');q.history.clear();q.setSelection(index,length,'user')},{ops,index,length});}
+async function seedRich(editor,ops,index=0,length=0){await editor.evaluate(async(node,{ops,index,length})=>{const q=node.__quill;q.setContents({ops},'silent');q.history.clear();q.focus({preventScroll:true});q.setSelection(index,length,'silent');await new Promise(requestAnimationFrame);q.update('silent');q.focus({preventScroll:true});q.setSelection(index,length,'user')},{ops,index,length});}
 
 test('rich text: paragraph Tab keeps native focus, grouped indentation preserves levels and headings reset padding',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('indent')],{route:'tasks'});await edit(page,'indent');const editor=page.locator('#taskNotes'),indent=page.locator('.task-notes-editor [data-command="indent"]'),outdent=page.locator('.task-notes-editor [data-command="outdent"]');
@@ -467,29 +467,30 @@ test('rich text: paragraph Tab keeps native focus, grouped indentation preserves
 });
 
 test('rich text: list subtrees move atomically through toolbar and keyboard, keep decimal numbering and undo separately',{timeout:30000},async t=>{
- const page=await fixture(t,[makeTask('tree')],{route:'tasks'});await edit(page,'tree');const editor=page.locator('#taskNotes');
+ const page=await fixture(t,[makeTask('tree')],{route:'tasks'});await edit(page,'tree');const editor=page.locator('#taskNotes'),root=editor.locator('.ql-editor');
  const ops=[{insert:'甲'},{insert:'\n',attributes:{list:'ordered'}},{insert:'乙'},{insert:'\n',attributes:{list:'ordered'}},{insert:'丙'},{insert:'\n',attributes:{list:'ordered',indent:1}},{insert:'丁'},{insert:'\n',attributes:{list:'ordered',indent:2}},{insert:'戊'},{insert:'\n',attributes:{list:'ordered'}}];
  await seedRich(editor,ops,2,3);await page.click('.task-notes-editor [data-command="indent"]');
  assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,1,2,3,0],'an unselected descendant was left behind');
  assert.deepEqual((await richLines(editor)).map(l=>l.list),Array(5).fill('ordered'));
  const markers=await editor.locator('li[class*="ql-indent-"]>.ql-ui').evaluateAll(nodes=>nodes.map(n=>getComputedStyle(n,'::before').content));assert(markers.every(m=>/^counter\(list-[123](?:, decimal)?\) "\. "$/.test(m)),JSON.stringify(markers));
- const moved=await editor.evaluate(node=>node.__quill.getContents());await page.keyboard.press('Tab');assert.deepEqual(await editor.evaluate(node=>node.__quill.getContents()),moved,'Tab bypassed depth or parent validation');
- await page.keyboard.press('Control+z');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,0,1,2,0]);
- await page.keyboard.press('Control+Shift+z');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,1,2,3,0]);
- await page.keyboard.press('Shift+Tab');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,0,1,2,0]);
+ const moved=await editor.evaluate(node=>node.__quill.getContents());await root.press('Tab');assert.deepEqual(await editor.evaluate(node=>node.__quill.getContents()),moved,'Tab bypassed depth or parent validation');
+ await root.press('Control+z');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,0,1,2,0]);
+ await root.press('Control+Shift+z');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,1,2,3,0]);
+ await editor.evaluate(node=>node.__quill.setSelection(2,3,'user'));
+ await root.press('Shift+Tab');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,0,1,2,0]);
  await editor.evaluate(node=>{const q=node.__quill;q.setSelection(2,0,'user');q.history.clear();q.insertText(2,'新','user');q.setSelection(2,0,'user')});
- await page.keyboard.press('Tab');await page.keyboard.press('Control+z');assert.equal((await richLines(editor))[1].text,'新乙','undoing indent also erased recently typed text');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,0,1,2,0]);
- await page.keyboard.press('Control+Shift+z');await save(page);await page.reload();await edit(page,'tree');assert.deepEqual((await richLines(page.locator('#taskNotes'))).map(l=>l.indent),[0,1,2,3,0]);
+ await root.press('Tab');await root.press('Control+z');assert.equal((await richLines(editor))[1].text,'新乙','undoing indent also erased recently typed text');assert.deepEqual((await richLines(editor)).map(l=>l.indent),[0,0,1,2,0]);
+ await root.press('Control+Shift+z');await save(page);await page.reload();await edit(page,'tree');assert.deepEqual((await richLines(page.locator('#taskNotes'))).map(l=>l.indent),[0,1,2,3,0]);
 });
 
 test('rich text: empty Enter exits one list level, Backspace lifts children and composition is untouched',{timeout:30000},async t=>{
- const page=await fixture(t,[makeTask('keys')],{route:'tasks'});await edit(page,'keys');const editor=page.locator('#taskNotes');
+ const page=await fixture(t,[makeTask('keys')],{route:'tasks'});await edit(page,'keys');const editor=page.locator('#taskNotes'),root=editor.locator('.ql-editor');
  await seedRich(editor,[{insert:'甲'},{insert:'\n',attributes:{list:'ordered'}},{insert:'乙'},{insert:'\n',attributes:{list:'ordered',indent:1}},{insert:'丙'},{insert:'\n',attributes:{list:'ordered',indent:2}},{insert:'\n',attributes:{list:'ordered',indent:3}}],6);
- for(const depth of [2,1,0]){await page.keyboard.press('Enter');const last=(await richLines(editor)).at(-1);assert.equal(last.indent,depth);assert.equal(last.list,'ordered');}
- await page.keyboard.press('Enter');assert.equal((await richLines(editor)).at(-1).list,'');
+ for(const depth of [2,1,0]){await editor.evaluate(node=>{const q=node.__quill;q.focus({preventScroll:true});q.setSelection(q.getLength()-1,0,'user')});await root.press('Enter');const last=(await richLines(editor)).at(-1);assert.equal(last.indent,depth);assert.equal(last.list,'ordered');}
+ await editor.evaluate(node=>{const q=node.__quill;q.focus({preventScroll:true});q.setSelection(q.getLength()-1,0,'user')});await root.press('Enter');assert.equal((await richLines(editor)).at(-1).list,'');
  await seedRich(editor,[{insert:'甲'},{insert:'\n',attributes:{list:'bullet'}},{insert:'乙'},{insert:'\n',attributes:{list:'bullet',indent:1}},{insert:'丙'},{insert:'\n',attributes:{list:'bullet',indent:2}}],2);
- await page.keyboard.press('Backspace');assert.deepEqual((await richLines(editor)).map(l=>[l.text,l.indent,l.list]),[['甲',0,'bullet'],['乙',0,'bullet'],['丙',1,'bullet']]);
- await editor.evaluate(node=>node.__quill.setSelection(5,0,'user'));await page.keyboard.press('Enter');assert.deepEqual((await richLines(editor)).at(-1).indent,1);assert.equal((await richLines(editor)).at(-1).list,'bullet');
+ await root.press('Backspace');assert.deepEqual((await richLines(editor)).map(l=>[l.text,l.indent,l.list]),[['甲',0,'bullet'],['乙',0,'bullet'],['丙',1,'bullet']]);
+ await editor.evaluate(node=>node.__quill.setSelection(5,0,'user'));await root.press('Enter');assert.deepEqual((await richLines(editor)).at(-1).indent,1);assert.equal((await richLines(editor)).at(-1).list,'bullet');
  const before=await editor.evaluate(node=>node.__quill.getContents());await editor.locator('.ql-editor').evaluate(node=>{node.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));for(const key of ['Tab','Enter','Backspace'])node.dispatchEvent(new KeyboardEvent('keydown',{key,isComposing:true,bubbles:true,cancelable:true}));node.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}))});assert.deepEqual(await editor.evaluate(node=>node.__quill.getContents()),before);
 });
 
