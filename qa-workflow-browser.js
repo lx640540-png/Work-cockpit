@@ -47,7 +47,7 @@ test('memo panes fit viewport and scroll independently; navigation restores main
   const geometry=await page.evaluate(()=>{const main=document.querySelector('#mainScroll'),list=document.querySelector('.memo-list'),editor=document.querySelector('.memo-editor-body .ql-editor');list.scrollTop=160;editor.scrollTop=180;return{mainOverflow:main.scrollHeight-main.clientHeight,overflow:getComputedStyle(main).overflowY,list:list.scrollTop,editor:editor.scrollTop,bottom:document.querySelector('.memo-layout').getBoundingClientRect().bottom,height:innerHeight,body:document.documentElement.scrollHeight-innerHeight}});
   assert.equal(geometry.overflow,'hidden');assert(geometry.mainOverflow<=2,JSON.stringify(geometry));assert(geometry.body<=2,JSON.stringify(geometry));assert(geometry.bottom<=geometry.height,JSON.stringify(geometry));assert(geometry.list>0);assert(geometry.editor>0);
  }
- await page.setViewportSize({width:1600,height:900});await page.click('[data-page="today"]');assert.equal(await page.locator('body.memo-workspace').count(),0);
+ await page.setViewportSize({width:1600,height:900});await page.click('[data-page="today"]');await page.waitForFunction(()=>!document.body.classList.contains('memo-workspace'));assert.equal(await page.locator('body.memo-workspace').count(),0);
  assert.equal(await page.locator('#mainScroll').evaluate(n=>getComputedStyle(n).overflowY),'auto');
 });
 test('project cards show completed count and status colors differ in both themes',async t=>{
