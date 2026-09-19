@@ -71,7 +71,7 @@ test('dropping files saves the current draft and ignores ordinary text drags',as
  await page.evaluate(()=>{Cloud.user=null;Cloud.client=null});
 });
 async function save(page){await page.click('#saveTaskButton');await page.waitForFunction(()=>!document.querySelector('#taskDialog').open);}
-async function edit(page,id){await page.click('[data-page="tasks"]');await page.click('#page-tasks [data-open-task="'+id+'"]');}
+async function edit(page,id){await page.click('[data-page="tasks"]');await page.click('#page-tasks [data-open-task="'+id+'"]');await page.waitForFunction(()=>document.activeElement?.id==='taskTitle');}
 
 test('due plans light flags on load/reload; excluded states and historical flags remain unchanged',{timeout:30000},async t=>{
   const page=await fixture(t,[makeTask('due',{planDate:today}),makeTask('long',{type:'长期跟进',planDate:today}),
