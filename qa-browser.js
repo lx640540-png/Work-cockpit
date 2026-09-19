@@ -39,6 +39,7 @@ const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5)
   const settled = await target.boundingBox();
   assert(settled, `missing settled release target: ${targetSelector}`);
   await page.mouse.move(settled.x + settled.width / 2, settled.y + settled.height * ratio);
+  console.log('DROP_GEOMETRY',await page.evaluate(({x,y})=>({x,y,hit:document.elementFromPoint(x,y)?.outerHTML.slice(0,300),intent:activeSortableTask?._taskDropIntent}),{x:settled.x+settled.width/2,y:settled.y+settled.height*ratio}));
   await page.mouse.up();
   await page.waitForTimeout(180);
 };

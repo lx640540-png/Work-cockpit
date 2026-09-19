@@ -41,6 +41,7 @@ const stored=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('work-cockp
 test('memo panes fit viewport and scroll independently; navigation restores main scrolling',async t=>{
  const page=await fixture(t,[]);
  await page.evaluate(()=>{state.memos=Array.from({length:30},(_,i)=>normalizeMemo({id:'m'+i,title:'备忘录 '+i,content:'<p>内容</p>'.repeat(100)}));navigate('memos')});
+ await page.waitForSelector('.memo-editor-body .ql-editor');
  for(const viewport of [{width:1600,height:900},{width:1280,height:640},{width:390,height:844}]){
   await page.setViewportSize(viewport);
   const geometry=await page.evaluate(()=>{const main=document.querySelector('#mainScroll'),list=document.querySelector('.memo-list'),editor=document.querySelector('.memo-editor-body .ql-editor');list.scrollTop=160;editor.scrollTop=180;return{mainOverflow:main.scrollHeight-main.clientHeight,overflow:getComputedStyle(main).overflowY,list:list.scrollTop,editor:editor.scrollTop,bottom:document.querySelector('.memo-layout').getBoundingClientRect().bottom,height:innerHeight,body:document.documentElement.scrollHeight-innerHeight}});
@@ -59,7 +60,7 @@ test('project cards show completed count and status colors differ in both themes
 });
 test('Obsidian link persists and rejects unrelated URL schemes',async t=>{
  const page=await fixture(t,[makeTask('a')]);await edit(page,'a');
- const uri='obsidian://open?vault=Work&file=%E7%AC%94%E8%AE%B0';await page.fill('#taskObsidianUri',uri);await save(page);await page.reload();await edit(page,'a');assert.equal(await page.inputValue('#taskObsidianUri'),uri);
+ const uri='obsidian://open?vault=Work&file=%E7%AC%94%E8%AE%B0';await page.fill('#taskObsidianUri',uri);assert.equal(await page.inputValue('#taskObsidianUri'),uri,'input before save');await save(page);assert.equal((await stored(page)).tasks.find(t=>t.id==='a').obsidianUri,uri,'stored after save');await page.reload();assert.equal((await stored(page)).tasks.find(t=>t.id==='a').obsidianUri,uri,'stored after reload');await edit(page,'a');assert.equal(await page.inputValue('#taskObsidianUri'),uri,'reopened input');
  await page.fill('#taskObsidianUri','javascript:window.badLink=true');await page.click('[data-open-obsidian]');assert.equal(await page.evaluate(()=>window.badLink),undefined);assert.match(await page.locator('#toast').textContent(),/obsidian/);
 });
 test('dropping files saves the current draft and ignores ordinary text drags',async t=>{
