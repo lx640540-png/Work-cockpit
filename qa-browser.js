@@ -276,8 +276,8 @@ async function testUrl() {
   await page.click('[data-page="today"]');
   await page.waitForSelector('#page-today.active #todayExecution', { state: 'visible' });
   assert(await page.locator('#todayHeightResizer,#captureResizer').count()===0,'removed layout handles remain');
-  const dailyGeometry=await page.evaluate(()=>{const rect=s=>document.querySelector(s).getBoundingClientRect();return {action:rect('[data-drop-zone="today"]').bottom,note:rect('.quick-note-card').top,inbox:rect('#todayCapture').top,execution:rect('#todayExecution').bottom};});
-  assert(dailyGeometry.note>=dailyGeometry.action&&dailyGeometry.inbox>=dailyGeometry.execution,'quick note and inbox do not follow the new daily layout');
+  const dailyGeometry=await page.evaluate(()=>{const rect=s=>document.querySelector(s).getBoundingClientRect();return {action:rect('[data-drop-zone="today"]').bottom,note:rect('.quick-note-card').top,inbox:rect('#todayCapture').top,waiting:rect('[data-drop-zone="waiting"]').bottom};});
+  assert(dailyGeometry.note>=dailyGeometry.action&&dailyGeometry.inbox>=dailyGeometry.waiting,'quick note and inbox do not follow the new daily layout');
   const quickEditor = page.locator('[data-quick-note] .ql-editor');
   assert(await quickEditor.count() === 1, 'persistent quick note card did not initialize with Quill');
   const quickPlaceholder = await page.locator('.quick-note-body').evaluate(body => {
@@ -807,14 +807,14 @@ async function testUrl() {
   assert(await page.locator('.project-master-detail').count() === 1, 'project master-detail workspace missing');
   const projectOverflow = await page.locator('.project-list-panel,.project-detail-panel').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).overflowY));
   assert(projectOverflow.every(value => value === 'auto'), 'project panes are not independently scrollable');
-  await page.click('[data-select-project="p2"] .project-list-content');
+  await page.click('[data-select-project="p2"] .project-list-name');
   await page.waitForSelector('[data-select-project="p2"].selected');
   await page.evaluate(() => { mainScroll.scrollTop = 0; document.querySelector('.project-detail-panel').scrollTop = 0; });
   const shortProjectDetail = page.locator('.project-detail-panel');
   await shortProjectDetail.hover(); await page.mouse.wheel(0, 120); await page.waitForTimeout(100);
   const projectWheel = await page.evaluate(() => { const panel=document.querySelector('.project-detail-panel');return { main:mainScroll.scrollTop, local:panel.scrollTop, localRange:panel.scrollHeight-panel.clientHeight, behavior:getComputedStyle(panel).overscrollBehaviorY }; });
   assert(projectWheel.main > 0 && projectWheel.local === 0 && projectWheel.localRange <= 1 && projectWheel.behavior === 'auto', `project detail wheel did not fall through to the main page: ${JSON.stringify(projectWheel)}`);
-  await page.click('[data-select-project="p1"] .project-list-content');
+  await page.click('[data-select-project="p1"] .project-list-name');
   await page.waitForSelector('[data-select-project="p1"].selected');
   await page.evaluate(() => { mainScroll.scrollTop = 0; });
   assert(await page.locator('#projectSearch').count() === 0, 'project list still contains the removed search box');
@@ -858,7 +858,7 @@ async function testUrl() {
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6'))); assert(saved.order.projects.join(',') === favoriteOrder, 'pin toggling rewrote the manual project order');
   assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p1,p3', 'newly pinned project did not move into the top section');
   assert(await page.locator('[data-select-project="p2"] .favorite.active').count() === 1, 'project pin button did not show its active state');
-  await page.click('[data-select-project="p2"] .project-list-content');
+  await page.click('[data-select-project="p2"] .project-list-name');
   await page.waitForSelector('[data-select-project="p2"].selected');
   const pinnedSelection = await page.evaluate(() => {
     const selected = document.querySelector('[data-select-project="p2"]');
@@ -868,7 +868,7 @@ async function testUrl() {
   assert(pinnedSelection.selectedClass && !pinnedSelection.otherSelected && pinnedSelection.selectedBorder !== pinnedSelection.otherBorder, `selected and unselected pinned projects remain visually indistinguishable: ${JSON.stringify(pinnedSelection)}`);
   const projectRail = await page.locator('#projectSplitter').evaluate(node => ({ hit: node.getBoundingClientRect().width, visible: getComputedStyle(node, '::before').width, length: getComputedStyle(node, '::before').height }));
   assert(projectRail.hit === 8 && projectRail.visible === '6px' && projectRail.length === '84px', `project splitter does not share the Today grip with a usable hit target: ${JSON.stringify(projectRail)}`);
-  await page.click('[data-select-project="p1"] .project-list-content');
+  await page.click('[data-select-project="p1"] .project-list-name');
   await page.evaluate(() => { taskFilter = { ...taskFilter, query: '残留筛选', type: ['问题与Bug'], status: ['暂停'] }; });
   await page.click('[data-open-project-tasks="p1"]');
   await page.waitForSelector('#page-tasks.active');
@@ -889,7 +889,7 @@ async function testUrl() {
   assert(await page.locator('#projectDialog .milestone-nav').count() === 6, 'switching back to hardware template did not restore stages');
   await page.click('#projectDialog [data-close="projectDialog"]');
   if(await page.locator('#confirmDialog').evaluate(n=>n.open))await page.click('#confirmAccept');
-  await page.click('[data-select-project="p1"] .project-list-content');
+  await page.click('[data-select-project="p1"] .project-list-name');
   await page.click('[data-edit-project="p1"]');
   await page.click('[data-project-panel="decisions"]');
   assert(await page.locator('[data-edit-decision]').count() >= 1, 'project decision panel is empty');
@@ -937,3 +937,4 @@ async function testUrl() {
   console.error(error.stack || error);
   process.exit(1);
 });
+

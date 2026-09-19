@@ -10,3 +10,6 @@
 #page-today .summary small{margin:0;font-size:12px}
 #page-today .summary-arrow{font-size:17px}
 @media(max-width:620px){#page-today .summary{padding:8px}#page-today .page-head{align-items:flex-start}#page-today .page-head h1{font-size:21px}}
+
+
+.today-sidebar-stack{display:grid;gap:16px;min-width:0;align-content:start}

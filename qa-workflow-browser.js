@@ -38,6 +38,37 @@ async function fixture(t,tasks,{time='2026-09-05T12:00:00',route='today',project
   return page;
 }
 const stored=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')));
+test('memo panes fit viewport and scroll independently; navigation restores main scrolling',async t=>{
+ const page=await fixture(t,[]);
+ await page.evaluate(()=>{state.memos=Array.from({length:30},(_,i)=>normalizeMemo({id:'m'+i,title:'备忘录 '+i,content:'<p>内容</p>'.repeat(100)}));navigate('memos')});
+ for(const viewport of [{width:1600,height:900},{width:1280,height:640},{width:390,height:844}]){
+  await page.setViewportSize(viewport);
+  const geometry=await page.evaluate(()=>{const main=document.querySelector('#mainScroll'),list=document.querySelector('.memo-list'),editor=document.querySelector('.memo-editor-body .ql-editor');list.scrollTop=160;editor.scrollTop=180;return{mainOverflow:main.scrollHeight-main.clientHeight,overflow:getComputedStyle(main).overflowY,list:list.scrollTop,editor:editor.scrollTop,bottom:document.querySelector('.memo-layout').getBoundingClientRect().bottom,height:innerHeight,body:document.documentElement.scrollHeight-innerHeight}});
+  assert.equal(geometry.overflow,'hidden');assert(geometry.mainOverflow<=2,JSON.stringify(geometry));assert(geometry.body<=2,JSON.stringify(geometry));assert(geometry.bottom<=geometry.height,JSON.stringify(geometry));assert(geometry.list>0);assert(geometry.editor>0);
+ }
+ await page.setViewportSize({width:1600,height:900});await page.click('[data-page="today"]');assert.equal(await page.locator('body.memo-workspace').count(),0);
+ assert.equal(await page.locator('#mainScroll').evaluate(n=>getComputedStyle(n).overflowY),'auto');
+});
+test('project cards show completed count and status colors differ in both themes',async t=>{
+ const page=await fixture(t,[makeTask('a',{project:'p'}),makeTask('b',{project:'p',status:'已完成'})],{projects:[{id:'p',name:'项目名称',milestones:[]}],route:'projects'});
+ await page.click('[data-project-view="detail"]');assert.equal(await page.locator('.project-completion strong').textContent(),'1 / 2');assert.equal(await page.locator('.project-list-milestone,.project-list-item .progress').count(),0);
+ await page.click('[data-favorite-project="p"]');assert.deepEqual((await stored(page)).favorites,['p']);
+ for(const theme of ['light','dark']){
+  const colors=await page.evaluate(theme=>{applyTheme(theme);const a=document.createElement('span'),b=document.createElement('span');a.className='pill status-进行中';b.className='pill status-已完成';document.body.append(a,b);const colors=[a,b].map(n=>getComputedStyle(n).backgroundColor);a.remove();b.remove();return colors},theme);assert.notEqual(colors[0],colors[1]);
+ }
+});
+test('Obsidian link persists and rejects unrelated URL schemes',async t=>{
+ const page=await fixture(t,[makeTask('a')]);await edit(page,'a');
+ const uri='obsidian://open?vault=Work&file=%E7%AC%94%E8%AE%B0';await page.fill('#taskObsidianUri',uri);await save(page);await page.reload();await edit(page,'a');assert.equal(await page.inputValue('#taskObsidianUri'),uri);
+ await page.fill('#taskObsidianUri','javascript:window.badLink=true');await page.click('[data-open-obsidian]');assert.equal(await page.evaluate(()=>window.badLink),undefined);assert.match(await page.locator('#toast').textContent(),/obsidian/);
+});
+test('dropping files saves the current draft and targets its task even after switching',async t=>{
+ const page=await fixture(t,[makeTask('a'),makeTask('b')]);await edit(page,'a');await page.fill('#taskTitle','已编辑的标题');
+ await page.evaluate(()=>{window.uploadCalls=[];Cloud.user={id:'test'};Cloud.client={};Cloud.uploadAttachments=async(id,files)=>{window.uploadCalls.push({id,names:files.map(f=>f.name),title:taskById(id).title})};const data=new DataTransfer();data.items.add(new File(['test'],'说明.txt',{type:'text/plain'}));document.querySelector('#taskNotes').dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:data}))});
+ assert.deepEqual(await page.evaluate(()=>window.uploadCalls),[{id:'a',names:['说明.txt'],title:'已编辑的标题'}]);
+ await page.evaluate(()=>{openTask('b');const data=new DataTransfer();data.setData('text/plain','ordinary text');document.querySelector('#taskNotes').dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:data}))});assert.equal(await page.evaluate(()=>window.uploadCalls.length),1);
+ await page.evaluate(()=>{Cloud.user=null;Cloud.client=null});
+});
 async function save(page){await page.click('#saveTaskButton');await page.waitForFunction(()=>!document.querySelector('#taskDialog').open);}
 async function edit(page,id){await page.click('[data-page="tasks"]');await page.click('#page-tasks [data-open-task="'+id+'"]');}
 
@@ -202,8 +233,8 @@ test('Today highlights next actions and pins while dated waiting stays separate 
  await page.locator('[data-pin-task="do"]').click();await page.locator('.section-caption').waitFor({state:'visible'});assert.match(await page.locator('.section-caption').textContent(),/今日先做/);
  assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true,'expanded state survives render');
  const modes=await page.locator('.today-task-scroll').evaluateAll(nodes=>nodes.map(node=>getComputedStyle(node).overflowY));assert.deepEqual(modes,['visible','visible']);
- const positions=await page.evaluate(()=>{const box=s=>document.querySelector(s).getBoundingClientRect();return {actionBottom:box('[data-drop-zone="today"]').bottom,noteTop:box('.quick-note-card').top,waitTop:box('[data-drop-zone="waiting"]').top,actionTop:box('[data-drop-zone="today"]').top,inboxTop:box('#todayCapture').top,flowBottom:box('#todayExecution').bottom}});
- assert(positions.noteTop>=positions.actionBottom);assert(Math.abs(positions.waitTop-positions.actionTop)<2);assert(positions.inboxTop>=positions.flowBottom);
+ const positions=await page.evaluate(()=>{const box=s=>document.querySelector(s).getBoundingClientRect();return {actionBottom:box('[data-drop-zone="today"]').bottom,noteTop:box('.quick-note-card').top,waitTop:box('[data-drop-zone="waiting"]').top,actionTop:box('[data-drop-zone="today"]').top,inboxTop:box('#todayCapture').top,waitBottom:box('[data-drop-zone="waiting"]').bottom}});
+ assert(positions.noteTop>=positions.actionBottom);assert(Math.abs(positions.waitTop-positions.actionTop)<2);assert(positions.inboxTop>=positions.waitBottom);
  await page.locator('[data-toggle-task="do"]').click();assert.equal((await stored(page)).tasks.find(task=>task.id==='do').status,'已完成');
 });
 
