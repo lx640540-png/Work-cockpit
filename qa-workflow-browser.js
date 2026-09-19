@@ -62,7 +62,7 @@ test('Obsidian link persists and rejects unrelated URL schemes',async t=>{
  const uri='obsidian://open?vault=Work&file=%E7%AC%94%E8%AE%B0';await page.fill('#taskObsidianUri',uri);await save(page);await page.reload();await edit(page,'a');assert.equal(await page.inputValue('#taskObsidianUri'),uri);
  await page.fill('#taskObsidianUri','javascript:window.badLink=true');await page.click('[data-open-obsidian]');assert.equal(await page.evaluate(()=>window.badLink),undefined);assert.match(await page.locator('#toast').textContent(),/obsidian/);
 });
-test('dropping files saves the current draft and targets its task even after switching',async t=>{
+test('dropping files saves the current draft and ignores ordinary text drags',async t=>{
  const page=await fixture(t,[makeTask('a'),makeTask('b')]);await edit(page,'a');await page.fill('#taskTitle','已编辑的标题');
  await page.evaluate(()=>{window.uploadCalls=[];Cloud.user={id:'test'};Cloud.client={};Cloud.uploadAttachments=async(id,files)=>{window.uploadCalls.push({id,names:files.map(f=>f.name),title:taskById(id).title})};const data=new DataTransfer();data.items.add(new File(['test'],'说明.txt',{type:'text/plain'}));document.querySelector('#taskNotes').dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:data}))});
  assert.deepEqual(await page.evaluate(()=>window.uploadCalls),[{id:'a',names:['说明.txt'],title:'已编辑的标题'}]);
