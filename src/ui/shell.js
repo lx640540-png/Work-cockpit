@@ -12,6 +12,7 @@ function renderSidebar(){
  $("#undoButton").disabled=!undoStack.length;$("#redoButton").disabled=!redoStack.length;$("#backButton").hidden=navigationDepth<=0;
 }
 function renderApp(){
+ document.body.classList.toggle("memo-workspace",currentPage==="memos");
  renderSidebar();
  $$(".page").forEach(page=>page.classList.toggle("active",page.id==="page-"+currentPage));
  if(currentPage==="today")renderToday();else if(currentPage==="week")renderWeek();else if(currentPage==="tasks")renderTasks();else if(currentPage==="projects")renderProjects();else if(currentPage==="memos")renderMemos();else if(currentPage==="data")renderData();else renderSearchPage();
@@ -65,3 +66,4 @@ function navigate(page,projectId){
  if(page!==currentPage){currentPage=page;navigationDepth+=1;history.pushState({page,appRoute:true,appNavDepth:navigationDepth},"","#"+page)}
  $("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender();
 }
+

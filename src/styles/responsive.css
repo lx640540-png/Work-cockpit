@@ -4,3 +4,30 @@
 @media(max-width:820px){.task-autosave-status{order:2;width:100%;text-align:right}.project-overview-head{padding:14px}.project-overview-tasks{padding:0 12px 12px}.week-result-cell{grid-template-columns:1fr}.week-result-cell .pill{justify-self:start}}
 
 
+
+
+/* The memo workspace fills available height; only its two content panes scroll. */
+body.memo-workspace{display:flow-root}
+body.memo-workspace #mainScroll{overflow:hidden;scrollbar-gutter:auto}
+body.memo-workspace .content{height:100%;padding:18px 0;min-height:0}
+body.memo-workspace #page-memos.active{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0}
+body.memo-workspace .memo-layout{height:100%;min-height:0}
+body.memo-workspace .memo-list-card,body.memo-workspace .memo-editor-card{min-width:0;min-height:0;height:100%}
+body.memo-workspace .memo-editor-body .ql-editor{overscroll-behavior:contain}
+@media(max-width:820px){
+ body.memo-workspace{overflow:hidden}
+ body.memo-workspace .app{height:100dvh;min-height:0;grid-template-rows:auto minmax(0,1fr)}
+ body.memo-workspace .main{display:grid;grid-template-rows:62px minmax(0,1fr)}
+ body.memo-workspace .topbar{position:static}
+ body.memo-workspace .memo-layout{grid-template-columns:minmax(120px,30%) minmax(0,1fr);gap:8px}
+ body.memo-workspace .page-head{margin-bottom:10px;gap:8px}
+ body.memo-workspace .page-head p,body.memo-workspace .eyebrow{display:none}
+ body.memo-workspace .memo-search,body.memo-workspace .memo-tabs,body.memo-workspace .memo-bulk-bar{padding:8px;flex-wrap:wrap}
+ body.memo-workspace .memo-list{padding:6px}
+ body.memo-workspace .memo-item{padding:8px;gap:2px}
+ body.memo-workspace .memo-editor-head,body.memo-workspace .memo-editor-meta{padding:8px;flex-wrap:wrap}
+ body.memo-workspace .memo-editor-meta .control{min-width:0;max-width:100%}
+ body.memo-workspace .memo-editor-body{margin:6px}
+ body.memo-workspace .memo-title{font-size:18px}
+ body.memo-workspace .memo-status{padding:4px 8px}
+}

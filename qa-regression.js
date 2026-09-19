@@ -51,7 +51,7 @@ const contracts = [
   [html.includes('data-smart-sort="long"'), 'long-term smart sort'],
   [html.includes('.task-row,.task-row.has-focus-toggle,.today-flow .task-row{grid-template-columns:auto minmax(0,1fr) auto') && html.includes('class="task-leading"') && html.includes('class="task-meta"'), 'task row layout contract'],
   [html.includes('grid-template-columns:minmax(280px,330px) minmax(390px,1fr) minmax(280px,320px)') && html.includes('<aside class="task-column attachment-column">') && html.includes('关联任务 <span class="muted">双向关联</span>'), 'right attachment/relations column'],
-  [html.includes('memo-layout{height:calc(100dvh') && html.includes('.memo-list{grid-row:4;min-height:0;overflow:auto'), 'independent memo scrolling'],
+  [html.includes('body.memo-workspace #mainScroll{overflow:hidden;') && html.includes('.memo-list{grid-row:4;min-height:0;overflow:auto'), 'independent memo scrolling'],
   [html.includes('memoMultiSelect:false') && html.includes('data-toggle-memo-select') && html.includes('data-memo-bulk-delete') && html.includes('moveMemosToTrash(ids'), 'memo multi-select and bulk delete'],
   [html.includes('.project-card{position:relative;min-height:305px'), 'project card comfortable height'],
   [html.includes('.future-week .week-card:not(.top-card)') && html.includes('未来周仅 Top 3 可编辑'), 'future top-only editing'],
@@ -257,3 +257,4 @@ assert(JSON.stringify(week.taskIds) === JSON.stringify(['t1', 't4', 't6']), 'sam
 assert(JSON.stringify(week.carriedTaskIds) === JSON.stringify(['t1', 't4']), 'same-week new task incorrectly marked as carry');
 
 console.log(`PASS: ${contracts.length} static contracts + multiline migration + week lifecycle behavior`);
+

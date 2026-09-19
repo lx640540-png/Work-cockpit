@@ -95,6 +95,7 @@ function handleClick(event){
  if(target.dataset.openRelated){let id=target.dataset.openRelated;if(!persistTaskDraft({close:true}))return;return openTask(id)}
  if(target.dataset.previewAttachment){attachmentPreviewId=target.dataset.previewAttachment;let preview=$("#attachmentPreview");if(preview){preview.classList.add("has-preview");preview.textContent="正在加载预览……"}return Cloud.previewAttachment(taskDraft.attachments.find(item=>item.id===attachmentPreviewId),preview)}
  if(target.dataset.removeAttachment){let item=taskDraft.attachments.find(value=>value.id===target.dataset.removeAttachment);return Cloud.removeAttachment(taskDraft.id,item)}
+ if(target.hasAttribute("data-open-obsidian"))return openTaskObsidian();
  if(target.closest(".dropzone"))return $("#attachmentInput").click();
  if(target.dataset.selectMile!==undefined){collectProjectDraft();projectMilestoneIndex=Number(target.dataset.selectMile);return renderProjectEditor()}
  if(target.dataset.projectPanel){collectProjectDraft();projectPanelTab=target.dataset.projectPanel;return renderProjectEditor()}
@@ -206,7 +207,7 @@ document.addEventListener("change",event=>{
  else if(target.id==="decisionProject"){decisionDraft.project=target.value;decisionDraft.milestone="";$("#decisionMilestone").innerHTML=milestoneOptions(decisionDraft.project,"");syncHoverSelect($("#decisionMilestone"))}
  else if(target.id==="decisionSourceTask"&&target.value){let source=taskById(target.value);if(source){decisionDraft.sourceTaskId=source.id;decisionDraft.project=source.project;decisionDraft.milestone=source.milestone;$("#decisionProject").innerHTML=decisionProjectOptions(source.project);$("#decisionMilestone").innerHTML=milestoneOptions(source.project,source.milestone);syncHoverSelect($("#decisionProject"));syncHoverSelect($("#decisionMilestone"))}}
  else if(target.dataset.checkDone!==undefined)taskDraft.checklist[Number(target.dataset.checkDone)].done=target.checked;
- else if(target.id==="attachmentInput"){let files=Array.from(target.files||[]);target.value="";if(files.length)Cloud.uploadAttachments(taskDraft.id,files)}
+ else if(target.id==="attachmentInput"){let files=Array.from(target.files||[]);target.value="";if(files.length)void uploadTaskFiles(files)}
  else if(target.id==="importInput"){let file=target.files?.[0];target.value="";if(file)importFile(file)}
  if(target.closest?.("#taskEditor")&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
 });
@@ -231,3 +232,4 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 
 
 $("#projectDialog").addEventListener("cancel",event=>{event.preventDefault();requestProjectClose()});
+
