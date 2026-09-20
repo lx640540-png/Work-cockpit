@@ -12,10 +12,12 @@
     "styles/today.css",
     "styles/task-dates.css",
     "styles/search.css",
-    "styles/progress-log.css"
+    "styles/progress-log.css",
+    "styles/workflow-completion.css"
   ],
   "scripts": [
     "core/runtime.js",
+    "domain/search.js",
     "domain/progress-log.js",
     "core/model.js",
     "core/store.js",
@@ -32,6 +34,7 @@
     "pages/data.js",
     "ui/shell.js",
     "ui/progress-log.js",
+    "ui/task-uploads.js",
     "ui/task-detail.js",
     "ui/decision-detail.js",
     "domain/task-delete.js",

@@ -44,8 +44,9 @@ test('memo panes fit viewport and scroll independently; navigation restores main
  await page.waitForSelector('.memo-editor-body .ql-editor');
  for(const viewport of [{width:1600,height:900},{width:1280,height:640},{width:390,height:844}]){
   await page.setViewportSize(viewport);
+  if(viewport.width<820){await page.click('[data-memo-pane="list"]');assert(await page.locator('.memo-list').evaluate(n=>{n.scrollTop=160;return n.scrollTop>0}));await page.click('[data-memo-pane="editor"]');}
   const geometry=await page.evaluate(()=>{const main=document.querySelector('#mainScroll'),list=document.querySelector('.memo-list'),editor=document.querySelector('.memo-editor-body .ql-editor');list.scrollTop=160;editor.scrollTop=180;return{mainOverflow:main.scrollHeight-main.clientHeight,overflow:getComputedStyle(main).overflowY,list:list.scrollTop,editor:editor.scrollTop,bottom:document.querySelector('.memo-layout').getBoundingClientRect().bottom,height:innerHeight,body:document.documentElement.scrollHeight-innerHeight}});
-  assert.equal(geometry.overflow,'hidden');assert(geometry.mainOverflow<=2,JSON.stringify(geometry));assert(geometry.body<=2,JSON.stringify(geometry));assert(geometry.bottom<=geometry.height,JSON.stringify(geometry));assert(geometry.list>0);assert(geometry.editor>0);
+  assert.equal(geometry.overflow,'hidden');assert(geometry.mainOverflow<=2,JSON.stringify(geometry));assert(geometry.body<=2,JSON.stringify(geometry));assert(geometry.bottom<=geometry.height,JSON.stringify(geometry));if(viewport.width>=820)assert(geometry.list>0);assert(geometry.editor>0);
  }
  await page.setViewportSize({width:1600,height:900});await page.click('[data-page="today"]');await page.waitForFunction(()=>!document.body.classList.contains('memo-workspace'));assert.equal(await page.locator('body.memo-workspace').count(),0);
  assert.equal(await page.locator('#mainScroll').evaluate(n=>getComputedStyle(n).overflowY),'auto');
@@ -60,8 +61,8 @@ test('project cards show completed count and status colors differ in both themes
 });
 test('Obsidian link persists and rejects unrelated URL schemes',async t=>{
  const page=await fixture(t,[makeTask('a')]);await edit(page,'a');
- const uri='obsidian://open?vault=Work&file=%E7%AC%94%E8%AE%B0';await page.fill('#taskObsidianUri',uri);assert.equal(await page.inputValue('#taskObsidianUri'),uri,'input before save');await save(page);assert.equal((await stored(page)).tasks.find(t=>t.id==='a').obsidianUri,uri,'stored after save');await page.reload();assert.equal((await stored(page)).tasks.find(t=>t.id==='a').obsidianUri,uri,'stored after reload');await edit(page,'a');assert.equal(await page.inputValue('#taskObsidianUri'),uri,'reopened input');
- await page.fill('#taskObsidianUri','javascript:window.badLink=true');await page.click('[data-open-obsidian]');assert.equal(await page.evaluate(()=>window.badLink),undefined);assert.match(await page.locator('#toast').textContent(),/obsidian/);
+ const uri='obsidian://open?vault=Work&file=%E7%AC%94%E8%AE%B0';await page.click('[data-edit-obsidian]');await page.fill('#taskObsidianUri',uri);assert.equal(await page.inputValue('#taskObsidianUri'),uri,'input before save');await save(page);assert.equal((await stored(page)).tasks.find(t=>t.id==='a').obsidianUri,uri,'stored after save');await page.reload();assert.equal((await stored(page)).tasks.find(t=>t.id==='a').obsidianUri,uri,'stored after reload');await edit(page,'a');assert.equal(await page.inputValue('#taskObsidianUri'),uri,'reopened input');
+ await page.click('[data-edit-obsidian]');await page.fill('#taskObsidianUri','javascript:window.badLink=true');await page.click('[data-open-obsidian]');assert.equal(await page.evaluate(()=>window.badLink),undefined);assert.match(await page.locator('#toast').textContent(),/obsidian/i);
 });
 test('dropping files saves the current draft and ignores ordinary text drags',async t=>{
  const page=await fixture(t,[makeTask('a'),makeTask('b')]);await edit(page,'a');await page.fill('#taskTitle','已编辑的标题');
@@ -233,7 +234,7 @@ test('Today highlights next actions and pins while dated waiting stays separate 
  await page.click('[data-waiting-group="future"] summary');assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true);
  await page.locator('[data-pin-task="do"]').click();await page.locator('.section-caption').waitFor({state:'visible'});assert.match(await page.locator('.section-caption').textContent(),/今日先做/);
  assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true,'expanded state survives render');
- const modes=await page.locator('.today-task-scroll').evaluateAll(nodes=>nodes.map(node=>getComputedStyle(node).overflowY));assert.deepEqual(modes,['visible','visible']);
+ const modes=await page.locator('.today-task-scroll').evaluateAll(nodes=>nodes.map(node=>getComputedStyle(node).overflowY));assert.deepEqual(modes,['visible','auto']);
  const positions=await page.evaluate(()=>{const box=s=>document.querySelector(s).getBoundingClientRect();return {actionBottom:box('[data-drop-zone="today"]').bottom,noteTop:box('.quick-note-card').top,waitTop:box('[data-drop-zone="waiting"]').top,actionTop:box('[data-drop-zone="today"]').top,inboxTop:box('#todayCapture').top,waitBottom:box('[data-drop-zone="waiting"]').bottom}});
  assert(positions.noteTop>=positions.actionBottom);assert(Math.abs(positions.waitTop-positions.actionTop)<2);assert(positions.inboxTop>=positions.waitBottom);
  await page.locator('[data-toggle-task="do"]').click();assert.equal((await stored(page)).tasks.find(task=>task.id==='do').status,'已完成');
@@ -542,4 +543,52 @@ test('rich text: highlighter icons retain size and selection across colors, them
   assert.equal(await page.locator('.task-notes-editor .rich-toolbar').evaluate(n=>n.scrollWidth<=n.clientWidth),true,'toolbar overflowed');
  }
  await page.click('.task-notes-editor [data-command="highlightGreen"]');await page.keyboard.press('Escape');await save(page);await page.reload();await edit(page,'colors');assert.equal(await page.locator('#taskNotes').evaluate(node=>node.__quill.getFormat(0,2).highlight),'green');
+});
+
+test('completion: shared search matches tokens, reversed tokens and title gaps with safe highlights',async t=>{
+ const page=await fixture(t,[makeTask('search',{title:'靶机电池充电异常排查',project:'p',notes:'<p>确认接线</p>',progressLog:[{id:'g',text:'已更换电源模块',createdAt:'2026-09-05T10:00:00Z'}]}),makeTask('other',{title:'其他事项'})],{projects:[{id:'p',name:'验证项目',milestones:[]}],route:'tasks'});
+ const result=await page.evaluate(()=>{
+  const queries=['充电异常','靶机 异常','异常 靶机','靶机异常','更换 模块'];
+  return {matches:queries.map(q=>{taskFilter.query=q;return [filteredTasks().map(t=>t.id),collectGlobalResults(q).task.map(t=>t.id)]}),noMatch:taskSearchMatch(taskById('search'),'电池 香蕉').score,html:highlightSearch('<img src=x>靶机异常','靶机 异常'),source:taskSearchHint(taskById('search'),'更换 模块')};
+ });
+ for(const pair of result.matches)assert.deepEqual(pair,[['search'],['search']]);assert.equal(result.noMatch,0);assert(!result.html.includes('<img'));assert(result.html.includes('<mark>靶机异常</mark>'));assert(result.source.includes('推进记录'));
+ await page.fill('#taskSearch','异常 靶机');assert.equal(await page.locator('[data-task="search"] mark').count(),2);
+ await page.click('[data-page="projects"]');await page.click('[data-project-view="detail"]');await page.fill('#projectTaskSearch','更换 模块');assert.equal(await page.locator('[data-project-task="search"]').count(),1);
+});
+
+test('completion: project panels stay inside viewport and preserve per-view positions',async t=>{
+ const projects=Array.from({length:25},(_,i)=>({id:'p'+i,name:'项目 '+i,milestones:[]}));
+ const page=await fixture(t,Array.from({length:45},(_,i)=>makeTask('t'+i,{project:'p0'})),{projects,route:'projects'});
+ await page.click('[data-project-view="detail"]');await page.waitForSelector('body.project-workspace');
+ for(const size of [{width:1600,height:900},{width:1280,height:640}]){
+  await page.setViewportSize(size);
+  const g=await page.evaluate(()=>{const main=$('#mainScroll'),left=$('.project-list-panel'),right=$('.project-detail-scroll');left.scrollTop=120;right.scrollTop=180;return {main:main.scrollHeight-main.clientHeight,overflow:getComputedStyle(main).overflowY,left:left.scrollTop,right:right.scrollTop,bottom:$('#projectWorkspace').getBoundingClientRect().bottom,height:innerHeight}});
+  assert.equal(g.overflow,'hidden');assert(g.main<=2,JSON.stringify(g));assert(g.bottom<=g.height,JSON.stringify(g));assert(g.left>0);assert(g.right>0);
+ }
+ await page.click('[data-project-view="overview"]');await page.waitForFunction(()=>!document.body.classList.contains('project-workspace'));
+ await page.click('[data-project-view="detail"]');await page.waitForSelector('.project-detail-scroll');assert(await page.locator('.project-detail-scroll').evaluate(n=>n.scrollTop>=170));
+ await page.setViewportSize({width:390,height:844});await page.click('[data-project-pane="list"]');assert(await page.locator('.project-list-panel').isVisible());assert(!(await page.locator('.project-detail-panel').isVisible()));await page.click('[data-select-project="p0"]');await page.waitForSelector('.project-detail-panel',{state:'visible'});assert(!(await page.locator('.project-list-panel').isVisible()));
+});
+
+test('completion: progress input moves without losing draft and OB links survive legacy normalization',async t=>{
+ const page=await fixture(t,[makeTask('a')]);await edit(page,'a');assert.equal(await page.locator('#taskEditor>aside:first-child #taskProgressInput').count(),1);
+ await page.fill('#taskProgressInput','保持输入内容');await page.setViewportSize({width:760,height:900});await page.waitForSelector('.task-content-column #taskProgressInput');assert.equal(await page.inputValue('#taskProgressInput'),'保持输入内容');await page.click('[data-add-progress]');assert.equal(await page.locator('.task-content-column #taskProgressList li').count(),1);
+ const result=await page.evaluate(()=>{let next=normalizeState({...snapshotCore(),meta:{...state.meta,obsidianLinks:{a:'obsidian://open?vault=Work&file=笔记'}},tasks:[{id:'a',title:'事项',status:'进行中'}]});let recovered=next.tasks[0].obsidianUri;next.tasks[0].obsidianUri='';next=normalizeState(next);return{recovered,cleared:next.meta.obsidianLinks.a}});assert(result.recovered.includes('笔记'));assert.equal(result.cleared,'');
+});
+
+test('completion: attachment queue retries actual upload handler and keeps original task on switching',async t=>{
+ const page=await fixture(t,[makeTask('a'),makeTask('b')]);await edit(page,'a');
+ await page.evaluate(()=>{window.attempts=0;window.pendingUpload=null;Cloud.user={id:'test-user'};Cloud.client={storage:{from:()=>({upload:async()=>{window.attempts++;if(window.attempts===1)return{error:{message:'offline'}};return new Promise(resolve=>window.pendingUpload=resolve)},remove:async()=>({error:null})})}};void uploadTaskFiles([new File(['image'],'测试.txt',{type:'text/plain'})])});
+ await page.waitForSelector('[data-status="failed"]');assert.equal((await stored(page)).tasks.find(t=>t.id==='a').attachments.length,0);
+ await page.click('[data-retry-upload]');await page.waitForFunction(()=>!!window.pendingUpload);
+ await page.evaluate(()=>{closeTaskDialog();openTask('b');window.pendingUpload({error:null})});
+ await page.waitForFunction(()=>taskById('a').attachments.length===1);const data=await stored(page);assert.equal(data.tasks.find(t=>t.id==='a').attachments.length,1);assert.equal(data.tasks.find(t=>t.id==='b').attachments.length,0);assert.equal(await page.locator('#taskUploadQueue .upload-job').count(),0);
+ await page.evaluate(()=>{Cloud.user=null;Cloud.client=null});
+});
+
+test('completion: overview collapse corners, inbox disclosure and empty project count',async t=>{
+ const page=await fixture(t,Array.from({length:9},(_,i)=>makeTask('i'+i,{status:'待处理',inbox:true})),{projects:[{id:'empty',name:'一个很长很长很长很长很长很长的项目名称',milestones:[]}]});
+ assert((await page.locator('[data-drop-zone="inbox"] .card-title').textContent()).includes('9'));await page.click('[data-toggle-inbox]');await page.waitForSelector('.inbox-items.expanded');
+ await page.click('[data-page="projects"]');await page.click('[data-collapse-project="empty"]');await page.waitForSelector('.project-overview-group.is-collapsed');const corners=await page.locator('.is-collapsed .project-overview-head').evaluate(n=>{let c=getComputedStyle(n);return{top:c.borderTopLeftRadius,bottom:c.borderBottomLeftRadius,border:c.borderBottomWidth}});assert.equal(corners.top,corners.bottom);assert.equal(corners.border,'0px');
+ await page.click('[data-project-view="detail"]');assert.equal(await page.locator('.project-completion strong').textContent(),'暂无任务');
 });
