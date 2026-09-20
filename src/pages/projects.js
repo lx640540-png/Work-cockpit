@@ -69,7 +69,7 @@ function renderProjectContent(){
 const projectPositions=new Map();
 function projectPositionKey(view,id){return view==='detail'?'detail:'+id:'overview'}
 function rememberProjectPosition(){
- let shell=$('#projectShell');if(!shell||!$('#page-projects')?.classList.contains('active'))return;
+ let shell=$('#projectShell');if(!shell||currentPage!=='projects'||ui.renderedPage!=='projects'||shell.dataset.view!==ui.projectView||!$('#page-projects')?.classList.contains('active'))return;
  projectPositions.set(projectPositionKey(shell.dataset.view,shell.dataset.project),{main:$('#mainScroll').scrollTop,left:$('.project-list-panel')?.scrollTop||0,right:$('.project-detail-scroll')?.scrollTop||0});
 }
 function projectViewTabs(){return '<nav class="project-view-nav" aria-label="项目视图"><button type="button" data-project-view="overview" aria-pressed="'+(ui.projectView==='overview')+'">项目总览</button><button type="button" data-project-view="detail" aria-pressed="'+(ui.projectView==='detail')+'">项目详情</button></nav>'}

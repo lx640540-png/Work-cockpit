@@ -1,4 +1,4 @@
-const ui={projectView:"overview",projectMobilePane:"detail",memoPane:"list",inboxExpanded:false,overviewFilter:"open",collapsedProjects:new Set(),waitingExpanded:new Set(),projectQuery:"",projectTaskQuery:"",projectMilestoneFilter:"all",projectFocusTaskId:"",projectReturnTaskId:"",memoQuery:"",memoMultiSelect:false,selectedMemos:new Set(),showArchivedProjects:false,projectOverviewFilter:"open",selectedTasks:new Set(),showAllWeekDone:false,weekPanel:"plan",taskOptionsOpen:false};
+const ui={projectView:"overview",renderedPage:"",projectMobilePane:"detail",memoPane:"list",inboxExpanded:false,overviewFilter:"open",collapsedProjects:new Set(),waitingExpanded:new Set(),projectQuery:"",projectTaskQuery:"",projectMilestoneFilter:"all",projectFocusTaskId:"",projectReturnTaskId:"",memoQuery:"",memoMultiSelect:false,selectedMemos:new Set(),showArchivedProjects:false,projectOverviewFilter:"open",selectedTasks:new Set(),showAllWeekDone:false,weekPanel:"plan",taskOptionsOpen:false};
 const THEME_KEY="work-cockpit-theme-v1";
 function applyTheme(value,remember=true){let preference=value||"system",dark=preference==="dark"||preference==="system"&&matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.dataset.theme=dark?"dark":"light";if(remember)localStorage.setItem(THEME_KEY,preference);let button=$("#themeButton");if(button){button.textContent=dark?"☀":"◐";button.dataset.tip=dark?"切换到浅色模式":"切换到暗夜模式"}let meta=$("meta[name=theme-color]");if(meta)meta.content=dark?"#080f1c":"#2468f2"}
 function toggleTheme(){applyTheme(document.documentElement.dataset.theme==="dark"?"light":"dark")}
@@ -23,6 +23,7 @@ function renderApp(){
  initQuillEditors($("#page-"+currentPage));
  initTaskSortables($("#page-"+currentPage));
  scheduleTodayScrollability();
+ ui.renderedPage=currentPage;
 }
 function bindTransientInputs(){initPlanningResize();initTableSorting()}
 const PLANNING_TEXTAREA_SELECTOR="[data-overview-next],[data-week-action]";

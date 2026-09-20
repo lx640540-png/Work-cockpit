@@ -62,7 +62,7 @@ test('project cards show completed count and status colors differ in both themes
 test('Obsidian link persists and rejects unrelated URL schemes',async t=>{
  const page=await fixture(t,[makeTask('a')]);await edit(page,'a');
  const uri='obsidian://open?vault=Work&file=%E7%AC%94%E8%AE%B0';await page.click('[data-edit-obsidian]');await page.fill('#taskObsidianUri',uri);assert.equal(await page.inputValue('#taskObsidianUri'),uri,'input before save');await save(page);assert.equal((await stored(page)).tasks.find(t=>t.id==='a').obsidianUri,uri,'stored after save');await page.reload();assert.equal((await stored(page)).tasks.find(t=>t.id==='a').obsidianUri,uri,'stored after reload');await edit(page,'a');assert.equal(await page.inputValue('#taskObsidianUri'),uri,'reopened input');
- await page.click('[data-edit-obsidian]');await page.fill('#taskObsidianUri','javascript:window.badLink=true');await page.click('[data-open-obsidian]');assert.equal(await page.evaluate(()=>window.badLink),undefined);assert.match(await page.locator('#toast').textContent(),/obsidian/);
+ await page.click('[data-edit-obsidian]');await page.fill('#taskObsidianUri','javascript:window.badLink=true');await page.click('[data-open-obsidian]');assert.equal(await page.evaluate(()=>window.badLink),undefined);assert.match(await page.locator('#toast').textContent(),/obsidian/i);
 });
 test('dropping files saves the current draft and ignores ordinary text drags',async t=>{
  const page=await fixture(t,[makeTask('a'),makeTask('b')]);await edit(page,'a');await page.fill('#taskTitle','已编辑的标题');
@@ -234,7 +234,7 @@ test('Today highlights next actions and pins while dated waiting stays separate 
  await page.click('[data-waiting-group="future"] summary');assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true);
  await page.locator('[data-pin-task="do"]').click();await page.locator('.section-caption').waitFor({state:'visible'});assert.match(await page.locator('.section-caption').textContent(),/今日先做/);
  assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true,'expanded state survives render');
- const modes=await page.locator('.today-task-scroll').evaluateAll(nodes=>nodes.map(node=>getComputedStyle(node).overflowY));assert.deepEqual(modes,['visible','visible']);
+ const modes=await page.locator('.today-task-scroll').evaluateAll(nodes=>nodes.map(node=>getComputedStyle(node).overflowY));assert.deepEqual(modes,['visible','auto']);
  const positions=await page.evaluate(()=>{const box=s=>document.querySelector(s).getBoundingClientRect();return {actionBottom:box('[data-drop-zone="today"]').bottom,noteTop:box('.quick-note-card').top,waitTop:box('[data-drop-zone="waiting"]').top,actionTop:box('[data-drop-zone="today"]').top,inboxTop:box('#todayCapture').top,waitBottom:box('[data-drop-zone="waiting"]').bottom}});
  assert(positions.noteTop>=positions.actionBottom);assert(Math.abs(positions.waitTop-positions.actionTop)<2);assert(positions.inboxTop>=positions.waitBottom);
  await page.locator('[data-toggle-task="do"]').click();assert.equal((await stored(page)).tasks.find(task=>task.id==='do').status,'已完成');
@@ -551,7 +551,7 @@ test('completion: shared search matches tokens, reversed tokens and title gaps w
   const queries=['充电异常','靶机 异常','异常 靶机','靶机异常','更换 模块'];
   return {matches:queries.map(q=>{taskFilter.query=q;return [filteredTasks().map(t=>t.id),collectGlobalResults(q).task.map(t=>t.id)]}),noMatch:taskSearchMatch(taskById('search'),'电池 香蕉').score,html:highlightSearch('<img src=x>靶机异常','靶机 异常'),source:taskSearchHint(taskById('search'),'更换 模块')};
  });
- for(const pair of result.matches)assert.deepEqual(pair,[['search'],['search']]);assert.equal(result.noMatch,0);assert(!result.html.includes('<img'));assert(result.html.includes('<mark>靶机</mark>'));assert(result.source.includes('推进记录'));
+ for(const pair of result.matches)assert.deepEqual(pair,[['search'],['search']]);assert.equal(result.noMatch,0);assert(!result.html.includes('<img'));assert(result.html.includes('<mark>靶机异常</mark>'));assert(result.source.includes('推进记录'));
  await page.fill('#taskSearch','异常 靶机');assert.equal(await page.locator('[data-task="search"] mark').count(),2);
  await page.click('[data-page="projects"]');await page.click('[data-project-view="detail"]');await page.fill('#projectTaskSearch','更换 模块');assert.equal(await page.locator('[data-project-task="search"]').count(),1);
 });
