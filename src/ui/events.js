@@ -5,6 +5,13 @@ function saveRelationsNow(label){
 }
 function handleClick(event){
  let target=event.target.closest("button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
+ if(target.dataset.projectPane){ui.projectMobilePane=target.dataset.projectPane;return syncProjectMobilePane()}
+ if(target.dataset.memoPane){ui.memoPane=target.dataset.memoPane;return syncMemoPane()}
+ if(target.hasAttribute('data-toggle-inbox')){ui.inboxExpanded=!ui.inboxExpanded;return requestRender()}
+ if(target.hasAttribute('data-edit-obsidian')){let box=$('#obsidianEditor');box.hidden=!box.hidden;if(!box.hidden)$('#taskObsidianUri').focus();return}
+ if(target.hasAttribute('data-clear-obsidian')){$('#taskObsidianUri').value='';persistTaskDraft();refreshObsidianLink();return}
+ if(target.hasAttribute('data-save-obsidian')){if(!validObsidianUri($('#taskObsidianUri').value))return toast('请粘贴 obsidian://open 格式的笔记链接');persistTaskDraft();refreshObsidianLink();$('#obsidianEditor').hidden=true;return}
+ if(target.dataset.retryUpload)return retryTaskUpload(target.dataset.retryUpload);
  if(target.dataset.addProgress!==undefined)return addTaskProgress();
  if(target.dataset.editProgress)return beginEditTaskProgress(target.dataset.editProgress);
  if(target.dataset.cancelProgressEdit!==undefined)return refreshTaskProgressList();
@@ -17,7 +24,7 @@ function handleClick(event){
  if(target.dataset.handleTask)return updateTask(target.dataset.handleTask,"本次已处理",task=>task.handledOn=todayKey());
  if(target.dataset.undoHandled)return updateTask(target.dataset.undoHandled,"撤销本次处理",task=>task.handledOn="");
  if(target.dataset.page)return navigate(target.dataset.page);
- if(target.dataset.projectView){ui.projectView=target.dataset.projectView;return requestRender()}
+ if(target.dataset.projectView){rememberProjectPosition();ui.projectView=target.dataset.projectView;return requestRender()}
  if(target.dataset.projectDetail)return navigate("projects",target.dataset.projectDetail);
  if(target.dataset.overviewFilter){ui.overviewFilter=target.dataset.overviewFilter;return requestRender()}
  if(target.dataset.collapseProject!==undefined){let id=target.dataset.collapseProject;ui.collapsedProjects.has(id)?ui.collapsedProjects.delete(id):ui.collapsedProjects.add(id);return requestRender()}
@@ -60,7 +67,7 @@ function handleClick(event){
  if(target.dataset.bulkClear!==undefined){ui.selectedTasks.clear();return requestRender()}
  if(target.dataset.bulkArchive!==undefined){let ids=new Set(ui.selectedTasks);ui.selectedTasks.clear();return commit("批量归档事项",draft=>draft.tasks.forEach(task=>{if(ids.has(task.id))task.archived=true}),{immediate:true})}
  if(target.dataset.bulkDelete!==undefined){let ids=new Set(ui.selectedTasks);return confirmAction("删除选中的 "+ids.size+" 项事项？","这些事项会进入回收站；已形成的关键决策会保留。",()=>{commit("批量删除事项",draft=>{draft.tasks.filter(task=>ids.has(task.id)).forEach(task=>draft.trash.unshift({id:uid("trash"),type:"task",deletedAt:new Date().toISOString(),data:clone(task),decisionLinks:draft.decisions.filter(decision=>decision.sourceTaskId===task.id).map(decision=>decision.id)}));draft.tasks=draft.tasks.filter(task=>!ids.has(task.id));draft.tasks.forEach(task=>task.relatedTaskIds=task.relatedTaskIds.filter(id=>!ids.has(id)));draft.decisions.forEach(decision=>{if(ids.has(decision.sourceTaskId))decision.sourceTaskId=""})},{immediate:true});ui.selectedTasks.clear()},"删除")}
- if(target.dataset.selectProject){let pane=target.closest('.project-list-panel'),scrollTop=pane?.scrollTop||0;selectedProjectId=target.dataset.selectProject;ui.projectTaskQuery="";ui.projectMilestoneFilter="all";ui.projectFocusTaskId="";ui.projectReturnTaskId="";requestRender();return requestAnimationFrame(()=>{let next=$('.project-list-panel');if(next)next.scrollTop=scrollTop})}
+ if(target.dataset.selectProject){rememberProjectPosition();ui.projectMobilePane='detail';let pane=target.closest('.project-list-panel'),scrollTop=pane?.scrollTop||0;selectedProjectId=target.dataset.selectProject;ui.projectTaskQuery="";ui.projectMilestoneFilter="all";ui.projectFocusTaskId="";ui.projectReturnTaskId="";requestRender();return requestAnimationFrame(()=>{let next=$('.project-list-panel');if(next)next.scrollTop=scrollTop})}
  if(target.dataset.projectOverview){ui.projectOverviewFilter=target.dataset.projectOverview;return requestRender()}
  if(target.dataset.projectMilestoneFilter){ui.projectMilestoneFilter=target.dataset.projectMilestoneFilter;return requestRender()}
  let favoriteButton=event.target.closest?.("[data-favorite-project]");if(favoriteButton){let id=favoriteButton.dataset.favoriteProject;event.stopPropagation();return commit("切换项目收藏",draft=>draft.favorites=draft.favorites.includes(id)?draft.favorites.filter(value=>value!==id):draft.favorites.concat(id),{immediate:true})}
@@ -80,7 +87,7 @@ function handleClick(event){
  if(target.dataset.toggleMemoMulti!==undefined){ui.memoMultiSelect=!ui.memoMultiSelect;ui.selectedMemos.clear();return requestRender()}
  if(target.dataset.toggleMemoSelect){let id=target.dataset.toggleMemoSelect;ui.selectedMemos.has(id)?ui.selectedMemos.delete(id):ui.selectedMemos.add(id);return requestRender()}
  if(target.dataset.memoBulkDelete!==undefined){let ids=Array.from(ui.selectedMemos);if(!ids.length)return;return confirmAction("删除选中的 "+ids.length+" 条备忘录？","这些备忘录会进入回收站，可在“数据与恢复”页面恢复。",()=>{moveMemosToTrash(ids,"批量删除备忘录");ui.selectedMemos.clear();ui.memoMultiSelect=false;toast("已将 "+ids.length+" 条备忘录移入回收站")},"删除所选")}
- if(target.dataset.selectMemo){selectedMemoId=target.dataset.selectMemo;return requestRender()}
+ if(target.dataset.selectMemo){ui.memoPane="editor";selectedMemoId=target.dataset.selectMemo;return requestRender()}
  if(target.dataset.togglePin){let id=target.dataset.togglePin;return commit("切换备忘录置顶",draft=>{let memo=draft.memos.find(item=>item.id===id);memo.pinned=!memo.pinned;memo.updatedAt=new Date().toISOString()},{immediate:true})}
  if(target.dataset.toggleMemoArchive){let id=target.dataset.toggleMemoArchive;return commit("归档备忘录",draft=>{let memo=draft.memos.find(item=>item.id===id);memo.archived=!memo.archived;memo.updatedAt=new Date().toISOString()},{immediate:true})}
  if(target.dataset.deleteMemo)return deleteMemo(target.dataset.deleteMemo);

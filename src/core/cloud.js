@@ -132,14 +132,21 @@ const Cloud={
  },
  async logout(){this.syncEpoch++;this.remoteReady=false;this.sessionCheck=null;this.pendingPush=false;this.pushing=false;if(this.client&&this.channel){await this.client.removeChannel(this.channel);this.channel=null}if(this.client)await this.client.auth.signOut();this.user=null;this.version=0;this.rowExists=false;this.lastHash="";this.pendingRemote=null;clearTimeout(this.timer);localStorage.setItem(LOCAL_MODE_KEY,"1");this.setStatus("local","本地模式");closeDialog("syncDialog")},
  async uploadAttachments(taskId,files){
-  if(!taskById(taskId))return toast("请先保存事项，再上传附件");
-  if(!this.user||!this.client)return toast("附件需要登录云端后上传");
+  if(!taskById(taskId))throw Error("原事项已删除");
+  if(!this.user||!this.client)throw Error("请登录云端后上传");
+  let userId=this.user.id,client=this.client,epoch=this.syncEpoch;
   for(let file of files){
-   if(file.size>50*1024*1024){toast(file.name+" 超过 50MB");continue}
-   let safe=file.name.replace(/[^\w.\-\u4e00-\u9fa5]/g,"_"),path=this.user.id+"/"+taskId+"/"+Date.now()+"-"+safe,result=await this.client.storage.from("task-attachments").upload(path,file,{upsert:false});
-   if(result.error){toast("上传失败："+file.name);continue}
+   if(file.size>50*1024*1024)throw Error(file.name+" 超过 50MB");
+   if(this.user?.id!==userId||this.client!==client||this.syncEpoch!==epoch)throw Error("登录账户已变化");
+   let safe=file.name.replace(/[^\w.\-\u4e00-\u9fa5]/g,"_"),path=userId+"/"+taskId+"/"+uid("file")+"-"+safe,result=await client.storage.from("task-attachments").upload(path,file,{upsert:false});
+   if(result.error)throw Error("上传失败："+file.name);
+   if(this.user?.id!==userId||this.client!==client||this.syncEpoch!==epoch||!taskById(taskId)){
+    try{await client.storage.from("task-attachments").remove([path])}catch{}
+    throw Error("事项或账户已变化，未添加附件");
+   }
    let meta={id:uid("attachment"),name:file.name,type:file.type||"application/octet-stream",size:file.size,path,createdAt:new Date().toISOString()};
-   commit("上传附件",draft=>{let task=draft.tasks.find(item=>item.id===taskId);if(task)task.attachments.push(meta)},{immediate:true});if(taskDraft?.id===taskId){taskDraft.attachments.push(meta);let list=$(".attachment-list");if(list)list.innerHTML=attachmentMarkup()}toast("附件已上传");
+   commit("上传附件",draft=>{let task=draft.tasks.find(item=>item.id===taskId);if(task)task.attachments.push(meta)},{immediate:true});
+   if(taskDraft?.id===taskId){taskDraft.attachments.push(meta);let list=$(".attachment-list");if(list)list.innerHTML=attachmentMarkup()}
   }
  },
  async previewAttachment(item,container){

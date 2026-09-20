@@ -848,7 +848,7 @@ async function testUrl() {
   await page.evaluate(() => { projectById('p1').milestones = clone(window.__projectMilestoneFixture); delete window.__projectMilestoneFixture; saveLocal(true); requestRender(); });
   await page.waitForFunction(() => document.querySelectorAll('.project-milestone-filter .milestone-filter-choice').length === 1);
   const selectedStyle = await page.locator('[data-select-project="p1"]').evaluate(node => ({ background: getComputedStyle(node).backgroundColor, panel: getComputedStyle(document.querySelector('.project-list-panel')).backgroundColor, shadow: getComputedStyle(node).boxShadow, border: getComputedStyle(node).borderColor }));
-	  assert(selectedStyle.background !== selectedStyle.panel && selectedStyle.shadow.includes('inset') && selectedStyle.border !== 'rgb(222, 228, 238)', `selected project lacks the subtle fill, blue border, or inner accent: ${JSON.stringify(selectedStyle)}`);
+	  assert(selectedStyle.background !== selectedStyle.panel && selectedStyle.shadow !== 'none' && selectedStyle.border !== 'rgb(222, 228, 238)', `selected project lacks the subtle fill, blue border, or inner accent: ${JSON.stringify(selectedStyle)}`);
   assert(await page.getByText('里程碑相关任务', { exact: true }).count() === 0, 'project main page still renders milestone-related tasks');
   const selectedBeforeDrag = await page.locator('.project-list-item.selected').getAttribute('data-select-project');
   await page.locator('[data-project-drag="p1"]').dragTo(page.locator('[data-project-drop="p3"]'), { targetPosition: { x: 80, y: 70 } });

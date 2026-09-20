@@ -3,19 +3,18 @@ const searchView={category:"all",limits:{task:10,project:8,decision:6,memo:6},ta
 const SEARCH_CATEGORIES={task:"事项",project:"项目",decision:"决策",memo:"备忘录"};
 const SEARCH_TASK_SORTS={relevance:"相关度优先",status:"按状态",completedDesc:"完成日期：新到旧",completedAsc:"完成日期：旧到新"};
 function resetSearchView(){searchView.category="all";searchView.limits={task:10,project:8,decision:6,memo:6};searchView.taskSort="relevance";searchView.groupTasksByProject=false;searchView.scrollTop=0;searchView.windowY=0}
-function normalizedSearchText(value){return String(value||"").normalize("NFKC").toLocaleLowerCase("zh-CN")}
-function searchRank(primary,secondary,q,inactive=false){let title=normalizedSearchText(primary),rest=normalizedSearchText(secondary),score=title===q?120:title.startsWith(q)?90:title.includes(q)?65:rest.includes(q)?35:0;return score-(inactive?8:0)}
+function searchRank(primary,secondary,q,inactive=false){let result=matchSearch(primary,[{label:'正文',text:secondary}],q);return result.score?result.score-(inactive?8:0):0}
 function collectGlobalResults(query){
  let q=normalizedSearchText(query).trim(),result={task:[],project:[],decision:[],memo:[]};if(!q)return result;
  let rank=(items,primary,secondary,inactive)=>items.map(item=>({item,score:searchRank(primary(item),secondary(item),q,inactive(item))})).filter(value=>value.score>0).sort((a,b)=>b.score-a.score||String(b.item.updatedAt||"").localeCompare(String(a.item.updatedAt||""))).map(value=>value.item);
- result.task=rank(state.tasks,task=>task.title,task=>{let project=projectById(task.project),milestone=milestoneOf(task,project);return[task.nextAction,strip(task.notes),...(task.progressLog||[]).map(entry=>entry.text),task.status,task.priority,project?.name,project?.code,milestone?.name].join(" ")},task=>task.archived||isDone(task));
+ result.task=state.tasks.map(task=>({task,score:taskSearchMatch(task,q).score})).filter(row=>row.score>0).sort((a,b)=>(b.score-(b.task.archived||isDone(b.task)?8:0))-(a.score-(a.task.archived||isDone(a.task)?8:0))||String(b.task.updatedAt||'').localeCompare(String(a.task.updatedAt||''))).map(row=>row.task);
  result.project=rank(state.projects,project=>project.name,project=>[project.code,project.description,...project.milestones.flatMap(item=>[item.name,item.criteria])].join(" "),project=>project.archived);
  result.decision=rank(state.decisions,decision=>decision.title,decision=>[strip(decision.conclusion),strip(decision.rationale),projectName(decision.project)].join(" "),decision=>decision.archived);
  result.memo=rank(state.memos,memo=>memo.title,memo=>[strip(memo.content),projectName(memo.project)].join(" "),memo=>memo.archived);
  return result;
 }
 function searchExcerpt(text,query){
- let content=String(text||""),at=normalizedSearchText(content).indexOf(normalizedSearchText(query).trim()),start=Math.max(0,at-24),end=Math.min(content.length,start+120);
+ let content=String(text||""),at=Math.min(...searchTokens(query).map(token=>normalizedSearchText(content).indexOf(token)).filter(i=>i>=0),content.length),start=Math.max(0,at-24),end=Math.min(content.length,start+120);
  return (start?'…':'')+content.slice(start,end)+(end<content.length?'…':'');
 }
 function searchTaskStatus(task){return task.archived?"已归档":task.status}
@@ -41,13 +40,13 @@ function searchResultRow(kind,item,query){
  if(kind==="task"){
   let project=projectById(item.project),status=searchTaskStatus(item),completed=item.completed?'<span class="search-completed-date"><span>完成日期</span><time datetime="'+esc(item.completed)+'">'+esc(item.completed)+'</time></span>':'';meta=[project?.name||"通用事项",milestoneOf(item,project)?.name,item.nextAction];body=[strip(item.notes),...(item.progressLog||[]).map(entry=>entry.text)].join(" ");
   let excerpt=body.trim()?searchExcerpt(body,query):"";
-  return '<button class="data-item search-result search-task-result" type="button" data-search-task="'+esc(item.id)+'"><span class="search-result-main"><span class="search-result-title"><b>'+esc(title)+'</b><span class="pill search-status status-'+esc(status)+'">'+esc(status)+'</span></span><small>'+esc(meta.filter(Boolean).join(" · "))+'</small>'+(excerpt?'<small class="search-excerpt">'+esc(excerpt)+'</small>':'')+'</span><span class="search-result-side">'+completed+'<span class="search-open" aria-hidden="true">↗</span></span></button>';
+  return '<button class="data-item search-result search-task-result" type="button" data-search-task="'+esc(item.id)+'"><span class="search-result-main"><span class="search-result-title"><b>'+highlightSearch(title,query,true)+'</b><span class="pill search-status status-'+esc(status)+'">'+esc(status)+'</span></span><small>'+highlightSearch(meta.filter(Boolean).join(" · "),query)+'</small>'+taskSearchHint(item,query)+'</span><span class="search-result-side">'+completed+'<span class="search-open" aria-hidden="true">↗</span></span></button>';
  }
  else if(kind==="project"){meta=[item.archived?"已归档":"进行中",item.code,currentMilestone(item)?.name];body=[item.description,...item.milestones.flatMap(m=>[m.name,m.criteria])].join(" ")}
  else if(kind==="decision"){meta=[item.archived?"已归档":"有效",projectName(item.project)];body=[strip(item.conclusion),strip(item.rationale)].join(" ")}
  else{meta=[item.archived?"已归档":"进行中",projectName(item.project)];body=strip(item.content)}
  let excerpt=body.trim()?searchExcerpt(body,query):"";
- return '<button class="data-item search-result" type="button" data-search-'+kind+'="'+esc(item.id)+'"><span><b>'+label+' · '+esc(title)+'</b><small>'+esc(meta.filter(Boolean).join(" · "))+'</small>'+(excerpt?'<small class="search-excerpt">'+esc(excerpt)+'</small>':'')+'</span><span aria-hidden="true">↗</span></button>';
+ return '<button class="data-item search-result" type="button" data-search-'+kind+'="'+esc(item.id)+'"><span><b>'+label+' · '+highlightSearch(title,query,true)+'</b><small>'+esc(meta.filter(Boolean).join(" · "))+'</small>'+(excerpt?'<small class="search-excerpt">'+highlightSearch(excerpt,query)+'</small>':'')+'</span><span aria-hidden="true">↗</span></button>';
 }
 function globalResults(query){
  if(!String(query||"").trim())return '<div class="empty">输入关键词搜索项目、事项、里程碑、决策和备忘录。</div>';

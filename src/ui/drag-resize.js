@@ -3,7 +3,7 @@ let todayScrollabilityFrame=0;
 function syncTodayScrollability(root=document){$$(TODAY_LOCAL_SCROLL_SELECTOR,root).forEach(node=>node.classList.toggle("can-local-scroll",node.scrollHeight>node.clientHeight+1))}
 function scheduleTodayScrollability(){cancelAnimationFrame(todayScrollabilityFrame);todayScrollabilityFrame=requestAnimationFrame(()=>{todayScrollabilityFrame=0;syncTodayScrollability()})}
 window.addEventListener("resize",()=>{scheduleTodayScrollability();schedulePlanningTextareaResize()});
-const DRAG_SCROLL_SELECTORS=["#mainScroll",".today-task-scroll",".quick-note-editor>.ql-editor",".project-list-panel",".project-detail-panel",".memo-list",".task-content-column"];
+const DRAG_SCROLL_SELECTORS=["#mainScroll",".today-task-scroll",".quick-note-editor>.ql-editor",".project-list-panel",".project-detail-panel",".project-detail-scroll",".memo-list",".task-content-column"];
 function captureDragScroll(){return DRAG_SCROLL_SELECTORS.flatMap(selector=>$$(selector).map((node,index)=>({selector,index,top:node.scrollTop,left:node.scrollLeft})))}
 function restoreDragScroll(snapshot){requestAnimationFrame(()=>snapshot.forEach(item=>{let node=$$(item.selector)[item.index];if(node){node.scrollTop=item.top;node.scrollLeft=item.left}}))}
 function cleanupDrag(){dragState=null;activeSortableTask=null;$$('.dragging,.drag-target,.project-dragging,.drop-before,.drop-after,.drag-before,.drag-after').forEach(node=>{node.classList.remove("dragging","drag-target","project-dragging","drop-before","drop-after","drag-before","drag-after");delete node.dataset.dropPosition})}
@@ -29,7 +29,7 @@ document.addEventListener("dragover",event=>{
 });
 document.addEventListener("dragleave",event=>{let row=event.target.closest?.(".drag-before,.drag-after");if(row&&!row.contains(event.relatedTarget)){row.classList.remove("drag-before","drag-after");delete row.dataset.dropPosition}});
 document.addEventListener("drop",event=>{
- if(dragState?.kind==="project"){let card=event.target.closest("[data-project-drop]");if(!card)return;event.preventDefault();let source=dragState.id,target=card.dataset.projectDrop,position=card.dataset.dropPosition||"before",scroll=captureDragScroll();commit("调整项目顺序",draft=>reorderId(draft.order.projects,source,target,position),{immediate:true});restoreDragScroll(scroll);cleanupDrag();return}
+ if(dragState?.kind==="project"){let card=event.target.closest("[data-project-drop]");if(!card)return;event.preventDefault();let source=dragState.id,target=card.dataset.projectDrop;if(state.favorites.includes(source)!==state.favorites.includes(target)){cleanupDrag();return toast("请在同一置顶分组内排序；使用图钉更改置顶")}let position=card.dataset.dropPosition||"before",scroll=captureDragScroll();commit("调整项目顺序",draft=>reorderId(draft.order.projects,source,target,position),{immediate:true});restoreDragScroll(scroll);cleanupDrag();return}
  let row=event.target.closest("[data-drop-scope],[data-drop-zone],[data-select-memo],[data-top-drop],[data-check-drop]");if(!dragState||!row)return;event.preventDefault();
  let position=row.dataset.dropPosition||"before",scroll=captureDragScroll();
  if(dragState.kind==="task"&&row.dataset.dropScope==="all")moveOrder("all",dragState.id,row.dataset.task,position)
