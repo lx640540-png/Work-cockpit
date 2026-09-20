@@ -863,7 +863,10 @@ async function testUrl() {
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6'))); assert(saved.order.projects.join(',') === favoriteOrder, 'pin toggling rewrote the manual project order');
   assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p1,p2,p3', 'newly pinned project did not move into the top section');
   assert(await page.locator('[data-select-project="p2"] .favorite.active').count() === 1, 'project pin button did not show its active state');
+  await page.evaluate(() => { window.projectDragEvents=[]; for(const type of ['dragstart','dragover','drop','dragend'])document.addEventListener(type,e=>window.projectDragEvents.push({type,id:e.target.closest('[data-project-drop]')?.dataset.projectDrop,y:e.clientY,position:e.target.closest('[data-project-drop]')?.dataset.dropPosition,drag:dragState?.id}),{capture:true}); });
   await page.locator('[data-project-drag="p1"]').dragTo(page.locator('[data-project-drop="p2"]'), { targetPosition: { x: 80, y: 70 } });
+  console.log('Pinned drag diagnostics',await page.evaluate(()=>({events:window.projectDragEvents,order:state.order.projects,favorites:state.favorites,rows:[...document.querySelectorAll('[data-project-drop]')].map(n=>({id:n.dataset.projectDrop,height:n.offsetHeight}))})));
+
   assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p1,p3', 'pinned projects did not retain independent manual sorting');
   await page.click('[data-select-project="p2"] .project-list-name');
   await page.waitForSelector('[data-select-project="p2"].selected');
