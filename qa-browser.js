@@ -853,13 +853,18 @@ async function testUrl() {
   const selectedBeforeDrag = await page.locator('.project-list-item.selected').getAttribute('data-select-project');
   await page.locator('[data-project-drag="p1"]').dragTo(page.locator('[data-project-drop="p3"]'), { targetPosition: { x: 80, y: 70 } });
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
-  assert(saved.order.projects.join(',') === 'p2,p3,p1', 'project drag did not persist the indicated after position');
+  assert(saved.order.projects.join(',') === 'p1,p2,p3', 'cross-group drag changed pinned project order');
+  await page.locator('[data-project-drag="p2"]').dragTo(page.locator('[data-project-drop="p3"]'), { targetPosition: { x: 80, y: 70 } });
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
+  assert(saved.order.projects.join(',') === 'p1,p3,p2', 'same-group project drag did not persist the indicated after position');
   assert(await page.locator('.project-list-item.selected').getAttribute('data-select-project') === selectedBeforeDrag, 'project drag changed the selected project');
   const favoriteOrder = saved.order.projects.join(','); await page.click('[data-select-project="p2"] .favorite');
   await page.waitForSelector('[data-select-project="p2"] .favorite.active');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6'))); assert(saved.order.projects.join(',') === favoriteOrder, 'pin toggling rewrote the manual project order');
-  assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p1,p3', 'newly pinned project did not move into the top section');
+  assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p1,p2,p3', 'newly pinned project did not move into the top section');
   assert(await page.locator('[data-select-project="p2"] .favorite.active').count() === 1, 'project pin button did not show its active state');
+  await page.locator('[data-project-drag="p1"]').dragTo(page.locator('[data-project-drop="p2"]'), { targetPosition: { x: 80, y: 70 } });
+  assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p2,p1,p3', 'pinned projects did not retain independent manual sorting');
   await page.click('[data-select-project="p2"] .project-list-name');
   await page.waitForSelector('[data-select-project="p2"].selected');
   const pinnedSelection = await page.evaluate(() => {
