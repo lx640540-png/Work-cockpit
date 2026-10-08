@@ -15,7 +15,8 @@
     "styles/progress-log.css",
     "styles/workflow-completion.css",
     "styles/work-journal.css",
-    "styles/reliability.css"
+    "styles/reliability.css",
+    "styles/rich-list-drag.css"
   ],
   "scripts": [
     "core/runtime.js",
@@ -49,6 +50,7 @@
     "domain/recovery.js",
     "pages/search.js",
     "ui/choices.js",
+    "ui/rich-list-drag.js",
     "ui/rich-editor.js",
     "ui/planning-resize.js",
     "ui/task-dates.js",
@@ -56,6 +58,7 @@
     "ui/drag-resize.js",
     "core/cloud.js",
     "ui/work-journal.js",
+    "ui/journal-copy.js",
     "ui/attachment-viewer.js",
     "ui/view-state.js",
     "boot.js"
