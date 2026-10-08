@@ -36,11 +36,18 @@ const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5)
   await page.mouse.move(release.x + release.width / 2, release.y + release.height * ratio, { steps: 3 });
   // Sortable animation and scroll can move the target during the sampling delay.
   await page.waitForTimeout(180);
-  const settled = await target.boundingBox();
-  assert(settled, `missing settled release target: ${targetSelector}`);
-  await page.mouse.move(settled.x + settled.width / 2, settled.y + settled.height * ratio);
-  // Confirm the pointer really reaches the visible release target after scrolling.
-  await page.waitForFunction(({selector,x,y})=>{const target=document.querySelector(selector),hit=document.elementFromPoint(x,y);return target&&hit&&(target===hit||target.contains(hit));},{selector:targetSelector,x:settled.x+settled.width/2,y:settled.y+settled.height*ratio});
+  // Center the target again after ghost insertion/auto-scroll. A previously sampled
+  // coordinate can fall outside a clipped scroll pane under parallel browser load.
+  let hit=false;
+  for(let attempt=0;attempt<6&&!hit;attempt++){
+    await target.evaluate(node=>node.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
+    await page.waitForTimeout(60);
+    const settled=await target.boundingBox();assert(settled,`missing settled release target: ${targetSelector}`);
+    const point={x:settled.x+settled.width/2,y:settled.y+settled.height*ratio};
+    await page.mouse.move(point.x,point.y);await page.waitForTimeout(40);
+    hit=await page.evaluate(({selector,x,y})=>{const node=document.querySelector(selector),under=document.elementFromPoint(x,y);return !!(node&&under&&(node===under||node.contains(under)));},{selector:targetSelector,...point});
+  }
+  assert(hit,`release target is not visible after auto-scroll: ${targetSelector}`);
   await page.mouse.up();
   await page.waitForTimeout(180);
 };
