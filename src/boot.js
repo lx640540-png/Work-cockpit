@@ -5,6 +5,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkDateC
 window.addEventListener("online",()=>{if(Cloud.user)Cloud.push()});
 async function boot(){
  applyTheme(localStorage.getItem(THEME_KEY)||"system",false);
+ restoreWorkspacePreferences();
  renderApp();
  await Cloud.init();
  refreshScheduledTasks();

@@ -10,16 +10,16 @@ function cardHead(title,subtitle,tools,dot){
 }
 function propertyButton(task,field,readonly){
  let value=task[field],className=field==="status"?"status-"+value:"priority-"+value;
- return readonly?'<span class="pill '+className+'">'+esc(value)+'</span>':'<button class="property-btn '+className+'" data-property="'+field+'" data-task="'+task.id+'" type="button">'+esc(value)+'⌄</button>';
+ return readonly?'<span class="pill '+className+'">'+esc(value)+'</span>':'<button class="property-btn '+className+'" data-property="'+field+'" data-task="'+esc(task.id)+'" type="button">'+esc(value)+'⌄</button>';
 }
 function milestoneOf(task,project){
  return(project||projectById(task.project))?.milestones.find(milestone=>milestone.id===task.milestone);
 }
 function taskRow(task,options={}){
  let scope=options.scope||"",readonly=!!options.readonly,project=options.projectLookup?options.projectLookup(task.project):projectById(task.project),milestone=milestoneOf(task,project),carry=scope==="week"&&currentWeek().carriedTaskIds.includes(task.id);
- let drag=scope&&!readonly?'<button class="drag-handle" type="button" data-drag-handle="'+scope+'" data-task="'+task.id+'" data-tip="拖动调整顺序">⠿</button>':'<span></span>';
- let focusToggle=scope==="week"&&!readonly?'<button class="flag-btn focus '+(task.focus?'active':'')+'" type="button" data-toggle-focus="'+task.id+'" data-tip="'+(task.focus?'移出今日行动（取消已到期计划）':'加入今日行动')+'">★</button>':'';
- let check=readonly?'<span class="check '+(isDone(task)?"done":"")+'">'+(isDone(task)?"✓":"")+'</span>':'<button class="check '+(isDone(task)?"done":"")+'" type="button" data-toggle-task="'+task.id+'" data-tip="'+(isDone(task)?"恢复事项":"完成事项")+'">'+(isDone(task)?"✓":"")+'</button>';
+ let drag=scope&&!readonly?'<button class="drag-handle" type="button" data-drag-handle="'+scope+'" data-task="'+esc(task.id)+'" data-tip="拖动调整顺序">⠿</button>':'<span></span>';
+ let focusToggle=scope==="week"&&!readonly?'<button class="flag-btn focus '+(task.focus?'active':'')+'" type="button" data-toggle-focus="'+esc(task.id)+'" data-tip="'+(task.focus?'移出今日行动（取消已到期计划）':'加入今日行动')+'">★</button>':'';
+ let check=readonly?'<span class="check '+(isDone(task)?"done":"")+'">'+(isDone(task)?"✓":"")+'</span>':'<button class="check '+(isDone(task)?"done":"")+'" type="button" data-toggle-task="'+esc(task.id)+'" data-tip="'+(isDone(task)?"恢复事项":"完成事项")+'">'+(isDone(task)?"✓":"")+'</button>';
  let actionFirst=scope==="today"&&!isDone(task),primary=actionFirst?(task.nextAction||task.title):task.title;
  let next=!isDone(task)&&task.nextAction?'<div class="task-next"><b>下一步 · </b>'+esc(task.nextAction)+'</div>':"";
  let openAttrs=options.historyWeek?'data-view-task-history="'+esc(task.id)+'" data-history-week="'+esc(options.historyWeek)+'"':'data-open-task="'+esc(task.id)+'"';
@@ -28,12 +28,12 @@ function taskRow(task,options={}){
  if(scope==="week"&&!readonly)next='<label class="week-action-label"><span>本周推进</span><textarea rows="2" data-week-action="'+esc(task.id)+'" aria-label="'+esc(task.title)+'的本周推进内容">'+esc(currentWeek().actions?.[task.id]?.text||"")+'</textarea></label>';
  let projectLine='<div class="task-project"><i></i>'+esc(project?.name||"通用事项")+(milestone?" · "+esc(milestone.name):"")+'</div>';
  let dates=taskDateButton(task,readonly)+taskDateWarnings(task)+(task.due?'<span class="muted" style="font-size:11px">截止 '+dateShort(task.due)+'</span>':"")+(task.completed?'<span class="muted" style="font-size:11px">完成 '+dateShort(task.completed)+'</span>':"");
- let pin=!readonly&&scope&&options.allowPin!==false?'<button class="pin-task '+(isPinned(task.id,scope)?'active':'')+'" data-pin-task="'+task.id+'" data-pin-scope="'+scope+'" data-tip="'+(scope==='today'?(isPinned(task.id,scope)?'取消今日先做':'设为今日先做'):(isPinned(task.id,scope)?'取消置顶':'置顶当前卡片'))+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2l8 8-3 1-4 4 1 5-1 1-5-6-5 5-1-1 5-5-6-5 1-1 5 1 4-4z"/></svg></button>':'';
+ let pin=!readonly&&scope&&options.allowPin!==false?'<button class="pin-task '+(isPinned(task.id,scope)?'active':'')+'" data-pin-task="'+esc(task.id)+'" data-pin-scope="'+scope+'" data-tip="'+(scope==='today'?(isPinned(task.id,scope)?'取消今日先做':'设为今日先做'):(isPinned(task.id,scope)?'取消置顶':'置顶当前卡片'))+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2l8 8-3 1-4 4 1 5-1 1-5-6-5 5-1-1 5-5-6-5 1-1 5 1 4-4z"/></svg></button>':'';
  let extra=!readonly&&['today','waiting'].includes(scope)?'<button class="icon-btn handled-action" type="button" aria-label="本次已处理" data-tip="本次已处理：今天已跟进，事项尚未完成" data-handle-task="'+esc(task.id)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12l2 2 4-4M20 12a8 8 0 1 1-8-8"/></svg></button>':'';
  let meta='<div class="task-meta">'+extra+pin+propertyButton(task,"status",readonly)+propertyButton(task,"priority",readonly)+(carry?'<span class="pill carry">上周遗留</span>':"")+dates+'</div>';
- let historyActions=options.historyWeek?'<div class="history-row-actions"><button class="link-btn" type="button" data-view-task-history="'+task.id+'" data-history-week="'+options.historyWeek+'">当时</button>'+(taskById(task.id)?'<button class="link-btn" type="button" data-view-current-task="'+task.id+'">当前</button>':'<button class="link-btn" type="button" disabled>已删除</button>')+'</div>':'';
+ let historyActions=options.historyWeek?'<div class="history-row-actions"><button class="link-btn" type="button" data-view-task-history="'+esc(task.id)+'" data-history-week="'+options.historyWeek+'">当时</button>'+(taskById(task.id)?'<button class="link-btn" type="button" data-view-current-task="'+esc(task.id)+'">当前</button>':'<button class="link-btn" type="button" disabled>已删除</button>')+'</div>':'';
  let main=scope==="week"&&!readonly?'<div class="task-main"><div class="week-task-identity">'+primaryLink+projectLine+'</div>'+next+meta+'</div>':'<div class="task-main">'+primaryLink+next+projectLine+'</div>'+meta;
- return'<div class="task-row scope-'+esc(scope)+' '+(focusToggle?'has-focus-toggle ':'')+(options.historyWeek?'history-row':'')+'" data-drop-scope="'+scope+'" data-task="'+task.id+'" data-pinned="'+(isPinned(task.id,scope)?"1":"0")+'"><div class="task-leading">'+drag+focusToggle+check+'</div>'+main+historyActions+'</div>';
+ return'<div class="task-row scope-'+esc(scope)+' '+(focusToggle?'has-focus-toggle ':'')+(options.historyWeek?'history-row':'')+'" data-drop-scope="'+scope+'" data-task="'+esc(task.id)+'" data-pinned="'+(isPinned(task.id,scope)?"1":"0")+'"><div class="task-leading">'+drag+focusToggle+check+'</div>'+main+historyActions+'</div>';
 }
 function groupedTaskList(items,options={}){
  let scope=options.scope||"",segment=(rows,name,empty="")=>'<div class="task-segment '+name+'-task-segment '+(name==="pinned"&&rows.length?"has-pins":"")+'" data-sort-segment="'+name+'">'+(rows.length?rows.map(task=>taskRow(task,options)).join(""):empty?'<div class="empty">'+esc(empty)+'</div>':"")+'</div>';
