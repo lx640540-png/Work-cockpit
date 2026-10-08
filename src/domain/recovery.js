@@ -10,6 +10,6 @@ function restoreTrash(id){
  },{immediate:true});toast("已恢复");
 }
 function restoreSnapshot(id){
- let item=state.snapshots.find(value=>value.id===id);if(!item)return;confirmAction("恢复快照？","当前数据会先再生成一份快照，然后恢复所选版本。",()=>{let current=snapshotCore();replaceState(item.state,"恢复快照");state.snapshots.unshift({id:uid("snapshot"),label:"恢复前的安全快照",createdAt:new Date().toISOString(),state:current});saveLocal(true)},"恢复");
+ let item=state.snapshots.find(value=>value.id===id);if(!item)return;confirmAction("恢复快照？","当前数据会先再生成一份快照，然后恢复所选版本。",()=>{let current=snapshotCore();current.snapshots=[];replaceState(item.state,"恢复快照");state.snapshots.unshift({id:uid("snapshot"),label:"恢复前的安全快照",createdAt:new Date().toISOString(),state:current});state.snapshots=state.snapshots.slice(0,12);saveLocal(true)},"恢复");
 }
 

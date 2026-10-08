@@ -4,7 +4,7 @@ function saveRelationsNow(label){
  commit(label,draft=>{let own=draft.tasks.find(task=>task.id===taskDraft.id);if(!own)return;let set=new Set(next);draft.tasks.forEach(task=>{if(task.id===own.id)return;let links=new Set(task.relatedTaskIds||[]);set.has(task.id)?links.add(own.id):links.delete(own.id);task.relatedTaskIds=Array.from(links)});own.relatedTaskIds=next;own.updatedAt=new Date().toISOString()},{immediate:true});taskDraft.relatedTaskIds=next;toast("关联事项已自动保存");
 }
 function handleClick(event){
- let target=event.target.closest("button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
+ let target=event.target.closest("[data-retry-thumb],[data-image-view],button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
  if(target.dataset.projectPane){ui.projectMobilePane=target.dataset.projectPane;return syncProjectMobilePane()}
  if(target.dataset.memoPane){ui.memoPane=target.dataset.memoPane;return syncMemoPane()}
  if(target.hasAttribute('data-toggle-inbox')){ui.inboxExpanded=!ui.inboxExpanded;return requestRender()}
@@ -12,6 +12,10 @@ function handleClick(event){
  if(target.hasAttribute('data-clear-obsidian')){$('#taskObsidianUri').value='';persistTaskDraft();refreshObsidianLink();return}
  if(target.hasAttribute('data-save-obsidian')){if(!validObsidianUri($('#taskObsidianUri').value))return toast('请粘贴 obsidian://open 格式的笔记链接');persistTaskDraft();refreshObsidianLink();$('#obsidianEditor').hidden=true;return}
  if(target.dataset.retryUpload)return retryTaskUpload(target.dataset.retryUpload);
+ if(target.dataset.discardUpload)return discardTaskUpload(target.dataset.discardUpload);
+ if(target.dataset.reselectUpload)return reselectTaskUpload(target.dataset.reselectUpload);
+ if(target.dataset.retryThumb){event.preventDefault();return refreshAttachmentThumbnails()}
+ if(target.dataset.imageView)return openAttachmentImage(target.dataset.imageView);
  if(target.dataset.addProgress!==undefined)return addTaskProgress();
  if(target.dataset.editProgress)return beginEditTaskProgress(target.dataset.editProgress);
  if(target.dataset.cancelProgressEdit!==undefined)return refreshTaskProgressList();
@@ -180,8 +184,8 @@ document.addEventListener("input",event=>{
  else if(target.id==="memoSearch"){ui.memoQuery=target.value;renderMemos();requestAnimationFrame(()=>{let input=$("#memoSearch");input?.focus();input?.setSelectionRange(input.value.length,input.value.length)})}
  else if(target.dataset.topIndex!==undefined){let index=Number(target.dataset.topIndex);recordDirectEdit("week:"+selectedWeekKey+":top:"+index,"编辑周重点");let week=currentWeek();week.top[index]=target.value;saveLocal()}
  else if(target.dataset.weekReview){recordDirectEdit("week:"+selectedWeekKey+":"+target.dataset.weekReview,"编辑周复盘");currentWeek()[target.dataset.weekReview]=serializeRichEditor(target);saveLocal()}
- else if(target.dataset.memoTitle!==undefined){let memo=memoById(selectedMemoId);if(memo){recordDirectEdit("memo:"+memo.id+":title","编辑备忘录标题");memo.title=target.value;memo.updatedAt=new Date().toISOString();saveLocal()}}
- else if(target.dataset.memoContent!==undefined){let memo=memoById(selectedMemoId);if(memo){recordDirectEdit("memo:"+memo.id+":content","编辑备忘录正文");memo.content=serializeRichEditor(target);memo.updatedAt=new Date().toISOString();saveLocal()}}
+ else if(target.dataset.memoTitle!==undefined){let memo=memoById(selectedMemoId);if(memo){recordDirectEdit("memo:"+esc(memo.id)+":title","编辑备忘录标题");memo.title=target.value;memo.updatedAt=new Date().toISOString();saveLocal()}}
+ else if(target.dataset.memoContent!==undefined){let memo=memoById(selectedMemoId);if(memo){recordDirectEdit("memo:"+esc(memo.id)+":content","编辑备忘录正文");memo.content=serializeRichEditor(target);memo.updatedAt=new Date().toISOString();saveLocal()}}
  else if(target.id==="relatedSearch")$("#relationResults").innerHTML=relationResults(target.value);
  else if(target.dataset.checkText!==undefined)taskDraft.checklist[Number(target.dataset.checkText)].text=target.value;
  else if((target.id==="globalSearch"||target.id==="searchPageInput")&&!event.isComposing&&target.dataset.composing!=="1")updateGlobalSearch(target.value,target.id)

@@ -1,5 +1,5 @@
-function decisionProjectOptions(selected){return'<option value="">暂不关联项目</option>'+state.projects.filter(project=>!project.archived||project.id===selected).map(project=>'<option value="'+project.id+'" '+(selected===project.id?"selected":"")+'>'+esc(project.name)+(project.archived?'（已归档）':'')+'</option>').join("")}
-function decisionSourceOptions(selected){return'<option value="">不关联来源任务</option>'+state.tasks.filter(task=>!task.archived).map(task=>'<option value="'+task.id+'" '+(selected===task.id?"selected":"")+'>'+esc(task.title)+'</option>').join("")}
+function decisionProjectOptions(selected){return'<option value="">暂不关联项目</option>'+state.projects.filter(project=>!project.archived||project.id===selected).map(project=>'<option value="'+esc(project.id)+'" '+(selected===project.id?"selected":"")+'>'+esc(project.name)+(project.archived?'（已归档）':'')+'</option>').join("")}
+function decisionSourceOptions(selected){return'<option value="">不关联来源任务</option>'+state.tasks.filter(task=>!task.archived).map(task=>'<option value="'+esc(task.id)+'" '+(selected===task.id?"selected":"")+'>'+esc(task.title)+'</option>').join("")}
 function openDecision(id,prefill={}){
  if($("#projectDialog").open)collectProjectDraft();
  let existing=id?decisionById(id):null,source=prefill.sourceTaskId?taskById(prefill.sourceTaskId):null;

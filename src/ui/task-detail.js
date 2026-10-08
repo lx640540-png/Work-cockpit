@@ -1,23 +1,23 @@
-function projectOptions(selected){return'<option value="">通用事项</option>'+state.projects.filter(project=>!project.archived||project.id===selected).map(project=>'<option value="'+project.id+'" '+(selected===project.id?"selected":"")+'>'+esc(project.name)+(project.archived?'（已归档）':'')+'</option>').join("")}
+function projectOptions(selected){return'<option value="">通用事项</option>'+state.projects.filter(project=>!project.archived||project.id===selected).map(project=>'<option value="'+esc(project.id)+'" '+(selected===project.id?"selected":"")+'>'+esc(project.name)+(project.archived?'（已归档）':'')+'</option>').join("")}
 function milestoneOptions(projectId,selected){
- let project=projectById(projectId);return'<option value="">暂不关联里程碑</option>'+(project?.milestones||[]).map(milestone=>'<option value="'+milestone.id+'" '+(selected===milestone.id?"selected":"")+'>'+esc(milestone.name)+'</option>').join("");
+ let project=projectById(projectId);return'<option value="">暂不关联里程碑</option>'+(project?.milestones||[]).map(milestone=>'<option value="'+esc(milestone.id)+'" '+(selected===milestone.id?"selected":"")+'>'+esc(milestone.name)+'</option>').join("");
 }
 function checklistMarkup(){
  return taskDraft.checklist.map((item,index)=>'<div class="attachment-item" data-check-drop="'+index+'"><button class="drag-handle" type="button" draggable="true" data-check-drag="'+index+'" data-tip="拖动调整检查项顺序">⠿</button><label style="display:flex;gap:7px;align-items:center"><input type="checkbox" data-check-done="'+index+'" '+(item.done?"checked":"")+'><input style="border:0;min-width:0;width:100%" data-check-text="'+index+'" value="'+esc(item.text)+'" placeholder="检查项"></label><button class="icon-btn" type="button" data-remove-check="'+index+'">×</button></div>').join("")||'<div class="muted" style="font-size:11px">暂无检查项</div>';
 }
 function attachmentMarkup(){
- return taskDraft.attachments.map(item=>'<div class="attachment-item"><button style="border:0;background:transparent;text-align:left;min-width:0" type="button" data-preview-attachment="'+item.id+'">'+attachmentThumbnail(item)+'<b>'+esc(item.name)+'</b><small>'+Math.ceil(item.size/1024)+' KB</small></button><button class="icon-btn" type="button" data-remove-attachment="'+item.id+'">×</button></div>').join("")||'<div class="muted" style="font-size:11px">还没有附件</div>';
+ return taskDraft.attachments.map(item=>'<div class="attachment-item"><button style="border:0;background:transparent;text-align:left;min-width:0" type="button" data-preview-attachment="'+esc(item.id)+'">'+attachmentThumbnail(item)+'<b>'+esc(item.name)+'</b><small>'+Math.ceil(item.size/1024)+' KB</small></button><button class="icon-btn" type="button" data-remove-attachment="'+esc(item.id)+'">×</button></div>').join("")||'<div class="muted" style="font-size:11px">还没有附件</div>';
 }
 function relationMarkup(){
  let selected=Array.from(relatedDraft).map(taskById).filter(Boolean);
- return selected.map(task=>'<div class="related-item"><button type="button" style="border:0;background:transparent;text-align:left;min-width:0" data-open-related="'+task.id+'"><b>'+esc(task.title)+'</b><small>'+esc(projectName(task.project))+' · '+esc(task.status)+'</small></button><button class="icon-btn" type="button" data-remove-related="'+task.id+'">×</button></div>').join("")||'<div class="muted" style="font-size:11px">尚未关联其他任务</div>';
+ return selected.map(task=>'<div class="related-item"><button type="button" style="border:0;background:transparent;text-align:left;min-width:0" data-open-related="'+esc(task.id)+'"><b>'+esc(task.title)+'</b><small>'+esc(projectName(task.project))+' · '+esc(task.status)+'</small></button><button class="icon-btn" type="button" data-remove-related="'+esc(task.id)+'">×</button></div>').join("")||'<div class="muted" style="font-size:11px">尚未关联其他任务</div>';
 }
 function relationResults(query){
  let text=String(query||"").trim().toLowerCase();if(!text)return"";
- return state.tasks.filter(task=>!task.archived&&task.id!==taskDraft.id&&!relatedDraft.has(task.id)&&(task.title+" "+task.nextAction+" "+projectName(task.project)).toLowerCase().includes(text)).slice(0,7).map(task=>'<button class="related-item" style="width:100%;text-align:left" type="button" data-add-related="'+task.id+'"><span><b>'+esc(task.title)+'</b><small>'+esc(projectName(task.project))+' · '+esc(task.nextAction||task.status)+'</small></span><span>＋</span></button>').join("")||'<div class="muted" style="font-size:11px">没有匹配事项</div>';
+ return state.tasks.filter(task=>!task.archived&&task.id!==taskDraft.id&&!relatedDraft.has(task.id)&&(task.title+" "+task.nextAction+" "+projectName(task.project)).toLowerCase().includes(text)).slice(0,7).map(task=>'<button class="related-item" style="width:100%;text-align:left" type="button" data-add-related="'+esc(task.id)+'"><span><b>'+esc(task.title)+'</b><small>'+esc(projectName(task.project))+' · '+esc(task.nextAction||task.status)+'</small></span><span>＋</span></button>').join("")||'<div class="muted" style="font-size:11px">没有匹配事项</div>';
 }
 function decisionRows(items,empty="还没有关键决策"){
- return items.map(decision=>{let project=projectById(decision.project),milestone=project?.milestones.find(item=>item.id===decision.milestone),source=taskById(decision.sourceTaskId),meta=[milestone?.name,source?.title].filter(Boolean).join(" · ")||project?.name||"未关联项目";return'<button class="decision-item" type="button" data-edit-decision="'+decision.id+'"><span><b>'+esc(decision.title)+'</b><small>'+esc(strip(decision.conclusion)||"尚未补充结论")+'</small><small>'+esc(meta)+'</small></span><time>'+dateShort(decision.date)+'</time></button>'}).join("")||'<div class="muted" style="font-size:11px">'+esc(empty)+'</div>';
+ return items.map(decision=>{let project=projectById(decision.project),milestone=project?.milestones.find(item=>item.id===decision.milestone),source=taskById(decision.sourceTaskId),meta=[milestone?.name,source?.title].filter(Boolean).join(" · ")||project?.name||"未关联项目";return'<button class="decision-item" type="button" data-edit-decision="'+esc(decision.id)+'"><span><b>'+esc(decision.title)+'</b><small>'+esc(strip(decision.conclusion)||"尚未补充结论")+'</small><small>'+esc(meta)+'</small></span><time>'+dateShort(decision.date)+'</time></button>'}).join("")||'<div class="muted" style="font-size:11px">'+esc(empty)+'</div>';
 }
 function taskDecisionMarkup(){return decisionRows(state.decisions.filter(decision=>!decision.archived&&decision.sourceTaskId===taskDraft.id),"该任务尚未形成关键决策")}
 function taskHistoryEntries(taskId){
@@ -75,8 +75,9 @@ function persistTaskDraft(options={}){
  if(!taskDraft.title){if(options.close&&!existing&&!taskDraftHasContent(taskDraft)){finishTaskDialogClose();return true}setTaskAutosaveStatus("error","请先填写事项名称");if(options.close||options.notify)toast("请填写事项名称");return false}
  let signature=taskDraftSignature(taskDraft);if(signature!==taskAutosaveSignature){
   let saved=clone(taskDraft);recordDirectEdit("task:auto:"+saved.id,existing?"编辑事项":"新增事项");
-  applyTaskDraftToState(saved);persistStateChanges({immediate:true});taskDraft=clone(taskById(saved.id));relatedDraft=new Set(taskDraft.relatedTaskIds||[]);taskAutosaveSignature=taskDraftSignature(taskDraft);$("#deleteTaskButton").hidden=false;$("#taskDialogTitle").textContent="编辑事项";
+  applyTaskDraftToState(saved);try{persistStateChanges({immediate:true})}catch(error){setTaskAutosaveStatus("error","本地保存失败，请重试或导出备份");return false}taskDraft=clone(taskById(saved.id));relatedDraft=new Set(taskDraft.relatedTaskIds||[]);taskAutosaveSignature=taskDraftSignature(taskDraft);$("#deleteTaskButton").hidden=false;$("#taskDialogTitle").textContent="编辑事项";
  }
+ if(localSavePending){try{saveLocal(true)}catch{setTaskAutosaveStatus("error","本地保存失败，请重试");return false}}
  setTaskAutosaveStatus("saved","已自动保存");if(options.close){finishTaskDialogClose();if(options.notify)toast(existing?"事项已保存":"事项已创建")}return true;
 }
 function scheduleTaskAutosave(){

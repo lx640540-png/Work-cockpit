@@ -16,6 +16,6 @@ document.addEventListener('pointerup',endPlanningResize);document.addEventListen
 document.addEventListener('dblclick',event=>{if(!event.target.closest?.('[data-planning-resize]'))return;event.preventDefault();applyPlanningWidth(45);savePlanningWidth()});
 document.addEventListener('keydown',event=>{if(!event.target.matches?.('[data-planning-resize]'))return;let value=event.key==='ArrowLeft'?planningWidth-2:event.key==='ArrowRight'?planningWidth+2:event.key==='Home'?20:event.key==='End'?70:null;if(value===null)return;event.preventDefault();event.stopPropagation();applyPlanningWidth(value);savePlanningWidth()},true);
 function initTableSorting(){
- tableSortables.forEach(sortable=>sortable.destroy());tableSortables=[];if(typeof Sortable!=='function')return;
+ tableSortables.forEach(sortable=>sortable.destroy());tableSortables=[];if(typeof Sortable!=='function'||taskFilter.query.trim()||taskFilter.sort!=="manual")return;
  document.querySelectorAll('#page-tasks .task-table tbody').forEach(body=>{let before=[];tableSortables.push(new Sortable(body,{draggable:'tr[data-task]',handle:'[data-drag-handle="all"]',forceFallback:true,fallbackOnBody:true,fallbackTolerance:4,animation:150,scroll:true,onStart(){before=Array.from(body.querySelectorAll('tr[data-task]'),row=>row.dataset.task)},onEnd(){let after=Array.from(body.querySelectorAll('tr[data-task]'),row=>row.dataset.task);commit('调整事项顺序',draft=>{draft.order.all=reconcileVisibleOrder(draft.order.all,before,after)},{immediate:true})}}))});
 }

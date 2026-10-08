@@ -10,7 +10,8 @@ function matchSearch(primary,fields,query){
  return{score,sources:values.filter(f=>tokens.some(t=>f.normalized.includes(t))).map(f=>f.label),jump:!all&&jump};
 }
 function taskSearchFields(task){let project=projectById(task.project),milestone=milestoneOf(task,project);return[{label:'下一步',text:task.nextAction},{label:'备注',text:strip(task.notes)},{label:'推进记录',text:(task.progressLog||[]).map(e=>e.text).join(' ')},{label:'项目',text:[project?.name,project?.code].join(' ')},{label:'里程碑',text:milestone?.name},{label:'状态',text:[task.status,task.priority,task.type].join(' ')}]}
-function taskSearchMatch(task,query){return matchSearch(task.title,taskSearchFields(task),query)}
+const taskSearchCache=new WeakMap();
+function taskSearchMatch(task,query){let project=projectById(task.project),milestone=milestoneOf(task,project),key=JSON.stringify([task.title,task.nextAction,task.notes,task.progressLog,task.status,task.priority,task.type,project?.name,project?.code,milestone?.name]),cached=taskSearchCache.get(task);if(cached?.key===key&&cached.query===query)return cached.match;let match=matchSearch(task.title,taskSearchFields(task),query);taskSearchCache.set(task,{key,query,match});return match}
 function highlightSearch(value,query,allowJump=false){
  let chars=Array.from(String(value||'')),normalized='',map=[];chars.forEach((ch,i)=>{let part=normalizedSearchText(ch);normalized+=part;for(let j=0;j<part.length;j++)map.push(i)});
  let marks=new Set(),tokens=searchTokens(query);for(let token of tokens){let from=0,at;while((at=normalized.indexOf(token,from))>=0){for(let i=at;i<at+token.length;i++)marks.add(map[i]);from=at+Math.max(1,token.length)}}

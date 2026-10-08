@@ -1,6 +1,6 @@
 function cloudHash(value){let text=typeof value==="string"?value:JSON.stringify(value),hash=2166136261;for(let index=0;index<text.length;index++){hash^=text.charCodeAt(index);hash=Math.imul(hash,16777619)}return(hash>>>0).toString(16).padStart(8,"0")}
 function deviceId(){let value=localStorage.getItem(CLOUD_DEVICE_KEY);if(!value){value=uid("device");localStorage.setItem(CLOUD_DEVICE_KEY,value)}return value}
-function hasBusinessData(value=state){let quick=(value.quickNote?.delta?.ops||[]).some(op=>String(op.insert||"").trim());return!!(value.tasks.length||value.projects.length||value.memos.length||value.decisions?.length||quick||Object.values(value.weeks||{}).some(week=>week.top?.length))}
+function hasBusinessData(value=state){let quick=(value.quickNote?.delta?.ops||[]).some(op=>String(op.insert||"").trim());return!!(Object.values(value.meta?.workJournal?.weeks||{}).some(week=>Object.values(week.days||{}).some(day=>strip(day.content)))||value.tasks.length||value.projects.length||value.memos.length||value.decisions?.length||quick||Object.values(value.weeks||{}).some(week=>week.top?.length))}
 const Cloud={
  client:null,user:null,channel:null,version:0,rowExists:false,remoteReady:false,sessionCheck:null,device:deviceId(),lastHash:"",timer:0,pushing:false,pendingPush:false,syncEpoch:0,applying:false,pendingRemote:null,importPending:false,authMode:"login",status:"local",
  config(){try{return{...DEFAULT_CLOUD_CONFIG,...JSON.parse(localStorage.getItem(CLOUD_CONFIG_KEY)||"null")}}catch(error){return DEFAULT_CLOUD_CONFIG}},
@@ -28,7 +28,7 @@ const Cloud={
   return check.promise;
  },
  async connectSession(session){
-  this.syncEpoch++;this.remoteReady=false;this.pushing=false;this.pendingPush=false;clearTimeout(this.timer);this.pendingRemote=null;this.user=session.user;const sessionEpoch=this.syncEpoch;localStorage.removeItem(LOCAL_MODE_KEY);$("#cloudGate").hidden=true;this.setStatus("connecting","连接中");
+  this.syncEpoch++;this.remoteReady=false;this.pushing=false;this.pendingPush=false;clearTimeout(this.timer);this.pendingRemote=null;$("#authPassword").value="";this.user=session.user;const sessionEpoch=this.syncEpoch;localStorage.removeItem(LOCAL_MODE_KEY);$("#cloudGate").hidden=true;this.setStatus("connecting","连接中");
   try{
    let row=await this.fetchRemote();if(sessionEpoch!==this.syncEpoch||this.user?.id!==session.user.id)return false;this.remoteReady=true;let localSerialized=serializeState(),localHash=cloudHash(localSerialized),link=null;
    try{link=JSON.parse(localStorage.getItem(CLOUD_LINK_KEY)||"null")}catch(error){}
@@ -139,23 +139,24 @@ const Cloud={
    if(file.size>50*1024*1024)throw Error(file.name+" 超过 50MB");
    if(this.user?.id!==userId||this.client!==client||this.syncEpoch!==epoch)throw Error("登录账户已变化");
    let safe=file.name.replace(/[^\w.\-\u4e00-\u9fa5]/g,"_"),path=userId+"/"+taskId+"/"+uid("file")+"-"+safe,result=await client.storage.from("task-attachments").upload(path,file,{upsert:false});
-   if(result.error)throw Error("上传失败："+file.name);
+   if(result.error)throw Error("上传失败："+(result.error.message||file.name));
    if(this.user?.id!==userId||this.client!==client||this.syncEpoch!==epoch||!taskById(taskId)){
     try{await client.storage.from("task-attachments").remove([path])}catch{}
     throw Error("事项或账户已变化，未添加附件");
    }
    let meta={id:uid("attachment"),name:file.name,type:file.type||"application/octet-stream",size:file.size,path,createdAt:new Date().toISOString()};
-   commit("上传附件",draft=>{let task=draft.tasks.find(item=>item.id===taskId);if(task)task.attachments.push(meta)},{immediate:true});
+   try{commit("上传附件",draft=>{let task=draft.tasks.find(item=>item.id===taskId);if(task)task.attachments.push(meta)},{immediate:true})}catch(error){if(!localSaveError)throw error;toast("文件已上传，但本地保存失败；请重试保存，勿重复上传")}
    if(taskDraft?.id===taskId){taskDraft.attachments.push(meta);let list=$(".attachment-list");if(list)list.innerHTML=attachmentMarkup()}
   }
  },
  async previewAttachment(item,container){
-  if(!item||!this.client||!this.user)return;let result=await this.client.storage.from("task-attachments").createSignedUrl(item.path,1800);
-  if(result.error)return container.textContent="无法生成预览地址";
-  let url=result.data.signedUrl;
-  if(item.type.startsWith("image/"))container.innerHTML='<img src="'+esc(url)+'" alt="'+esc(item.name)+'">';
-  else if(item.type==="application/pdf")container.innerHTML='<iframe src="'+esc(url)+'" style="width:100%;height:260px;border:0"></iframe>';
-  else container.innerHTML='<a class="btn" href="'+esc(url)+'" target="_blank" rel="noopener">打开 / 下载 '+esc(item.name)+'</a>';
+  if(!item||!container)return;if(!this.client||!this.user){container.textContent="请登录后查看附件";return}let token=uid("preview"),userId=this.user.id,taskId=taskDraft?.id;container.dataset.previewToken=token;
+  let current=()=>container.isConnected&&container.dataset.previewToken===token&&this.user?.id===userId&&taskDraft?.id===taskId;
+  try{let result=await this.client.storage.from("task-attachments").createSignedUrl(item.path,1800);if(!current())return;if(result.error||!result.data?.signedUrl)throw Error(result.error?.message||"无法生成预览地址");let url=result.data.signedUrl;
+   if(item.type.startsWith("image/")){container.innerHTML='<button type="button" class="attachment-large-preview" data-image-view="'+esc(item.id)+'" aria-label="查看'+esc(item.name)+'大图"><img src="'+esc(url)+'" alt="'+esc(item.name)+'"><small>点击查看大图</small></button>';let image=container.querySelector("img");image.onerror=()=>{if(current())container.innerHTML='<span>图片加载失败</span><button type="button" class="btn" data-preview-attachment="'+esc(item.id)+'">重试预览</button>'}}
+   else if(item.type==="application/pdf")container.innerHTML='<iframe title="'+esc(item.name)+'" src="'+esc(url)+'" style="width:100%;height:260px;border:0"></iframe>';
+   else container.innerHTML='<a class="btn" href="'+esc(url)+'" target="_blank" rel="noopener">打开 / 下载 '+esc(item.name)+'</a>';
+  }catch(error){if(current())container.innerHTML='<span>'+esc(error.message||"预览失败")+'</span><button type="button" class="btn" data-preview-attachment="'+esc(item.id)+'">重试预览</button>'}
  },
  async removeAttachment(taskId,item){
   if(!item)return;commit("移除附件",draft=>{let task=draft.tasks.find(value=>value.id===taskId);if(task)task.attachments=task.attachments.filter(value=>value.id!==item.id)},{immediate:true});if(taskDraft?.id===taskId){taskDraft.attachments=taskDraft.attachments.filter(value=>value.id!==item.id);if(attachmentPreviewId===item.id){attachmentPreviewId="";let preview=$("#attachmentPreview");if(preview){preview.textContent="选择附件后在这里预览";preview.classList.remove("has-preview")}}let list=$(".attachment-list");if(list)list.innerHTML=attachmentMarkup()}toast("附件已移除；云端文件暂时保留，可通过撤销恢复")

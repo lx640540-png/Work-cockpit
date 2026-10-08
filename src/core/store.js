@@ -12,11 +12,17 @@ let undoStack=[],redoStack=[],saveTimer=null,renderFrame=0,confirmCallback=null,
 function stateCore(value=state){return{version:8,tasks:value.tasks,projects:value.projects,memos:value.memos,decisions:value.decisions,weeks:value.weeks,trash:value.trash,snapshots:value.snapshots,favorites:value.favorites,quickNote:value.quickNote,order:value.order,meta:value.meta}}
 function serializeState(value=state){return JSON.stringify(stateCore(value))}
 function snapshotCore(value=state){return JSON.parse(serializeState(value))}
+let localSavePending=false,localSaveError="";
+function showLocalSaveStatus(){let banner=$("#localSaveBanner");if(!banner){banner=document.createElement("div");banner.id="localSaveBanner";banner.setAttribute("role","status");document.body.appendChild(banner)}banner.hidden=!localSaveError;banner.textContent=localSaveError?"本地保存失败，请保留页面并重试或导出备份。":"";if(localSaveError){let retry=document.createElement("button");retry.type="button";retry.textContent="重试保存";retry.onclick=()=>{try{saveLocal(true)}catch{}};banner.appendChild(retry)}let memo=$(".memo-status");if(memo)memo.textContent=localSaveError?"本地保存失败":localSavePending?"待保存…":"本地已保存"}
 function saveLocal(immediate=false){
- clearTimeout(saveTimer);
- let write=()=>{state.meta.updatedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,serializeState());window.CloudSync?.schedule()};
- if(immediate)write();else saveTimer=setTimeout(write,160);
+ clearTimeout(saveTimer);localSavePending=true;
+ let write=()=>{try{state.meta.updatedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,serializeState());localSavePending=false;localSaveError=""}catch(error){localSaveError=error.message||"本地存储不可用";throw error}finally{window.CloudSync?.schedule();showLocalSaveStatus()}};
+ if(immediate)write();else{showLocalSaveStatus();saveTimer=setTimeout(()=>{try{write()}catch{}},160)}
 }
+function flushPendingEdits(){let saved=true;try{if(taskDraft&&$("#taskDialog")?.open)saved=persistTaskDraft();if(typeof journalFlush==="function"&&!journalFlush())saved=false;if(localSavePending)saveLocal(true)}catch{saved=false}if(typeof rememberWorkspace==="function")rememberWorkspace();return saved}
+window.addEventListener("pagehide",flushPendingEdits);
+window.addEventListener("beforeunload",event=>{if(!flushPendingEdits()&&localSavePending){event.preventDefault();event.returnValue=""}});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)flushPendingEdits()});
 function requestRender(){if(renderFrame)return;renderFrame=requestAnimationFrame(()=>{renderFrame=0;renderApp()})}
 function renderNow(){if(renderFrame){cancelAnimationFrame(renderFrame);renderFrame=0}renderApp()}
 function recordDirectEdit(key,label){

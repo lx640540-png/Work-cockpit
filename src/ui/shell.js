@@ -8,10 +8,11 @@ function renderSidebar(){
  Object.entries(counts).forEach(([key,value])=>{let element=$('[data-count="'+key+'"]');if(element)element.textContent=value});
  $$(".nav-button").forEach(button=>button.classList.toggle("active",button.dataset.page===currentPage));
  let note=sidebarNotes[currentPage];$("#sidebarNote").innerHTML="<b>"+note[0]+"</b>"+note[1];
- $("#favoriteProjects").innerHTML=state.favorites.map(id=>projectById(id)).filter(project=>project&&!project.archived).map(project=>'<button class="favorite-link" data-favorite-open="'+project.id+'"><i></i>'+esc(project.name)+'</button>').join("")||'<span class="muted" style="font-size:11px">在项目卡片点击 ☆ 收藏</span>';
+ $("#favoriteProjects").innerHTML=state.favorites.map(id=>projectById(id)).filter(project=>project&&!project.archived).map(project=>'<button class="favorite-link" data-favorite-open="'+esc(project.id)+'"><i></i>'+esc(project.name)+'</button>').join("")||'<span class="muted" style="font-size:11px">在项目卡片点击 ☆ 收藏</span>';
  $("#undoButton").disabled=!undoStack.length;$("#redoButton").disabled=!redoStack.length;$("#backButton").hidden=navigationDepth<=0;
 }
 function renderApp(){
+ if(typeof rememberWorkspace==="function"&&ui.renderedPage===currentPage)rememberWorkspace();
  document.body.classList.toggle("memo-workspace",currentPage==="memos");
  document.body.classList.toggle("project-workspace",currentPage==="projects"&&ui.projectView==="detail");
  renderSidebar();
@@ -23,6 +24,8 @@ function renderApp(){
  initQuillEditors($("#page-"+currentPage));
  initTaskSortables($("#page-"+currentPage));
  scheduleTodayScrollability();
+ if(typeof restoreWorkspacePosition==="function")restoreWorkspacePosition();
+ syncWorkJournal();
  ui.renderedPage=currentPage;
 }
 function bindTransientInputs(){initPlanningResize();initTableSorting()}
@@ -63,6 +66,9 @@ function confirmTwice(title,message,callback,label){
 }
 function navigate(page,projectId){
  if(!["today","week","tasks","projects","memos","data","search"].includes(page))return;
+ if(!journalFlush())return;
+ rememberWorkspace();
+ if(journalUI.open&&!journalUI.pinned){journalUI.open=false;journalUI.expanded=false;syncWorkJournal()}
  rememberProjectPosition();rememberSearchPosition();closeTaskDateMenu();
  if(projectId){selectedProjectId=projectId;ui.projectView="detail"}
  if(page!==currentPage){currentPage=page;navigationDepth+=1;history.pushState({page,appRoute:true,appNavDepth:navigationDepth},"","#"+page)}
