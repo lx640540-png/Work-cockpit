@@ -1,5 +1,10 @@
 // Export from Quill's document model so lists and inline formats survive copying.
 function journalExport(format){
+ if(format==="review"){
+  let review=normalizeJournalReview(journalWeek(journalUI.week).review),labels={achievements:"本周成果",issues:"遗留问题",next:"下周跟进"};
+  let parts=JOURNAL_REVIEW_FIELDS.filter(field=>review[field].trim()).map(field=>labels[field]+"\n"+review[field].trim());
+  return parts.length?journalUI.week.slice(0,4)+"年 "+dateShort(journalUI.week)+"—"+dateShort(weekEnd(journalUI.week))+" 周五整理\n\n"+parts.join("\n\n"):"";
+ }
  let week=journalWeek(journalUI.week),parts=[];
  for(let date of Object.keys(week.days).sort()){
   let editor=$('[data-journal-date="'+date+'"]'),q=quillFor(editor);if(!q||!q.getText().trim())continue;
@@ -18,7 +23,7 @@ function journalExport(format){
  return parts.join(format==="rich"?'':'\n\n');
 }
 async function journalCopy(format){
- let text=journalExport(format);if(!text){toast("本周暂无正文可复制");return}
+ let text=journalExport(format);if(!text){toast(format==="review"?"周五整理尚无内容":"本周暂无正文可复制");return}
  $(".journal-copy-menu").hidden=true;$('[data-journal-action="copy"]').setAttribute("aria-expanded","false");
  try{if(format==="rich"){if(!window.ClipboardItem||!navigator.clipboard?.write)throw new Error("rich clipboard unavailable");await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([text],{type:'text/html'}),'text/plain':new Blob([journalExport('plain')],{type:'text/plain'})})])}else await navigator.clipboard.writeText(text);toast("本周记录已复制")}catch{journalCopyFallback(format,text)}
 }
