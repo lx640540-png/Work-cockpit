@@ -90,3 +90,26 @@ test('a week with only a review is treated as business data and does not target 
  await p.locator('[data-journal-date="2026-10-08"] .ql-editor').click();
  assert.equal(await p.locator('#workJournal .rich-toolbar').evaluate(node=>node.inert),false);
 });
+test('focused daily text has no heavy rectangle; review toolbar clearly dims',async t=>{
+ let p=await fixture(t);await p.locator('[data-journal-date="2026-10-08"] .ql-editor').click();
+ assert.equal(await p.locator('[data-journal-date="2026-10-08"] .ql-editor').evaluate(node=>getComputedStyle(node).outlineStyle),'none');
+ assert.equal(await p.locator('[data-journal-date="2026-10-08"]').evaluate(node=>getComputedStyle(node).outlineStyle),'none');
+ await p.click('[data-journal-action="review"]');await p.locator('[data-journal-review="next"]').click();
+ assert.equal(await p.locator('#workJournal .rich-toolbar').evaluate(node=>({inert:node.inert,opacity:getComputedStyle(node).opacity})).then(value=>value.inert&&Number(value.opacity)<.5),true);
+});
+test('calendar, editor and footer remain accessible in a short mobile window',async t=>{
+ let p=await fixture(t);await p.setViewportSize({width:390,height:560});await p.click('[data-journal-action="week"]');
+ let placement=await p.evaluate(()=>{let panel=document.querySelector('#workJournal').getBoundingClientRect(),calendar=document.querySelector('.journal-calendar').getBoundingClientRect(),body=document.querySelector('.journal-body').getBoundingClientRect(),footer=document.querySelector('.journal-footer').getBoundingClientRect();return{calendarTop:calendar.top-panel.top,calendarBottom:calendar.bottom-panel.bottom,bodyHeight:body.height,footerBottom:footer.bottom-panel.bottom}});
+ assert(placement.calendarTop>=0);assert(placement.calendarBottom<=0);assert(placement.bodyHeight>=60);assert(placement.footerBottom<=0);
+});
+test('long weekly review is retained and a rest-day reopening targets the latest workday',async t=>{
+ let p=await fixture(t);await p.click('[data-journal-action="review"]');await p.locator('[data-journal-review="next"]').fill('字'.repeat(10020));
+ await p.click('[data-journal-action="review"]');await p.click('[data-journal-action="review"]');
+ assert.equal((await p.locator('[data-journal-review="next"]').inputValue()).length,10020);
+ await p.reload();await p.click('#journalHandle');await p.click('[data-journal-action="review"]');
+ assert.equal((await p.locator('[data-journal-review="next"]').inputValue()).length,10020);
+ await p.clock.setFixedTime(new Date('2026-10-11T12:00:00+08:00'));
+ await p.addStyleTag({content:'.journal-review-field textarea{height:400px}'});
+ await p.locator('.journal-body').evaluate(node=>node.scrollTop=node.scrollHeight);await p.click('[data-journal-action="close"]');await p.click('#journalHandle');
+ let position=await p.evaluate(()=>{let body=document.querySelector('.journal-body'),day=document.querySelector('[data-journal-section="2026-10-10"]');return Math.abs(day.getBoundingClientRect().top-body.getBoundingClientRect().top)});assert(position<30);
+});
