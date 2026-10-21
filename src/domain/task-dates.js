@@ -1,6 +1,6 @@
 // Scheduling changes dates and Today membership, never task status or historical weeks.
 function isFollowupDue(task,today=todayKey()){
- return !task.archived&&!isDone(task)&&task.status==="等待"&&!!task.followup&&task.followup<=today&&task.handledOn!==today;
+ return !task.archived&&!isDone(task)&&task.status==="等待"&&!!task.followup&&task.followup<=today;
 }
 function taskScheduleField(task){return task.status==="等待"?"followup":"planDate"}
 function validTaskDate(value){return value===""||/^\d{4}-\d{2}-\d{2}$/.test(value)&&fmt(parseDate(value))===value}

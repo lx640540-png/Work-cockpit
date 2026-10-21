@@ -55,14 +55,14 @@ test('week reopening returns to today, while an open drawer keeps a manually cho
  assert.equal(await p.locator('.journal-calendar-notice').isVisible(),false);
 });
 
-test('daily jump and weekly review survive a reload',async t=>{
+test('weekly review keeps its recorded-day links without the retired top navigation',async t=>{
  let p=await fixture(t);
  let editor=p.locator('[data-journal-date="2026-10-08"] .ql-editor');await editor.fill('产前样确认');
- assert.match(await p.locator('[data-journal-jump="2026-10-08"]').first().getAttribute('aria-label'),/有记录/);
- await p.click('.journal-jump [data-journal-jump="2026-10-10"]');
- assert(await p.locator('[data-journal-section="2026-10-10"]').isVisible());
+ assert.equal(await p.locator('.journal-top [data-journal-jump],.journal-editing').count(),0);
  await p.click('[data-journal-action="review"]');
  assert.match(await p.locator('.journal-review-links').innerText(),/10\/8/);
+ await p.click('.journal-review-links [data-journal-jump="2026-10-08"]');
+ assert(await p.locator('[data-journal-section="2026-10-08"]').isVisible());
  await p.locator('[data-journal-review="achievements"]').fill('完成首轮验收');
  await p.locator('[data-journal-review="issues"]').fill('电池批次待确认');
  assert.equal(await p.evaluate(()=>journalExport('review').includes('完成首轮验收')),true);
@@ -94,6 +94,8 @@ test('focused daily text has no heavy rectangle; review toolbar clearly dims',as
  let p=await fixture(t);await p.locator('[data-journal-date="2026-10-08"] .ql-editor').click();
  assert.equal(await p.locator('[data-journal-date="2026-10-08"] .ql-editor').evaluate(node=>getComputedStyle(node).outlineStyle),'none');
  assert.equal(await p.locator('[data-journal-date="2026-10-08"]').evaluate(node=>getComputedStyle(node).outlineStyle),'none');
+ assert.equal(await p.locator('[data-journal-section="2026-10-08"]').evaluate(node=>getComputedStyle(node).backgroundColor),'rgba(0, 0, 0, 0)');
+ assert.equal(await p.locator('.journal-jump,.journal-editing').count(),0);
  await p.click('[data-journal-action="review"]');await p.locator('[data-journal-review="next"]').click();
  assert.equal(await p.locator('#workJournal .rich-toolbar').evaluate(node=>({inert:node.inert,opacity:getComputedStyle(node).opacity})).then(value=>value.inert&&Number(value.opacity)<.5),true);
 });
@@ -101,6 +103,40 @@ test('calendar, editor and footer remain accessible in a short mobile window',as
  let p=await fixture(t);await p.setViewportSize({width:390,height:560});await p.click('[data-journal-action="week"]');
  let placement=await p.evaluate(()=>{let panel=document.querySelector('#workJournal').getBoundingClientRect(),calendar=document.querySelector('.journal-calendar').getBoundingClientRect(),body=document.querySelector('.journal-body').getBoundingClientRect(),footer=document.querySelector('.journal-footer').getBoundingClientRect();return{calendarTop:calendar.top-panel.top,calendarBottom:calendar.bottom-panel.bottom,bodyHeight:body.height,footerBottom:footer.bottom-panel.bottom}});
  assert(placement.calendarTop>=0);assert(placement.calendarBottom<=0);assert(placement.bodyHeight>=60);assert(placement.footerBottom<=0);
+});
+test('week and single-date selections stay readable on hover in both themes',async t=>{
+ let p=await fixture(t);
+ await p.clock.setFixedTime(new Date('2026-10-21T12:00:00+08:00'));
+ await p.click('[data-journal-action="today"]');await p.click('[data-journal-action="week"]');
+ assert.equal(await p.locator('.journal-calendar [aria-pressed="true"]').count(),7);
+ assert.equal(await p.locator('.week-start').getAttribute('data-journal-pick'),'2026-10-19');
+ assert.equal(await p.locator('.week-end').getAttribute('data-journal-pick'),'2026-10-25');
+ const contrast=async selector=>p.locator(selector).evaluate(node=>{
+  let style=getComputedStyle(node),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');canvas.width=canvas.height=1;
+  const luminance=color=>{ctx.fillStyle=color;ctx.fillRect(0,0,1,1);let values=[...ctx.getImageData(0,0,1,1).data].slice(0,3).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4});return values[0]*.2126+values[1]*.7152+values[2]*.0722};
+  let a=luminance(style.color),b=luminance(style.backgroundColor);return(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+ });
+ for(const theme of ['light','dark']){
+  await p.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
+  await p.hover('[data-journal-pick="2026-10-22"]');
+  assert(await contrast('[data-journal-pick="2026-10-22"]')>=4.5);
+  await p.locator('[data-journal-pick="2026-10-22"]').focus();
+  await p.keyboard.press('Tab');
+  assert.equal(await p.locator('.journal-calendar-grid button:focus-visible').evaluate(n=>getComputedStyle(n).outlineStyle),'solid');
+ }
+ assert.equal(await p.locator('[data-journal-pick="2026-10-21"]').getAttribute('aria-current'),'date');
+ await p.click('[data-journal-action="calendar-close"]');await p.click('[data-journal-change-date="2026-10-21"]');
+ assert.equal(await p.locator('.journal-calendar [aria-pressed="true"]').count(),1);
+ assert.equal(await p.locator('.week-selected').count(),0);
+ for(const theme of ['light','dark']){
+  await p.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
+  await p.hover('[data-journal-pick="2026-10-21"]');assert(await contrast('[data-journal-pick="2026-10-21"]')>=4.5);
+ }
+ await p.click('[data-journal-pick="2026-10-21"]');
+ let editor=p.locator('[data-journal-date="2026-10-21"] .ql-editor');await editor.fill('统一工具栏');
+ await p.evaluate(()=>quillFor(document.querySelector('[data-journal-date="2026-10-21"]')).setSelection(0,5));
+ await p.click('#workJournal [data-command="bold"]');
+ assert.match((await contents(p)).weeks['2026-10-19'].days['2026-10-21'].content,/<strong>统一工具栏/);
 });
 test('long weekly review is retained and a rest-day reopening targets the latest workday',async t=>{
  let p=await fixture(t);await p.click('[data-journal-action="review"]');await p.locator('[data-journal-review="next"]').fill('字'.repeat(10020));

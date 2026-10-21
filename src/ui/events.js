@@ -16,17 +16,10 @@ function handleClick(event){
  if(target.dataset.reselectUpload)return reselectTaskUpload(target.dataset.reselectUpload);
  if(target.dataset.retryThumb){event.preventDefault();return refreshAttachmentThumbnails()}
  if(target.dataset.imageView)return openAttachmentImage(target.dataset.imageView);
- if(target.dataset.addProgress!==undefined)return addTaskProgress();
- if(target.dataset.editProgress)return beginEditTaskProgress(target.dataset.editProgress);
- if(target.dataset.cancelProgressEdit!==undefined)return refreshTaskProgressList();
- if(target.dataset.saveProgress)return saveTaskProgressEdit(target.dataset.saveProgress);
- if(target.dataset.deleteProgress)return deleteTaskProgress(target.dataset.deleteProgress);
  if(target.dataset.quickDate)return openTaskDateMenu(target,target.dataset.quickDate);
  if(target.dataset.setTaskDate!==undefined)return applyQuickTaskDate(target.dataset.setTaskDate);
  if(target.dataset.applyTaskDate!==undefined)return applyQuickTaskDate($("#quickTaskDate").value);
  if(target.dataset.openAllWaiting!==undefined){taskFilter={...taskFilter,quick:"waiting",query:"",project:[],type:[],status:[]};return navigate("tasks")}
- if(target.dataset.handleTask)return updateTask(target.dataset.handleTask,"本次已处理",task=>task.handledOn=todayKey());
- if(target.dataset.undoHandled)return updateTask(target.dataset.undoHandled,"撤销本次处理",task=>task.handledOn="");
  if(target.dataset.page)return navigate(target.dataset.page);
  if(target.dataset.projectView){rememberProjectPosition();ui.projectView=target.dataset.projectView;return requestRender()}
  if(target.dataset.projectDetail)return navigate("projects",target.dataset.projectDetail);
@@ -161,7 +154,7 @@ document.addEventListener("beforeinput",event=>{let editor=event.target.closest?
 $("#confirmAccept").addEventListener("click",()=>{let callback=confirmCallback;confirmCallback=null;closeDialog("confirmDialog");if(typeof callback==="function")callback()});
 $("#taskForm").addEventListener("submit",event=>{event.preventDefault();saveTaskDraft()});
 $("#taskForm").addEventListener("keydown",event=>{
- if(event.key!=="Enter"||event.isComposing||event.keyCode===229||event.target.closest(".rich-editor")||event.target.id==="taskProgressInput"||event.target.closest("button"))return;
+ if(event.key!=="Enter"||event.isComposing||event.keyCode===229||event.target.closest(".rich-editor")||event.target.closest("button"))return;
  event.preventDefault();event.stopPropagation();saveTaskDraft();
 });
 $("#projectForm").addEventListener("submit",event=>{event.preventDefault();saveProjectDraft()});
