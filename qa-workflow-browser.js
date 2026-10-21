@@ -222,7 +222,10 @@ test('weekly planning and review retain their action and results through complet
  let data=await stored(page);assert.equal(data.weeks['2026-08-31'].actions.a.text,'确认目录并完成初稿');assert.equal(data.weeks['2026-08-31'].actions.a.result,'目录已确认，初稿完成一半');assert.equal(data.weeks['2026-08-31'].topResults[0],'部分达成，待补插图');
  assert.deepEqual(data.weeks['2026-08-31'].taskSnapshots,before.taskSnapshots);
  assert.equal(data.weeks['2026-09-07'].actions.a.text,'补充插图');assert.equal(data.weeks['2026-09-07'].actions.a.result,'');assert.equal(data.weeks['2026-09-07'].taskIds.includes('b'),false);assert.equal(data.weeks['2026-09-07'].taskSnapshots.some(task=>task.id==='b'),false);
- await page.click('[data-week-shift="-1"]');await page.locator('[data-week-result="a"][readonly]').waitFor({state:'visible'});
+ await page.waitForFunction(()=>!renderFrame&&document.querySelector('#weekPicker').value===weekInputValue(currentWeekKey()));
+ await page.click('[data-week-shift="-1"]');await page.waitForFunction(()=>!renderFrame&&document.querySelector('#weekPicker').value===weekInputValue('2026-08-31'));
+ t.diagnostic(JSON.stringify(await page.evaluate(()=>({selectedWeekKey,panel:ui.weekPanel,results:[...document.querySelectorAll('[data-week-result]')].map(n=>({task:n.dataset.weekResult,readonly:n.readOnly,height:n.getBoundingClientRect().height})),snapshots:state.weeks['2026-08-31'].taskSnapshots.map(n=>({id:n.id,week:n.week}))}))));
+ await page.locator('[data-week-result="a"][readonly]').waitFor({state:'visible'});
  assert.equal(await page.locator('[data-week-result="a"]').getAttribute('readonly'),'');
  await page.reload();data=await stored(page);assert.equal(data.weeks['2026-08-31'].actions.a.result,'目录已确认，初稿完成一半');
 });
@@ -531,7 +534,7 @@ test('rich text: highlighter icons retain size and selection across colors, them
  for(const [color,label] of [['Yellow','黄'],['Green','绿'],['Blue','蓝']]){
   const button=page.locator('.task-notes-editor [data-command="highlight'+color+'"]');await button.click();assert.equal(await button.getAttribute('aria-pressed'),'true');
   assert.equal(await editor.evaluate(node=>node.__quill.getFormat(0,2).highlight),color.toLowerCase());assert.equal(await editor.evaluate(node=>node.__quill.getFormat(2,2).highlight||''),'');
-  await page.clock.fastForward(450);assert.equal(await page.locator('#tooltip').textContent(),label+'色高亮；再次点击清除');
+  await page.mouse.move(0,0);await button.hover();await page.clock.fastForward(450);assert.equal(await page.locator('#tooltip').textContent(),label+'色高亮；再次点击清除');
   await button.click();assert.equal(await button.getAttribute('aria-pressed'),'false');assert.equal(await editor.evaluate(node=>node.__quill.getFormat(0,2).highlight||''),'');
  }
  for(const [width,theme] of [[1600,'light'],[760,'dark']]){
