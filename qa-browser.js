@@ -103,6 +103,7 @@ async function testUrl() {
     if (message.type() === 'error') browserErrors.push(`console.error: ${message.text()}`);
   });
   await page.addInitScript(() => {
+    localStorage.setItem('work-cockpit-visual-preview-v1',JSON.stringify({mode:'old'}));
     // Match the application's local YYYY-MM-DD formatter instead of using UTC ISO dates.
     const localDateKey = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const today = new Date();
@@ -371,7 +372,7 @@ async function testUrl() {
   assert(saved.order.pinToday.includes('t1'), 'single task pin was not persisted');
   await page.waitForSelector('[data-drop-zone="today"] .pinned-task-segment [data-task="t1"][data-pinned="1"]');
   const pinDividerVisual = await page.locator('[data-drop-zone="today"] .pinned-task-segment.has-pins').evaluate(node => ({ border: getComputedStyle(node).borderTopWidth, background: getComputedStyle(node).backgroundColor, label: getComputedStyle(node, '::before').display }));
-  assert(await page.locator('[data-drop-zone="today"] .pinned-divider').count() === 1 && pinDividerVisual.border !== '0px' && pinDividerVisual.background !== 'rgba(0, 0, 0, 0)' && pinDividerVisual.label === 'none', `pinned tasks did not show the light-blue grouping frame: ${JSON.stringify(pinDividerVisual)}`);
+  assert(await page.locator('[data-drop-zone="today"] .pinned-divider').count() === 1 && pinDividerVisual.border === '0px' && pinDividerVisual.background === 'rgba(0, 0, 0, 0)' && pinDividerVisual.label === 'none', `pinned tasks changed their shared row geometry or lost the separator: ${JSON.stringify(pinDividerVisual)}`);
   await page.click('[data-unpin-all="today"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinToday.length === 0, 'clear all pins did not stay scoped to today card');
@@ -857,7 +858,7 @@ async function testUrl() {
   await page.evaluate(() => { projectById('p1').milestones = clone(window.__projectMilestoneFixture); delete window.__projectMilestoneFixture; saveLocal(true); requestRender(); });
   await page.waitForFunction(() => document.querySelectorAll('.project-milestone-filter .milestone-filter-choice').length === 1);
   const selectedStyle = await page.locator('[data-select-project="p1"]').evaluate(node => ({ background: getComputedStyle(node).backgroundColor, panel: getComputedStyle(document.querySelector('.project-list-panel')).backgroundColor, shadow: getComputedStyle(node).boxShadow, border: getComputedStyle(node).borderColor }));
-	  assert(selectedStyle.background !== selectedStyle.panel && selectedStyle.shadow !== 'none' && selectedStyle.border !== 'rgb(222, 228, 238)', `selected project lacks the subtle fill, blue border, or inner accent: ${JSON.stringify(selectedStyle)}`);
+	  assert(selectedStyle.background !== selectedStyle.panel && selectedStyle.shadow === 'none' && selectedStyle.border !== 'rgb(222, 228, 238)', `selected project lacks the subtle fill, blue border, or unified selection edge: ${JSON.stringify(selectedStyle)}`);
   assert(await page.getByText('里程碑相关任务', { exact: true }).count() === 0, 'project main page still renders milestone-related tasks');
   const selectedBeforeDrag = await page.locator('.project-list-item.selected').getAttribute('data-select-project');
   await page.locator('[data-project-drag="p1"]').dragTo(page.locator('[data-project-drop="p3"]'), { targetPosition: { x: 80, y: 70 } });

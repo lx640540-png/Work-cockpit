@@ -1,0 +1,249 @@
+/* The same preview-only visual language across the working views. */
+:root[data-calm-today] .content{width:min(1560px,calc(100% - 64px))}
+:root[data-calm-page] .content{width:min(1480px,calc(100% - 80px))}
+:root[data-calm-today] .page-head{align-items:center;margin-bottom:26px}
+:root[data-calm-today] .page-head h1{font-size:25px;font-weight:600;line-height:1.4;letter-spacing:-.02em}
+:root[data-calm-today] .eyebrow{font-weight:500;font-size:10px;color:var(--muted-soft)}
+:root[data-calm-today] .page-head p{font-size:12px;line-height:1.65}
+:root[data-calm-today] .card{border-color:var(--line);border-radius:var(--r);background:var(--panel);box-shadow:none}
+:root[data-calm-today] .card-title{font-size:16px;font-weight:600;color:var(--ink)}
+:root[data-calm-today] .card-title i{display:none}
+:root[data-calm-today] .card-subtitle{font-size:11px;font-weight:400;line-height:1.65}
+:root[data-calm-today] :is(.property-btn,.pill){font-size:11px;font-weight:500;border-radius:5px}
+:root[data-calm-today] :is(.task-title-link,.overview-task-link,.table-title-link){font-size:14px;font-weight:600;line-height:1.6;color:var(--ink)}
+:root[data-calm-today] :is(.task-next,.task-project,.table-sub,.table-next,.table-note){font-size:12px;font-weight:400;line-height:1.6;color:var(--muted)}
+:root[data-calm-today] :is(.search-field input,.control,.week-bar input,.week-label,.project-task-search input,.multi-filter summary,.search-task-tools select){border-radius:6px;border-color:var(--line);background:var(--panel);color:var(--text);font-weight:400;font-size:12px;box-shadow:none}
+:root[data-calm-today] :is(.segmented,.panel-tabs){border-radius:7px;background:var(--soft);padding:3px}
+:root[data-calm-today] :is(.segmented,.panel-tabs) button{font-weight:500;font-size:12px;border-radius:5px;color:var(--muted)}
+:root[data-calm-today] :is(.segmented,.panel-tabs) button.active{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px #0000000a}
+:root[data-calm-today] :is(.multi-menu,.choice-popover,.hover-select-menu){background:var(--panel);border-color:var(--line);border-radius:8px;box-shadow:var(--shadow)}
+:root[data-calm-today] :is(.multi-menu button,.hover-select-trigger){background:var(--panel);color:var(--text);border-color:var(--line);font-weight:500}
+:root[data-calm-today] :is(.multi-menu button:hover,.multi-menu button.active){background:var(--soft);color:var(--blue)}
+:root[data-calm-today] .btn.danger{color:var(--red);background:var(--panel);border-color:color-mix(in srgb,var(--red) 25%,var(--line))}
+:root[data-calm-today] .btn.danger:hover{background:var(--red-bg)}
+:root[data-calm-today] :is(.rich-toolbar,.toolbar){background:var(--panel)!important;border-color:var(--line)}
+:root[data-calm-today] .rich-toolbar button{border-radius:5px;font-weight:500;color:var(--text)}
+:root[data-calm-today] .rich-toolbar button.active{background:color-mix(in srgb,var(--blue) 10%,var(--panel));color:var(--blue)}
+:root[data-calm-today] .rich-toolbar .rich-expand-button[aria-pressed=false]{font-size:0}
+:root[data-calm-today] .rich-expand-button[aria-pressed=false]::after{content:"";display:inline-block;width:14px;height:14px;vertical-align:middle;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 3H3v6m12-6h6v6M3 15v6h6m6 0h6v-6' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
+:root[data-calm-today] body.rich-expanded-open{overflow:hidden}
+:root[data-calm-today] .rich-editor{color:var(--text);background:var(--panel)}
+:root[data-calm-today] :is(.task-row,.top-row,.overview-row,.task-table td){border-color:var(--line)}
+:root[data-calm-today] :is(.property-btn,.pill).status-进行中{background:color-mix(in srgb,var(--blue) 9%,var(--panel));color:var(--blue)}
+:root[data-calm-today] :is(.property-btn,.pill).status-已完成{background:var(--green-bg);color:var(--green)}
+:root[data-calm-today] :is(.property-btn,.pill).status-等待{background:var(--orange-bg);color:var(--orange)}
+:root[data-calm-today] :is(.property-btn,.pill).status-暂停{background:var(--soft);color:var(--muted)}
+:root[data-calm-today] :is(.property-btn,.pill).priority-P0{background:var(--red-bg);color:var(--red)}
+:root[data-calm-today] :is(.property-btn,.pill).priority-P1{background:var(--orange-bg);color:var(--orange)}
+:root[data-calm-today] :is(.property-btn,.pill).priority-P2{background:var(--green-bg);color:var(--green)}
+:root[data-calm-today] :is(.property-btn,.pill).priority-P3{background:var(--soft);color:var(--muted)}
+/* Week: one boundary per working section, with editable goals kept distinct. */
+:root[data-calm-today] .week-mode-bar{padding:0;margin-bottom:26px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent}
+:root[data-calm-today] .week-mode-tabs{gap:22px}
+:root[data-calm-today] .week-mode-tabs button{min-height:43px;padding:0 2px;border-bottom:2px solid transparent;border-radius:0;font-size:13px;font-weight:500}
+:root[data-calm-today] .week-mode-tabs button.active{background:transparent;color:var(--ink);border-bottom-color:var(--ink)}
+:root[data-calm-today] .week-mode-hint{font-size:11px;font-weight:400}
+:root[data-calm-today] #page-week .week-card{border:0;border-radius:0;background:transparent;box-shadow:none}
+:root[data-calm-today] #page-week .week-stack{gap:30px}
+:root[data-calm-today] #page-week .card-head{min-height:0;padding:0 0 14px;flex-wrap:wrap;gap:10px}
+:root[data-calm-today] #page-week .card-tools .btn{min-height:28px;font-size:11px;padding:0 8px}
+:root[data-calm-today] #page-week :is(.items,.top-list){padding:0;border-top:1px solid var(--line)}
+:root[data-calm-today] #page-week .task-row{padding:12px 0;min-height:var(--preview-row-height,78px)}
+:root[data-calm-today] #page-week :is(.task-group,.task-section,.pinned-task-segment){border:0;border-radius:0;background:transparent!important;box-shadow:none}
+:root[data-calm-today] #page-week .task-group-title{background:transparent!important;color:var(--muted);font-size:11px;font-weight:500;padding:12px 0 6px}
+:root[data-calm-today] .top-row{min-height:58px;gap:8px}
+:root[data-calm-today] .top-number{background:transparent;color:var(--muted);font-size:13px;font-weight:500}
+:root[data-calm-today] .top-input{font-size:14px;font-weight:400;background:transparent;color:var(--ink)}
+:root[data-calm-today] .top-input:focus{background:var(--soft)}
+:root[data-calm-today] :is(.week-action-label textarea,.overview-next-label textarea){border-color:var(--line);border-radius:6px;background:var(--panel);font-size:13px;line-height:1.65;color:var(--text)}
+:root[data-calm-today] .week-comparison{overflow:hidden}
+:root[data-calm-today] .week-comparison h2{font-size:16px;font-weight:600}
+:root[data-calm-today] .week-outcome{border:0;border-left:2px solid var(--line);border-radius:0;padding:4px 14px}
+:root[data-calm-today] .week-outcome b{font-size:14px;font-weight:600}
+:root[data-calm-today] .week-comparison-table{font-size:13px}
+:root[data-calm-today] .week-comparison-table thead{background:var(--soft)}
+:root[data-calm-today] .week-comparison-table th{font-weight:500}
+:root[data-calm-today] .review-grid{padding:0;gap:22px}
+:root[data-calm-today] .review-field{padding:0;border:0;border-radius:0;background:transparent!important}
+:root[data-calm-today] .review-field>label{font-size:13px;font-weight:600}
+:root[data-calm-today] .field-hint{font-size:11px;line-height:1.65}
+:root[data-calm-today] .review-field .planning-rich-box{border-radius:7px}
+/* All tasks: use the table and its column headings as the main structure. */
+:root[data-calm-today] .quickviews{display:flex;flex-wrap:wrap;gap:8px;padding:0 0 16px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+:root[data-calm-today] .quick-btn{min-height:34px;padding:6px 12px;border-color:transparent;border-radius:6px;background:transparent;color:var(--muted);font-size:12px;font-weight:500}
+:root[data-calm-today] .quick-btn:hover{background:var(--soft)}
+:root[data-calm-today] .quick-btn.active{background:var(--soft);border-color:var(--line);color:var(--ink)}
+:root[data-calm-today] .quick-btn em{font-size:11px;font-weight:400;color:var(--muted);margin-left:8px}
+:root[data-calm-today] .task-advanced-panel{border-radius:8px;padding:12px;background:var(--panel)}
+:root[data-calm-today] :is(.task-options-toggle.active,.task-options-toggle.hover-open){background:var(--soft);border-color:var(--line);color:var(--ink)}
+:root[data-calm-today] .bulk-bar{background:var(--soft);border-color:var(--line);border-radius:7px}
+:root[data-calm-today] .table-card{border:0;border-radius:0;background:transparent}
+:root[data-calm-today] .task-table{table-layout:fixed;min-width:1180px}
+:root[data-calm-today] .task-table th{white-space:nowrap}
+:root[data-calm-today] .task-table :is(th,td):nth-child(1){width:32px;padding-left:4px;padding-right:4px}
+:root[data-calm-today] .task-table :is(th,td):nth-child(2){width:36px;padding-left:6px;padding-right:6px}
+:root[data-calm-today] .task-table :is(th,td):nth-child(3){width:76px;padding-left:6px;padding-right:6px}
+:root[data-calm-today] .task-table :is(th,td):nth-child(4){width:50px;padding-left:6px;padding-right:6px}
+:root[data-calm-today] .task-table :is(th,td):nth-child(5){width:220px}
+:root[data-calm-today] .task-table :is(th,td):nth-child(7){display:table-cell;width:124px}
+:root[data-calm-today] .task-table :is(th,td):nth-child(8){width:110px}
+:root[data-calm-today] .task-table :is(th,td):nth-child(9){width:74px}
+:root[data-calm-today] .task-table :is(th,td):nth-child(10){display:table-cell;width:128px}
+:root[data-calm-today] .task-table td:nth-child(7)>b{font-size:12px;font-weight:500;line-height:1.6}
+:root[data-calm-today] .task-table .table-sub{max-width:none;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+:root[data-calm-today] .task-table th{background:var(--soft)!important;color:var(--muted);font-size:11px;font-weight:500;padding-top:12px;padding-bottom:12px}
+:root[data-calm-today] .task-table td{padding-top:13px;padding-bottom:13px}
+:root[data-calm-today] .task-table .group-row td{background:var(--soft)!important;font-size:12px;font-weight:500;color:var(--text)}
+:root[data-calm-today] .table-next b{font-weight:500;color:var(--text)}
+/* Projects: retain the two established views and the independent scroll panes. */
+:root[data-calm-today] .project-shell{gap:20px}
+:root[data-calm-today] .project-view-nav button{border-radius:7px;font-size:12px;font-weight:500;padding:14px 10px;background:var(--panel)}
+:root[data-calm-today] .project-view-nav button[aria-pressed=true]{border-color:color-mix(in srgb,var(--blue) 30%,var(--line));background:color-mix(in srgb,var(--blue) 7%,var(--panel))}
+:root[data-calm-today] .project-overview-groups{gap:24px}
+:root[data-calm-today] .project-overview-head{border-radius:calc(var(--r) - 1px) calc(var(--r) - 1px) 0 0;padding:18px 20px}
+:root[data-calm-today] .project-overview-heading>button{font-size:16px;font-weight:600;color:var(--ink)}
+:root[data-calm-today] .project-overview-context{font-size:11px;color:var(--muted)}
+:root[data-calm-today] .project-overview-tasks{padding:0 20px 8px}
+:root[data-calm-today] .project-overview-task{padding:16px 0;gap:20px}
+:root[data-calm-today] .project-overview-stats .pill{background:var(--soft);color:var(--muted)}
+:root[data-calm-today] .project-list-panel{padding:0;border:0;border-radius:0;background:transparent}
+:root[data-calm-today] .project-list-item{border-color:transparent;border-radius:7px;background:var(--panel);box-shadow:none;gap:4px}
+:root[data-calm-today] .project-list-item:hover{background:var(--soft);border-color:var(--line)}
+:root[data-calm-today] .project-list-item.selected{background:color-mix(in srgb,var(--blue) 7%,var(--panel));border-color:color-mix(in srgb,var(--blue) 50%,var(--line));box-shadow:none}
+:root[data-calm-today] .project-list-name{font-size:16px;font-weight:500}
+:root[data-calm-today] .project-completion strong{font-size:12px;font-weight:500}
+:root[data-calm-today] .project-detail-card{border:0;border-left:1px solid var(--line);border-radius:0;padding-left:24px;background:transparent}
+:root[data-calm-today] .project-detail-card .portfolio-head{padding:0 0 18px;border-bottom:1px solid var(--line);gap:12px}
+:root[data-calm-today] .portfolio-title h2{font-size:20px;font-weight:600;color:var(--ink)}
+:root[data-calm-today] .project-context-row{padding:16px 0}
+:root[data-calm-today] .project-current.compact{border:0;border-radius:0;background:transparent!important;padding:0;color:var(--text)}
+:root[data-calm-today] .project-current b{font-size:14px;font-weight:500}
+:root[data-calm-today] .project-task-head{border-bottom:1px solid var(--line)}
+:root[data-calm-today] .project-task-head b{font-size:14px;font-weight:600}
+:root[data-calm-today] .overview-list{border:0;border-radius:0;background:transparent}
+:root[data-calm-today] .overview-row{grid-template-columns:minmax(0,1fr) auto auto auto;padding:14px 0;min-height:66px}
+:root[data-calm-today] .overview-row>.property-btn{justify-self:start}
+:root[data-calm-today] .project-detail-scroll{container-type:inline-size;container-name:calm-project}
+:root[data-calm-today] .overview-row small{font-size:12px;line-height:1.6;color:var(--muted)}
+/* Memos: a quiet index beside an open document, without a second editor frame. */
+:root[data-calm-today] .memo-layout{grid-template-columns:300px minmax(0,1fr);gap:28px}
+:root[data-calm-today] :is(.memo-list-card,.memo-editor-card){border:0;border-radius:0;background:transparent}
+:root[data-calm-today] .memo-list-card{border-right:1px solid var(--line);padding-right:20px}
+:root[data-calm-today] .memo-search{padding:0 0 12px}
+:root[data-calm-today] .memo-search input{height:36px;border-radius:6px;background:var(--panel);border-color:var(--line);font-size:12px;color:var(--text)}
+:root[data-calm-today] .memo-tabs{padding:0 0 12px;gap:4px}
+:root[data-calm-today] .memo-tab{height:30px;border-radius:5px;background:transparent;color:var(--muted);font-size:12px;font-weight:500}
+:root[data-calm-today] .memo-tab.active{background:var(--soft);color:var(--ink)}
+:root[data-calm-today] .memo-list{padding:12px 2px 12px 0;gap:6px}
+:root[data-calm-today] .memo-item{min-height:108px;padding:12px 8px;gap:4px;border-color:transparent;border-bottom-color:var(--line);border-radius:6px;background:transparent;box-shadow:none}
+:root[data-calm-today] .memo-item:hover{background:var(--soft)}
+:root[data-calm-today] .memo-item.active{background:color-mix(in srgb,var(--blue) 6%,var(--panel));border-color:color-mix(in srgb,var(--blue) 35%,var(--line));box-shadow:none}
+:root[data-calm-today] .memo-item.selected{background:color-mix(in srgb,var(--blue) 10%,var(--panel));border-color:var(--blue)}
+:root[data-calm-today] .memo-item h3{font-weight:600;color:var(--ink)}
+:root[data-calm-today] :is(.memo-meta,.memo-preview){color:var(--muted);line-height:1.6}
+:root[data-calm-today] .memo-editor-head{padding:0 0 18px;border:0;align-items:flex-start}
+:root[data-calm-today] .memo-title{font-size:24px;font-weight:600;line-height:1.5;background:transparent;color:var(--ink)}
+:root[data-calm-today] .memo-editor-meta{padding:0 0 14px;align-items:center;font-size:11px;color:var(--muted);gap:10px}
+:root[data-calm-today] .memo-editor-body{margin:0;border:0;border-radius:0}
+:root[data-calm-today] .memo-editor-body:not(.rich-expanded) .rich-toolbar{padding:9px 0;border-bottom:1px solid var(--line)}
+:root[data-calm-today] .memo-editor-body:not(.rich-expanded) .ql-editor{padding:22px 20px 24px 0;font-size:14px;line-height:1.85}
+:root[data-calm-today] .memo-status{padding:10px 0 0;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+/* Search and recovery: rows carry the hierarchy; no nested tile per result. */
+:root[data-calm-today] .search-page-main{padding:0;border:0;border-radius:0}
+:root[data-calm-today] .search-page-help{padding:20px;border:0;border-left:1px solid var(--line);border-radius:0;background:transparent}
+:root[data-calm-today] .search-page-field{margin-bottom:22px}
+:root[data-calm-today] .search-page-field input{border-radius:7px;font-size:14px}
+:root[data-calm-today] .search-page-field input:focus{box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 10%,transparent)}
+:root[data-calm-today] .search-category-tabs{padding:8px 0 14px;border-bottom:1px solid var(--line)}
+:root[data-calm-today] .search-category-tabs .btn{border-color:transparent;background:transparent;color:var(--muted)}
+:root[data-calm-today] .search-category-tabs .btn[aria-pressed=true]{background:var(--soft);color:var(--ink)}
+:root[data-calm-today] .search-result-heading{font-size:13px;padding:8px 0 14px}
+:root[data-calm-today] .search-result-heading b{font-weight:600}
+:root[data-calm-today] .search-task-tools{border:0;padding:0 0 8px}
+:root[data-calm-today] .search-task-tools label{font-weight:400}
+:root[data-calm-today] .search-result{padding:16px 8px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent}
+:root[data-calm-today] .search-result:hover{background:var(--soft)}
+:root[data-calm-today] .search-result b{font-size:14px;font-weight:600;color:var(--ink)}
+:root[data-calm-today] .search-result small{font-size:12px;line-height:1.7;color:var(--muted)}
+:root[data-calm-today] .search-project-heading{background:var(--soft);border-radius:5px}
+:root[data-calm-today] .feature-card{padding:22px}
+:root[data-calm-today] .feature-card h2{font-size:16px;font-weight:600}
+:root[data-calm-today] .data-list{gap:0;margin-top:18px}
+:root[data-calm-today] .data-list .data-item{padding:14px 0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent}
+:root[data-calm-today] .data-item b{font-size:13px;font-weight:500}
+:root[data-calm-today] .data-item small{font-size:11px;line-height:1.8}
+:root[data-calm-today] .danger-zone{border-color:color-mix(in srgb,var(--red) 25%,var(--line));background:color-mix(in srgb,var(--red) 3%,var(--panel))}
+/* Shared dialogs use the same typography and a single outer boundary. */
+:root[data-calm-today] dialog{border-color:var(--line);border-radius:12px;background:var(--panel);box-shadow:0 24px 80px #0003}
+:root[data-calm-today] dialog::backdrop{background:#10101866;backdrop-filter:blur(2px)}
+:root[data-calm-today] .modal-head{padding:18px 22px;border-color:var(--line)}
+:root[data-calm-today] .modal-head h2{font-size:19px;font-weight:600}
+:root[data-calm-today] .modal-actions{background:var(--panel);border-color:var(--line)}
+:root[data-calm-today] .task-modal .task-section{border:0;border-top:1px solid var(--line);border-radius:0;padding:14px 0;background:transparent!important}
+:root[data-calm-today] .task-modal .task-section-title{font-size:12px;font-weight:600;color:var(--ink)}
+:root[data-calm-today] .task-modal .title-input{font-size:22px;font-weight:600;background:transparent;border-color:var(--line);color:var(--ink)}
+:root[data-calm-today] .field label{font-size:12px;font-weight:500;color:var(--text)}
+:root[data-calm-today] :is(.field input,.field textarea,.field select,.editor-box,.related-search){border-radius:6px;border-color:var(--line);background:var(--panel);color:var(--text)}
+:root[data-calm-today] :is(.attachment-item,.related-item){border-radius:6px;background:var(--panel);border-color:var(--line)}
+:root[data-calm-today] .dropzone{border-color:var(--line);border-radius:8px;background:var(--soft)!important;color:var(--muted)}
+:root[data-calm-today] .close{border-radius:6px;background:transparent;color:var(--muted)}
+:root[data-calm-today] :is(.project-basic,.milestone-sidebar,.milestone-detail,.milestone-task-panel){border-radius:8px;background:var(--panel);border-color:var(--line)}
+:root[data-calm-today] .milestone-nav.active{background:color-mix(in srgb,var(--blue) 7%,var(--panel));border-color:var(--blue)}
+:root[data-calm-today] .milestone-index{background:var(--soft);color:var(--muted);font-weight:500}
+:root[data-calm-today] .status-choice button.active{background:color-mix(in srgb,var(--blue) 9%,var(--panel));color:var(--blue)}
+@container calm-project (max-width:560px){:root[data-calm-today] .overview-row{grid-template-columns:repeat(3,max-content);justify-content:start;gap:8px}:root[data-calm-today] .overview-row>div:first-child{grid-column:1/-1;max-width:100%}}
+@media(max-width:1100px){:root[data-calm-today] .content{width:calc(100% - 40px)}:root[data-calm-today] .memo-layout{grid-template-columns:260px minmax(0,1fr);gap:20px}:root[data-calm-today] .memo-editor-head{flex-wrap:wrap}:root[data-calm-today] .memo-editor-meta{flex-wrap:wrap}}
+@media(max-width:1000px){:root[data-calm-today] .project-shell{gap:10px}:root[data-calm-today] .project-view-nav button{padding:7px 12px}:root[data-calm-today] .project-detail-card{border:0;padding:0}:root[data-calm-today] .project-overview-head{flex-wrap:wrap}:root[data-calm-today] .week-comparison-table tr{padding:12px 16px}}
+@media(max-width:820px){:root[data-calm-today] .content{width:calc(100% - 32px)}:root[data-calm-today] .page-head{align-items:flex-start;flex-direction:column;gap:12px;margin-bottom:20px}:root[data-calm-today] .page-head h1{font-size:22px}:root[data-calm-today] body:is(.memo-workspace,.project-workspace) .main{display:grid;grid-template-rows:62px minmax(0,1fr)}:root[data-calm-today] body:is(.memo-workspace,.project-workspace) .topbar{position:static}:root[data-calm-today] body:is(.memo-workspace,.project-workspace) .content{padding:14px 0}:root[data-calm-today] body:is(.memo-workspace,.project-workspace) .page-head{gap:8px;margin-bottom:12px}:root[data-calm-today] body.memo-workspace .memo-layout{grid-template-columns:minmax(0,1fr);gap:0}:root[data-calm-today] .memo-list-card{border:0;padding:0}:root[data-calm-today] .memo-editor-head{padding:0 0 10px;gap:8px}:root[data-calm-today] .memo-title{font-size:20px}:root[data-calm-today] .memo-editor-meta{padding:0 0 10px;gap:6px}:root[data-calm-today] .memo-editor-meta .control{min-width:0;max-width:100%}:root[data-calm-today] .memo-editor-body:not(.rich-expanded) .ql-editor{padding:16px 8px 20px 0}:root[data-calm-today] .memo-status{font-size:10px;padding-top:6px}:root[data-calm-today] .project-overview-tasks{padding:0 14px 8px}:root[data-calm-today] .project-overview-head{padding:14px}:root[data-calm-today] .quickviews{gap:4px}:root[data-calm-today] .quick-btn{padding:6px 9px}:root[data-calm-today] .feature-card{padding:16px}}
+/* Journal wrapper also retains the original single-column layout. */
+.journal-workspace{grid-column:2;grid-row:2;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);min-width:0;min-height:0;overflow:hidden}
+.journal-workspace>.journal-body{grid-area:1/1;min-width:0;min-height:0}
+.journal-daily-heading{display:none}
+.journal-review-pane[hidden],.journal-column-splitter[hidden]{display:none!important}
+:root[data-calm-today] #workJournal.journal-split .journal-workspace{grid-template-columns:minmax(0,var(--journal-daily,62%)) 12px minmax(0,1fr)}
+:root[data-calm-today] #workJournal.journal-split .journal-body{grid-area:1/1;padding:20px 32px 32px}
+:root[data-calm-today] .journal-split .journal-daily-heading{display:block;margin:0 auto 8px;max-width:760px;font-size:15px;font-weight:600;color:var(--muted)}
+:root[data-calm-today] .journal-split .journal-review-pane{grid-area:1/3;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:20px 28px 32px}
+:root[data-calm-today] #workJournal.journal-split .journal-review{margin:0;padding:0;border:0;max-width:none}
+:root[data-calm-today] .journal-split .journal-review-toggle{cursor:default;padding:0 0 10px;font-size:16px;font-weight:600;color:var(--ink)}
+:root[data-calm-today] .journal-split .journal-review-toggle>span{display:none}
+:root[data-calm-today] .journal-split .journal-review-content>p{line-height:1.7;margin:0 0 16px}
+:root[data-calm-today] .journal-split .journal-review-field textarea{min-height:120px;font-family:inherit;font-size:14px;line-height:1.8}
+:root[data-calm-today] .journal-column-splitter{grid-area:1/2;position:relative;width:12px;height:100%;min-height:0;padding:0;border:0;border-radius:0;background:transparent;cursor:col-resize;touch-action:none}
+:root[data-calm-today] .journal-column-splitter:before{content:"";position:absolute;left:5px;top:0;bottom:0;width:1px;background:var(--line)}
+:root[data-calm-today] .journal-column-splitter:after{content:"";position:absolute;left:3px;top:calc(50% - 28px);height:56px;width:5px;border-radius:4px;background:var(--line)}
+:root[data-calm-today] .journal-column-splitter:is(:hover,:focus-visible,.resizing):after{background:var(--blue)}
+:root[data-calm-today] .journal-column-splitter:focus-visible{outline:1px solid var(--blue);outline-offset:-1px}
+/* Fix overlapping focus decorations without removing keyboard focus on controls. */
+:root[data-calm-today] .review-field:focus-within{box-shadow:none;border-color:transparent}
+:root[data-calm-today] :is(.rich-editor,.ql-editor):focus-visible{outline:none}
+:root[data-calm-today] :is(.week-action-label,.overview-next-label,.week-comparison,.journal-review-field) textarea:focus{outline:none;box-shadow:none;border-color:var(--blue)}
+:root[data-calm-today] .planning-width-handle:after{opacity:0;transition:opacity .12s}
+:root[data-calm-today] .planning-resizable:hover .planning-width-handle:after,:root[data-calm-today] .planning-width-handle:is(:focus-visible,.active):after{opacity:1}
+/* Readable review text, including long Chinese paragraphs and rich lists. */
+:root[data-calm-today] #page-week .week-comparison-table{table-layout:fixed;line-height:1.7}
+:root[data-calm-today] .week-comparison-table .week-plan-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.75}
+:root[data-calm-today] .week-result-cell{grid-template-columns:minmax(0,1fr);gap:6px}
+:root[data-calm-today] .week-result-cell>.pill{justify-self:start}
+:root[data-calm-today] .week-comparison-table .week-result-cell textarea{height:72px;min-height:72px;font-family:inherit;font-size:13px;line-height:1.7;padding:8px 10px}
+:root[data-calm-today] .review-field:not(.rich-expanded) .ql-editor{font-family:inherit;font-size:14px;line-height:1.8;color:var(--text);overflow-wrap:anywhere}
+:root[data-calm-today] .review-field:not(.rich-expanded) .editor-box{min-width:0}
+/* Dragging uses a soft destination surface and the existing insertion lines. */
+:root[data-calm-today] .drop-card.drag-target{outline:none;outline-offset:0;box-shadow:none;background:color-mix(in srgb,var(--blue) 4%,var(--panel))!important}
+:root[data-calm-today] .drop-card.drag-target .card-title{color:var(--blue)}
+:root[data-calm-today] .sortable-fallback{border-radius:8px;box-shadow:0 6px 20px #0002;outline:none}
+/* A concise memo index with a distinct pinned state. */
+:root[data-calm-today] .memo-preview{display:none}
+:root[data-calm-today] .memo-item{min-height:86px}
+:root[data-calm-today] .memo-item .memo-pin.active{background:var(--panel);color:var(--blue);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--blue) 32%,var(--line));border-radius:5px}
+/* Keep both project views anchored to the same shared header and scroll gutter. */
+:root[data-calm-today] body.project-workspace .content{padding-top:30px;padding-bottom:24px}
+:root[data-calm-today] body.project-workspace #mainScroll{scrollbar-gutter:stable}
+:root[data-calm-today] #projectShell>.project-view-body .page-head{min-height:72px;margin-bottom:24px;align-items:center}
+:root[data-calm-today] #projectShell .page-head .page-actions{flex-wrap:nowrap;flex-shrink:0}
+@media(max-width:820px){.journal-workspace{grid-column:1;grid-row:3}:root[data-calm-today] body.project-workspace .content{padding-top:24px}:root[data-calm-today] #projectShell>.project-view-body .page-head{min-height:0;align-items:flex-start;margin-bottom:16px;gap:12px}:root[data-calm-today] #projectShell .page-head .page-actions{flex-wrap:wrap}:root[data-calm-today] .week-result-cell{grid-template-columns:minmax(0,1fr)}}
+:root[data-calm-today] .journal-split .journal-daily-heading{position:sticky;top:0;z-index:2;padding:8px 0;background:var(--panel)}
+:root[data-calm-today] #workJournal .journal-review-field textarea{background:var(--panel);color:var(--text);border-color:var(--line);font-family:inherit}
+:root[data-calm-today] #workJournal .journal-review-field textarea:focus{border-color:var(--blue);outline:none;box-shadow:none}
+:root[data-calm-today] #projectShell [data-toggle-archived-projects]{min-width:104px}
+:root[data-calm-today] .journal-split .journal-daily-heading{top:-20px}

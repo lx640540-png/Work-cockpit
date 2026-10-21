@@ -30,6 +30,7 @@ async function fixture(t,tasks,{time='2026-09-05T12:00:00',route='today',project
   await page.clock.install({time:new Date(time+'+08:00')});
   await page.addInitScript(({tasks,projects})=>{
     localStorage.setItem('work-cockpit-local-mode-v1','1');
+    localStorage.setItem('work-cockpit-visual-preview-v1',JSON.stringify({mode:'old'}));
     if(!localStorage.getItem('work-cockpit-v6'))localStorage.setItem('work-cockpit-v6',JSON.stringify({version:8,tasks,projects,memos:[],
       meta:{activeWeekKey:'2026-08-31'},weeks:{'2026-08-24':{closedAt:'2026-08-30',top:['历史目标'],taskSnapshots:[{id:'historical',title:'历史事项',status:'暂停',type:'任务',focus:true,planDate:'2026-08-24'}]}},order:{long:tasks.map(t=>t.id)}}));
   },{tasks,projects});
@@ -199,6 +200,7 @@ test('project overview edits original tasks, retains empty projects and schedule
 
 test('weekly planning and review retain their action and results through completion and rollover',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('a',{week:true,project:'p1',nextAction:'确认目录'}),makeTask('b',{week:true,type:'长期跟进',nextAction:'确认交期'})],{route:'week',projects:projectFixture});
+ page.setDefaultTimeout(10000);
  const weeklyGeometry=await page.locator('[data-drop-zone="week"] .task-row[data-task="a"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),action=box(row.querySelector('.week-action-label')),meta=box(row.querySelector('.task-meta')),whole=box(row);return{rowHeight:whole.height,actionLeft:action.left,actionRight:action.right,metaLeft:meta.left,metaRight:meta.right,metaTop:meta.top,actionBottom:action.bottom,rowRight:whole.right}});
  assert(weeklyGeometry.rowHeight<150&&(weeklyGeometry.metaLeft>=weeklyGeometry.actionRight-1||weeklyGeometry.metaTop>=weeklyGeometry.actionBottom-1)&&weeklyGeometry.metaRight<=weeklyGeometry.rowRight,JSON.stringify(weeklyGeometry));
  const longWeekAction='确认目录并完成初稿，同时补齐结构示意、测试结论和仍待确认的问题，提交给相关人员审核后记录下一轮修改项。';
@@ -216,11 +218,14 @@ test('weekly planning and review retain their action and results through complet
  await page.click('[data-week-panel="plan"]');await page.locator('[data-toggle-task="b"]').click();
  await page.click('[data-week-panel="review"]');assert.match(await page.locator('.week-comparison').textContent(),/事项 b/);
  const before=(await stored(page)).weeks['2026-08-31'];
- await page.clock.fastForward(3*86400000);await page.waitForFunction(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).meta.activeWeekKey==='2026-09-07');
+ // Freeze the target wall-clock date independently of timer advancement.
+ await page.clock.setFixedTime(new Date('2026-09-08T12:00:00+08:00'));await page.clock.runFor(61000);await page.waitForFunction(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).meta.activeWeekKey==='2026-09-07');
  let data=await stored(page);assert.equal(data.weeks['2026-08-31'].actions.a.text,'确认目录并完成初稿');assert.equal(data.weeks['2026-08-31'].actions.a.result,'目录已确认，初稿完成一半');assert.equal(data.weeks['2026-08-31'].topResults[0],'部分达成，待补插图');
  assert.deepEqual(data.weeks['2026-08-31'].taskSnapshots,before.taskSnapshots);
  assert.equal(data.weeks['2026-09-07'].actions.a.text,'补充插图');assert.equal(data.weeks['2026-09-07'].actions.a.result,'');assert.equal(data.weeks['2026-09-07'].taskIds.includes('b'),false);assert.equal(data.weeks['2026-09-07'].taskSnapshots.some(task=>task.id==='b'),false);
- await page.click('[data-week-shift="-1"]');await page.locator('[data-week-result="a"][readonly]').waitFor({state:'visible'});
+ await page.waitForFunction(()=>!renderFrame&&document.querySelector('#weekPicker').value===weekInputValue(currentWeekKey()));
+ await page.click('[data-week-shift="-1"]');await page.clock.runFor(100);await page.waitForFunction(()=>!renderFrame&&document.querySelector('#weekPicker').value===weekInputValue('2026-08-31'));
+ await page.locator('[data-week-result="a"][readonly]').waitFor({state:'visible'});
  assert.equal(await page.locator('[data-week-result="a"]').getAttribute('readonly'),'');
  await page.reload();data=await stored(page);assert.equal(data.weeks['2026-08-31'].actions.a.result,'目录已确认，初稿完成一半');
 });
@@ -529,7 +534,7 @@ test('rich text: highlighter icons retain size and selection across colors, them
  for(const [color,label] of [['Yellow','黄'],['Green','绿'],['Blue','蓝']]){
   const button=page.locator('.task-notes-editor [data-command="highlight'+color+'"]');await button.click();assert.equal(await button.getAttribute('aria-pressed'),'true');
   assert.equal(await editor.evaluate(node=>node.__quill.getFormat(0,2).highlight),color.toLowerCase());assert.equal(await editor.evaluate(node=>node.__quill.getFormat(2,2).highlight||''),'');
-  await page.clock.fastForward(450);assert.equal(await page.locator('#tooltip').textContent(),label+'色高亮；再次点击清除');
+  await page.mouse.move(0,0);await button.hover();await page.clock.fastForward(450);assert.equal(await page.locator('#tooltip').textContent(),label+'色高亮；再次点击清除');
   await button.click();assert.equal(await button.getAttribute('aria-pressed'),'false');assert.equal(await editor.evaluate(node=>node.__quill.getFormat(0,2).highlight||''),'');
  }
  for(const [width,theme] of [[1600,'light'],[760,'dark']]){

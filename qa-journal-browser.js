@@ -6,7 +6,7 @@ before(async()=>{server=http.createServer((req,res)=>{const name=new URL(req.url
 after(async()=>{await browser?.close();if(server)await new Promise(resolve=>server.close(resolve))});
 async function fixture(t){let context=await browser.newContext({viewport:{width:1440,height:900},timezoneId:'Asia/Shanghai'});t.after(()=>context.close());await context.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.abort());let page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));t.after(()=>assert.deepEqual(errors,[]));await page.clock.install({time:new Date('2026-10-08T18:00:00+08:00')});await page.addInitScript(()=>localStorage.setItem('work-cockpit-local-mode-v1','1'));await page.goto(origin);await page.waitForFunction(()=>!document.documentElement.classList.contains('booting'));await page.click('#journalHandle');return page}
 const contents=async p=>{await p.waitForFunction(()=>!journalUI.dirty);return p.evaluate(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).meta.workJournal)};
-test('journal date headings open a calendar; rich content moves intact and survives reload',async t=>{let p=await fixture(t);assert.deepEqual(await p.locator('[data-journal-change-date]').evaluateAll(nodes=>nodes.map(n=>n.dataset.journalChangeDate)),['2026-10-08','2026-10-09','2026-10-10']);assert.equal(await p.locator('#workJournal .rich-toolbar').count(),1);await p.locator('[data-journal-date="2026-10-08"] .ql-editor').fill('复测完成');await p.evaluate(()=>{let q=quillFor(document.querySelector('[data-journal-date="2026-10-08"]'));q.setSelection(0,4)});await p.click('#workJournal [data-command="bold"]');assert.match((await contents(p)).weeks['2026-10-05'].days['2026-10-08'].content,/<strong>复测完成/);await p.click('[data-journal-change-date="2026-10-08"]');await p.click('[data-journal-pick="2026-10-07"]');let data=await contents(p);assert.match(data.weeks['2026-10-05'].days['2026-10-07'].content,/复测完成/);assert.equal(data.weeks['2026-10-05'].days['2026-10-08'],undefined);await p.click('[data-journal-change-date="2026-10-07"]');await p.click('[data-journal-pick="2026-10-09"]');assert(await p.locator('.journal-calendar').isVisible());await p.click('[data-journal-action="calendar-close"]');await p.reload();await p.click('#journalHandle');assert.match(await p.locator('[data-journal-date="2026-10-07"] .ql-editor').innerHTML(),/strong/);assert.equal(await p.locator('[data-journal-date="2026-10-08"]').count(),0)});
+test('journal date headings open a calendar; rich content moves intact and survives reload',async t=>{let p=await fixture(t);assert.deepEqual(await p.locator('[data-journal-change-date]').evaluateAll(nodes=>nodes.map(n=>n.dataset.journalChangeDate)),['2026-10-08','2026-10-09','2026-10-10']);assert.equal(await p.locator('#workJournal .journal-daily-header .rich-toolbar').count(),1);await p.locator('[data-journal-date="2026-10-08"] .ql-editor').fill('复测完成');await p.evaluate(()=>{let q=quillFor(document.querySelector('[data-journal-date="2026-10-08"]'));q.setSelection(0,4)});await p.click('#workJournal .journal-daily-header [data-command="bold"]');assert.match((await contents(p)).weeks['2026-10-05'].days['2026-10-08'].content,/<strong>复测完成/);await p.click('[data-journal-change-date="2026-10-08"]');await p.click('[data-journal-pick="2026-10-07"]');let data=await contents(p);assert.match(data.weeks['2026-10-05'].days['2026-10-07'].content,/复测完成/);assert.equal(data.weeks['2026-10-05'].days['2026-10-08'],undefined);await p.click('[data-journal-change-date="2026-10-07"]');await p.click('[data-journal-pick="2026-10-09"]');assert(await p.locator('.journal-calendar').isVisible());await p.click('[data-journal-action="calendar-close"]');await p.reload();await p.click('#journalHandle');assert.match(await p.locator('[data-journal-date="2026-10-07"] .ql-editor').innerHTML(),/strong/);assert.equal(await p.locator('[data-journal-date="2026-10-08"]').count(),0)});
 test('week calendar, holiday generation, pinning, resizing and expansion preserve underlying geometry',async t=>{let p=await fixture(t);const rect=()=>p.locator('#mainScroll').evaluate(n=>({width:n.clientWidth,left:n.getBoundingClientRect().left}));let before=await rect();await p.click('[data-journal-action="week"]');await p.click('[data-journal-pick="2026-10-01"]');assert.deepEqual(await p.locator('[data-journal-date]').evaluateAll(nodes=>nodes.map(n=>n.dataset.journalDate)),['2026-09-28','2026-09-29','2026-09-30']);await p.click('[data-journal-action="add"]');await p.click('[data-journal-pick="2026-10-04"]');assert.equal(await p.locator('[data-journal-date="2026-10-04"]').count(),1);await p.click('[data-journal-action="pin"]');await p.click('[data-page="tasks"]');assert(await p.locator('#workJournal').isVisible());let grip=p.locator('.journal-resize'),box=await grip.boundingBox();await p.mouse.move(box.x+3,box.y+200);await p.mouse.down();await p.mouse.move(box.x-160,box.y+200);await p.mouse.up();assert.deepEqual(await rect(),before);assert((await p.locator('#workJournal').boundingBox()).width>500);await p.click('[data-journal-action="expand"]');let geom=await p.evaluate(()=>({drawer:document.querySelector('#workJournal').getBoundingClientRect().left,main:document.querySelector('.main').getBoundingClientRect().left}));assert(Math.abs(geom.drawer-geom.main)<2);await p.click('[data-journal-action="expand"]');await p.setViewportSize({width:390,height:844});await p.waitForFunction(()=>document.querySelector('#workJournal').getBoundingClientRect().width<=390);let small=await p.locator('#workJournal').boundingBox();assert(small.width<=390);assert(small.x>=0);assert(small.y+small.height<=845);await p.reload();assert(await p.locator('#workJournal').isVisible())});
 test('journal data survives serialization, restore normalization and unknown-year fallback',async t=>{let p=await fixture(t);await p.locator('[data-journal-date="2026-10-08"] .ql-editor').fill('原始记录');assert(await p.evaluate(()=>hasBusinessData()));let result=await p.evaluate(()=>{let copy=normalizeState(JSON.parse(serializeState()));return copy.meta.workJournal.weeks['2026-10-05'].days['2026-10-08'].content});assert.match(result,/原始记录/);await p.evaluate(()=>{journalUI.week='2027-01-04';journalUI.signature='';syncWorkJournal()});assert.match(await p.locator('.journal-calendar-notice').innerText(),/暂按周一至周五/);assert.equal(await p.locator('[data-journal-date]').count(),5)});
 
@@ -63,14 +63,14 @@ test('weekly review keeps its recorded-day links without the retired top navigat
  assert.match(await p.locator('.journal-review-links').innerText(),/10\/8/);
  await p.click('.journal-review-links [data-journal-jump="2026-10-08"]');
  assert(await p.locator('[data-journal-section="2026-10-08"]').isVisible());
- await p.locator('[data-journal-review="achievements"]').fill('完成首轮验收');
- await p.locator('[data-journal-review="issues"]').fill('电池批次待确认');
+ await p.locator('[data-journal-review="achievements"] .ql-editor').fill('完成首轮验收');
+ await p.locator('[data-journal-review="issues"] .ql-editor').fill('电池批次待确认');
  assert.equal(await p.evaluate(()=>journalExport('review').includes('完成首轮验收')),true);
  await p.click('[data-journal-action="copy"]');await p.click('[data-journal-copy="review"]');
  assert.match((await contents(p)).weeks['2026-10-05'].review.issues,/电池批次待确认/);
  await p.reload();await p.click('#journalHandle');await p.click('[data-journal-action="review"]');
- assert.equal(await p.locator('[data-journal-review="achievements"]').inputValue(),'完成首轮验收');
- assert.equal(await p.locator('[data-journal-review="issues"]').inputValue(),'电池批次待确认');
+ assert.equal(await p.locator('[data-journal-review="achievements"] .ql-editor').innerText(),'完成首轮验收');
+ assert.equal(await p.locator('[data-journal-review="issues"] .ql-editor').innerText(),'电池批次待确认');
 });
 test('rapid journal inputs produce one local write and navigation flushes pending edits',async t=>{
  let p=await fixture(t);await p.evaluate(()=>{window.journalWrites=0;let original=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key==='work-cockpit-v6')window.journalWrites++;return original.call(this,key,value)};let q=quillFor(document.querySelector('[data-journal-date="2026-10-08"]'));for(let word of ['第','第一','第一轮'])q.setText(word+'\n','user')});
@@ -81,23 +81,23 @@ test('rapid journal inputs produce one local write and navigation flushes pendin
  await p.evaluate(()=>{let q=quillFor(document.querySelector('[data-journal-date="2026-10-08"]'));q.setText('第二轮\n','user')});
  await p.click('[data-page="tasks"]');assert.match((await contents(p)).weeks['2026-10-05'].days['2026-10-08'].content,/第二轮/);
 });
-test('a week with only a review is treated as business data and does not target a daily editor',async t=>{
+test('a week with only a rich review is business data and targets the review editor',async t=>{
  let p=await fixture(t);await p.click('[data-journal-action="review"]');
- await p.locator('[data-journal-review="next"]').fill('复核电池保护板');
+ await p.locator('[data-journal-review="next"] .ql-editor').fill('复核电池保护板');
  assert.equal(await p.evaluate(()=>hasBusinessData()),true);
- assert.equal(await p.locator('#workJournal .rich-toolbar').evaluate(node=>node.inert),true);
- assert.equal(await p.evaluate(()=>activeRichEditor),null);
+ assert.equal(await p.locator('#workJournal .journal-review-tools .rich-toolbar').evaluate(node=>node.inert),false);
+ assert.equal(await p.evaluate(()=>activeRichEditor?.dataset.journalReview),'next');
  await p.locator('[data-journal-date="2026-10-08"] .ql-editor').click();
- assert.equal(await p.locator('#workJournal .rich-toolbar').evaluate(node=>node.inert),false);
+ assert.equal(await p.locator('#workJournal .journal-daily-header .rich-toolbar').evaluate(node=>node.inert),false);
 });
-test('focused daily text has no heavy rectangle; review toolbar clearly dims',async t=>{
+test('focused daily text has no heavy rectangle and review uses its own toolbar',async t=>{
  let p=await fixture(t);await p.locator('[data-journal-date="2026-10-08"] .ql-editor').click();
  assert.equal(await p.locator('[data-journal-date="2026-10-08"] .ql-editor').evaluate(node=>getComputedStyle(node).outlineStyle),'none');
  assert.equal(await p.locator('[data-journal-date="2026-10-08"]').evaluate(node=>getComputedStyle(node).outlineStyle),'none');
  assert.equal(await p.locator('[data-journal-section="2026-10-08"]').evaluate(node=>getComputedStyle(node).backgroundColor),'rgba(0, 0, 0, 0)');
  assert.equal(await p.locator('.journal-jump,.journal-editing').count(),0);
- await p.click('[data-journal-action="review"]');await p.locator('[data-journal-review="next"]').click();
- assert.equal(await p.locator('#workJournal .rich-toolbar').evaluate(node=>({inert:node.inert,opacity:getComputedStyle(node).opacity})).then(value=>value.inert&&Number(value.opacity)<.5),true);
+ await p.click('[data-journal-action="review"]');await p.locator('[data-journal-review="next"] .ql-editor').click();
+ assert.equal(await p.locator('#workJournal .journal-review-tools .rich-toolbar').evaluate(node=>node.inert),false);assert.equal(await p.evaluate(()=>journalToolbarEditor(document.querySelector('.journal-review-tools [data-command=bold]'))?.dataset.journalReview),'next');
 });
 test('calendar, editor and footer remain accessible in a short mobile window',async t=>{
  let p=await fixture(t);await p.setViewportSize({width:390,height:560});await p.click('[data-journal-action="week"]');
@@ -135,17 +135,17 @@ test('week and single-date selections stay readable on hover in both themes',asy
  await p.click('[data-journal-pick="2026-10-21"]');
  let editor=p.locator('[data-journal-date="2026-10-21"] .ql-editor');await editor.fill('统一工具栏');
  await p.evaluate(()=>quillFor(document.querySelector('[data-journal-date="2026-10-21"]')).setSelection(0,5));
- await p.click('#workJournal [data-command="bold"]');
+ await p.click('#workJournal .journal-daily-header [data-command="bold"]');
  assert.match((await contents(p)).weeks['2026-10-19'].days['2026-10-21'].content,/<strong>统一工具栏/);
 });
 test('long weekly review is retained and a rest-day reopening targets the latest workday',async t=>{
- let p=await fixture(t);await p.click('[data-journal-action="review"]');await p.locator('[data-journal-review="next"]').fill('字'.repeat(10020));
+ let p=await fixture(t);await p.click('[data-journal-action="review"]');await p.locator('[data-journal-review="next"] .ql-editor').fill('字'.repeat(10020));
  await p.click('[data-journal-action="review"]');await p.click('[data-journal-action="review"]');
- assert.equal((await p.locator('[data-journal-review="next"]').inputValue()).length,10020);
+ assert.equal((await p.locator('[data-journal-review="next"] .ql-editor').innerText()).length,10020);
  await p.reload();await p.click('#journalHandle');await p.click('[data-journal-action="review"]');
- assert.equal((await p.locator('[data-journal-review="next"]').inputValue()).length,10020);
+ assert.equal((await p.locator('[data-journal-review="next"] .ql-editor').innerText()).length,10020);
  await p.clock.setFixedTime(new Date('2026-10-11T12:00:00+08:00'));
- await p.addStyleTag({content:'.journal-review-field textarea{height:400px}'});
+ await p.addStyleTag({content:'.journal-review-field .ql-editor{min-height:400px}'});
  await p.locator('.journal-body').evaluate(node=>node.scrollTop=node.scrollHeight);await p.click('[data-journal-action="close"]');await p.click('#journalHandle');
  let position=await p.evaluate(()=>{let body=document.querySelector('.journal-body'),day=document.querySelector('[data-journal-section="2026-10-10"]');return Math.abs(day.getBoundingClientRect().top-body.getBoundingClientRect().top)});assert(position<30);
 });

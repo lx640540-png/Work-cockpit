@@ -28,7 +28,7 @@ function sortSearchTasks(items){
 }
 function searchTaskControls(){
  let options=Object.entries(SEARCH_TASK_SORTS).map(([value,label])=>'<option value="'+value+'" '+(searchView.taskSort===value?'selected':'')+'>'+label+'</option>').join('');
- return '<div class="search-task-tools" aria-label="事项结果整理"><label><span>事项排序</span><select id="searchTaskSort">'+options+'</select></label><button type="button" class="btn '+(searchView.groupTasksByProject?'soft':'')+'" data-search-project-group aria-pressed="'+searchView.groupTasksByProject+'">按项目整理</button></div>';
+ return '<div class="search-task-tools" aria-label="事项结果整理"><label><span class="visually-hidden">事项排序</span><select id="searchTaskSort" aria-label="事项排序">'+options+'</select></label><button type="button" class="btn '+(searchView.groupTasksByProject?'soft':'')+'" data-search-project-group aria-pressed="'+searchView.groupTasksByProject+'">按项目整理</button></div>';
 }
 function searchTaskResultRows(items,query){
  if(!searchView.groupTasksByProject)return items.map(item=>searchResultRow("task",item,query)).join('');
@@ -40,13 +40,13 @@ function searchResultRow(kind,item,query){
  if(kind==="task"){
   let project=projectById(item.project),status=searchTaskStatus(item),completed=item.completed?'<span class="search-completed-date"><span>完成日期</span><time datetime="'+esc(item.completed)+'">'+esc(item.completed)+'</time></span>':'';meta=[project?.name||"通用事项",milestoneOf(item,project)?.name,item.nextAction];body=strip(item.notes);
   let excerpt=body.trim()?searchExcerpt(body,query):"";
-  return '<button class="data-item search-result search-task-result" type="button" data-search-task="'+esc(item.id)+'"><span class="search-result-main"><span class="search-result-title"><b>'+highlightSearch(title,query,true)+'</b><span class="pill search-status status-'+esc(status)+'">'+esc(status)+'</span></span><small>'+highlightSearch(meta.filter(Boolean).join(" · "),query)+'</small>'+taskSearchHint(item,query)+'</span><span class="search-result-side">'+completed+'<span class="search-open" aria-hidden="true">↗</span></span></button>';
+  return '<button class="ui-list-item data-item search-result search-task-result" type="button" data-search-task="'+esc(item.id)+'"><span class="search-result-main"><span class="search-result-title"><b>'+highlightSearch(title,query,true)+'</b><span class="pill search-status status-'+esc(status)+'">'+esc(status)+'</span></span><small>'+highlightSearch(meta.filter(Boolean).join(" · "),query)+'</small>'+taskSearchHint(item,query)+'</span><span class="search-result-side">'+completed+'<span class="search-open" aria-hidden="true">↗</span></span></button>';
  }
  else if(kind==="project"){meta=[item.archived?"已归档":"进行中",item.code,currentMilestone(item)?.name];body=[item.description,...item.milestones.flatMap(m=>[m.name,m.criteria])].join(" ")}
  else if(kind==="decision"){meta=[item.archived?"已归档":"有效",projectName(item.project)];body=[strip(item.conclusion),strip(item.rationale)].join(" ")}
  else{meta=[item.archived?"已归档":"进行中",projectName(item.project)];body=strip(item.content)}
  let excerpt=body.trim()?searchExcerpt(body,query):"";
- return '<button class="data-item search-result" type="button" data-search-'+kind+'="'+esc(item.id)+'"><span><b>'+label+' · '+highlightSearch(title,query,true)+'</b><small>'+esc(meta.filter(Boolean).join(" · "))+'</small>'+(excerpt?'<small class="search-excerpt">'+highlightSearch(excerpt,query)+'</small>':'')+'</span><span aria-hidden="true">↗</span></button>';
+ return '<button class="ui-list-item data-item search-result" type="button" data-search-'+kind+'="'+esc(item.id)+'"><span><b>'+label+' · '+highlightSearch(title,query,true)+'</b><small>'+esc(meta.filter(Boolean).join(" · "))+'</small>'+(excerpt?'<small class="search-excerpt">'+highlightSearch(excerpt,query)+'</small>':'')+'</span><span aria-hidden="true">↗</span></button>';
 }
 function globalResults(query){
  if(!String(query||"").trim())return '<div class="empty">输入关键词搜索项目、事项、里程碑、决策和备忘录。</div>';
@@ -55,7 +55,7 @@ function globalResults(query){
  let groups=Object.entries(results).filter(([kind])=>searchView.category==='all'||searchView.category===kind).map(([kind,items])=>{
   if(!items.length)return '';
   let ordered=kind==="task"?sortSearchTasks(items):items,shown=ordered.slice(0,searchView.limits[kind]),more=shown.length<items.length,tools=kind==="task"?searchTaskControls():"",rows=kind==="task"?searchTaskResultRows(shown,query):shown.map(item=>searchResultRow(kind,item,query)).join('');
-  return '<section class="search-result-group" data-result-group="'+kind+'"><div class="search-result-heading"><b>'+SEARCH_CATEGORIES[kind]+' · '+items.length+' 项</b>'+(more&&searchView.category==='all'?'<button type="button" class="link-btn" data-search-category="'+kind+'">查看全部 '+items.length+' 项 →</button>':'')+'</div>'+tools+rows+'<div class="search-result-footer">已显示 '+shown.length+' / '+items.length+' 项'+(more?'<button type="button" class="btn" data-search-more="'+kind+'">加载更多</button>':'')+'</div></section>';
+  return '<section class="search-result-group" data-result-group="'+kind+'">'+uiSectionHeading('<b>'+SEARCH_CATEGORIES[kind]+' · '+items.length+' 项</b>',tools+(more&&searchView.category==='all'?'<button type="button" class="link-btn" data-search-category="'+kind+'">查看全部 '+items.length+' 项 →</button>':''),'search-result-heading')+rows+'<div class="search-result-footer">已显示 '+shown.length+' / '+items.length+' 项'+(more?'<button type="button" class="btn" data-search-more="'+kind+'">加载更多</button>':'')+'</div></section>';
  }).join('');
  return '<div class="search-result-count" role="status">共找到 '+total+' 项匹配结果</div><div class="search-category-tabs">'+tabs+'</div>'+(groups||'<div class="empty">当前分类没有匹配结果。</div>');
 }

@@ -40,9 +40,13 @@ document.addEventListener("drop",event=>{
 });
 document.addEventListener("dragend",cleanupDrag);
 
-let tooltipTimer=0;
-document.addEventListener("pointerover",event=>{let owner=event.target.closest("[data-tip]");if(!owner)return;clearTimeout(tooltipTimer);tooltipTimer=setTimeout(()=>{let tip=$("#tooltip"),rect=owner.getBoundingClientRect();tip.textContent=owner.dataset.tip;tip.hidden=false;tip.style.left=Math.max(8,Math.min(rect.left,innerWidth-270))+"px";tip.style.top=Math.min(rect.bottom+7,innerHeight-50)+"px"},350)});
-document.addEventListener("pointerout",event=>{if(event.target.closest("[data-tip]")){clearTimeout(tooltipTimer);$("#tooltip").hidden=true}});
+let tooltipTimer=0,tooltipOwner=null;
+function hideUiTooltip(){clearTimeout(tooltipTimer);tooltipOwner=null;let tip=$("#tooltip");if(tip)tip.hidden=true}
+document.addEventListener("pointerover",event=>{let owner=event.target.closest("[data-tip]");if(!owner||tooltipOwner===owner)return;hideUiTooltip();tooltipOwner=owner;tooltipTimer=setTimeout(()=>{if(tooltipOwner!==owner||!owner.isConnected||!owner.matches(':hover'))return;let tip=$("#tooltip"),rect=owner.getBoundingClientRect();tip.textContent=owner.dataset.tip;tip.hidden=false;tip.style.left=Math.max(8,Math.min(rect.left,innerWidth-270))+"px";tip.style.top=Math.min(rect.bottom+7,innerHeight-50)+"px"},350)});
+document.addEventListener("pointerout",event=>{let owner=event.target.closest("[data-tip]");if(owner&&!owner.contains(event.relatedTarget))hideUiTooltip()});
+document.addEventListener("pointerdown",hideUiTooltip,true);
+document.addEventListener("scroll",hideUiTooltip,true);
+
 window.addEventListener("popstate",event=>{let page=(location.hash||"#today").slice(1);if(["today","week","tasks","projects","memos","data","search"].includes(page)){rememberSearchPosition();currentPage=page;navigationDepth=Number(event.state?.appNavDepth||0);$("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender()}});
 let todayResizeState=null;
 document.addEventListener("pointerdown",event=>{
