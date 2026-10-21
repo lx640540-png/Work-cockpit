@@ -12,6 +12,7 @@ function renderSidebar(){
  $("#undoButton").disabled=!undoStack.length;$("#redoButton").disabled=!redoStack.length;$("#backButton").hidden=navigationDepth<=0;
 }
 function renderApp(){
+ hideUiTooltip();
  if(typeof rememberWorkspace==="function"&&ui.renderedPage===currentPage)rememberWorkspace();
  document.body.classList.toggle("memo-workspace",currentPage==="memos");
  document.body.classList.toggle("project-workspace",currentPage==="projects"&&ui.projectView==="detail");

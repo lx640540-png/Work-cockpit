@@ -200,6 +200,7 @@ test('project overview edits original tasks, retains empty projects and schedule
 
 test('weekly planning and review retain their action and results through completion and rollover',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('a',{week:true,project:'p1',nextAction:'确认目录'}),makeTask('b',{week:true,type:'长期跟进',nextAction:'确认交期'})],{route:'week',projects:projectFixture});
+ page.setDefaultTimeout(10000);
  const weeklyGeometry=await page.locator('[data-drop-zone="week"] .task-row[data-task="a"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),action=box(row.querySelector('.week-action-label')),meta=box(row.querySelector('.task-meta')),whole=box(row);return{rowHeight:whole.height,actionLeft:action.left,actionRight:action.right,metaLeft:meta.left,metaRight:meta.right,metaTop:meta.top,actionBottom:action.bottom,rowRight:whole.right}});
  assert(weeklyGeometry.rowHeight<150&&(weeklyGeometry.metaLeft>=weeklyGeometry.actionRight-1||weeklyGeometry.metaTop>=weeklyGeometry.actionBottom-1)&&weeklyGeometry.metaRight<=weeklyGeometry.rowRight,JSON.stringify(weeklyGeometry));
  const longWeekAction='确认目录并完成初稿，同时补齐结构示意、测试结论和仍待确认的问题，提交给相关人员审核后记录下一轮修改项。';

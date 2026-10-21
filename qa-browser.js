@@ -372,7 +372,7 @@ async function testUrl() {
   assert(saved.order.pinToday.includes('t1'), 'single task pin was not persisted');
   await page.waitForSelector('[data-drop-zone="today"] .pinned-task-segment [data-task="t1"][data-pinned="1"]');
   const pinDividerVisual = await page.locator('[data-drop-zone="today"] .pinned-task-segment.has-pins').evaluate(node => ({ border: getComputedStyle(node).borderTopWidth, background: getComputedStyle(node).backgroundColor, label: getComputedStyle(node, '::before').display }));
-  assert(await page.locator('[data-drop-zone="today"] .pinned-divider').count() === 1 && pinDividerVisual.border !== '0px' && pinDividerVisual.background !== 'rgba(0, 0, 0, 0)' && pinDividerVisual.label === 'none', `pinned tasks did not show the light-blue grouping frame: ${JSON.stringify(pinDividerVisual)}`);
+  assert(await page.locator('[data-drop-zone="today"] .pinned-divider').count() === 1 && pinDividerVisual.border === '0px' && pinDividerVisual.background === 'rgba(0, 0, 0, 0)' && pinDividerVisual.label === 'none', `pinned tasks changed their shared row geometry or lost the separator: ${JSON.stringify(pinDividerVisual)}`);
   await page.click('[data-unpin-all="today"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.pinToday.length === 0, 'clear all pins did not stay scoped to today card');

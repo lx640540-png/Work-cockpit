@@ -375,7 +375,7 @@ mark{background:#fff0a8;color:#523b00;border-radius:3px;padding:0 .04em}
 @media(max-width:820px){.task-modal .task-editor{display:block}.task-modal .task-editor>.task-column{height:auto;min-height:0;overflow:visible;margin-bottom:16px}}
 /* Overlay width never reflows the main page. The rail and resize edge are separate. */
 .journal-handle{position:fixed;right:34px;top:48%;z-index:70;writing-mode:vertical-rl;padding:14px 9px;min-width:34px;border:1px solid var(--line);border-radius:12px 0 0 12px;background:var(--panel);color:var(--blue);box-shadow:var(--shadow);cursor:pointer}
-#workJournal{position:fixed;z-index:80;display:grid;grid-template-columns:58px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;box-shadow:-8px 0 35px #18253f18;overflow:hidden;min-width:0}
+#workJournal{position:fixed;z-index:80;display:grid;grid-template-columns:70px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px;box-shadow:-8px 0 35px #18253f18;overflow:hidden;min-width:0}
 #workJournal[hidden],.journal-handle[hidden],.journal-status[hidden],.journal-copy-menu[hidden]{display:none!important}
 .journal-control-rail{grid-column:1;grid-row:1/-1;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;padding-inline:0}
 .journal-actions{display:flex;flex-direction:column;gap:4px;padding:4px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
@@ -504,7 +504,7 @@ html[data-visual-preview] body:is(.memo-workspace,.project-workspace) .app{heigh
 :root[data-calm-today] #page-today .waiting-group>summary{font-size:12px;padding:12px 0}
 :root[data-calm-today] #page-today .inbox-more{margin-top:12px}
 :root[data-calm-today] .journal-handle{right:0;box-shadow:0 2px 8px #0000000a;color:var(--muted);border-radius:8px 0 0 8px;font-size:12px}
-html[data-visual-preview=new] #workJournal{--panel:#fff;--soft:#f4f4f5;--ink:#202023;--text:#3f3f46;--muted:#686870;--line:#e5e5e8;--blue:#2563eb;--shadow:0 8px 24px #00000012;border-radius:0;border-color:var(--line);grid-template-columns:58px minmax(0,1fr);box-shadow:-8px 0 28px #0000000d}
+html[data-visual-preview=new] #workJournal{--panel:#fff;--soft:#f4f4f5;--ink:#202023;--text:#3f3f46;--muted:#686870;--line:#e5e5e8;--blue:#2563eb;--shadow:0 8px 24px #00000012;border-radius:0;border-color:var(--line);grid-template-columns:70px minmax(0,1fr);box-shadow:-8px 0 28px #0000000d}
 html[data-visual-preview=new] #workJournal .journal-control-rail{background:color-mix(in srgb,var(--soft) 50%,var(--panel));border-right:1px solid var(--line);padding:0}
 html[data-visual-preview=new] #workJournal .journal-actions{border-radius:8px;box-shadow:0 1px 3px #00000005}
 html[data-visual-preview=new] #workJournal .journal-actions button{color:var(--muted)}
@@ -1766,6 +1766,7 @@ function renderSidebar(){
  $("#undoButton").disabled=!undoStack.length;$("#redoButton").disabled=!redoStack.length;$("#backButton").hidden=navigationDepth<=0;
 }
 function renderApp(){
+ hideUiTooltip();
  if(typeof rememberWorkspace==="function"&&ui.renderedPage===currentPage)rememberWorkspace();
  document.body.classList.toggle("memo-workspace",currentPage==="memos");
  document.body.classList.toggle("project-workspace",currentPage==="projects"&&ui.projectView==="detail");
@@ -2883,9 +2884,13 @@ document.addEventListener("drop",event=>{
 });
 document.addEventListener("dragend",cleanupDrag);
 
-let tooltipTimer=0;
-document.addEventListener("pointerover",event=>{let owner=event.target.closest("[data-tip]");if(!owner)return;clearTimeout(tooltipTimer);tooltipTimer=setTimeout(()=>{let tip=$("#tooltip"),rect=owner.getBoundingClientRect();tip.textContent=owner.dataset.tip;tip.hidden=false;tip.style.left=Math.max(8,Math.min(rect.left,innerWidth-270))+"px";tip.style.top=Math.min(rect.bottom+7,innerHeight-50)+"px"},350)});
-document.addEventListener("pointerout",event=>{if(event.target.closest("[data-tip]")){clearTimeout(tooltipTimer);$("#tooltip").hidden=true}});
+let tooltipTimer=0,tooltipOwner=null;
+function hideUiTooltip(){clearTimeout(tooltipTimer);tooltipOwner=null;let tip=$("#tooltip");if(tip)tip.hidden=true}
+document.addEventListener("pointerover",event=>{let owner=event.target.closest("[data-tip]");if(!owner||tooltipOwner===owner)return;hideUiTooltip();tooltipOwner=owner;tooltipTimer=setTimeout(()=>{if(tooltipOwner!==owner||!owner.isConnected||!owner.matches(':hover'))return;let tip=$("#tooltip"),rect=owner.getBoundingClientRect();tip.textContent=owner.dataset.tip;tip.hidden=false;tip.style.left=Math.max(8,Math.min(rect.left,innerWidth-270))+"px";tip.style.top=Math.min(rect.bottom+7,innerHeight-50)+"px"},350)});
+document.addEventListener("pointerout",event=>{let owner=event.target.closest("[data-tip]");if(owner&&!owner.contains(event.relatedTarget))hideUiTooltip()});
+document.addEventListener("pointerdown",hideUiTooltip,true);
+document.addEventListener("scroll",hideUiTooltip,true);
+
 window.addEventListener("popstate",event=>{let page=(location.hash||"#today").slice(1);if(["today","week","tasks","projects","memos","data","search"].includes(page)){rememberSearchPosition();currentPage=page;navigationDepth=Number(event.state?.appNavDepth||0);$("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender()}});
 let todayResizeState=null;
 document.addEventListener("pointerdown",event=>{
@@ -3303,7 +3308,7 @@ function initScopedPlanningResize(root=document){
 }
 function journalMountAboveModal(){
  let panel=$('#workJournal');if(!panel||!journalUI.open)return;
- let modal=[...document.querySelectorAll('dialog[open]')].filter(node=>!panel.contains(node)).at(-1),host=expandedRichBox&&(!modal||modal.contains(expandedRichBox))?expandedRichBox:modal||document.body;
+ let modal=[...document.querySelectorAll('dialog[open]')].filter(node=>!panel.contains(node)&&!node.matches('.journal-copy-dialog')).at(-1),host=expandedRichBox&&(!modal||modal.contains(expandedRichBox))?expandedRichBox:modal||document.body;
  if(panel.parentElement!==host){let active=panel.contains(document.activeElement)?document.activeElement:null;host.appendChild(panel);active?.focus({preventScroll:true});journalLayout()}
 }
 function toggleJournalShortcut(){

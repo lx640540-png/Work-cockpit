@@ -18,7 +18,7 @@ function initScopedPlanningResize(root=document){
 }
 function journalMountAboveModal(){
  let panel=$('#workJournal');if(!panel||!journalUI.open)return;
- let modal=[...document.querySelectorAll('dialog[open]')].filter(node=>!panel.contains(node)).at(-1),host=expandedRichBox&&(!modal||modal.contains(expandedRichBox))?expandedRichBox:modal||document.body;
+ let modal=[...document.querySelectorAll('dialog[open]')].filter(node=>!panel.contains(node)&&!node.matches('.journal-copy-dialog')).at(-1),host=expandedRichBox&&(!modal||modal.contains(expandedRichBox))?expandedRichBox:modal||document.body;
  if(panel.parentElement!==host){let active=panel.contains(document.activeElement)?document.activeElement:null;host.appendChild(panel);active?.focus({preventScroll:true});journalLayout()}
 }
 function toggleJournalShortcut(){
