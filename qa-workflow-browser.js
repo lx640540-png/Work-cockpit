@@ -222,8 +222,11 @@ test('weekly planning and review retain their action and results through complet
  let data=await stored(page);assert.equal(data.weeks['2026-08-31'].actions.a.text,'确认目录并完成初稿');assert.equal(data.weeks['2026-08-31'].actions.a.result,'目录已确认，初稿完成一半');assert.equal(data.weeks['2026-08-31'].topResults[0],'部分达成，待补插图');
  assert.deepEqual(data.weeks['2026-08-31'].taskSnapshots,before.taskSnapshots);
  assert.equal(data.weeks['2026-09-07'].actions.a.text,'补充插图');assert.equal(data.weeks['2026-09-07'].actions.a.result,'');assert.equal(data.weeks['2026-09-07'].taskIds.includes('b'),false);assert.equal(data.weeks['2026-09-07'].taskSnapshots.some(task=>task.id==='b'),false);
+ // A large mocked-clock jump fires the date watcher before the queued render frame.
+ await page.clock.runFor(100);
+ t.diagnostic(JSON.stringify(await page.evaluate(()=>({selectedWeekKey,current:currentWeekKey(),panel:ui.weekPanel,renderFrame,picker:document.querySelector('#weekPicker').value}))));
  await page.waitForFunction(()=>!renderFrame&&document.querySelector('#weekPicker').value===weekInputValue(currentWeekKey()));
- await page.click('[data-week-shift="-1"]');await page.waitForFunction(()=>!renderFrame&&document.querySelector('#weekPicker').value===weekInputValue('2026-08-31'));
+ await page.click('[data-week-shift="-1"]');await page.clock.runFor(100);await page.waitForFunction(()=>!renderFrame&&document.querySelector('#weekPicker').value===weekInputValue('2026-08-31'));
  t.diagnostic(JSON.stringify(await page.evaluate(()=>({selectedWeekKey,panel:ui.weekPanel,results:[...document.querySelectorAll('[data-week-result]')].map(n=>({task:n.dataset.weekResult,readonly:n.readOnly,height:n.getBoundingClientRect().height})),snapshots:state.weeks['2026-08-31'].taskSnapshots.map(n=>({id:n.id,week:n.week}))}))));
  await page.locator('[data-week-result="a"][readonly]').waitFor({state:'visible'});
  assert.equal(await page.locator('[data-week-result="a"]').getAttribute('readonly'),'');
