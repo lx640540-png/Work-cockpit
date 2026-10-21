@@ -31,7 +31,7 @@ test('pinning never changes row height and trailing buttons center across wrappe
   for(const [scope,id] of [['today','ui-a'],['waiting','ui-b'],['inbox','ui-c']]){
    const selector='[data-drop-scope="'+scope+'"][data-task="'+id+'"]',row=p.locator(selector);const before=await row.boundingBox(),was=await row.getAttribute('data-pinned');await row.locator('.pin-task').click();await p.waitForSelector(selector+'[data-pinned="'+(was==='1'?'0':'1')+'"]');
    const geometry=await row.evaluate(n=>{const r=n.getBoundingClientRect(),p=n.querySelector('.pin-task').getBoundingClientRect(),hit=n.querySelector('.task-trailing').getBoundingClientRect();return{height:r.height,delta:Math.abs(p.y+p.height/2-r.y-r.height/2),overflow:n.scrollWidth-n.clientWidth,hitInside:hit.left>=r.left&&hit.right<=r.right&&hit.top>=r.top&&hit.bottom<=r.bottom}});
-   assert(Math.abs(geometry.height-before.height)<=1,JSON.stringify({viewport,scope,before,geometry}));assert(geometry.delta<=1,JSON.stringify(geometry));assert(geometry.overflow<=1);assert(geometry.hitInside);
+   assert(Math.abs(geometry.height-before.height)<=1,JSON.stringify({viewport,scope,before,geometry}));assert(geometry.delta<=1,JSON.stringify(geometry));assert(geometry.overflow<=1);assert(geometry.hitInside);assert.equal(await p.evaluate(()=>document.scrollingElement.scrollTop),0,'task focus scrolled the outer page behind the top toolbar');
   }
  }
 });
