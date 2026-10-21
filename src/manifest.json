@@ -15,7 +15,12 @@
     "styles/workflow-completion.css",
     "styles/work-journal.css",
     "styles/reliability.css",
-    "styles/rich-list-drag.css"
+    "styles/rich-list-drag.css",
+    "styles/visual-preview.css",
+    "styles/visual-workspaces.css",
+    "styles/visual-components.css",
+    "styles/component-preview.css",
+    "styles/appearance-controls.css"
   ],
   "scripts": [
     "core/runtime.js",
@@ -27,6 +32,7 @@
     "domain/week.js",
     "domain/task-dates.js",
     "domain/tasks.js",
+    "ui/components.js",
     "ui/task-list.js",
     "pages/today.js",
     "pages/week.js",
@@ -58,6 +64,9 @@
     "ui/journal-copy.js",
     "ui/attachment-viewer.js",
     "ui/view-state.js",
+    "ui/visual-preview.js",
+    "ui/component-preview.js",
+    "ui/appearance-controls.js",
     "boot.js"
   ]
 }

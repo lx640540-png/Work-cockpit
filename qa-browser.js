@@ -103,6 +103,7 @@ async function testUrl() {
     if (message.type() === 'error') browserErrors.push(`console.error: ${message.text()}`);
   });
   await page.addInitScript(() => {
+    localStorage.setItem('work-cockpit-visual-preview-v1',JSON.stringify({mode:'old'}));
     // Match the application's local YYYY-MM-DD formatter instead of using UTC ISO dates.
     const localDateKey = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const today = new Date();
@@ -857,7 +858,7 @@ async function testUrl() {
   await page.evaluate(() => { projectById('p1').milestones = clone(window.__projectMilestoneFixture); delete window.__projectMilestoneFixture; saveLocal(true); requestRender(); });
   await page.waitForFunction(() => document.querySelectorAll('.project-milestone-filter .milestone-filter-choice').length === 1);
   const selectedStyle = await page.locator('[data-select-project="p1"]').evaluate(node => ({ background: getComputedStyle(node).backgroundColor, panel: getComputedStyle(document.querySelector('.project-list-panel')).backgroundColor, shadow: getComputedStyle(node).boxShadow, border: getComputedStyle(node).borderColor }));
-	  assert(selectedStyle.background !== selectedStyle.panel && selectedStyle.shadow !== 'none' && selectedStyle.border !== 'rgb(222, 228, 238)', `selected project lacks the subtle fill, blue border, or inner accent: ${JSON.stringify(selectedStyle)}`);
+	  assert(selectedStyle.background !== selectedStyle.panel && selectedStyle.shadow === 'none' && selectedStyle.border !== 'rgb(222, 228, 238)', `selected project lacks the subtle fill, blue border, or unified selection edge: ${JSON.stringify(selectedStyle)}`);
   assert(await page.getByText('里程碑相关任务', { exact: true }).count() === 0, 'project main page still renders milestone-related tasks');
   const selectedBeforeDrag = await page.locator('.project-list-item.selected').getAttribute('data-select-project');
   await page.locator('[data-project-drag="p1"]').dragTo(page.locator('[data-project-drop="p3"]'), { targetPosition: { x: 80, y: 70 } });

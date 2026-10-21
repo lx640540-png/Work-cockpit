@@ -1,0 +1,82 @@
+/* Appearance preferences are device-local; rich-text contents keep semantic formatting. */
+:root[data-ui-font] body{font-family:var(--ui-font-stack)}
+:root[data-ui-font] :is(button,input,textarea,select,.ql-editor){font-family:inherit}
+:root[data-calm-today] :is(.page-head h1,.card-title,.ui-sidebar-title h3,.component-example h2,.rich-editor .ql-editor h2,.rich-editor .ql-editor h3){font-weight:var(--ui-heading-weight,600)}
+:root[data-calm-today] :is(.page-head h1,.component-preview-head h1){font-size:24px;line-height:1.35}
+:root[data-calm-today] .task-title-link{font-size:14px;font-weight:var(--ui-heading-weight,600)}
+.preview-font-sample{font:400 15px/1.7 var(--ui-font-stack);padding:10px;background:var(--soft,#f4f4f5);border-radius:6px;overflow-wrap:anywhere}
+.ui-preview-panel{max-height:calc(100dvh - 70px);overflow:auto}
+/* Both sidebar renderers use these same slots. Selection occupies the handle slot. */
+:root[data-visual-preview] .ui-sidebar-item,:root[data-visual-preview] .ui-sidebar-item.selecting{position:relative;display:grid;grid-template-columns:28px minmax(0,1fr) auto 32px;align-items:center;gap:8px;min-height:76px;padding:12px 8px;box-sizing:border-box;border:1px solid transparent;border-radius:7px;margin:4px 0;box-shadow:none}
+:root[data-visual-preview] .ui-sidebar-item>:is(.drag-handle,.project-order-handle,.memo-select-check){grid-column:1;grid-row:1;align-self:center;justify-self:center}
+:root[data-visual-preview] .ui-sidebar-item .ui-sidebar-main{grid-column:2;grid-row:1;min-width:0;align-self:center}
+:root[data-visual-preview] .ui-sidebar-title{display:block;margin:0;min-width:0}
+:root[data-visual-preview] .ui-sidebar-title h3{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;overflow-wrap:anywhere;margin:0;font-size:16px;line-height:1.5;font-weight:var(--ui-heading-weight,600);color:var(--text)}
+:root[data-visual-preview] .ui-sidebar-meta{display:block;min-width:0;margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:root[data-visual-preview] .ui-sidebar-detail{grid-column:3;grid-row:1;align-self:center;max-width:88px;text-align:right;color:var(--muted);font-size:12px;line-height:1.5}
+:root[data-visual-preview] .ui-sidebar-detail .project-completion{display:grid;min-width:0;font-size:12px;gap:2px}
+:root[data-visual-preview] .ui-sidebar-detail :is(strong,small){font-size:12px;line-height:1.5;font-weight:400;white-space:nowrap}
+:root[data-visual-preview] .ui-sidebar-trailing{grid-column:4;grid-row:1;display:grid;place-items:center;width:32px;align-self:center}
+:root[data-visual-preview] .ui-sidebar-trailing :is(.favorite,.memo-pin){display:grid;place-items:center;width:30px;height:30px;min-width:0;padding:7px;border:0;border-radius:6px;background:transparent;color:var(--muted);opacity:0}
+:root[data-visual-preview] .ui-sidebar-item:is(:hover,:focus-within,[data-ui-state=hover]) .ui-sidebar-trailing button,:root[data-visual-preview] .ui-sidebar-trailing button.active{opacity:1}
+:root[data-visual-preview] .ui-sidebar-trailing button.active{color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,var(--panel))}
+:root[data-visual-preview] .ui-sidebar-trailing svg{width:14px;height:14px;fill:currentColor}
+:root[data-visual-preview] .ui-sidebar-item.selecting>.drag-handle{visibility:hidden;pointer-events:none}
+:root[data-visual-preview] .ui-sidebar-item .memo-select-check{z-index:1;position:static;width:24px;height:24px}
+:root[data-calm-today] .ui-sidebar-item{background:var(--panel)}
+:root[data-calm-today] .ui-sidebar-item:is(:hover,:focus-within,[data-ui-state=hover]){background:var(--ui-hover)}
+:root[data-visual-preview] .ui-sidebar-item:is(.selected,.active,[data-ui-state=selected]){background:color-mix(in srgb,var(--blue) 8%,var(--panel));border-color:color-mix(in srgb,var(--blue) 45%,var(--line))}
+:root[data-calm-today] .ui-sidebar-item:focus-visible{outline:2px solid var(--ui-focus);outline-offset:1px}
+/* Explicit areas keep pin/unpin and responsive attributes in the same row box. */
+:root[data-visual-preview] .task-row.has-trailing-pin{grid-template-columns:auto minmax(0,1fr) minmax(140px,auto) 30px;grid-template-areas:"leading main meta trailing";grid-template-rows:auto;column-gap:10px;align-items:center}
+:root[data-visual-preview] .task-row.has-trailing-pin>.task-leading{grid-area:leading;align-self:center;padding-block:0}
+:root[data-visual-preview] .task-row.has-trailing-pin>.task-main{grid-area:main;min-width:0}
+:root[data-visual-preview] .task-row.has-trailing-pin>.task-meta{grid-area:meta;align-self:center;min-width:0}
+:root[data-visual-preview] .task-row.scope-week.has-trailing-pin{grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:"leading main trailing"}
+:root[data-visual-preview] .task-row.has-trailing-pin>.task-trailing{grid-area:trailing;align-self:center;justify-self:center;display:grid;place-items:center;width:30px;height:30px;min-width:0}
+:root[data-visual-preview] .task-trailing .pin-task{display:grid;place-items:center;box-sizing:border-box;width:28px;height:28px;padding:0;margin:0;opacity:0}
+:root[data-visual-preview] .task-row:is(:hover,:focus-within,[data-ui-state=hover])>.task-trailing .pin-task,:root[data-visual-preview] .task-trailing .pin-task.active{opacity:1}
+:root[data-visual-preview] .task-table :is(th,td).task-table-trailing{display:table-cell;width:46px;min-width:46px;position:sticky;right:0;background:var(--panel);text-align:center;z-index:1}
+:root[data-visual-preview] .task-table tbody tr:hover .task-table-trailing{background:var(--ui-hover)}
+:root[data-visual-preview] .task-table-trailing .pin-task{display:grid;place-items:center;width:28px;height:28px;margin:auto;padding:0}
+:root[data-visual-preview] .pinned-task-segment.has-pins{margin:0;padding:0;border:0;border-radius:0;background:transparent}
+:root[data-visual-preview] .task-row:first-child,:root[data-visual-preview] #page-today .task-row:first-child{border-top:1px solid transparent}
+@container(max-width:600px){
+ :root[data-visual-preview] .task-row.has-trailing-pin:not(.scope-week){grid-template-columns:auto minmax(0,1fr) 30px;grid-template-rows:auto auto;grid-template-areas:"leading main trailing" "leading meta trailing";row-gap:6px}
+ :root[data-visual-preview] .task-row.has-trailing-pin:not(.scope-week)>.task-meta{justify-content:flex-start;max-width:100%}
+}
+/* One divider appearance for columns, planning editors and height adjustments. */
+:root[data-calm-today] .ui-resize-divider{background:transparent!important;border:0;box-shadow:none!important;border-radius:0;touch-action:none;cursor:col-resize}
+:root[data-calm-today] .ui-resize-divider:after{content:none!important}
+:root[data-calm-today] .ui-resize-divider:before{content:''!important;position:absolute!important;inset:0 auto 0 50%!important;width:1px!important;height:auto!important;transform:translateX(-50%);border:0!important;border-radius:0!important;background:var(--line)!important;opacity:1!important;pointer-events:none;transition:background-color .12s}
+:root[data-calm-today] .ui-resize-divider[data-resize-axis=y]{cursor:row-resize}
+:root[data-calm-today] .ui-resize-divider[data-resize-axis=y]:before{inset:50% 0 auto 0!important;width:auto!important;height:1px!important;transform:translateY(-50%)}
+:root[data-calm-today] .ui-resize-divider:is(:hover,:focus-visible,.active,.resizing):before{background:var(--blue)!important}
+:root[data-calm-today] .ui-resize-divider:focus-visible{outline:none}
+:root[data-calm-today] .journal-resize.ui-resize-divider:before{left:0!important;transform:none}
+:root[data-calm-today] .week-splitter.ui-resize-divider{align-self:stretch;min-height:80px}
+/* Native scrollbar geometry stays fixed, only thumb color changes. */
+:root[data-calm-today]{--ui-scroll-thumb:color-mix(in srgb,var(--muted) 45%,transparent)}
+:root[data-calm-today],:root[data-calm-today] *{scrollbar-width:thin;scrollbar-color:transparent transparent}
+:root[data-calm-today][data-scrollbars=always],:root[data-calm-today][data-scrollbars=always] *,:root[data-calm-today] .ui-scroll-active{scrollbar-color:var(--ui-scroll-thumb) transparent}
+:root[data-calm-today]::-webkit-scrollbar,:root[data-calm-today] ::-webkit-scrollbar{width:6px;height:6px}
+:root[data-calm-today]::-webkit-scrollbar-track,:root[data-calm-today] ::-webkit-scrollbar-track{background:transparent}
+:root[data-calm-today]::-webkit-scrollbar-thumb,:root[data-calm-today] ::-webkit-scrollbar-thumb{background:transparent;border-radius:6px}
+:root[data-calm-today][data-scrollbars=always]::-webkit-scrollbar-thumb,:root[data-calm-today][data-scrollbars=always] ::-webkit-scrollbar-thumb,:root[data-calm-today] .ui-scroll-active::-webkit-scrollbar-thumb{background:var(--ui-scroll-thumb)}
+:root[data-calm-today] ::-webkit-scrollbar-corner{background:transparent}
+@media(hover:none){:root[data-calm-today] .task-trailing .pin-task,:root[data-visual-preview] .ui-sidebar-trailing button{opacity:1}}
+@media(forced-colors:active){:root[data-calm-today],:root[data-calm-today] *{scrollbar-color:auto}:root[data-calm-today] .ui-resize-divider:before{background:CanvasText!important}}
+@media(prefers-reduced-motion:reduce){:root[data-calm-today] .ui-resize-divider:before{transition:none}}
+
+:root[data-calm-today] #journalHandle{right:14px;border-radius:6px}
+:root[data-calm-today] .component-example .component-memo-example{margin-block:12px}
+
+:root[data-calm-today] :is(.memo-list,.project-list){gap:4px;align-content:start}
+:root[data-calm-today] .ui-sidebar-item:not(.selected):not(.active){border-color:transparent}
+:root[data-calm-today] .ui-sidebar-item .ui-sidebar-trailing :is(.favorite,.memo-pin).active{background:color-mix(in srgb,var(--blue) 12%,var(--panel));color:var(--blue);box-shadow:none;border:0;border-radius:6px}
+:root[data-calm-today] :is(h1,h2,h3,h4,b,strong,.nav-button.active,.memo-title){font-weight:var(--ui-heading-weight,600)}
+:root[data-calm-today] :is(.btn,.link-btn,.property-btn,.pill,.memo-tab,.week-mode-tabs button){font-weight:var(--ui-control-weight,500)}
+:root[data-calm-today] .card-title{font-size:16px}
+:root[data-calm-today] #workJournal .ql-editor{font-size:15px;line-height:1.8}
+:root[data-calm-today].ui-scroll-active{scrollbar-color:var(--ui-scroll-thumb) transparent}
+:root[data-calm-today].ui-scroll-active::-webkit-scrollbar-thumb{background:var(--ui-scroll-thumb)}

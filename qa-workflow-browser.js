@@ -30,6 +30,7 @@ async function fixture(t,tasks,{time='2026-09-05T12:00:00',route='today',project
   await page.clock.install({time:new Date(time+'+08:00')});
   await page.addInitScript(({tasks,projects})=>{
     localStorage.setItem('work-cockpit-local-mode-v1','1');
+    localStorage.setItem('work-cockpit-visual-preview-v1',JSON.stringify({mode:'old'}));
     if(!localStorage.getItem('work-cockpit-v6'))localStorage.setItem('work-cockpit-v6',JSON.stringify({version:8,tasks,projects,memos:[],
       meta:{activeWeekKey:'2026-08-31'},weeks:{'2026-08-24':{closedAt:'2026-08-30',top:['历史目标'],taskSnapshots:[{id:'historical',title:'历史事项',status:'暂停',type:'任务',focus:true,planDate:'2026-08-24'}]}},order:{long:tasks.map(t=>t.id)}}));
   },{tasks,projects});

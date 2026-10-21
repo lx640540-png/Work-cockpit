@@ -26,6 +26,7 @@ function renderApp(){
  scheduleTodayScrollability();
  if(typeof restoreWorkspacePosition==="function")restoreWorkspacePosition();
  syncWorkJournal();
+ if(typeof syncVisualPreview==="function")syncVisualPreview();
  ui.renderedPage=currentPage;
 }
 function bindTransientInputs(){initPlanningResize();initTableSorting()}
