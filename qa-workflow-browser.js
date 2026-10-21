@@ -436,8 +436,13 @@ test('iteration: dates and compact layout remain usable on narrow screens',{time
  const shots=path.join(__dirname,'artifacts/browser-regression');fs.mkdirSync(shots,{recursive:true});
  await page.screenshot({path:path.join(shots,'iteration-today-desktop.png')});
  for(const width of [900,390]){
-  await page.setViewportSize({width,height:900});await page.clock.runFor(100);
-  await page.click('#page-today [data-quick-date="narrow"]');
+  // Native viewport resize events are independent of Playwright's mocked clock.
+  // Wait for their handlers before opening a menu that intentionally closes on resize.
+  await page.evaluate(()=>{window.qaViewportResized=false;window.addEventListener('resize',()=>window.qaViewportResized=true,{once:true})});
+  await page.setViewportSize({width,height:900});
+  await page.waitForFunction(width=>window.qaViewportResized&&innerWidth===width,width);
+  const trigger=page.locator('#page-today [data-quick-date="narrow"]');await trigger.scrollIntoViewIfNeeded();await page.clock.runFor(100);
+  await trigger.click();await page.locator('#taskDatePopover').waitFor({state:'visible'});
   const menu=await page.locator('#taskDatePopover').boundingBox();assert(menu&&menu.x>=0&&menu.x+menu.width<=width&&menu.y>=0&&menu.y+menu.height<=900,JSON.stringify(menu));
   if(width===390)await page.screenshot({path:path.join(shots,'iteration-date-mobile.png')});
   await page.keyboard.press('Escape');assert.equal(await page.locator('#taskDatePopover').isVisible(),false);
