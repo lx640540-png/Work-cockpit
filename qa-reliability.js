@@ -24,8 +24,7 @@ function task(extra = {}) {
 }
 function ruleContext() {
   const context = vm.createContext({ Date, todayKey: () => '2026-09-05',
-    isDone: t => t.status === '已完成', generated: 0,
-    generateRepeat: () => { context.generated++; },
+    isDone: t => t.status === '已完成',
     state: { tasks: [] }, clone: copy, statuses: ['待处理','进行中','等待','暂停','已完成'],
     priorities: ['P0','P1','P2','P3'], taskTypes: ['任务','临时事项','长期跟进'],
     sanitizeRichValue: x => x, normalizeRich: x => x, uid: () => 'new-id' });
@@ -119,13 +118,12 @@ test('normalization never activates dated historical task snapshots', () => {
   assert.equal(c.normalizeTask(snapshot,0).focus,false);
 });
 
-test('status transitions clear incompatible focus and generate repeats once', () => {
-  const c=ruleContext();
-  for (const status of ['待处理','等待','暂停','已完成']) {
-    const t=task({focus:true});c.setTaskStatus(t,status,{tasks:[t]});assert.equal(t.focus,false);
-  }
-  const t=task();c.generated=0;c.setTaskStatus(t,'已完成',{tasks:[t]});c.setTaskStatus(t,'已完成',{tasks:[t]});
-  assert.equal(c.generated,1);
+test('status transitions clear incompatible focus and ignore legacy recurrence', () => {
+ const c=ruleContext();
+ for(const status of ['待处理','等待','暂停','已完成']){const t=task({focus:true});c.setTaskStatus(t,status,{tasks:[t]});assert.equal(t.focus,false)}
+ const t=task({repeat:'daily',repeatUntil:'2030-01-01'}),draft={tasks:[t]};
+ c.setTaskStatus(t,'已完成',draft);c.setTaskStatus(t,'进行中',draft);c.setTaskStatus(t,'已完成',draft);
+ assert.equal(draft.tasks.length,1);assert.equal(t.completed,'2026-09-05');
 });
 
 function cloudContext() {
@@ -228,9 +226,9 @@ test('legacy classification is derived from status without changing task content
  const legacy=task({status:'待处理'});delete legacy.inbox;assert.equal(c.normalizeTask(legacy).inbox,true);
  const value=c.normalizeTask(task({inbox:true,planDate:'2026-09-05'}));c.state.tasks=[value];c.activateScheduledTasks();assert.equal(value.focus,true);assert.equal(value.inbox,false);
 });
-test('handled marker survives normalization without completing the task', () => {
- const c=ruleContext(),value=c.normalizeTask(task({handledOn:'2026-09-05'}));
- assert.equal(value.handledOn,'2026-09-05');assert.equal(value.status,'进行中');assert.equal(value.completed,'');
+test('retired handled and recurrence fields are discarded without completing the task', () => {
+ const c=ruleContext(),value=c.normalizeTask(task({handledOn:'2026-09-05',repeat:'daily',repeatUntil:'2030-01-01'}));
+ assert.equal(value.handledOn,undefined);assert.equal(value.repeat,undefined);assert.equal(value.repeatUntil,undefined);assert.equal(value.status,'进行中');assert.equal(value.completed,'');
 });
 
 test('dragging to inbox sets pending status and moves order and pin',()=>{

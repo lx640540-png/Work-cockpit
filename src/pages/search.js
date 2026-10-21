@@ -38,7 +38,7 @@ function searchTaskResultRows(items,query){
 function searchResultRow(kind,item,query){
  let label=SEARCH_CATEGORIES[kind],title=item.title||item.name,meta=[],body="";
  if(kind==="task"){
-  let project=projectById(item.project),status=searchTaskStatus(item),completed=item.completed?'<span class="search-completed-date"><span>完成日期</span><time datetime="'+esc(item.completed)+'">'+esc(item.completed)+'</time></span>':'';meta=[project?.name||"通用事项",milestoneOf(item,project)?.name,item.nextAction];body=[strip(item.notes),...(item.progressLog||[]).map(entry=>entry.text)].join(" ");
+  let project=projectById(item.project),status=searchTaskStatus(item),completed=item.completed?'<span class="search-completed-date"><span>完成日期</span><time datetime="'+esc(item.completed)+'">'+esc(item.completed)+'</time></span>':'';meta=[project?.name||"通用事项",milestoneOf(item,project)?.name,item.nextAction];body=strip(item.notes);
   let excerpt=body.trim()?searchExcerpt(body,query):"";
   return '<button class="data-item search-result search-task-result" type="button" data-search-task="'+esc(item.id)+'"><span class="search-result-main"><span class="search-result-title"><b>'+highlightSearch(title,query,true)+'</b><span class="pill search-status status-'+esc(status)+'">'+esc(status)+'</span></span><small>'+highlightSearch(meta.filter(Boolean).join(" · "),query)+'</small>'+taskSearchHint(item,query)+'</span><span class="search-result-side">'+completed+'<span class="search-open" aria-hidden="true">↗</span></span></button>';
  }

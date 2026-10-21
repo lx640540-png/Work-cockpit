@@ -122,7 +122,7 @@ test('real pointer sorting inside long-term preserves follow-up, plan, state and
   await page.reload();assert.equal((await stored(page)).order.long.join(','),'b,a');
 });
 
-test('detail status changes agree with flags and do not lose tasks when generating a repeat',{timeout:30000},async t=>{
+test('detail status changes save normally and legacy repeat rules never generate tasks',{timeout:30000},async t=>{
   const page=await fixture(t,[makeTask('repeat',{repeat:'daily',planDate:today}),makeTask('other')]);
   await edit(page,'repeat');
   // Select the actual native value through its accessible enhanced control.
@@ -134,7 +134,8 @@ test('detail status changes agree with flags and do not lose tasks when generati
   await page.locator('#draftStatus').evaluate(select=>{select.value='已完成';select.dispatchEvent(new Event('change',{bubbles:true}));});
   await save(page);const data=await stored(page);
   assert.equal(data.tasks.find(t=>t.id==='repeat').status,'已完成');assert(data.tasks.some(t=>t.id==='other'));
-  assert.equal(data.tasks.length,3,'exactly one next occurrence must be generated');
+  assert.equal(data.tasks.length,2,'retired repeat rules must not generate another occurrence');
+  assert.equal(await page.locator('#draftRepeat,#draftRepeatUntil').count(),0);
   assert.equal(new Set(data.tasks.map(t=>t.id)).size,data.tasks.length);
 });
 
@@ -252,18 +253,17 @@ test('overview preserves notes verbatim, uses waiting follow-up dates, and suppo
 });
 
 
-test('removed classification, handled undo and next-day visibility survive reload',{timeout:30000},async t=>{
- const page=await fixture(t,[makeTask('active',{focus:true,week:true,inbox:true,nextAction:''})]);
+test('legacy handled markers never hide active or due waiting tasks after reload',{timeout:30000},async t=>{
+ const page=await fixture(t,[makeTask('active',{focus:true,week:true,inbox:true,nextAction:'',handledOn:today}),makeTask('waiting',{status:'等待',followup:today,handledOn:today})]);
  assert.equal(await page.locator('[data-drop-zone="today"] [data-task="active"] .task-next').count(),0);
- assert.equal(await page.locator('[data-organize-task]').count(),0);
- assert.equal((await stored(page)).tasks[0].inbox,false);
- await page.click('[data-handle-task="active"]');
- assert.equal((await stored(page)).tasks[0].status,'进行中');
- await page.reload();assert.equal(await page.locator('[data-drop-zone="today"] .task-row').count(),0);
- await page.locator('.handled-panel summary').click();await page.click('[data-undo-handled="active"]');
- await page.click('[data-handle-task="active"]');
- await page.clock.setSystemTime(new Date('2026-09-06T12:00:00+08:00'));await page.evaluate(()=>checkDateChange());
- await page.locator('[data-drop-zone="today"] .task-row[data-task="active"]').waitFor();
+ assert.equal(await page.locator('[data-organize-task],[data-handle-task],[data-undo-handled],.handled-panel').count(),0);
+ assert.equal((await stored(page)).tasks.find(t=>t.id==='active').inbox,false);
+ for(const reload of [false,true]){
+  if(reload)await page.reload();
+  assert.equal(await page.locator('[data-drop-zone="today"] .task-row[data-task="active"]').count(),1);
+  assert.equal(await page.locator('[data-drop-zone="waiting"] .task-row[data-task="waiting"]').count(),1);
+  assert.equal(await page.locator('[data-summary-target="waiting"] strong').textContent(),'1');
+ }
 });
 
 test('project settings preserves drafts across decisions and protects close on short screens',{timeout:30000},async t=>{
@@ -283,9 +283,8 @@ test('project settings preserves drafts across decisions and protects close on s
  await page.click('#confirmAccept');assert.equal((await stored(page)).projects[0].name,projectFixture[0].name);
 });
 
-test('row icons and shared width handles support pointer resizing, reload and responsive controls',{timeout:30000},async t=>{
+test('shared width handles support pointer resizing, reload and responsive controls',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('a',{focus:true,week:true,project:'p1'}),makeTask('b',{week:true,project:'p1'})],{projects:projectFixture});
- const button=page.locator('[data-handle-task="a"]');assert.equal((await button.textContent()).trim(),'');assert.equal(await button.getAttribute('aria-label'),'本次已处理');await button.hover();await page.locator('#tooltip').filter({hasText:'本次已处理'}).waitFor({state:'visible'});
  await page.click('[data-page="projects"]');
  assert.equal(await page.locator('[data-overview-next][placeholder]').count(),0);
  let handle=page.locator('[data-planning-resize]').first();await handle.scrollIntoViewIfNeeded();let box=await handle.boundingBox();
@@ -334,7 +333,7 @@ test('iteration: quick dates preserve status, deadlines, week and historical rec
  await page.click('[data-page="tasks"]');await page.click('#page-tasks [data-quick-date="wait-date"]');
  await page.click('[data-set-task-date="2026-09-07"]');
  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).tasks.find(x=>x.id==='wait-date').followup==='2026-09-07');
- task=(await stored(page)).tasks.find(x=>x.id==='wait-date');assert.equal(task.status,'等待');assert.equal(task.handledOn,today);assert.equal(task.planDate,'2026-09-01');
+ task=(await stored(page)).tasks.find(x=>x.id==='wait-date');assert.equal(task.status,'等待');assert.equal(task.handledOn,undefined);assert.equal(task.planDate,'2026-09-01');
  await page.click('#page-tasks [data-quick-date="schedule"]');await page.click('[data-set-task-date=""]');
  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).tasks.find(x=>x.id==='schedule').planDate==='');
  assert.equal(JSON.stringify((await stored(page)).weeks['2026-08-24']),history);
@@ -343,13 +342,13 @@ test('iteration: quick dates preserve status, deadlines, week and historical rec
 
 test('iteration: compact Today counts only actionable follow-ups and exposes total waiting',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('due-wait',{status:'等待',followup:today}),makeTask('past-wait',{status:'等待',followup:'2026-09-04'}),makeTask('later',{status:'等待'}),makeTask('undated',{status:'等待',followup:''}),makeTask('handled-wait',{status:'等待',followup:today,handledOn:today}),makeTask('archived-wait',{status:'等待',followup:today,archived:true})]);
- assert.equal(await page.locator('[data-summary-target="waiting"] strong').textContent(),'2');
+ assert.equal(await page.locator('[data-summary-target="waiting"] strong').textContent(),'3');
  assert.match(await page.locator('[data-open-all-waiting]').textContent(),/5/);
  assert((await page.locator('[data-summary-target="waiting"]').boundingBox()).height<=56);
- await page.click('[data-handle-task="due-wait"]');await page.waitForFunction(()=>document.querySelector('[data-summary-target="waiting"] strong').textContent==='1');
- assert.match(await page.locator('[data-open-all-waiting]').textContent(),/5/);
- await page.click('[data-open-all-waiting]');await page.locator('#page-tasks.active').waitFor();assert.equal(await page.locator('#page-tasks tr[data-task]').count(),5);
- await page.click('[data-quick="followup"]');await page.waitForFunction(()=>document.querySelectorAll('#page-tasks tr[data-task]').length===1);
+ await page.click('[data-toggle-task="due-wait"]');await page.waitForFunction(()=>document.querySelector('[data-summary-target="waiting"] strong').textContent==='2');
+ assert.match(await page.locator('[data-open-all-waiting]').textContent(),/4/);
+ await page.click('[data-open-all-waiting]');await page.locator('#page-tasks.active').waitFor();assert.equal(await page.locator('#page-tasks tr[data-task]').count(),4);
+ await page.click('[data-quick="followup"]');await page.waitForFunction(()=>document.querySelectorAll('#page-tasks tr[data-task]').length===2);
  assert.equal(await page.locator('#page-tasks tr[data-task="past-wait"]').count(),1);
 });
 
@@ -398,17 +397,19 @@ test('search: task status, completion date, sorting and project grouping are vis
  assert.equal(await page.locator('#searchTaskSort').inputValue(),'status');assert.equal(await page.locator('[data-search-project-group]').getAttribute('aria-pressed'),'true');
 });
 
-test('iteration: progress drafts, timestamped entries and weekly history survive saves',{timeout:30000},async t=>{
- const page=await fixture(t,[makeTask('progress',{week:true,nextAction:'原有下一步'})],{route:'tasks'});
+test('retired progress payloads survive import normalization, editing, export and reload',{timeout:30000},async t=>{
+ const legacy={progressDraft:'未提交的旧草稿',progressLog:[{id:'old-entry',text:'旧推进记录专用词',createdAt:'2026-09-05T10:00:00Z'}]};
+ const page=await fixture(t,[makeTask('progress',{week:true,nextAction:'原有下一步',...legacy})],{route:'tasks'});
  const history=JSON.stringify((await stored(page)).weeks['2026-08-24']);
- await edit(page,'progress');await page.fill('#taskProgressInput','已收到初稿，待复核');await page.clock.fastForward(800);
- await page.keyboard.press('Escape');await edit(page,'progress');assert.equal(await page.locator('#taskProgressInput').inputValue(),'已收到初稿，待复核');
- await page.click('[data-add-progress]');assert.equal(await page.locator('#taskProgressList li').count(),1);assert.equal(await page.locator('#taskProgressInput').inputValue(),'');
- await page.fill('#taskProgressInput','完成复核，待确认');await page.locator('[data-add-progress]').focus();await page.locator('[data-add-progress]').press('Enter');assert.equal(await page.locator('#taskDialog').getAttribute('open'),'');await page.keyboard.press('Escape');
- let task=(await stored(page)).tasks.find(x=>x.id==='progress');assert.equal(task.progressLog.length,2);assert.equal(task.nextAction,'原有下一步');assert.equal(task.status,'进行中');assert.equal(task.progressDraft,'');assert(task.progressLog.every(e=>e.createdAt));
+ await edit(page,'progress');
+ assert.equal(await page.locator('#taskProgressInput,#taskProgressList,[data-add-progress],.progress-log-section').count(),0);
+ await page.fill('#taskTitle','更新后的事项');await page.clock.fastForward(800);await page.keyboard.press('Escape');
+ let data=await page.evaluate(()=>normalizeState(JSON.parse(serializeState()))),value=data.tasks.find(t=>t.id==='progress');
+ assert.deepEqual(value.progressLog,legacy.progressLog);assert.equal(value.progressDraft,legacy.progressDraft);assert.equal(value.nextAction,'原有下一步');assert.equal(value.title,'更新后的事项');
  assert.equal(JSON.stringify((await stored(page)).weeks['2026-08-24']),history);
- await page.click('[data-page="today"]');await page.click('[data-summary-target="done"]');await page.locator('.week-progress-records').waitFor();assert.match(await page.locator('.week-progress-records').textContent(),/已收到初稿/);
- await page.reload();assert.equal((await stored(page)).tasks.find(x=>x.id==='progress').progressLog.length,2);
+ assert.deepEqual(await page.evaluate(()=>collectGlobalResults('旧推进记录专用词').task.map(t=>t.id)),[]);
+ await page.reload();value=(await stored(page)).tasks.find(t=>t.id==='progress');assert.deepEqual(value.progressLog,legacy.progressLog);assert.equal(value.progressDraft,legacy.progressDraft);
+ await page.click('[data-page="week"]');assert.equal(await page.locator('.week-progress-records').count(),0);
 });
 
 test('fix: clearing a plan stays cleared after later detail autosaves',{timeout:30000},async t=>{
@@ -419,16 +420,7 @@ test('fix: clearing a plan stays cleared after later detail autosaves',{timeout:
  const task=(await stored(page)).tasks.find(x=>x.id==='clear-plan');assert.equal(task.planDate,'');assert.equal(task.focus,false);assert.equal(task.week,true);assert.equal(task.title,'修改后的标题');
 });
 
-test('fix: progress history syncs after undo and supports edit delete restore',{timeout:30000},async t=>{
- const page=await fixture(t,[makeTask('progress-fix')],{route:'tasks'});page.setDefaultTimeout(3000);await edit(page,'progress-fix');
- await page.fill('#taskProgressInput','第一条记录');await page.click('[data-add-progress]');assert.equal(await page.locator('#taskProgressList li').count(),1);
- await page.locator('[data-add-progress]').focus();await page.keyboard.press('Control+z');assert.equal(await page.locator('#taskProgressList li').count(),0);
- await page.fill('#taskTitle','撤销后改标题');await page.clock.fastForward(800);assert.equal((await stored(page)).tasks.find(x=>x.id==='progress-fix').progressLog.length,0);
- await page.fill('#taskProgressInput','重新记录的进展');await page.click('[data-add-progress]');assert.equal(await page.locator('#taskProgressList li').count(),1);
- await page.click('[data-edit-progress]');await page.fill('.progress-edit-input','修正后的记录');await page.click('[data-save-progress]');assert.match(await page.locator('#taskProgressList').textContent(),/修正后的记录/);
- await page.click('[data-delete-progress]');await page.click('#confirmAccept');assert.equal(await page.locator('#taskProgressList li').count(),0);
- await page.keyboard.press('Control+z');assert.equal(await page.locator('#taskProgressList li').count(),1);assert.match(await page.locator('#taskProgressList').textContent(),/修正后的记录/);
-});
+
 
 test('iteration: new task next action stays blank without placeholders across creation paths',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('source',{nextAction:'保留已有内容'})],{route:'tasks',projects:projectFixture});
@@ -444,8 +436,13 @@ test('iteration: dates and compact layout remain usable on narrow screens',{time
  const shots=path.join(__dirname,'artifacts/browser-regression');fs.mkdirSync(shots,{recursive:true});
  await page.screenshot({path:path.join(shots,'iteration-today-desktop.png')});
  for(const width of [900,390]){
-  await page.setViewportSize({width,height:900});await page.clock.runFor(100);
-  await page.click('#page-today [data-quick-date="narrow"]');
+  // Native viewport resize events are independent of Playwright's mocked clock.
+  // Wait for their handlers before opening a menu that intentionally closes on resize.
+  await page.evaluate(()=>{window.qaViewportResized=false;window.addEventListener('resize',()=>window.qaViewportResized=true,{once:true})});
+  await page.setViewportSize({width,height:900});
+  await page.waitForFunction(width=>window.qaViewportResized&&innerWidth===width,width);
+  const trigger=page.locator('#page-today [data-quick-date="narrow"]');await trigger.scrollIntoViewIfNeeded();await page.clock.runFor(100);
+  await trigger.click();await page.locator('#taskDatePopover').waitFor({state:'visible'});
   const menu=await page.locator('#taskDatePopover').boundingBox();assert(menu&&menu.x>=0&&menu.x+menu.width<=width&&menu.y>=0&&menu.y+menu.height<=900,JSON.stringify(menu));
   if(width===390)await page.screenshot({path:path.join(shots,'iteration-date-mobile.png')});
   await page.keyboard.press('Escape');assert.equal(await page.locator('#taskDatePopover').isVisible(),false);
@@ -546,12 +543,12 @@ test('rich text: highlighter icons retain size and selection across colors, them
 });
 
 test('completion: shared search matches tokens, reversed tokens and title gaps with safe highlights',async t=>{
- const page=await fixture(t,[makeTask('search',{title:'靶机电池充电异常排查',project:'p',notes:'<p>确认接线</p>',progressLog:[{id:'g',text:'已更换电源模块',createdAt:'2026-09-05T10:00:00Z'}]}),makeTask('other',{title:'其他事项'})],{projects:[{id:'p',name:'验证项目',milestones:[]}],route:'tasks'});
+ const page=await fixture(t,[makeTask('search',{title:'靶机电池充电异常排查',project:'p',notes:'<p>确认接线，已更换电源模块</p>',progressLog:[{id:'g',text:'已更换电源模块',createdAt:'2026-09-05T10:00:00Z'}]}),makeTask('other',{title:'其他事项'})],{projects:[{id:'p',name:'验证项目',milestones:[]}],route:'tasks'});
  const result=await page.evaluate(()=>{
   const queries=['充电异常','靶机 异常','异常 靶机','靶机异常','更换 模块'];
   return {matches:queries.map(q=>{taskFilter.query=q;return [filteredTasks().map(t=>t.id),collectGlobalResults(q).task.map(t=>t.id)]}),noMatch:taskSearchMatch(taskById('search'),'电池 香蕉').score,html:highlightSearch('<img src=x>靶机异常','靶机 异常'),source:taskSearchHint(taskById('search'),'更换 模块')};
  });
- for(const pair of result.matches)assert.deepEqual(pair,[['search'],['search']]);assert.equal(result.noMatch,0);assert(!result.html.includes('<img'));assert(result.html.includes('<mark>靶机异常</mark>'));assert(result.source.includes('推进记录'));
+ for(const pair of result.matches)assert.deepEqual(pair,[['search'],['search']]);assert.equal(result.noMatch,0);assert(!result.html.includes('<img'));assert(result.html.includes('<mark>靶机异常</mark>'));assert(result.source.includes('备注'));
  await page.fill('#taskSearch','异常 靶机');assert.equal(await page.locator('[data-task="search"] mark').count(),2);
  await page.click('[data-page="projects"]');await page.click('[data-project-view="detail"]');await page.fill('#projectTaskSearch','更换 模块');assert.equal(await page.locator('[data-project-task="search"]').count(),1);
 });
@@ -570,9 +567,8 @@ test('completion: project panels stay inside viewport and preserve per-view posi
  await page.setViewportSize({width:390,height:844});await page.click('[data-project-pane="list"]');assert(await page.locator('.project-list-panel').isVisible());assert(!(await page.locator('.project-detail-panel').isVisible()));await page.click('[data-select-project="p0"]');await page.waitForSelector('.project-detail-panel',{state:'visible'});assert(!(await page.locator('.project-list-panel').isVisible()));
 });
 
-test('completion: progress input moves without losing draft and OB links survive legacy normalization',async t=>{
- const page=await fixture(t,[makeTask('a')]);await edit(page,'a');assert.equal(await page.locator('#taskEditor>aside:first-child #taskProgressInput').count(),1);
- await page.fill('#taskProgressInput','保持输入内容');await page.setViewportSize({width:760,height:900});await page.waitForSelector('.task-content-column #taskProgressInput');assert.equal(await page.inputValue('#taskProgressInput'),'保持输入内容');await page.click('[data-add-progress]');assert.equal(await page.locator('.task-content-column #taskProgressList li').count(),1);
+test('completion: OB links survive legacy normalization',async t=>{
+ const page=await fixture(t,[makeTask('a')]);await edit(page,'a');
  const result=await page.evaluate(()=>{let next=normalizeState({...snapshotCore(),meta:{...state.meta,obsidianLinks:{a:'obsidian://open?vault=Work&file=笔记'}},tasks:[{id:'a',title:'事项',status:'进行中'}]});let recovered=next.tasks[0].obsidianUri;next.tasks[0].obsidianUri='';next=normalizeState(next);return{recovered,cleared:next.meta.obsidianLinks.a}});assert(result.recovered.includes('笔记'));assert.equal(result.cleared,'');
 });
 

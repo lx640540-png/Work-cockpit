@@ -46,8 +46,6 @@ mark{background:#fff0a8;color:#523b00;border-radius:3px;padding:0 .04em}
 .obsidian-summary [data-open-obsidian]{max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .obsidian-editor{padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:var(--soft)}
 .obsidian-editor[hidden]{display:none}.obsidian-editor input{width:100%;min-width:0}.obsidian-editor small{display:block;color:var(--muted);margin:6px 0;line-height:1.6}
-.progress-input-section textarea{width:100%;min-height:90px;resize:vertical;border:1px solid var(--line);border-radius:9px;padding:9px;background:var(--panel)}
-.progress-input-section small{display:block;color:var(--muted);font-size:11px;margin-top:6px}
 .progress-history-more{margin-top:8px}.progress-history-more summary{cursor:pointer;color:var(--muted)}
 .upload-job{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}
 .upload-job b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.upload-job small{grid-column:1/-1;color:var(--muted)}
