@@ -1,0 +1,52 @@
+/* Divider contract: one painted line, a contained hit area and equal adjacent gutters. */
+:root{--ui-divider-hit:12px;--ui-divider-gap:12px}
+:root[data-visual-preview] .ui-resize-divider{position:relative;isolation:isolate;overflow:hidden;contain:paint;padding:0;border:0!important;border-radius:0;background:transparent!important;box-shadow:none!important;touch-action:none}
+:root[data-visual-preview] .ui-resize-divider:after{content:none!important}
+:root[data-visual-preview] .ui-resize-divider:before{content:''!important;position:absolute!important;inset:0 auto 0 50%!important;width:1px!important;height:auto!important;transform:translateX(-50%);border:0!important;border-radius:0!important;background:var(--line)!important;pointer-events:none}
+:root[data-visual-preview] .ui-resize-divider[data-resize-axis=y]:before{inset:50% 0 auto 0!important;width:auto!important;height:1px!important;transform:translateY(-50%)}
+:root[data-visual-preview] .ui-resize-divider:is(:hover,:focus-visible,.active,.resizing):before{background:var(--blue)!important}
+:root[data-visual-preview] .ui-resize-divider:focus-visible{outline:none}
+:root[data-visual-preview] .ui-resize-divider.planning-width-handle,:root[data-visual-preview] .ui-resize-divider.journal-resize{position:absolute}
+:root[data-visual-preview] .planning-resizable{padding-right:24px}
+:root[data-visual-preview] .planning-width-handle{right:0;top:22px;bottom:0;width:12px}
+:root[data-visual-preview] .today-flow.today-execution{grid-template-columns:minmax(0,calc(var(--today-left,52%) - 18px)) 12px minmax(0,1fr);column-gap:var(--ui-divider-gap)}
+:root[data-visual-preview] .today-sidebar-stack{padding:0;border:0;align-content:stretch;height:clamp(420px,68dvh,760px);grid-template-rows:clamp(120px,calc(var(--waiting-share,55%) - 18px),calc(100% - 156px)) 12px minmax(120px,1fr);row-gap:var(--ui-divider-gap);min-height:0}
+:root[data-visual-preview] :is(.column-resizer,.project-splitter,.week-splitter,.journal-column-splitter){width:12px;justify-self:stretch}
+.today-sidebar-splitter{position:relative;width:100%;height:12px;min-height:12px;cursor:row-resize}
+.today-sidebar-stack>.today-waiting,.today-sidebar-stack>.today-capture,.today-sidebar-stack>.today-capture>.card{height:100%;min-height:0;min-width:0}
+:root[data-visual-preview] #page-today .today-sidebar-stack .drop-card{display:flex;flex-direction:column;overflow:hidden}
+.today-sidebar-stack .card-head{flex:none}.today-sidebar-stack .today-task-scroll,.today-sidebar-stack .inbox-items{flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain}
+.today-sidebar-stack .inbox-more{flex:none;align-self:flex-start}
+:root[data-visual-preview] .week-split-layout{grid-template-columns:minmax(0,calc(var(--week-left,50%) - 18px)) 12px minmax(0,1fr);column-gap:var(--ui-divider-gap)}
+:root[data-visual-preview] .project-master-detail{grid-template-columns:var(--project-list,300px) 12px minmax(0,1fr);column-gap:var(--ui-divider-gap)}
+:root[data-calm-today] .project-detail-card{border-left:0;padding-left:0}
+:root[data-calm-today] #workJournal{border-left:0}
+:root[data-calm-today] #workJournal.journal-split .journal-workspace{grid-template-columns:minmax(0,calc(var(--journal-daily,62%) - 18px)) 12px minmax(0,1fr);column-gap:var(--ui-divider-gap)}
+:root[data-calm-today] #workJournal.journal-split :is(.journal-body,.journal-review-pane){padding-inline:16px}
+:root[data-calm-today] #workJournal.journal-split .journal-daily-header{padding-inline:16px}
+.component-split-example{column-gap:var(--ui-divider-gap)}
+/* No row-wide focus rectangle or stale drop line while editing. */
+:root[data-calm-today] .task-row:focus-within{outline:0;box-shadow:none}
+:root[data-calm-today] .task-row:not(.drag-before):not(.drag-after):not(.dragging){box-shadow:none}
+:root[data-calm-today]:not([data-task-dragging]) .task-row:is(.drag-before,.drag-after,.drag-over){box-shadow:none}
+.week-plan-history{white-space:pre-wrap;color:var(--muted);font-size:12px;margin-top:6px}
+.week-review-layout.readonly .rich-toolbar button:disabled{opacity:.4}
+.week-review-layout.readonly .rich-toolbar button[data-command=expand]{pointer-events:auto}
+.ui-week-picker{position:fixed;z-index:5000;width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px);overflow:auto;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);box-shadow:0 6px 24px #00000016;font:13px/1.5 var(--ui-font-stack,sans-serif)}
+.ui-week-heading{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.ui-week-picker button,.ui-week-picker select{font:inherit;color:inherit;border:0;border-radius:5px;background:transparent}
+.ui-week-heading button{width:28px;height:28px;flex:none}.ui-week-heading select{min-width:0;flex:1;padding:4px 2px}
+.ui-week-row{display:grid;grid-template-columns:24px repeat(7,minmax(0,1fr));border-radius:5px}
+.ui-week-row small{text-align:center;color:var(--muted);font-size:11px;padding:6px 0}
+.ui-week-row button{height:32px;min-width:0;padding:0;font-variant-numeric:tabular-nums;cursor:pointer}
+.ui-week-row:not(:first-child):hover{background:var(--soft)}
+.ui-week-row.selected{background:color-mix(in srgb,var(--blue) 10%,var(--panel));color:var(--blue)}
+.ui-week-row .ui-week-number{color:var(--muted);font-size:10px}
+.ui-week-row .outside{opacity:.45}.ui-week-row .today{font-weight:700;text-decoration:underline;text-underline-offset:4px}
+.ui-week-picker :is(button,select):focus-visible{outline:2px solid var(--ui-focus,var(--blue));outline-offset:-2px}
+.ui-week-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+.ui-week-footer button{flex:none;padding:5px 8px;color:var(--blue);cursor:pointer}
+.week-picker-trigger{font-variant-numeric:tabular-nums}.week-native-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+@media(max-width:1000px){:root[data-visual-preview] .today-flow.today-execution{grid-template-columns:minmax(0,1fr)}:root[data-visual-preview] #todayResizer{display:none}:root[data-visual-preview] .today-sidebar-stack{padding:0;border:0}}
+@media(max-width:900px){:root[data-visual-preview] .project-master-detail{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){:root[data-visual-preview] .week-split-layout{grid-template-columns:minmax(0,1fr);row-gap:24px}:root[data-visual-preview] .week-splitter{display:none}}

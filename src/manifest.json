@@ -20,7 +20,8 @@
     "styles/visual-workspaces.css",
     "styles/visual-components.css",
     "styles/component-preview.css",
-    "styles/appearance-controls.css"
+    "styles/appearance-controls.css",
+    "styles/iteration-fixes.css"
   ],
   "scripts": [
     "core/runtime.js",
@@ -60,6 +61,7 @@
     "ui/events.js",
     "ui/drag-resize.js",
     "core/cloud.js",
+    "ui/week-picker.js",
     "ui/work-journal.js",
     "ui/journal-copy.js",
     "ui/attachment-viewer.js",
