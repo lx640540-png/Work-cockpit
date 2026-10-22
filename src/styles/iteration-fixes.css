@@ -30,7 +30,8 @@
 :root[data-calm-today] .task-row:not(.drag-before):not(.drag-after):not(.dragging){box-shadow:none}
 :root[data-calm-today]:not([data-task-dragging]) .task-row:is(.drag-before,.drag-after,.drag-over){box-shadow:none}
 .week-plan-history{white-space:pre-wrap;color:var(--muted);font-size:12px;margin-top:6px}
-.week-review-readonly .rich-toolbar button:not([data-command=expand]){opacity:.4;pointer-events:none}
+.week-review-layout.readonly .rich-toolbar button:disabled{opacity:.4}
+.week-review-layout.readonly .rich-toolbar button[data-command=expand]{pointer-events:auto}
 .ui-week-picker{position:fixed;z-index:5000;width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 16px);overflow:auto;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);box-shadow:0 6px 24px #00000016;font:13px/1.5 var(--ui-font-stack,sans-serif)}
 .ui-week-heading{display:flex;align-items:center;gap:6px;margin-bottom:12px}
 .ui-week-picker button,.ui-week-picker select{font:inherit;color:inherit;border:0;border-radius:5px;background:transparent}

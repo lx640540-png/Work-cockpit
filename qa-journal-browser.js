@@ -45,12 +45,12 @@ test('dragging into another date or pressing Escape cancels; memo dialog and exp
 
 test('week reopening returns to today, while an open drawer keeps a manually chosen week',async t=>{
  let p=await fixture(t);
- await p.click('[data-journal-action="week"]');await p.click('[data-week-pick="2026-09-28"]');
- assert.equal(await p.locator('.journal-week-range').innerText(),'2026年 9/28 — 10/4 ▾');
+ await p.click('[data-journal-action="week"]');await p.click('[role=gridcell][data-week-pick="2026-09-28"]');
+ assert.equal(await p.locator('.journal-week-range').innerText(),'2026年第40周 · 9/28—10/4 ▾');
  await p.click('[data-journal-action="pin"]');
- await p.click('[data-page="tasks"]');assert.equal(await p.locator('.journal-week-range').innerText(),'2026年 9/28 — 10/4 ▾');
+ await p.click('[data-page="tasks"]');assert.equal(await p.locator('.journal-week-range').innerText(),'2026年第40周 · 9/28—10/4 ▾');
  await p.click('[data-journal-action="close"]');await p.click('#journalHandle');
- assert.equal(await p.locator('.journal-week-range').innerText(),'2026年 10/5 — 10/11 ▾');
+ assert.equal(await p.locator('.journal-week-range').innerText(),'2026年第41周 · 10/5—10/11 ▾');
  assert.equal(await p.locator('.journal-day.is-today').count(),1);
  assert.equal(await p.locator('.journal-calendar-notice').isVisible(),false);
 });

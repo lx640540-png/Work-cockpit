@@ -887,7 +887,7 @@ async function testUrl() {
   });
   assert(pinnedSelection.selectedClass && !pinnedSelection.otherSelected && pinnedSelection.selectedBorder !== pinnedSelection.otherBorder, `selected and unselected pinned projects remain visually indistinguishable: ${JSON.stringify(pinnedSelection)}`);
   const projectRail = await page.locator('#projectSplitter').evaluate(node => ({ hit: node.getBoundingClientRect().width, visible: getComputedStyle(node, '::before').width, length: getComputedStyle(node, '::before').height }));
-  assert(projectRail.hit === 8 && projectRail.visible === '6px' && projectRail.length === '84px', `project splitter does not share the Today grip with a usable hit target: ${JSON.stringify(projectRail)}`);
+  assert(projectRail.hit === 12 && projectRail.visible === '1px' && parseFloat(projectRail.length) > 84, `project splitter violates the shared single-line divider contract: ${JSON.stringify(projectRail)}`);
   await page.click('[data-select-project="p1"] .project-list-name');
   await page.evaluate(() => { taskFilter = { ...taskFilter, query: '残留筛选', type: ['问题与Bug'], status: ['暂停'] }; });
   await page.click('[data-open-project-tasks="p1"]');
