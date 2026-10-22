@@ -43,7 +43,11 @@ const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5)
     await target.evaluate(node=>node.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
     await page.waitForTimeout(60);
     const settled=await target.boundingBox();assert(settled,`missing settled release target: ${targetSelector}`);
-    const point={x:settled.x+settled.width/2,y:settled.y+settled.height*ratio};
+    const point=await target.evaluate((node,ratio)=>{
+      const rect=node.getBoundingClientRect();let left=Math.max(0,rect.left),right=Math.min(innerWidth,rect.right),top=Math.max(0,rect.top),bottom=Math.min(innerHeight,rect.bottom);
+      for(let parent=node.parentElement;parent;parent=parent.parentElement){const style=getComputedStyle(parent),clip=parent.getBoundingClientRect();if(/auto|scroll|hidden|clip/.test(style.overflowY)){top=Math.max(top,clip.top+parent.clientTop);bottom=Math.min(bottom,clip.top+parent.clientTop+parent.clientHeight)}if(/auto|scroll|hidden|clip/.test(style.overflowX)){left=Math.max(left,clip.left+parent.clientLeft);right=Math.min(right,clip.left+parent.clientLeft+parent.clientWidth)}}
+      return{x:Math.max(left+2,Math.min(right-2,rect.left+rect.width/2)),y:Math.max(top+2,Math.min(bottom-2,rect.top+rect.height*ratio))};
+    },ratio);
     await page.mouse.move(point.x,point.y);await page.waitForTimeout(40);
     hit=await page.evaluate(({selector,x,y})=>{const node=document.querySelector(selector),under=document.elementFromPoint(x,y);return !!(node&&under&&(node===under||node.contains(under)));},{selector:targetSelector,...point});
   }
