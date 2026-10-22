@@ -9,15 +9,15 @@ function weekKeyFromInput(value){
 function historicalRow(task,week){
  let project=week.projectSnapshots.find(item=>item.id===task.project)||projectById(task.project);
  let weekKey=Object.keys(state.weeks).find(key=>state.weeks[key]===week)||"";
- return taskRow(task,{readonly:true,historyWeek:weekKey,projectLookup:id=>week.projectSnapshots.find(item=>item.id===id)||projectById(id)});
+ return taskRow(task,{readonly:true,historyWeek:weekKey,weekAction:(week.taskIds||[]).includes(task.id)?week.actions?.[task.id]?.text||'未记录当周推进内容':undefined,projectLookup:id=>week.projectSnapshots.find(item=>item.id===id)||projectById(id)});
 }
 function topMarkup(week,mode){
  let rows=week.top.map((text,index)=>'<div class="top-row" data-top-drop="'+index+'"><button class="drag-handle" type="button" draggable="'+(mode!=="past")+'" data-top-drag="'+index+'" '+(mode==="past"?"disabled":"")+'>⠿</button><span class="top-number">'+(index+1)+'</span><input class="top-input" data-top-index="'+index+'" value="'+esc(text)+'" '+(mode==="past"?"readonly":"")+'><button class="top-delete" type="button" data-delete-top="'+index+'" '+(mode==="past"?"disabled":"")+'>×</button></div>').join("");
  return rows||'<div class="empty">还没有重点；点击“添加重点”开始规划。</div>';
 }
 function renderWeek(){
- let mode=weekMode(selectedWeekKey),week=state.weeks[selectedWeekKey]||emptyWeek(),start=parseDate(selectedWeekKey),end=weekEnd(selectedWeekKey),actions='<div class="week-bar"><button class="btn" data-week-shift="-1">‹</button><label class="week-label">选择周 <input id="weekPicker" type="week" value="'+weekInputValue(selectedWeekKey)+'"></label><button class="btn" data-week-shift="1">›</button><button class="btn" data-week-current>回到本周</button></div>';
- let title=start.getFullYear()+" 年第 "+isoWeekNumber(start)+" 周 · "+dateShort(selectedWeekKey)+"—"+dateShort(end);
+ let mode=weekMode(selectedWeekKey),week=state.weeks[selectedWeekKey]||emptyWeek(),start=parseDate(selectedWeekKey),end=weekEnd(selectedWeekKey),actions='<div class="week-bar"><button class="btn" data-week-shift="-1">‹</button><button type="button" class="btn week-picker-trigger" data-open-week-picker aria-haspopup="dialog" aria-expanded="false">'+esc(weekRangeLabel(selectedWeekKey))+'</button><input class="week-native-input" id="weekPicker" type="week" tabindex="-1" aria-hidden="true" value="'+weekInputValue(selectedWeekKey)+'"><button class="btn" data-week-shift="1">›</button><button class="btn" data-week-current>回到本周</button></div>';
+ let title=isoWeekYear(start)+" 年第 "+isoWeekNumber(start)+" 周 · "+dateShort(selectedWeekKey)+"—"+dateShort(end);
  let banner=mode==="future"?"未来周仅 Top 3 可编辑；其余卡片将在该周到来后自动启用。":mode==="past"?"正在查看历史周只读快照。":"";
  let topTools='<span class="muted">可拖动排序</span><button class="link-btn" data-add-top '+(mode==="past"||week.top.length>=3?"disabled":"")+'>＋ 添加重点</button>';
  let actionItems,doneItems,longItems;

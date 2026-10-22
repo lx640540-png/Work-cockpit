@@ -21,6 +21,7 @@ function handleClick(event){
  if(target.dataset.applyTaskDate!==undefined)return applyQuickTaskDate($("#quickTaskDate").value);
  if(target.dataset.openAllWaiting!==undefined){taskFilter={...taskFilter,quick:"waiting",query:"",project:[],type:[],status:[]};return navigate("tasks")}
  if(target.dataset.page)return navigate(target.dataset.page);
+ if(target.hasAttribute("data-project-date-sort")){let modes=["default","desc","asc"];ui.projectDateSort=modes[(modes.indexOf(ui.projectDateSort)+1)%modes.length];toast({desc:"完成日期：最新在前",asc:"完成日期：最早在前",default:"已恢复默认排序"}[ui.projectDateSort]);return requestRender()}
  if(target.dataset.projectView){rememberProjectPosition();ui.projectView=target.dataset.projectView;return requestRender()}
  if(target.dataset.projectDetail)return navigate("projects",target.dataset.projectDetail);
  if(target.dataset.overviewFilter){ui.overviewFilter=target.dataset.overviewFilter;return requestRender()}

@@ -11,9 +11,9 @@ function closestUiScroller(node){
 }
 function initUiResizeDividers(root=document){
  if(!VISUAL_PREVIEW_ENABLED)return;
- root.querySelectorAll('.column-resizer,.capture-resizer,.project-splitter,.week-splitter,.today-height-resizer,.checklist-resizer,.quick-note-height-resizer,.rich-height-resizer,.planning-width-handle,.journal-resize,.journal-column-splitter,.ui-splitter').forEach(handle=>{
+ root.querySelectorAll('.today-sidebar-splitter,.column-resizer,.capture-resizer,.project-splitter,.week-splitter,.today-height-resizer,.checklist-resizer,.quick-note-height-resizer,.rich-height-resizer,.planning-width-handle,.journal-resize,.journal-column-splitter,.ui-splitter').forEach(handle=>{
   handle.classList.add('ui-resize-divider');
-  let horizontal=handle.matches('.today-height-resizer,.checklist-resizer,.quick-note-height-resizer,.rich-height-resizer');
+  let horizontal=handle.matches('.today-sidebar-splitter,.today-height-resizer,.checklist-resizer,.quick-note-height-resizer,.rich-height-resizer');
   handle.dataset.resizeAxis=horizontal?'y':'x';handle.setAttribute('role','separator');handle.setAttribute('aria-orientation',horizontal?'horizontal':'vertical');
   if(handle.dataset.dividerBound)return;handle.dataset.dividerBound='true';
   let spec=uiLegacyResizeSpec(handle);if(!spec)return;
@@ -27,6 +27,7 @@ function initUiResizeDividers(root=document){
  });
 }
 function uiLegacyResizeSpec(handle){
+ if(handle.id==='todaySidebarSplitter')return{min:.2,max:.8,step:.02,reset:.55,read:()=>uiLayout.todayWaitingShare,write:value=>{uiLayout.todayWaitingShare=value;$('.today-sidebar-stack')?.style.setProperty('--waiting-share',value*100+'%')}};
  let ratios={weekPlanSplitter:['weekPlanLeft','#weekPlanSplit','--week-left',.34,.66],weekReviewSplitter:['weekReviewLeft','#weekReviewSplit','--week-left',.34,.66],todayResizer:['todayLeft','#todayExecution','--today-left',.38,.66],captureResizer:['quickNoteLeft','#todayCapture','--quick-left',.34,.66]},ratio=ratios[handle.id];
  if(ratio){let [key,selector,property,min,max]=ratio;return{min,max,step:.02,reset:key==='weekReviewLeft'?.46:key==='todayLeft'?.52:.5,read:()=>uiLayout[key],write:value=>{uiLayout[key]=value;$(selector)?.style.setProperty(property,value*100+'%')}}}
  if(handle.matches('[data-rich-height-resizer]')){let key=handle.dataset.richHeightResizer,spec=RICH_HEIGHT_SPECS[key];return{min:spec.min,max:spec.max,step:16,reset:spec.default,read:()=>uiLayout[key],write:value=>{uiLayout[key]=value;handle.closest('[data-rich-resize]')?.style.setProperty('--rich-editor-height',value+'px')}}}
