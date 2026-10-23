@@ -2,13 +2,8 @@ const PLANNING_WIDTH_KEY="work-cockpit-planning-width-v1";
 let planningWidth=45,planningPointer=null,tableSortables=[];
 try{let saved=Number(localStorage.getItem(PLANNING_WIDTH_KEY));if(saved>=20&&saved<=70)planningWidth=saved}catch(error){}
 function applyPlanningWidth(value){planningWidth=Math.max(20,Math.min(70,value));document.documentElement.style.setProperty('--planning-width',planningWidth+'%');document.querySelectorAll('[data-planning-resize]').forEach(handle=>handle.setAttribute('aria-valuenow',Math.round(planningWidth)));schedulePlanningTextareaResize()}
-function initPlanningResize(){
- if(typeof VISUAL_PREVIEW_ENABLED!=="undefined"&&VISUAL_PREVIEW_ENABLED&&visualPreview.mode==="new")return initScopedPlanningResize();
- document.querySelectorAll('.week-action-label,.overview-next-label').forEach(label=>{
-  label.classList.add('planning-resizable');if(label.querySelector('[data-planning-resize]'))return;
-  let handle=document.createElement('span');handle.dataset.planningResize='';handle.className='planning-width-handle';handle.tabIndex=0;handle.setAttribute('role','slider');handle.setAttribute('aria-label','统一调整任务输入框宽度');handle.setAttribute('aria-valuemin','20');handle.setAttribute('aria-valuemax','70');handle.setAttribute('aria-orientation','horizontal');handle.dataset.tip='左右拖动统一调整输入框宽度；双击恢复默认';label.append(handle);
- });applyPlanningWidth(planningWidth);
-}
+function initPlanningResize(){return initScopedPlanningResize()}
+
 function savePlanningWidth(){localStorage.setItem(PLANNING_WIDTH_KEY,String(planningWidth))}
 document.addEventListener('pointerdown',event=>{let handle=event.target.closest?.('[data-planning-resize]');if(!handle||handle.hasAttribute("data-scoped-planning")||event.button!==0)return;let row=handle.closest('.project-overview-task,.task-main');if(!row)return;event.preventDefault();event.stopPropagation();planningPointer={handle,id:event.pointerId,x:event.clientX,width:row.getBoundingClientRect().width,start:planningWidth};handle.setPointerCapture(event.pointerId);handle.classList.add('active')},true);
 document.addEventListener('pointermove',event=>{if(!planningPointer||event.pointerId!==planningPointer.id)return;event.preventDefault();applyPlanningWidth(planningPointer.start+(event.clientX-planningPointer.x)/planningPointer.width*100)});

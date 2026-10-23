@@ -1276,29 +1276,29 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
  .project-brief .project-stage{gap:4px;margin-bottom:7px}
 }
 /* One planning-row layout; editor width yields before identity and properties. */
-:root[data-calm-today] .workflow-task-row.has-planning{display:grid;grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing';align-items:start;column-gap:10px}
-:root[data-calm-today] .workflow-task-row.has-planning>.task-leading{grid-area:leading;align-self:start;margin-top:4px}
-:root[data-calm-today] .workflow-task-row.has-planning>.task-trailing{grid-area:trailing;align-self:center!important;margin-top:0}
-:root[data-calm-today] .workflow-task-row.has-planning>.ui-planning-row{grid-area:main;display:grid;grid-template-areas:'identity editor meta';grid-template-columns:minmax(160px,1fr) minmax(0,var(--planning-editor-width,320px)) minmax(140px,200px);gap:16px;align-items:start;min-width:0}
-:root[data-calm-today] .ui-planning-row>.week-task-identity{grid-area:identity;min-width:0}
-:root[data-calm-today] .ui-planning-row>.task-meta{grid-area:meta;position:static;width:100%;min-width:0;max-width:none;margin:0;justify-content:flex-end;align-self:start;flex-wrap:wrap}
-:root[data-calm-today] .ui-planning-row>:is(.week-action-label,.overview-next-label){grid-area:editor;width:100%;min-width:0;max-width:100%;margin:0;justify-self:start;box-sizing:border-box}
-:root[data-calm-today] .ui-planning-row textarea{width:100%;min-width:0;max-width:100%;max-height:240px;overflow-y:auto!important;resize:none}
-:root[data-calm-today] .ui-planning-row .planning-width-handle{top:22px;bottom:0;right:0;width:12px}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning{display:grid;grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing';align-items:start;column-gap:10px}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.task-leading{grid-area:leading;align-self:start;margin-top:4px}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.task-trailing{grid-area:trailing;align-self:center!important;margin-top:0}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{grid-area:main;display:grid;grid-template-areas:'identity editor meta';grid-template-columns:minmax(160px,1fr) minmax(0,var(--planning-editor-width,320px)) minmax(140px,200px);gap:16px;align-items:start;min-width:0}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.week-task-identity{grid-area:identity;min-width:0}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta{grid-area:meta;position:static;width:100%;min-width:0;max-width:none;margin:0;justify-content:flex-end;align-self:start;flex-wrap:wrap}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>:is(.week-action-label,.overview-next-label){grid-area:editor;width:100%;min-width:0;max-width:100%;margin:0;justify-self:start;box-sizing:border-box}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row textarea{width:100%;min-width:0;max-width:100%;max-height:240px;overflow-y:auto!important;resize:none}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-width-handle{top:22px;bottom:0;right:0;width:12px}
 .planning-reveal{display:none}
 @container(max-width:1000px){
- :root[data-calm-today] .workflow-task-row.has-planning>.ui-planning-row{grid-template-areas:'identity meta' 'editor editor';grid-template-columns:minmax(0,1fr) minmax(140px,190px);gap:8px 16px}
- :root[data-calm-today] .ui-planning-row>.planning-resizable{width:100%;padding-right:0}
- :root[data-calm-today] .ui-planning-row .planning-width-handle{display:none}
- :root[data-calm-today] .ui-planning-row .planning-reveal{display:block;width:100%;max-width:100%;padding:5px 0;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12px;text-align:left;cursor:pointer}
- :root[data-calm-today] .ui-planning-row .planning-resizable:not(.planning-expanded)>.planning-reveal{white-space:nowrap;overflow:hidden;mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent)}
- :root[data-calm-today] .ui-planning-row .planning-resizable:not(.planning-expanded)>span,:root[data-calm-today] .ui-planning-row .planning-resizable:not(.planning-expanded)>textarea{display:none}
- :root[data-calm-today] .ui-planning-row .planning-expanded>.planning-reveal{color:var(--blue);font-size:11px}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{grid-template-areas:'identity meta' 'editor editor';grid-template-columns:minmax(0,1fr) minmax(140px,190px);gap:8px 16px}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.planning-resizable{width:100%;padding-right:0}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-width-handle{display:none}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-reveal{display:block;width:100%;max-width:100%;padding:5px 0;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12px;text-align:left;cursor:pointer}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-resizable:not(.planning-expanded)>.planning-reveal{white-space:nowrap;overflow:hidden;mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent)}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-resizable:not(.planning-expanded)>span,.ui-planning-row .planning-resizable:not(.planning-expanded)>textarea{display:none}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-expanded>.planning-reveal{color:var(--blue);font-size:11px}
 }
 @container(max-width:480px){
- :root[data-calm-today] .workflow-task-row.has-planning>.ui-planning-row{grid-template-areas:'identity' 'meta' 'editor';grid-template-columns:minmax(0,1fr);gap:8px}
- :root[data-calm-today] .ui-planning-row>.task-meta{justify-content:flex-start}
- :root[data-calm-today] .ui-planning-row>.task-meta :is(.followup,.muted){text-align:left}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{grid-template-areas:'identity' 'meta' 'editor';grid-template-columns:minmax(0,1fr);gap:8px}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta{justify-content:flex-start}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta :is(.followup,.muted){text-align:left}
 }
 /* Project details use the selected project as the page title. */
 :root[data-calm-today] .project-master-tools{display:flex;align-items:center;gap:8px;padding:0 0 12px;margin-bottom:8px;position:sticky;top:0;z-index:2;background:var(--panel);border-bottom:1px solid var(--line)}
@@ -1341,26 +1341,26 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 
 #draftChecklist .checklist-item>.checklist-text:is(:focus,:focus-visible){outline:none;outline-offset:0;box-shadow:none;border:0;background:transparent}
 /* Standard, grouped, completed and read-only rows share the same slot contract. */
-:root[data-calm-today] .workflow-task-row:not(.has-planning){display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,250px);grid-template-areas:'leading main meta';column-gap:10px;row-gap:6px;align-items:center}
-:root[data-calm-today] .workflow-task-row.has-trailing-pin:not(.has-planning){grid-template-columns:auto minmax(0,1fr) minmax(140px,250px) 30px;grid-template-areas:'leading main meta trailing'}
-:root[data-calm-today] .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr) minmax(0,220px) auto;grid-template-areas:'leading main meta history'}
-:root[data-calm-today] .workflow-task-row:not(.has-planning)>.task-leading{grid-area:leading;align-self:center;margin:0}
-:root[data-calm-today] .workflow-task-row:not(.has-planning)>.task-main{grid-area:main;display:block;min-width:0}
-:root[data-calm-today] .workflow-task-row:not(.has-planning)>.task-meta{grid-area:meta;align-self:center;min-width:0;width:auto;max-width:250px;justify-content:flex-end}
-:root[data-calm-today] .workflow-task-row>.task-trailing{grid-area:trailing;align-self:center;justify-self:center;display:flex;align-items:center;justify-content:flex-end;gap:2px;width:30px;height:30px;min-width:0}
-:root[data-calm-today] .workflow-task-row>.history-row-actions{grid-area:history;flex-wrap:wrap;max-width:100%}
-:root[data-calm-today] .workflow-task-row .task-row-dates{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-width:0;max-width:100%;color:var(--muted);font-size:11px;line-height:1.5}
-:root[data-calm-today] .workflow-task-row .task-meta :is(.followup,.muted){flex-basis:auto;text-align:inherit}
-:root[data-calm-today] .workflow-task-row .task-meta>.task-row-dates{flex:0 1 auto}
-:root[data-calm-today] .workflow-task-row .task-completed-date{white-space:nowrap}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row:not(.has-planning){display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,250px);grid-template-areas:'leading main meta';column-gap:10px;row-gap:6px;align-items:center}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-trailing-pin:not(.has-planning){grid-template-columns:auto minmax(0,1fr) minmax(140px,250px) 30px;grid-template-areas:'leading main meta trailing'}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr) minmax(0,220px) auto;grid-template-areas:'leading main meta history'}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row:not(.has-planning)>.task-leading{grid-area:leading;align-self:center;margin:0}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row:not(.has-planning)>.task-main{grid-area:main;display:block;min-width:0}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row:not(.has-planning)>.task-meta{grid-area:meta;align-self:center;min-width:0;width:auto;max-width:250px;justify-content:flex-end}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row>.task-trailing{grid-area:trailing;align-self:center;justify-self:center;display:flex;align-items:center;justify-content:flex-end;gap:2px;width:30px;height:30px;min-width:0}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row>.history-row-actions{grid-area:history;flex-wrap:wrap;max-width:100%}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-row-dates{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-width:0;max-width:100%;color:var(--muted);font-size:11px;line-height:1.5}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-meta :is(.followup,.muted){flex-basis:auto;text-align:inherit}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-meta>.task-row-dates{flex:0 1 auto}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-completed-date{white-space:nowrap}
 @container(max-width:760px){
- :root[data-calm-today] .workflow-task-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta'}
- :root[data-calm-today] .workflow-task-row.has-trailing-pin:not(.has-planning){grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing' 'leading meta trailing'}
- :root[data-calm-today] .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history' 'leading meta history'}
- :root[data-calm-today] .workflow-task-row:not(.has-planning)>.task-meta{justify-content:flex-start;max-width:none}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta'}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-trailing-pin:not(.has-planning){grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing' 'leading meta trailing'}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history' 'leading meta history'}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row:not(.has-planning)>.task-meta{justify-content:flex-start;max-width:none}
 }
 @container(max-width:420px){
- :root[data-calm-today] .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta' 'leading history'}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta' 'leading history'}
 }
 /* Avoid a second boundary meeting the sticky topbar while scrolling. */
 :root[data-calm-today] #page-today .summary-grid{border-bottom:0}
@@ -1708,7 +1708,8 @@ function stateCore(value=state){return{version:8,tasks:value.tasks,projects:valu
 function serializeState(value=state){return JSON.stringify(stateCore(value))}
 function snapshotCore(value=state){return JSON.parse(serializeState(value))}
 let localSavePending=false,localSaveError="";
-function showLocalSaveStatus(){let banner=$("#localSaveBanner");if(!banner){banner=document.createElement("div");banner.id="localSaveBanner";banner.setAttribute("role","status");document.body.appendChild(banner)}banner.hidden=!localSaveError;banner.textContent=localSaveError?"本地保存失败，请保留页面并重试或导出备份。":"";if(localSaveError){let retry=document.createElement("button");retry.type="button";retry.textContent="重试保存";retry.onclick=()=>{try{saveLocal(true)}catch{}};banner.appendChild(retry)}let sync=$("#syncButton"),notice=$("#localSaveNotice");if(sync&&!notice){notice=document.createElement("button");notice.id="localSaveNotice";notice.type="button";notice.className="sync-badge error";notice.title="本地保存失败；点击重试。云端状态独立显示。";notice.onclick=()=>{try{saveLocal(true);if(typeof journalFlush==="function")journalFlush()}catch{}};sync.before(notice)}if(notice){notice.hidden=!localSaveError;notice.textContent="本地保存失败"}let memo=$(".memo-status");if(memo)memo.textContent=localSaveError?"本地保存失败":localSavePending?"待保存…":"本地已保存"}
+function retryLocalSave(){try{saveLocal(true);if(typeof journalFlush==="function")journalFlush()}catch{}}
+function showLocalSaveStatus(){let banner=$("#localSaveBanner");if(!banner){banner=document.createElement("div");banner.id="localSaveBanner";banner.setAttribute("role","status");document.body.appendChild(banner)}banner.hidden=!localSaveError;banner.textContent=localSaveError?"本地保存失败，请保留页面并重试或导出备份。":"";if(localSaveError){let retry=document.createElement("button");retry.type="button";retry.textContent="重试保存";retry.onclick=retryLocalSave;banner.appendChild(retry)}let sync=$("#syncButton"),notice=$("#localSaveNotice");if(sync&&!notice){notice=document.createElement("button");notice.id="localSaveNotice";notice.type="button";notice.className="sync-badge error";notice.title="本地保存失败；点击重试。云端状态独立显示。";notice.onclick=retryLocalSave;sync.before(notice)}if(notice){notice.hidden=!localSaveError;notice.textContent="本地保存失败"}let memo=$(".memo-status");if(memo)memo.textContent=localSaveError?"本地保存失败":localSavePending?"待保存…":"本地已保存"}
 function saveLocal(immediate=false){
  clearTimeout(saveTimer);localSavePending=true;
  let write=()=>{try{state.meta.updatedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,serializeState());localSavePending=false;localSaveError=""}catch(error){localSaveError=error.message||"本地存储不可用";throw error}finally{window.CloudSync?.schedule();showLocalSaveStatus()}};
@@ -3101,13 +3102,8 @@ const PLANNING_WIDTH_KEY="work-cockpit-planning-width-v1";
 let planningWidth=45,planningPointer=null,tableSortables=[];
 try{let saved=Number(localStorage.getItem(PLANNING_WIDTH_KEY));if(saved>=20&&saved<=70)planningWidth=saved}catch(error){}
 function applyPlanningWidth(value){planningWidth=Math.max(20,Math.min(70,value));document.documentElement.style.setProperty('--planning-width',planningWidth+'%');document.querySelectorAll('[data-planning-resize]').forEach(handle=>handle.setAttribute('aria-valuenow',Math.round(planningWidth)));schedulePlanningTextareaResize()}
-function initPlanningResize(){
- if(typeof VISUAL_PREVIEW_ENABLED!=="undefined"&&VISUAL_PREVIEW_ENABLED&&visualPreview.mode==="new")return initScopedPlanningResize();
- document.querySelectorAll('.week-action-label,.overview-next-label').forEach(label=>{
-  label.classList.add('planning-resizable');if(label.querySelector('[data-planning-resize]'))return;
-  let handle=document.createElement('span');handle.dataset.planningResize='';handle.className='planning-width-handle';handle.tabIndex=0;handle.setAttribute('role','slider');handle.setAttribute('aria-label','统一调整任务输入框宽度');handle.setAttribute('aria-valuemin','20');handle.setAttribute('aria-valuemax','70');handle.setAttribute('aria-orientation','horizontal');handle.dataset.tip='左右拖动统一调整输入框宽度；双击恢复默认';label.append(handle);
- });applyPlanningWidth(planningWidth);
-}
+function initPlanningResize(){return initScopedPlanningResize()}
+
 function savePlanningWidth(){localStorage.setItem(PLANNING_WIDTH_KEY,String(planningWidth))}
 document.addEventListener('pointerdown',event=>{let handle=event.target.closest?.('[data-planning-resize]');if(!handle||handle.hasAttribute("data-scoped-planning")||event.button!==0)return;let row=handle.closest('.project-overview-task,.task-main');if(!row)return;event.preventDefault();event.stopPropagation();planningPointer={handle,id:event.pointerId,x:event.clientX,width:row.getBoundingClientRect().width,start:planningWidth};handle.setPointerCapture(event.pointerId);handle.classList.add('active')},true);
 document.addEventListener('pointermove',event=>{if(!planningPointer||event.pointerId!==planningPointer.id)return;event.preventDefault();applyPlanningWidth(planningPointer.start+(event.clientX-planningPointer.x)/planningPointer.width*100)});
