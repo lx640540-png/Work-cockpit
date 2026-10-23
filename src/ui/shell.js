@@ -1,4 +1,4 @@
-const ui={projectView:"overview",renderedPage:"",projectMobilePane:"detail",memoPane:"list",inboxExpanded:false,overviewFilter:"open",collapsedProjects:new Set(),waitingExpanded:new Set(),projectQuery:"",projectTaskQuery:"",projectDateSort:"default",projectMilestoneFilter:"all",projectFocusTaskId:"",projectReturnTaskId:"",memoQuery:"",memoMultiSelect:false,selectedMemos:new Set(),showArchivedProjects:false,projectOverviewFilter:"open",selectedTasks:new Set(),showAllWeekDone:false,weekPanel:"plan",taskOptionsOpen:false};
+const ui={projectView:"overview",renderedPage:"",projectMobilePane:"detail",memoPane:"list",overviewFilter:"open",collapsedProjects:new Set(),waitingExpanded:new Set(["undated"]),projectQuery:"",projectTaskQuery:"",projectDateSort:"default",projectAttentionFilter:"all",projectTaskOptionsOpen:false,projectBriefExpanded:new Map(),projectMilestoneFilter:"all",projectFocusTaskId:"",projectReturnTaskId:"",memoQuery:"",memoMultiSelect:false,selectedMemos:new Set(),showArchivedProjects:false,projectOverviewFilter:"open",selectedTasks:new Set(),showAllWeekDone:false,weekPanel:"plan",taskOptionsOpen:false};
 const THEME_KEY="work-cockpit-theme-v1";
 function applyTheme(value,remember=true){let preference=value||"system",dark=preference==="dark"||preference==="system"&&matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.dataset.theme=dark?"dark":"light";if(remember)localStorage.setItem(THEME_KEY,preference);let button=$("#themeButton");if(button){button.textContent=dark?"☀":"◐";button.dataset.tip=dark?"切换到浅色模式":"切换到暗夜模式"}let meta=$("meta[name=theme-color]");if(meta)meta.content=dark?"#080f1c":"#2468f2"}
 function toggleTheme(){applyTheme(document.documentElement.dataset.theme==="dark"?"light":"dark")}
@@ -71,10 +71,10 @@ function navigate(page,projectId){
  if(!["today","week","tasks","projects","memos","data","search"].includes(page))return;
  if(!journalFlush())return;
  rememberWorkspace();
+ applyTaskPageDefaults(page,currentPage);
  if(journalUI.open&&!journalUI.pinned){journalUI.open=false;journalUI.expanded=false;syncWorkJournal()}
  rememberProjectPosition();rememberSearchPosition();closeTaskDateMenu();
- if(projectId){selectedProjectId=projectId;ui.projectView="detail"}
+ if(projectId){if(selectedProjectId!==projectId){ui.projectOverviewFilter="open";ui.projectDateSort="default";ui.projectAttentionFilter="all";ui.projectMilestoneFilter="all";ui.projectTaskQuery="";ui.projectTaskOptionsOpen=false}selectedProjectId=projectId;ui.projectView="detail"}
  if(page!==currentPage){currentPage=page;navigationDepth+=1;history.pushState({page,appRoute:true,appNavDepth:navigationDepth},"","#"+page)}
  $("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender();
 }
-

@@ -31,4 +31,3 @@ function ensureCurrentWeek(){
  existing.actions=existing.actions||{};state.tasks.filter(task=>task.week&&!task.archived&&(!isDone(task)||task.completed>=now&&task.completed<=weekEnd(now))).forEach(task=>{if(!Object.hasOwn(existing.actions,task.id))existing.actions[task.id]={text:task.nextAction||"",result:""}});
  state.weeks[now]=existing;state.meta.activeWeekKey=now;
 }
-

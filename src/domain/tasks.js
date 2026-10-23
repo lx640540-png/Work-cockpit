@@ -34,14 +34,19 @@ function moveOrder(scope,fromId,toId,position="before"){
 function canAdvanceToday(task){return!task.archived&&!isDone(task)&&!["待处理","等待","暂停"].includes(task.status)}
 function isPlanDue(task,today=todayKey()){return!!task.planDate&&task.planDate<=today}
 function activateScheduledTasks(value=state){
- let changed=false,today=todayKey();
- value.tasks.forEach(task=>{if(canAdvanceToday(task)&&isPlanDue(task,today)&&!task.focus){task.focus=true;task.week=true;task.updatedAt=new Date().toISOString();changed=true}});
+ let changed=false,today=todayKey(),range=planningReviewRange(today);
+ value.tasks.forEach(task=>{if(!canAdvanceToday(task))return;let updated=false;if(task.planDate>=range.start&&task.planDate<=range.end&&!task.week){task.week=true;updated=true}if(isPlanDue(task,today)&&!task.focus){task.focus=true;task.week=true;updated=true}if(updated){task.updatedAt=new Date().toISOString();changed=true}});
  return changed;
 }
 function refreshScheduledTasks(){if(activateScheduledTasks()){captureCurrentWeek();saveLocal(true);requestRender()}}
 function setTaskFocus(task,active,draft){
  if(active){if(task.archived||isDone(task))return;setTaskStatus(task,"进行中",draft);task.focus=true;task.week=true}
  else{task.focus=false;if(isPlanDue(task))task.planDate=""}
+}
+function setTaskWeek(task,active,draft){
+ task.week=!!active;if(active)return;
+ setTaskFocus(task,false,draft);
+ if(task.planDate&&task.planDate<=planningReviewRange().end)task.planDate="";
 }
 function reconcileTaskEdit(task,previous){
  if(previous&&task.planDate!==previous.planDate&&(!task.planDate||task.planDate>todayKey()))task.focus=false;
@@ -53,7 +58,7 @@ function applyTaskCardTransition(task,fromScope,toScope,draft){
  let previous={...task},transition=TASK_CARD_TRANSITIONS[toScope];if(!transition?.accept)return;
  transition.apply(task,draft);reconcileTaskEdit(task,previous);
 }
-const TASK_CARD_TRANSITIONS=Object.freeze({today:{label:"我来推进",accept:true,apply(task,draft){setTaskFocus(task,true,draft)}},waiting:{label:"等待与催办",accept:true,apply(task,draft){setTaskStatus(task,"等待",draft)}},inbox:{label:"临时收件箱",accept:true,apply(task,draft){setTaskStatus(task,"待处理",draft)}},week:{label:"本周推进事项",accept:true,apply(task){task.week=true}},long:{label:"长期跟进",accept:true,apply(task,draft){task.type="长期跟进";task.week=false;setTaskFocus(task,false,draft)}},done:{label:"本周完成",accept:false}});
+const TASK_CARD_TRANSITIONS=Object.freeze({today:{label:"我来推进",accept:true,apply(task,draft){setTaskFocus(task,true,draft)}},waiting:{label:"等待与催办",accept:true,apply(task,draft){setTaskStatus(task,"等待",draft)}},inbox:{label:"临时收件箱",accept:true,apply(task,draft){setTaskStatus(task,"待处理",draft)}},week:{label:"本周推进事项",accept:true,apply(task){task.week=true}},long:{label:"长期跟进",accept:true,apply(task,draft){task.type="长期跟进";setTaskWeek(task,false,draft)}},done:{label:"本周完成",accept:false}});
 const pinKey=scope=>"pin"+scope.charAt(0).toUpperCase()+scope.slice(1);
 function isPinned(taskId,scope){return(state.order[pinKey(scope)]||[]).includes(taskId)}
 function pinOrdered(items,scope){let rows=ordered(items,scope),pins=new Set(state.order[pinKey(scope)]||[]);return rows.filter(task=>pins.has(task.id)).concat(rows.filter(task=>!pins.has(task.id)))}

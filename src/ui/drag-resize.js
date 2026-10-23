@@ -17,9 +17,12 @@ document.addEventListener("dragstart",event=>{
  let memo=event.target.closest("[data-memo-drag]");if(memo){dragState={kind:"memo",id:memo.dataset.memoDrag};event.dataTransfer.setData("text/plain",dragState.id);memo.closest(".memo-item")?.classList.add("dragging");return}
  let top=event.target.closest("[data-top-drag]");if(top){dragState={kind:"top",index:Number(top.dataset.topDrag)};event.dataTransfer.setData("text/plain",String(dragState.index))}
 });
-function trackSortableTaskPointer(event){if(!activeSortableTask)return;let point=Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?document.elementFromPoint(event.clientX,event.clientY):event.target,card=point?.closest?.(".drop-card[data-drop-zone]"),targetRow=point?.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;$$('.drop-card[data-drop-zone]').forEach(node=>node.classList.toggle("drag-target",node===card))}}
+function trackSortableTaskPointer(event){if(!activeSortableTask)return;let point=Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?document.elementFromPoint(event.clientX,event.clientY):event.target,card=point?.closest?.(".drop-card[data-drop-zone]"),targetRow=point?.closest?.(".task-row[data-task]");if(targetRow===activeSortableTask||targetRow?.classList.contains("sortable-fallback"))return;let intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;if(event.type==="pointerup"||event.type==="mouseup")activeSortableTask._taskReleaseIntent={...intent};$$('.drop-card[data-drop-zone]').forEach(node=>node.classList.toggle("drag-target",node===card))}}
 document.addEventListener("dragover",trackSortableTaskPointer,true);
 document.addEventListener("pointermove",trackSortableTaskPointer,true);
+// Capture the final visible row before Sortable removes its placeholder.
+document.addEventListener("pointerup",trackSortableTaskPointer,true);
+document.addEventListener("mouseup",trackSortableTaskPointer,true);
 document.addEventListener("dragover",event=>{
  if(activeSortableTask){let card=event.target.closest?.(".drop-card[data-drop-zone]"),targetRow=event.target.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;event.preventDefault();$$(".drop-card[data-drop-zone]").forEach(node=>node.classList.toggle("drag-target",node===card))}return}
  if(!dragState)return;
@@ -48,7 +51,7 @@ document.addEventListener("pointerout",event=>{let owner=event.target.closest("[
 document.addEventListener("pointerdown",hideUiTooltip,true);
 document.addEventListener("scroll",hideUiTooltip,true);
 
-window.addEventListener("popstate",event=>{let page=(location.hash||"#today").slice(1);if(["today","week","tasks","projects","memos","data","search"].includes(page)){rememberSearchPosition();currentPage=page;navigationDepth=Number(event.state?.appNavDepth||0);$("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender()}});
+window.addEventListener("popstate",event=>{let page=(location.hash||"#today").slice(1);if(["today","week","tasks","projects","memos","data","search"].includes(page)){rememberSearchPosition();applyTaskPageDefaults(page,currentPage);currentPage=page;navigationDepth=Number(event.state?.appNavDepth||0);$("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender()}});
 let todayResizeState=null;
 document.addEventListener("pointerdown",event=>{
  let richHandle=event.target.closest?.("[data-rich-height-resizer]");if(richHandle){let key=richHandle.dataset.richHeightResizer,spec=RICH_HEIGHT_SPECS[key],box=richHandle.closest("[data-rich-resize]"),editor=box?.querySelector(".rich-editor");if(!spec||!box||!editor)return;todayResizeState={kind:"richHeight",owner:richHandle,box,key,spec,startY:event.clientY,startHeight:editor.getBoundingClientRect().height};richHandle.classList.add("active");richHandle.setPointerCapture(event.pointerId);event.preventDefault();return}
@@ -63,7 +66,7 @@ document.addEventListener("pointerdown",event=>{
 });
 document.addEventListener("pointermove",event=>{
  let execution=$("#todayExecution");
- if(todayResizeState?.kind==="sidebar"){let stack=$(".today-sidebar-stack"),rect=stack?.getBoundingClientRect();if(rect){uiLayout.todayWaitingShare=Math.max(.2,Math.min(.8,(event.clientY-rect.top)/rect.height));stack.style.setProperty("--waiting-share",uiLayout.todayWaitingShare*100+"%")}}
+ if(todayResizeState?.kind==="sidebar"){let stack=$(".today-sidebar-stack"),rect=stack?.getBoundingClientRect();if(rect){uiLayout.todayWaitingShare=Math.max(.2,Math.min(.8,(event.clientY-rect.top+18)/Math.max(420,Math.min(760,window.innerHeight*.68))));stack.style.setProperty("--waiting-share",uiLayout.todayWaitingShare)}}
  if(todayResizeState?.kind==="weekPlan"||todayResizeState?.kind==="weekReview"){let owner=todayResizeState.splitOwner,rect=owner?.getBoundingClientRect();if(rect){let ratio=Math.max(.34,Math.min(.66,(event.clientX-rect.left)/rect.width)),key=todayResizeState.kind==="weekReview"?"weekReviewLeft":"weekPlanLeft";uiLayout[key]=ratio;owner.style.setProperty("--week-left",(ratio*100).toFixed(2)+"%")}}
  if(todayResizeState?.kind==="project"){uiLayout.projectListWidth=Math.max(280,Math.min(420,todayResizeState.startWidth+event.clientX-todayResizeState.startX));$("#projectWorkspace")?.style.setProperty("--project-list",uiLayout.projectListWidth+"px")}
  if(todayResizeState?.kind==="capture"){let capture=$("#todayCapture"),rect=capture?.getBoundingClientRect();if(rect){let ratio=Math.max(.34,Math.min(.66,(event.clientX-rect.left)/rect.width));uiLayout.quickNoteLeft=ratio;capture.style.setProperty("--quick-left",(ratio*100).toFixed(2)+"%")}}

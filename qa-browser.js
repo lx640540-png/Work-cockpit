@@ -14,6 +14,8 @@ const dragAt = (page, sourceSelector, targetSelector, ratio = 0.5) => page.evalu
   source.dispatchEvent(new DragEvent('dragend', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
 }, { sourceSelector, targetSelector, ratio });
 const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5) => {
+  // Measure the drop geometry after layout, without Sortable's decorative transition moving the target between samples.
+  await page.evaluate(()=>taskSortables.forEach(sortable=>sortable.option('animation',0)));
   const source = page.locator(sourceSelector), target = page.locator(targetSelector);
   const scrollStable = async locator => {
     for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -48,8 +50,8 @@ const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5)
       for(let parent=node.parentElement;parent;parent=parent.parentElement){const style=getComputedStyle(parent),clip=parent.getBoundingClientRect();if(/auto|scroll|hidden|clip/.test(style.overflowY)){top=Math.max(top,clip.top+parent.clientTop);bottom=Math.min(bottom,clip.top+parent.clientTop+parent.clientHeight)}if(/auto|scroll|hidden|clip/.test(style.overflowX)){left=Math.max(left,clip.left+parent.clientLeft);right=Math.min(right,clip.left+parent.clientLeft+parent.clientWidth)}}
       return{x:Math.max(left+2,Math.min(right-2,rect.left+rect.width/2)),y:Math.max(top+2,Math.min(bottom-2,rect.top+rect.height*ratio))};
     },ratio);
-    await page.mouse.move(point.x,point.y);await page.waitForTimeout(40);
-    hit=await page.evaluate(({selector,x,y})=>{const node=document.querySelector(selector),under=document.elementFromPoint(x,y);return !!(node&&under&&(node===under||node.contains(under)));},{selector:targetSelector,...point});
+    await page.mouse.move(point.x,point.y);await page.waitForTimeout(180);
+    hit=await page.evaluate(({selector,x,y,ratio})=>{const node=document.querySelector(selector),under=document.elementFromPoint(x,y);if(!node||!under||!(node===under||node.contains(under)))return false;const rect=node.getBoundingClientRect(),actual=(y-rect.top)/rect.height;return ratio<.5?actual<.5:ratio>.5?actual>=.5:true;},{selector:targetSelector,...point,ratio});
   }
   assert(hit,`release target is not visible after auto-scroll: ${targetSelector}`);
   await page.mouse.up();
@@ -236,7 +238,7 @@ async function testUrl() {
   await page.waitForFunction(() => document.querySelector('[data-filter-detail="project"]')?.open === true);
   await page.locator('[data-filter-detail="type"] summary').hover();
   await page.waitForFunction(() => document.querySelector('[data-filter-detail="type"]')?.open === true && document.querySelector('[data-filter-detail="project"]')?.open === false);
-  await page.locator('#page-tasks .task-table').hover(); await page.waitForTimeout(140);
+  await page.locator('#page-tasks .all-task-list').hover(); await page.waitForTimeout(140);
   assert(await page.locator('#page-tasks .task-advanced-panel').isHidden(), 'hover-opened task filters did not close after the pointer left');
   await page.click('[data-toggle-task-options]');
   await page.waitForSelector('#page-tasks .task-advanced-panel:not([hidden])');
@@ -253,9 +255,9 @@ async function testUrl() {
     pageNode.style.minHeight = '1800px';
     mainScroll.scrollTop = 0;
   });
-  const taskTableScroller = page.locator('#page-tasks .table-card');
+  const taskTableScroller = page.locator('#page-tasks .all-task-list');
   await taskTableScroller.hover(); await page.mouse.wheel(0, 90); await page.waitForTimeout(80);
-  const taskWheel = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('#page-tasks .table-card').scrollTop, maxHeight:getComputedStyle(document.querySelector('#page-tasks .table-card')).maxHeight }));
+  const taskWheel = await page.evaluate(() => ({ main: mainScroll.scrollTop, local: document.querySelector('#page-tasks .all-task-list').scrollTop, maxHeight:getComputedStyle(document.querySelector('#page-tasks .all-task-list')).maxHeight }));
   assert(taskWheel.main > 70 && taskWheel.local === 0 && taskWheel.maxHeight === 'none', `all-task wheel did not use the main page: ${JSON.stringify(taskWheel)}`);
   await page.evaluate(() => { document.querySelector('#page-tasks').style.minHeight = ''; mainScroll.scrollTop = 0; });
   await page.click('[data-open-task="t1"]');
@@ -263,6 +265,7 @@ async function testUrl() {
   await page.click('[data-add-check]');
   await page.click('[data-add-check]');
   await page.click('[data-add-check]');
+  await page.waitForFunction(()=>!renderFrame);await page.evaluate(()=>new Promise(requestAnimationFrame));
   const checklistRows = page.locator('#draftChecklist [data-check-drop]');
   await checklistRows.nth(0).locator('[data-check-text]').fill('检查项一');
   await checklistRows.nth(1).locator('[data-check-text]').fill('检查项二');
@@ -273,20 +276,20 @@ async function testUrl() {
   const checklistInput = page.locator('#draftChecklist [data-check-text]').last();
   await checklistInput.focus();
   const checklistFocus = await checklistInput.evaluate(node => ({ outline: getComputedStyle(node).outlineStyle, shadow: getComputedStyle(node).boxShadow }));
-  assert(checklistFocus.outline !== 'auto' && checklistFocus.shadow !== 'none', 'checklist focus kept the browser black outline');
+  assert(checklistFocus.outline === 'none' && checklistFocus.shadow === 'none', 'checklist inline editing must keep only the text caret');
   await page.fill('#taskTitle', '回车保存测试');
   await page.press('#taskTitle', 'Enter');
   await page.waitForFunction(() => !document.querySelector('#taskDialog').open);
   let saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').title === '回车保存测试', 'Enter on task title closed without saving');
-  assert(await page.locator('.task-table').getByText('回车保存测试', { exact: true }).count() === 1, 'saved task did not immediately reconcile the current view');
-  await page.click('[data-toggle-focus="t1"]');
+  assert(await page.locator('.all-task-list').getByText('回车保存测试', { exact: true }).count() === 1, 'saved task did not immediately reconcile the current view');
+  await page.click('#page-tasks [data-open-task="t1"]');await page.check('#draftFocus');await page.click('#saveTaskButton');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.tasks.find(task => task.id === 't1').focus && saved.tasks.find(task => task.id === 't1').week, 'today focus did not also enable week');
-  await page.click('[data-toggle-week="t1"]');
+  await page.click('#page-tasks [data-open-task="t1"]');await page.uncheck('#draftWeek');await page.click('#saveTaskButton');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(!saved.tasks.find(task => task.id === 't1').focus && !saved.tasks.find(task => task.id === 't1').week, 'removing week did not remove today focus');
-  await page.click('[data-toggle-focus="t1"]');
+  await page.click('#page-tasks [data-open-task="t1"]');await page.check('#draftFocus');await page.click('#saveTaskButton');
   await page.click('[data-page="today"]');
   await page.waitForSelector('#page-today.active #todayExecution', { state: 'visible' });
   assert(await page.locator('#todayHeightResizer,#captureResizer').count()===0,'removed layout handles remain');
@@ -383,6 +386,8 @@ async function testUrl() {
   await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="0"]');
   assert(await page.locator('[data-drop-zone="today"] .pinned-task-segment.has-pins,[data-drop-zone="today"] .pinned-divider').count() === 0, 'pin grouping remained visible after the last pinned task was cleared');
   const firstTodayBeforeCardDrop = await page.locator('[data-drop-scope="today"][data-task]').first().getAttribute('data-task');
+  // Ordering is tested with complete target rows; nested auto-scroll has a separate regression.
+  await page.setViewportSize({width:1920,height:1080});await page.locator('#todaySidebarSplitter').focus();await page.keyboard.press('End');
   await sortableDragAt(page, '[data-drag-handle="waiting"][data-task="t2"]', '[data-drop-zone="today"] .card-head', 0.5);
   await page.waitForSelector('[data-drop-scope="today"][data-task="t2"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
@@ -717,15 +722,15 @@ async function testUrl() {
   assert(saved.trash.filter(item => item.type === 'memo').length === 2, 'memo bulk delete did not move both records to trash');
 
   await page.click('[data-page="tasks"]');
-  await page.waitForFunction(() => document.querySelector('#page-tasks')?.classList.contains('active') && document.querySelector('#page-tasks tr[data-task="t1"]')?.getBoundingClientRect().height > 0);
-  const tableAlignment = await page.locator('#page-tasks tr[data-task="t1"]').evaluate(row => {
+  await page.waitForFunction(() => document.querySelector('#page-tasks')?.classList.contains('active') && document.querySelector('#page-tasks .task-row[data-task="t1"]')?.getBoundingClientRect().height > 0);
+  const tableAlignment = await page.locator('#page-tasks .task-row[data-task="t1"]').evaluate(row => {
     const status = row.querySelector('[data-property="status"]').getBoundingClientRect();
     const priority = row.querySelector('[data-property="priority"]').getBoundingClientRect();
     const pin = row.querySelector('[data-pin-task]').getBoundingClientRect();
-    return { verticalAlign:getComputedStyle(row.cells[8]).verticalAlign, statusCenter:status.y+status.height/2, priorityCenter:priority.y+priority.height/2, pinCenter:pin.y+pin.height/2 };
+    return { rowCenter:row.getBoundingClientRect().y+row.getBoundingClientRect().height/2,verticalAlign:getComputedStyle(row.querySelector('.task-trailing')).alignSelf, statusCenter:status.y+status.height/2, priorityCenter:priority.y+priority.height/2, pinCenter:pin.y+pin.height/2 };
   });
-  assert(tableAlignment.verticalAlign === 'middle' && Math.abs(tableAlignment.statusCenter-tableAlignment.priorityCenter) < 1 && Math.abs(tableAlignment.statusCenter-tableAlignment.pinCenter) < 1, `all-items status controls are not vertically aligned: ${JSON.stringify(tableAlignment)}`);
-  const taskTableType = await page.locator('#page-tasks').evaluate(root => ({ heading:parseFloat(getComputedStyle(root.querySelector('.task-table th')).fontSize), title:parseFloat(getComputedStyle(root.querySelector('.table-title-link')).fontSize), muted:getComputedStyle(root.querySelector('.table-sub')).color }));
+  assert(tableAlignment.verticalAlign === 'center' && Math.abs(tableAlignment.statusCenter-tableAlignment.priorityCenter) < 1 && Math.abs(tableAlignment.rowCenter-tableAlignment.pinCenter) < 1, `all-items status controls are not vertically aligned: ${JSON.stringify(tableAlignment)}`);
+  const taskTableType = await page.locator('#page-tasks').evaluate(root => ({ heading:parseFloat(getComputedStyle(root.querySelector('.all-task-select')).fontSize), title:parseFloat(getComputedStyle(root.querySelector('.task-title-link')).fontSize), muted:getComputedStyle(root.querySelector('.task-project')).color }));
   assert(taskTableType.heading >= 12 && taskTableType.title >= 14, `all-items typography hierarchy remained too small: ${JSON.stringify(taskTableType)}`);
   await page.evaluate(() => { window.__taskDetailFixture = { state:clone(state), undo:clone(undoStack), redo:clone(redoStack) }; });
   await page.click('#page-tasks.active [data-open-task="t1"]');
@@ -794,6 +799,7 @@ async function testUrl() {
   assert(await page.locator('#decisionDialog[open] .decision-rich-box .ql-container').count() === 2, 'key decision fields did not initialize as rich-text editors');
   assert(await page.locator('#decisionDialog[open] [data-rich-height-resizer]').count() === 2, 'key decision rich editors do not expose the shared bottom-edge resize area');
   const decisionResizeHandle = page.locator('[data-rich-height-resizer="decisionConclusionHeight"]');
+  await decisionResizeHandle.scrollIntoViewIfNeeded();
   const decisionResizeBox = await decisionResizeHandle.boundingBox();
   const decisionHeightBefore = await page.locator('#decisionConclusion').evaluate(node => node.getBoundingClientRect().height);
   await page.mouse.move(decisionResizeBox.x + decisionResizeBox.width / 2, decisionResizeBox.y + decisionResizeBox.height / 2);
@@ -802,7 +808,7 @@ async function testUrl() {
   await page.mouse.up();
   const decisionHeightAfter = await page.locator('#decisionConclusion').evaluate(node => node.getBoundingClientRect().height);
   richLayout = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-layout-v1')));
-  assert(decisionHeightAfter > decisionHeightBefore + 30 && richLayout.decisionConclusionHeight === Math.round(decisionHeightAfter), 'key decision editor height did not resize and persist');
+  assert(decisionHeightAfter > decisionHeightBefore + 30 && richLayout.decisionConclusionHeight === Math.round(decisionHeightAfter), 'key decision editor height did not resize and persist: '+JSON.stringify({before:decisionHeightBefore,after:decisionHeightAfter,saved:richLayout.decisionConclusionHeight,handle:decisionResizeBox}));
   await decisionResizeHandle.dblclick();
   assert(Math.abs(await page.locator('#decisionConclusion').evaluate(node => node.getBoundingClientRect().height) - 160) < 1, 'double-click did not restore the key decision editor height');
   await page.fill('#decisionTitle', '采用方案A');
@@ -835,10 +841,10 @@ async function testUrl() {
   await page.evaluate(() => { mainScroll.scrollTop = 0; });
   assert(await page.locator('#projectSearch').count() === 0, 'project list still contains the removed search box');
   await page.fill('#projectTaskSearch', '保持推进顺序');
-  await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length === 1);
-  assert((await page.locator('#page-projects .overview-row .task-title-link').first().textContent()).includes('保持推进顺序'), 'project-local task search returned the wrong item');
+  await page.waitForFunction(() => document.querySelectorAll('#page-projects [data-project-task]').length === 1);
+  assert((await page.locator('#page-projects [data-project-task] .task-title-link').first().textContent()).includes('保持推进顺序'), 'project-local task search returned the wrong item');
   await page.fill('#projectTaskSearch', '');
-  await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length > 1);
+  await page.waitForFunction(() => document.querySelectorAll('#page-projects [data-project-task]').length > 1);
   await page.click('#page-projects.active [data-open-task="t1"]');
   await page.waitForSelector('#taskDialog[open] [data-go-task-project]:not([disabled])');
   await page.click('[data-go-task-project]');
@@ -849,16 +855,17 @@ async function testUrl() {
   await page.waitForSelector('#taskDialog[open] #taskTitle');
   assert(await page.locator('#taskTitle').inputValue() === '回车保存测试', 'project return path opened the wrong task');
   await page.click('#taskForm .modal-actions [data-close="taskDialog"]');
+  if(await page.locator('[data-toggle-project-task-options]').getAttribute('aria-expanded')==='false')await page.click('[data-toggle-project-task-options]');
   await page.locator('.project-milestone-filter summary').hover();
   await page.waitForFunction(() => document.querySelector('.project-milestone-filter')?.open === true);
   const milestoneChoices = await page.locator('.project-milestone-filter .milestone-filter-choice').evaluateAll(nodes => nodes.map(node => node.textContent.replace(/\s+/g, ' ').trim()));
   assert(milestoneChoices.length === 3 && milestoneChoices.some(text => text.includes('DVT 验证')) && milestoneChoices.some(text => text.includes('小批试产')), `project milestone filter did not list every milestone separately: ${milestoneChoices.join(' | ')}`);
   await page.click('[data-project-milestone-filter="m1"]');
-  await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length === 2);
-  assert(await page.locator('#page-projects .overview-row').count() === 2, 'project milestone filter did not isolate milestone tasks');
+  await page.waitForFunction(() => document.querySelectorAll('#page-projects [data-project-task]').length === 2);
+  assert(await page.locator('#page-projects [data-project-task]').count() === 2, 'project milestone filter did not isolate milestone tasks');
   await page.locator('.project-milestone-filter summary').hover();
   await page.click('[data-project-milestone-filter="all"]');
-  await page.waitForFunction(() => document.querySelectorAll('#page-projects .overview-row').length > 2);
+  await page.waitForFunction(() => document.querySelectorAll('#page-projects [data-project-task]').length > 2);
   await page.evaluate(() => { projectById('p1').milestones = clone(window.__projectMilestoneFixture); delete window.__projectMilestoneFixture; saveLocal(true); requestRender(); });
   await page.waitForFunction(() => document.querySelectorAll('.project-milestone-filter .milestone-filter-choice').length === 1);
   const selectedStyle = await page.locator('[data-select-project="p1"]').evaluate(node => ({ background: getComputedStyle(node).backgroundColor, panel: getComputedStyle(document.querySelector('.project-list-panel')).backgroundColor, shadow: getComputedStyle(node).boxShadow, border: getComputedStyle(node).borderColor }));
@@ -907,7 +914,7 @@ async function testUrl() {
   assert(await page.locator('#projectTemplate').inputValue() === 'hardware', 'new project did not select the hardware template by default');
   assert(await page.locator('#projectDialog .milestone-nav').count() === 6, 'hardware project template did not generate six milestone stages');
   assert(await page.locator('#milestoneName').inputValue() === '需求冻结', 'hardware project template starts with the wrong milestone');
-  await page.selectOption('#projectTemplate', 'blank');
+  await page.selectOption('#projectTemplate', 'blank');if(await page.locator('#confirmDialog').evaluate(n=>n.open))await page.click('#confirmAccept');
   assert(await page.locator('#projectDialog .milestone-nav').count() === 0, 'blank project template kept generated milestones');
   await page.selectOption('#projectTemplate', 'hardware');
   assert(await page.locator('#projectDialog .milestone-nav').count() === 6, 'switching back to hardware template did not restore stages');
@@ -915,9 +922,9 @@ async function testUrl() {
   if(await page.locator('#confirmDialog').evaluate(n=>n.open))await page.click('#confirmAccept');
   await page.click('[data-select-project="p1"] .project-list-name');
   await page.click('[data-edit-project="p1"]');
-  await page.click('[data-project-panel="decisions"]');
+  await page.click('[data-project-settings-tab="records"]');await page.click('[data-project-panel="decisions"]');
   assert(await page.locator('[data-edit-decision]').count() >= 1, 'project decision panel is empty');
-  await page.click('#deleteProjectButton');
+  await page.locator('#projectMaintenance summary').click();await page.click('#deleteProjectButton');
   await page.click('#confirmAccept');
   await page.click('#confirmAccept');
   await page.waitForFunction(() => !document.querySelector('#projectDialog').open);

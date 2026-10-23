@@ -92,7 +92,6 @@ html[data-visual-preview] body:is(.memo-workspace,.project-workspace) .app{heigh
 :root[data-calm-today] #page-today .quick-note-status{font-size:10px;padding:0 18px 12px}
 :root[data-calm-today] #page-today .waiting-group{border-color:var(--line)}
 :root[data-calm-today] #page-today .waiting-group>summary{font-size:12px;padding:12px 0}
-:root[data-calm-today] #page-today .inbox-more{margin-top:12px}
 :root[data-calm-today] .journal-handle{right:0;box-shadow:0 2px 8px #0000000a;color:var(--muted);border-radius:8px 0 0 8px;font-size:12px}
 html[data-visual-preview=new] #workJournal{--panel:#fff;--soft:#f4f4f5;--ink:#202023;--text:#3f3f46;--muted:#686870;--line:#e5e5e8;--blue:#2563eb;--shadow:0 8px 24px #00000012;border-radius:0;border-color:var(--line);grid-template-columns:70px minmax(0,1fr);box-shadow:-8px 0 28px #0000000d}
 html[data-visual-preview=new] #workJournal .journal-control-rail{background:color-mix(in srgb,var(--soft) 50%,var(--panel));border-right:1px solid var(--line);padding:0}

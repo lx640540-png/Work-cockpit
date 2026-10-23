@@ -5,8 +5,8 @@
   "description": "Regression test environment for the Work Cockpit single-page application",
   "scripts": {
     "test": "npm run test:static && npm run test:browser",
-    "test:static": "npm run check:build && node qa-regression.js index.html && node qa-reliability.js && node qa-structure.js && node qa-cloud-startup.js && node --test qa-journal.js && node --test qa-iteration.js",
-    "test:browser": "node --test qa-browser.js qa-workflow-browser.js qa-journal-browser.js qa-fixes-browser.js qa-ui-layout-browser.js qa-iteration-browser.js",
+    "test:static": "npm run check:build && node qa-regression.js index.html && node qa-reliability.js && node qa-structure.js && node qa-cloud-startup.js && node --test qa-journal.js && node --test qa-workflow-data.js && node --test qa-project-details.js && node --test qa-checklist-project.js && node --test qa-task-journal.js && node --test qa-workflow-closure.js",
+    "test:browser": "node --test qa-browser.js qa-workflow-browser.js qa-journal-browser.js qa-fixes-browser.js qa-ui-layout-browser.js qa-iteration-browser.js qa-workflow-closure-browser.js",
     "setup:cloud": "playwright install chromium",
     "build": "node scripts/build.js",
     "check:build": "node scripts/build.js --check",

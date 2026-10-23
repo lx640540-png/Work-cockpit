@@ -1,0 +1,65 @@
+/* One planning-row layout; editor width yields before identity and properties. */
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning{display:grid;grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing';align-items:start;column-gap:10px}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.task-leading{grid-area:leading;align-self:start;margin-top:4px}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.task-trailing{grid-area:trailing;align-self:center!important;margin-top:0}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{grid-area:main;display:grid;grid-template-areas:'identity editor meta';grid-template-columns:minmax(160px,1fr) minmax(0,var(--planning-editor-width,320px)) minmax(140px,200px);gap:16px;align-items:start;min-width:0}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.week-task-identity{grid-area:identity;min-width:0}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta{grid-area:meta;position:static;width:100%;min-width:0;max-width:none;margin:0;justify-content:flex-end;align-self:start;flex-wrap:wrap}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>:is(.week-action-label,.overview-next-label){grid-area:editor;width:100%;min-width:0;max-width:100%;margin:0;justify-self:start;box-sizing:border-box}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row textarea{width:100%;min-width:0;max-width:100%;max-height:240px;overflow-y:auto!important;resize:none}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-width-handle{top:22px;bottom:0;right:0;width:12px}
+.planning-reveal{display:none}
+@container(max-width:1000px){
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{grid-template-areas:'identity meta' 'editor editor';grid-template-columns:minmax(0,1fr) minmax(140px,190px);gap:8px 16px}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.planning-resizable{width:100%;padding-right:0}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-width-handle{display:none}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-reveal{display:block;width:100%;max-width:100%;padding:5px 0;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12px;text-align:left;cursor:pointer}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-resizable:not(.planning-expanded)>.planning-reveal{white-space:nowrap;overflow:hidden;mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent)}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-resizable:not(.planning-expanded)>span,.ui-planning-row .planning-resizable:not(.planning-expanded)>textarea{display:none}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-expanded>.planning-reveal{color:var(--blue);font-size:11px}
+}
+@container(max-width:480px){
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{grid-template-areas:'identity' 'meta' 'editor';grid-template-columns:minmax(0,1fr);gap:8px}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta{justify-content:flex-start}
+ :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta :is(.followup,.muted){text-align:left}
+}
+/* Project details use the selected project as the page title. */
+:root[data-calm-today] .project-master-tools{display:flex;align-items:center;gap:8px;padding:0 0 12px;margin-bottom:8px;position:sticky;top:0;z-index:2;background:var(--panel);border-bottom:1px solid var(--line)}
+.project-master-tools>.btn{flex:1;min-width:0;font-size:12px;padding:6px 8px;white-space:nowrap}
+:root[data-calm-today] .project-detail-card .portfolio-head h2{font-size:22px;line-height:1.4}
+.project-brief{padding-top:14px;padding-bottom:12px}
+.project-stage-heading>button{font-size:16px;font-weight:600}
+.project-criteria{font-size:13px;max-width:1000px}.project-criteria summary>b{font-size:12px;color:var(--muted)}
+.project-brief-metrics{gap:6px;margin:8px 0}
+.project-brief .project-brief-columns{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;max-width:1000px}
+.project-brief-columns:has(>section:only-child){grid-template-columns:minmax(0,1fr)}
+.project-brief-heading h3{font-size:13px;font-weight:600}.project-brief-heading h3 small{font-size:11px;font-weight:400;color:var(--muted)}
+.project-brief-task>span{font-size:13px;line-height:1.6}.project-brief-task>small{font-size:12px;line-height:1.6}
+.project-brief .project-brief-task{padding-block:4px;margin-bottom:4px}
+.project-brief-context>summary{font-size:12px;margin-bottom:6px}
+.project-stage>.project-stage-blocker{display:block;justify-self:start;border:0;background:transparent;color:var(--red);font:inherit;font-size:12px;padding:3px 0;text-align:left;overflow-wrap:anywhere}
+@container calm-project (max-width:600px){.project-brief .project-brief-columns{grid-template-columns:minmax(0,1fr);gap:12px}}
+/* A resize affordance belongs below the text, without a persistent blue input edge. */
+.rich-resizable:not(.rich-expanded){padding-bottom:14px}
+:root[data-calm-today] .rich-height-resizer.ui-resize-divider:before{opacity:0!important;background:var(--line)!important}
+:root[data-calm-today] .rich-height-resizer.ui-resize-divider:hover:before{opacity:1!important;background:var(--line)!important}
+:root[data-calm-today] .rich-height-resizer.ui-resize-divider:is(.active,.resizing,:focus-visible):before{opacity:1!important;background:var(--blue)!important}
+/* Checklist dates are secondary metadata and never steal the text column. */
+.checklist-section{container-type:inline-size}
+#draftChecklist .checklist-item{display:grid;grid-template-columns:18px 16px minmax(0,1fr) auto 25px;align-items:center;gap:5px;min-width:0;padding:6px 0}
+#draftChecklist .checklist-item>.drag-handle{grid-column:1;grid-row:1;width:18px;height:28px;min-width:0;padding:0;margin:0;align-self:center;opacity:0}
+#draftChecklist .checklist-item:is(:hover,:focus-within)>.drag-handle{opacity:1}
+#draftChecklist .checklist-item>input[type=checkbox]{grid-column:2;grid-row:1;align-self:center}
+#draftChecklist .checklist-item>.checklist-text{grid-column:3;grid-row:1;min-width:0;width:100%;border:0;background:transparent;font:inherit;height:28px;line-height:20px;padding:4px 3px;margin:0;align-self:center;box-sizing:border-box;caret-color:var(--text)}
+#draftChecklist .checklist-item>.icon-btn{grid-column:5;grid-row:1;align-self:center}
+.checklist-time{grid-column:4;grid-row:1;border:0;background:transparent;color:var(--muted);font:inherit;font-size:11px;display:inline-flex;align-items:center;align-self:center;height:28px;line-height:20px;white-space:nowrap;padding:4px 3px;cursor:pointer}
+.checklist-time:hover{color:var(--blue)}
+.checklist-time-editor{grid-column:3/-1;grid-row:2;padding:10px;border:1px solid var(--line);border-radius:6px;min-width:0;background:var(--panel)}
+.checklist-time-editor p{margin:0 0 8px;color:var(--muted);font-size:11px;overflow-wrap:anywhere}.checklist-time-editor label{display:block;font-size:12px;margin-bottom:6px}
+.checklist-time-editor input{width:100%;min-width:0;max-width:100%;font:inherit;padding:6px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:5px}
+.checklist-time-editor>div{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:8px}.checklist-time-editor .btn{font-size:11px;min-height:28px;padding:4px 8px}
+.history-check-time{margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap}
+@container(max-width:430px){#draftChecklist .checklist-time{grid-column:3/5;grid-row:2;text-align:left;line-height:20px;padding-left:3px}#draftChecklist .checklist-time-editor{grid-row:3}}
+@media(hover:none){#draftChecklist .checklist-item>.drag-handle{opacity:1}}
+
+#draftChecklist .checklist-item>.checklist-text:is(:focus,:focus-visible){outline:none;outline-offset:0;box-shadow:none;border:0;background:transparent}
