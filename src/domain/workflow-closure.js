@@ -25,7 +25,7 @@ function applyPlanningReview(draft,scope,decisions,now=todayKey()){
  }
  let changed=0;
  for(const choice of changes){const {task}=choice,before=JSON.stringify(task);
-  if(choice.action==='remove'){if(scope==='week')task.week=false;setTaskFocus(task,false,draft)}
+  if(choice.action==='remove'){if(scope==='week')setTaskWeek(task,false,draft);else setTaskFocus(task,false,draft)}
   else{if(scope==='next'&&task.status==='待处理')setTaskStatus(task,'进行中',draft);task.focus=false;task.planDate=choice.date;if(scope!=='next'){if(choice.date>range.end)task.week=false;else if(scope==='week')task.week=true}}
   if(JSON.stringify(task)!==before){task.updatedAt=new Date().toISOString();changed++}
  }

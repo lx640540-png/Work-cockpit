@@ -1599,7 +1599,7 @@ function applyPlanningReview(draft,scope,decisions,now=todayKey()){
  }
  let changed=0;
  for(const choice of changes){const {task}=choice,before=JSON.stringify(task);
-  if(choice.action==='remove'){if(scope==='week')task.week=false;setTaskFocus(task,false,draft)}
+  if(choice.action==='remove'){if(scope==='week')setTaskWeek(task,false,draft);else setTaskFocus(task,false,draft)}
   else{if(scope==='next'&&task.status==='待处理')setTaskStatus(task,'进行中',draft);task.focus=false;task.planDate=choice.date;if(scope!=='next'){if(choice.date>range.end)task.week=false;else if(scope==='week')task.week=true}}
   if(JSON.stringify(task)!==before){task.updatedAt=new Date().toISOString();changed++}
  }
@@ -1848,6 +1848,11 @@ function setTaskFocus(task,active,draft){
  if(active){if(task.archived||isDone(task))return;setTaskStatus(task,"进行中",draft);task.focus=true;task.week=true}
  else{task.focus=false;if(isPlanDue(task))task.planDate=""}
 }
+function setTaskWeek(task,active,draft){
+ task.week=!!active;if(active)return;
+ setTaskFocus(task,false,draft);
+ if(task.planDate&&task.planDate<=planningReviewRange().end)task.planDate="";
+}
 function reconcileTaskEdit(task,previous){
  if(previous&&task.planDate!==previous.planDate&&(!task.planDate||task.planDate>todayKey()))task.focus=false;
  if(!canAdvanceToday(task))task.focus=false;
@@ -1858,7 +1863,7 @@ function applyTaskCardTransition(task,fromScope,toScope,draft){
  let previous={...task},transition=TASK_CARD_TRANSITIONS[toScope];if(!transition?.accept)return;
  transition.apply(task,draft);reconcileTaskEdit(task,previous);
 }
-const TASK_CARD_TRANSITIONS=Object.freeze({today:{label:"我来推进",accept:true,apply(task,draft){setTaskFocus(task,true,draft)}},waiting:{label:"等待与催办",accept:true,apply(task,draft){setTaskStatus(task,"等待",draft)}},inbox:{label:"临时收件箱",accept:true,apply(task,draft){setTaskStatus(task,"待处理",draft)}},week:{label:"本周推进事项",accept:true,apply(task){task.week=true}},long:{label:"长期跟进",accept:true,apply(task,draft){task.type="长期跟进";task.week=false;setTaskFocus(task,false,draft)}},done:{label:"本周完成",accept:false}});
+const TASK_CARD_TRANSITIONS=Object.freeze({today:{label:"我来推进",accept:true,apply(task,draft){setTaskFocus(task,true,draft)}},waiting:{label:"等待与催办",accept:true,apply(task,draft){setTaskStatus(task,"等待",draft)}},inbox:{label:"临时收件箱",accept:true,apply(task,draft){setTaskStatus(task,"待处理",draft)}},week:{label:"本周推进事项",accept:true,apply(task){task.week=true}},long:{label:"长期跟进",accept:true,apply(task,draft){task.type="长期跟进";setTaskWeek(task,false,draft)}},done:{label:"本周完成",accept:false}});
 const pinKey=scope=>"pin"+scope.charAt(0).toUpperCase()+scope.slice(1);
 function isPinned(taskId,scope){return(state.order[pinKey(scope)]||[]).includes(taskId)}
 function pinOrdered(items,scope){let rows=ordered(items,scope),pins=new Set(state.order[pinKey(scope)]||[]);return rows.filter(task=>pins.has(task.id)).concat(rows.filter(task=>!pins.has(task.id)))}
@@ -3385,7 +3390,7 @@ function handleClick(event){
  if(target.dataset.pinTask)return updateTask(target.dataset.pinTask,"切换事项置顶",(task,draft)=>{let key=pinKey(target.dataset.pinScope),list=draft.order[key]||(draft.order[key]=[]);draft.order[key]=list.includes(task.id)?list.filter(id=>id!==task.id):list.concat(task.id)});
  if(target.dataset.unpinAll)return commit("取消当前卡片全部置顶",draft=>draft.order[pinKey(target.dataset.unpinAll)]=[],{immediate:true});
  if(target.dataset.toggleFocus)return commit("切换今日行动",draft=>{let task=draft.tasks.find(item=>item.id===target.dataset.toggleFocus);setTaskFocus(task,!task.focus,draft)},{immediate:true});
- if(target.dataset.toggleWeek)return commit("切换本周行动",draft=>{let task=draft.tasks.find(item=>item.id===target.dataset.toggleWeek);task.week=!task.week;if(!task.week)setTaskFocus(task,false,draft)},{immediate:true});
+ if(target.dataset.toggleWeek)return commit("切换本周行动",draft=>{let task=draft.tasks.find(item=>item.id===target.dataset.toggleWeek);setTaskWeek(task,!task.week,draft)},{immediate:true});
  if(target.dataset.property)return openChoice(target,target.dataset.property,target.dataset.task);
  if(target.dataset.smartSort){
   let scope=target.dataset.smartSort,items=scope==="today"?todayAdvance():scope==="waiting"?todayWaiting():scope==="week"?weekTasks():scope==="long"?longTasks():filteredTasks();return applySmartOrder(items,scope);
@@ -3547,7 +3552,7 @@ document.addEventListener("change",event=>{
   if(target.checked){if(taskDraft.archived||["已完成"].includes($("#draftStatus").value)){target.checked=false;return toast("请先恢复事项，再加入今日")}$("#draftWeek").checked=true;$("#draftStatus").value="进行中";syncHoverSelect($("#draftStatus"));syncTaskCompletedField()}
   else if(isPlanDue({planDate:$("#draftPlanDate").value})){$("#draftPlanDate").value="";toast("已取消今日安排和已到期的计划日期")}
  }
- else if(target.id==="draftWeek"){if(!target.checked){$("#draftFocus").checked=false;if(isPlanDue({planDate:$("#draftPlanDate").value})){$("#draftPlanDate").value="";toast("已取消本周、今日安排和已到期的计划日期")}}}
+ else if(target.id==="draftWeek"){if(!target.checked){$("#draftFocus").checked=false;let input=$("#draftPlanDate"),schedule={planDate:input.value};setTaskWeek(schedule,false);if(input.value!==schedule.planDate){input.value=schedule.planDate;toast("已取消本周、今日安排和本周内的计划日期")}}}
  else if(target.id==="draftPlanDate"){let eligible=!taskDraft.archived&&!["待处理","等待","暂停","已完成"].includes($("#draftStatus").value);if(!target.value||target.value>todayKey())$("#draftFocus").checked=false;else if(eligible){$("#draftFocus").checked=true;$("#draftWeek").checked=true}}
  else if(target.id==="decisionProject"){decisionDraft.project=target.value;decisionDraft.milestone="";$("#decisionMilestone").innerHTML=milestoneOptions(decisionDraft.project,"");syncHoverSelect($("#decisionMilestone"))}
  else if(target.id==="decisionSourceTask"&&target.value){let source=taskById(target.value);if(source){decisionDraft.sourceTaskId=source.id;decisionDraft.project=source.project;decisionDraft.milestone=source.milestone;$("#decisionProject").innerHTML=decisionProjectOptions(source.project);$("#decisionMilestone").innerHTML=milestoneOptions(source.project,source.milestone);syncHoverSelect($("#decisionProject"));syncHoverSelect($("#decisionMilestone"))}}

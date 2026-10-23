@@ -28,7 +28,7 @@ function ruleContext() {
     state: { tasks: [] }, clone: copy, statuses: ['待处理','进行中','等待','暂停','已完成'],
     priorities: ['P0','P1','P2','P3'], taskTypes: ['任务','临时事项','长期跟进'],
     sanitizeRichValue: x => x, normalizeRich: x => x, uid: () => 'new-id' });
-  for (const name of ['planningReviewRange','canAdvanceToday','isPlanDue','activateScheduledTasks','setTaskFocus',
+  for (const name of ['planningReviewRange','canAdvanceToday','isPlanDue','activateScheduledTasks','setTaskFocus','setTaskWeek',
     'setTaskStatus','reconcileTaskEdit','applyTaskCardTransition','normalizeProgressLog','normalizeChecklistItem','normalizeTask']) {
     vm.runInContext(source(name), context);
   }

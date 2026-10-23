@@ -52,7 +52,7 @@ function handleClick(event){
  if(target.dataset.pinTask)return updateTask(target.dataset.pinTask,"切换事项置顶",(task,draft)=>{let key=pinKey(target.dataset.pinScope),list=draft.order[key]||(draft.order[key]=[]);draft.order[key]=list.includes(task.id)?list.filter(id=>id!==task.id):list.concat(task.id)});
  if(target.dataset.unpinAll)return commit("取消当前卡片全部置顶",draft=>draft.order[pinKey(target.dataset.unpinAll)]=[],{immediate:true});
  if(target.dataset.toggleFocus)return commit("切换今日行动",draft=>{let task=draft.tasks.find(item=>item.id===target.dataset.toggleFocus);setTaskFocus(task,!task.focus,draft)},{immediate:true});
- if(target.dataset.toggleWeek)return commit("切换本周行动",draft=>{let task=draft.tasks.find(item=>item.id===target.dataset.toggleWeek);task.week=!task.week;if(!task.week)setTaskFocus(task,false,draft)},{immediate:true});
+ if(target.dataset.toggleWeek)return commit("切换本周行动",draft=>{let task=draft.tasks.find(item=>item.id===target.dataset.toggleWeek);setTaskWeek(task,!task.week,draft)},{immediate:true});
  if(target.dataset.property)return openChoice(target,target.dataset.property,target.dataset.task);
  if(target.dataset.smartSort){
   let scope=target.dataset.smartSort,items=scope==="today"?todayAdvance():scope==="waiting"?todayWaiting():scope==="week"?weekTasks():scope==="long"?longTasks():filteredTasks();return applySmartOrder(items,scope);
@@ -214,7 +214,7 @@ document.addEventListener("change",event=>{
   if(target.checked){if(taskDraft.archived||["已完成"].includes($("#draftStatus").value)){target.checked=false;return toast("请先恢复事项，再加入今日")}$("#draftWeek").checked=true;$("#draftStatus").value="进行中";syncHoverSelect($("#draftStatus"));syncTaskCompletedField()}
   else if(isPlanDue({planDate:$("#draftPlanDate").value})){$("#draftPlanDate").value="";toast("已取消今日安排和已到期的计划日期")}
  }
- else if(target.id==="draftWeek"){if(!target.checked){$("#draftFocus").checked=false;if(isPlanDue({planDate:$("#draftPlanDate").value})){$("#draftPlanDate").value="";toast("已取消本周、今日安排和已到期的计划日期")}}}
+ else if(target.id==="draftWeek"){if(!target.checked){$("#draftFocus").checked=false;let input=$("#draftPlanDate"),schedule={planDate:input.value};setTaskWeek(schedule,false);if(input.value!==schedule.planDate){input.value=schedule.planDate;toast("已取消本周、今日安排和本周内的计划日期")}}}
  else if(target.id==="draftPlanDate"){let eligible=!taskDraft.archived&&!["待处理","等待","暂停","已完成"].includes($("#draftStatus").value);if(!target.value||target.value>todayKey())$("#draftFocus").checked=false;else if(eligible){$("#draftFocus").checked=true;$("#draftWeek").checked=true}}
  else if(target.id==="decisionProject"){decisionDraft.project=target.value;decisionDraft.milestone="";$("#decisionMilestone").innerHTML=milestoneOptions(decisionDraft.project,"");syncHoverSelect($("#decisionMilestone"))}
  else if(target.id==="decisionSourceTask"&&target.value){let source=taskById(target.value);if(source){decisionDraft.sourceTaskId=source.id;decisionDraft.project=source.project;decisionDraft.milestone=source.milestone;$("#decisionProject").innerHTML=decisionProjectOptions(source.project);$("#decisionMilestone").innerHTML=milestoneOptions(source.project,source.milestone);syncHoverSelect($("#decisionProject"));syncHoverSelect($("#decisionMilestone"))}}
