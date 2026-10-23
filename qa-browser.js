@@ -48,8 +48,8 @@ const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5)
       for(let parent=node.parentElement;parent;parent=parent.parentElement){const style=getComputedStyle(parent),clip=parent.getBoundingClientRect();if(/auto|scroll|hidden|clip/.test(style.overflowY)){top=Math.max(top,clip.top+parent.clientTop);bottom=Math.min(bottom,clip.top+parent.clientTop+parent.clientHeight)}if(/auto|scroll|hidden|clip/.test(style.overflowX)){left=Math.max(left,clip.left+parent.clientLeft);right=Math.min(right,clip.left+parent.clientLeft+parent.clientWidth)}}
       return{x:Math.max(left+2,Math.min(right-2,rect.left+rect.width/2)),y:Math.max(top+2,Math.min(bottom-2,rect.top+rect.height*ratio))};
     },ratio);
-    await page.mouse.move(point.x,point.y);await page.waitForTimeout(40);
-    hit=await page.evaluate(({selector,x,y})=>{const node=document.querySelector(selector),under=document.elementFromPoint(x,y);return !!(node&&under&&(node===under||node.contains(under)));},{selector:targetSelector,...point});
+    await page.mouse.move(point.x,point.y);await page.waitForTimeout(180);
+    hit=await page.evaluate(({selector,x,y,ratio})=>{const node=document.querySelector(selector),under=document.elementFromPoint(x,y);if(!node||!under||!(node===under||node.contains(under)))return false;const rect=node.getBoundingClientRect(),actual=(y-rect.top)/rect.height;return ratio<.5?actual<.5:ratio>.5?actual>=.5:true;},{selector:targetSelector,...point,ratio});
   }
   assert(hit,`release target is not visible after auto-scroll: ${targetSelector}`);
   await page.mouse.up();
