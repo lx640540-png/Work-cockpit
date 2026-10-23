@@ -290,14 +290,14 @@ test('project settings preserves drafts across decisions and protects close on s
 });
 
 test('shared width handles persist per card and compact editors remain reachable',{timeout:30000},async t=>{
- const page=await fixture(t,[makeTask('a',{focus:true,week:true,project:'p1'}),makeTask('b',{week:true,project:'p1'})],{projects:projectFixture});await page.setViewportSize({width:1920,height:1080});
+ const page=await fixture(t,[makeTask('a',{focus:true,week:true,project:'p1'}),makeTask('b',{week:true,project:'p1'})],{projects:projectFixture});page.setDefaultTimeout(5000);await page.setViewportSize({width:1920,height:1080});
  await page.click('[data-page="projects"]');
- const handle=page.locator('[data-overview-project="p1"] [data-scoped-planning]').first();await handle.scrollIntoViewIfNeeded();
+ const handle=page.locator('[data-overview-project="p1"] [data-scoped-planning]').first();console.log('planning handle geometry',await handle.evaluate(n=>({w:n.getBoundingClientRect().width,h:n.getBoundingClientRect().height,card:n.closest('.project-overview-group').clientWidth,display:getComputedStyle(n).display})));await handle.scrollIntoViewIfNeeded();
  const before=Number(await handle.getAttribute('aria-valuenow'));await handle.focus();await handle.press('ArrowRight');
  const value=Number(await handle.getAttribute('aria-valuenow'));assert.equal(value,before+16);
  assert.equal(await page.locator('[data-overview-project="p1"] [data-scoped-planning]').last().getAttribute('aria-valuenow'),String(value));
  await page.reload();assert.equal(await page.locator('[data-overview-project="p1"] [data-scoped-planning]').first().getAttribute('aria-valuenow'),String(value));
- await page.click('[data-page="week"]');const field=page.locator('[data-week-action="a"]');assert(await field.isHidden());await page.locator('[data-task="a"] .planning-reveal').click();assert(await field.isVisible());
+ await page.click('[data-page="week"]');await page.locator('#page-week.active').waitFor();const field=page.locator('#page-week [data-week-action="a"]');assert(await field.isHidden());await page.locator('#page-week [data-task="a"] .planning-reveal').click();assert(await field.isVisible());
  await page.setViewportSize({width:800,height:700});const overflow=await page.locator('#mainScroll').evaluate(n=>n.scrollWidth-n.clientWidth);assert(overflow<=1);
 });
 
