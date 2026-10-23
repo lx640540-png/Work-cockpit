@@ -2333,7 +2333,8 @@ function projectOptions(selected){return'<option value="">通用事项</option>'
 function milestoneOptions(projectId,selected){
  let project=projectById(projectId);return'<option value="">暂不关联里程碑</option>'+(project?.milestones||[]).map(milestone=>'<option value="'+esc(milestone.id)+'" '+(selected===milestone.id?"selected":"")+'>'+esc(milestone.name)+'</option>').join("");
 }
-let checklistTimeEditingId="";
+let checklistTimeEditingId="",checklistFocusFrame=0;
+function collectChecklistText(){if(!taskDraft)return;let byId=new Map(taskDraft.checklist.map(item=>[item.id,item]));$$("#draftChecklist [data-check-id]").forEach(input=>{let item=byId.get(input.dataset.checkId);if(item)item.text=input.value})}
 function checklistTimeLabel(item,now=new Date()){
  if(!item.done)return "";if(!item.completedAt)return "时间未记录";
  let date=new Date(item.completedAt);if(!Number.isFinite(date.getTime()))return "时间未记录";
@@ -2346,7 +2347,7 @@ function checklistMarkup(){
  return taskDraft.checklist.map((item,index)=>{
   let editing=item.done&&checklistTimeEditingId===item.id,time=item.done?'<button class="checklist-time" type="button" data-edit-check-time="'+esc(item.id)+'" aria-label="查看或修改检查项完成时间：'+esc(item.text)+'" aria-expanded="'+editing+'" title="'+esc(checklistFullTime(item.completedAt))+'">'+esc(checklistTimeLabel(item))+'</button>':'';
   let edit=editing?'<div class="checklist-time-editor"><p>完成时间 · '+esc(checklistFullTime(item.completedAt))+'</p><label for="checklistCompletedAt">修改完成时间</label><input id="checklistCompletedAt" type="datetime-local" step="60" value="'+esc(checklistLocalTime(item.completedAt))+'"><div><button class="btn" type="button" data-cancel-check-time>取消</button><button class="btn" type="button" data-save-check-time="'+esc(item.id)+'">保存时间</button></div></div>':'';
-  return '<div class="attachment-item checklist-item" data-check-drop="'+index+'"><button class="drag-handle" type="button" draggable="true" data-check-drag="'+index+'" aria-label="拖动调整检查项顺序">⠿</button><input type="checkbox" data-check-done="'+index+'" aria-label="完成检查项：'+esc(item.text)+'" '+(item.done?'checked':'')+'><input class="checklist-text" type="text" data-check-text="'+index+'" aria-label="检查项内容" value="'+esc(item.text)+'" placeholder="检查项">'+time+'<button class="icon-btn" type="button" data-remove-check="'+index+'" aria-label="删除检查项">×</button>'+edit+'</div>';
+  return '<div class="attachment-item checklist-item" data-check-drop="'+index+'"><button class="drag-handle" type="button" draggable="true" data-check-drag="'+index+'" aria-label="拖动调整检查项顺序">⠿</button><input type="checkbox" data-check-done="'+index+'" aria-label="完成检查项：'+esc(item.text)+'" '+(item.done?'checked':'')+'><input class="checklist-text" type="text" data-check-text="'+index+'" data-check-id="'+esc(item.id)+'" aria-label="检查项内容" value="'+esc(item.text)+'" placeholder="检查项">'+time+'<button class="icon-btn" type="button" data-remove-check="'+index+'" aria-label="删除检查项">×</button>'+edit+'</div>';
  }).join("")||'<div class="muted" style="font-size:11px">暂无检查项</div>';
 }
 function saveChecklistTime(id){
@@ -2411,9 +2412,11 @@ function syncOpenTaskDraftFromState(){
  clearTimeout(taskAutosaveTimer);taskAutosaveTimer=0;taskDraft=clone(current);relatedDraft=new Set(taskDraft.relatedTaskIds||[]);taskAutosaveSignature=taskDraftSignature(taskDraft);renderTaskEditor();setTaskAutosaveStatus("saved","已与撤销记录同步");
 }
 function refreshChecklist(options={}){
- let section=$(".checklist-section"),list=$("#draftChecklist"),toggle=$("[data-toggle-checklist]");if(!section||!list)return;section.classList.toggle("collapsed",taskChecklistCollapsed);section.style.height=taskChecklistHeight&&!taskChecklistCollapsed?Math.round(taskChecklistHeight)+"px":"";toggle.textContent=(taskChecklistCollapsed?"展开":"收起")+" · "+taskDraft.checklist.length;list.innerHTML=checklistMarkup();if(options.focusLast)requestAnimationFrame(()=>{let input=$("#draftChecklist .attachment-item:last-child [data-check-text]");input?.focus();input?.scrollIntoView({block:"nearest"})});
+ collectChecklistText();cancelAnimationFrame(checklistFocusFrame);
+ let section=$(".checklist-section"),list=$("#draftChecklist"),toggle=$("[data-toggle-checklist]");if(!section||!list)return;section.classList.toggle("collapsed",taskChecklistCollapsed);section.style.height=taskChecklistHeight&&!taskChecklistCollapsed?Math.round(taskChecklistHeight)+"px":"";toggle.textContent=(taskChecklistCollapsed?"展开":"收起")+" · "+taskDraft.checklist.length;list.innerHTML=checklistMarkup();if(options.focusLast)checklistFocusFrame=requestAnimationFrame(()=>{let input=$("#draftChecklist .attachment-item:last-child [data-check-text]");input?.focus();input?.scrollIntoView({block:"nearest"})});
 }
 function collectTaskDraft(){
+ collectChecklistText();
  taskDraft.title=$("#taskTitle").value.trim();taskDraft.nextAction=$("#taskNext").value.trim();taskDraft.notes=serializeRichEditor($("#taskNotes"));taskDraft.obsidianUri=$("#taskObsidianUri").value.trim();taskDraft.type=$("#draftType").value;taskDraft.status=$("#draftStatus").value;taskDraft.priority=$("#draftPriority").value;taskDraft.planDate=$("#draftPlanDate").value;taskDraft.due=$("#draftDue").value;taskDraft.completed=taskDraft.status==="已完成"?($("#draftCompleted").value||taskDraft.completed||todayKey()):"";taskDraft.followup=$("#draftFollowup").value;taskDraft.project=$("#draftProject").value;taskDraft.milestone=$("#draftMilestone").value;taskDraft.focus=$("#draftFocus").checked;taskDraft.week=$("#draftWeek").checked||taskDraft.focus;taskDraft.inbox=taskDraft.status==="待处理";taskDraft.relatedTaskIds=Array.from(relatedDraft);taskDraft.updatedAt=new Date().toISOString();
 }
 function taskDraftSignature(task){let value=clone(task||{});delete value.updatedAt;return JSON.stringify(value)}

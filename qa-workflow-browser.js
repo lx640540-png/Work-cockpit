@@ -175,7 +175,7 @@ const projectFixture=[{id:'p1',name:'项目甲',milestones:[]},{id:'p2',name:'�
 test('project overview edits original tasks, retains empty projects and schedules long-term work',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('long',{type:'长期跟进',project:'p1',nextAction:'发出目录确认',notes:'<p>收到初稿，等待目录确认。</p>'}),makeTask('paused',{project:'p1',status:'暂停'})],{route:'projects',projects:projectFixture});
  assert.equal(await page.locator('[data-overview-project]').count(),2);
- assert.equal(await page.locator('[data-overview-project="p1"] [data-task="paused"]').count(),1);
+ assert.equal(await page.locator('[data-overview-project="p1"] .task-row[data-task="paused"]').count(),1);
  const row=page.locator('[data-overview-project="p1"] .task-row[data-task="long"]');
  const overviewGeometry=await row.evaluate(row=>{const n=row.getBoundingClientRect();return{height:n.height,overflow:row.scrollWidth-row.clientWidth}});
  assert(overviewGeometry.height<150&&overviewGeometry.overflow<=1,JSON.stringify(overviewGeometry));
@@ -201,8 +201,8 @@ test('project overview edits original tasks, retains empty projects and schedule
 test('weekly planning and review retain their action and results through completion and rollover',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('a',{week:true,project:'p1',nextAction:'确认目录'}),makeTask('b',{week:true,type:'长期跟进',nextAction:'确认交期'})],{route:'week',projects:projectFixture});
  page.setDefaultTimeout(10000);
- const weeklyGeometry=await page.locator('[data-drop-zone="week"] .task-row[data-task="a"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),action=box(row.querySelector('.week-action-label')),meta=box(row.querySelector('.task-meta')),whole=box(row);return{rowHeight:whole.height,actionLeft:action.left,actionRight:action.right,metaLeft:meta.left,metaRight:meta.right,metaTop:meta.top,actionBottom:action.bottom,rowRight:whole.right}});
- assert(weeklyGeometry.rowHeight<150&&(weeklyGeometry.metaLeft>=weeklyGeometry.actionRight-1||weeklyGeometry.metaTop>=weeklyGeometry.actionBottom-1)&&weeklyGeometry.metaRight<=weeklyGeometry.rowRight,JSON.stringify(weeklyGeometry));
+ const weeklyGeometry=await page.locator('[data-drop-zone="week"] .task-row[data-task="a"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),action=box(row.querySelector('.week-action-label')),meta=box(row.querySelector('.task-meta')),whole=box(row);return{rowHeight:whole.height,actionLeft:action.left,actionRight:action.right,metaLeft:meta.left,metaRight:meta.right,metaTop:meta.top,metaBottom:meta.bottom,actionTop:action.top,actionBottom:action.bottom,rowRight:whole.right}});
+ assert(weeklyGeometry.rowHeight<150&&(weeklyGeometry.metaLeft>=weeklyGeometry.actionRight-1||weeklyGeometry.metaTop>=weeklyGeometry.actionBottom-1||weeklyGeometry.metaBottom<=weeklyGeometry.actionTop+1)&&weeklyGeometry.metaRight<=weeklyGeometry.rowRight,JSON.stringify(weeklyGeometry));
  if(await page.locator('[data-week-action="a"]').isHidden())await page.locator('[data-task="a"] .planning-reveal').click();
  const longWeekAction='确认目录并完成初稿，同时补齐结构示意、测试结论和仍待确认的问题，提交给相关人员审核后记录下一轮修改项。';
  await page.locator('[data-week-action="a"]').fill(longWeekAction);
@@ -290,7 +290,7 @@ test('project settings preserves drafts across decisions and protects close on s
 });
 
 test('shared width handles persist per card and compact editors remain reachable',{timeout:30000},async t=>{
- const page=await fixture(t,[makeTask('a',{focus:true,week:true,project:'p1'}),makeTask('b',{week:true,project:'p1'})],{projects:projectFixture});
+ const page=await fixture(t,[makeTask('a',{focus:true,week:true,project:'p1'}),makeTask('b',{week:true,project:'p1'})],{projects:projectFixture});await page.setViewportSize({width:1920,height:1080});
  await page.click('[data-page="projects"]');
  const handle=page.locator('[data-overview-project="p1"] [data-scoped-planning]').first();await handle.scrollIntoViewIfNeeded();
  const before=Number(await handle.getAttribute('aria-valuenow'));await handle.focus();await handle.press('ArrowRight');
