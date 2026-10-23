@@ -797,6 +797,7 @@ async function testUrl() {
   assert(await page.locator('#decisionDialog[open] .decision-rich-box .ql-container').count() === 2, 'key decision fields did not initialize as rich-text editors');
   assert(await page.locator('#decisionDialog[open] [data-rich-height-resizer]').count() === 2, 'key decision rich editors do not expose the shared bottom-edge resize area');
   const decisionResizeHandle = page.locator('[data-rich-height-resizer="decisionConclusionHeight"]');
+  await decisionResizeHandle.scrollIntoViewIfNeeded();
   const decisionResizeBox = await decisionResizeHandle.boundingBox();
   const decisionHeightBefore = await page.locator('#decisionConclusion').evaluate(node => node.getBoundingClientRect().height);
   await page.mouse.move(decisionResizeBox.x + decisionResizeBox.width / 2, decisionResizeBox.y + decisionResizeBox.height / 2);
@@ -805,7 +806,7 @@ async function testUrl() {
   await page.mouse.up();
   const decisionHeightAfter = await page.locator('#decisionConclusion').evaluate(node => node.getBoundingClientRect().height);
   richLayout = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-layout-v1')));
-  assert(decisionHeightAfter > decisionHeightBefore + 30 && richLayout.decisionConclusionHeight === Math.round(decisionHeightAfter), 'key decision editor height did not resize and persist');
+  assert(decisionHeightAfter > decisionHeightBefore + 30 && richLayout.decisionConclusionHeight === Math.round(decisionHeightAfter), 'key decision editor height did not resize and persist: '+JSON.stringify({before:decisionHeightBefore,after:decisionHeightAfter,saved:richLayout.decisionConclusionHeight,handle:decisionResizeBox}));
   await decisionResizeHandle.dblclick();
   assert(Math.abs(await page.locator('#decisionConclusion').evaluate(node => node.getBoundingClientRect().height) - 160) < 1, 'double-click did not restore the key decision editor height');
   await page.fill('#decisionTitle', '采用方案A');
