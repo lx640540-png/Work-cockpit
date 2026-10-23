@@ -2,14 +2,14 @@
 function journalExport(format,section="days"){
  if(format==="review")return journalExport("plain","review");
  if(section==="review"&&!journalRichReviewEnabled()){
-  let review=normalizeJournalReview(journalWeek(journalUI.week).review),labels={achievements:"本周成果",issues:"遗留问题",next:"下周跟进"};
+  let review=normalizeJournalReview(journalWeek(journalUI.week).review),labels=WEEKLY_SUMMARY_LABELS;
   let parts=JOURNAL_REVIEW_FIELDS.filter(field=>review[field].trim()).map(field=>labels[field]+"\n"+review[field].trim());
   return parts.length?journalUI.week.slice(0,4)+"年 "+dateShort(journalUI.week)+"—"+dateShort(weekEnd(journalUI.week))+" 周五整理\n\n"+parts.join("\n\n"):"";
  }
  let week=journalWeek(journalUI.week),parts=[];
  for(let date of (section==="review"?JOURNAL_REVIEW_FIELDS:Object.keys(week.days).sort())){
   let editor=$(section==="review"?'[data-journal-review="'+date+'"]':'[data-journal-date="'+date+'"]'),q=quillFor(editor);if(!q||!q.getText().trim())continue;
-  let title=section==="review"?({achievements:"本周成果",issues:"遗留问题",next:"下周跟进"}[date]):journalDateLabel(date);if(format==="rich"){parts.push('<h2>'+esc(title)+'</h2>'+journalRichExport(q.getSemanticHTML()));continue}
+  let title=section==="review"?(WEEKLY_SUMMARY_LABELS[date]):journalDateLabel(date);if(format==="rich"){parts.push('<h2>'+esc(title)+'</h2>'+journalRichExport(q.getSemanticHTML()));continue}
   let lines=[],ops=q.getContents().ops,inline="";
   const escapeMD=text=>text.replace(/([\\`*_{}\[\]<>#!|])/g,"\\$1");let counters=[];
   for(let op of ops){if(typeof op.insert!=="string"){if(op.insert?.divider!==undefined)lines.push((op.insert.divider?String(op.insert.divider)+'\n':'')+'---');else if(op.insert?.focus)inline+='重点 ';continue}let chunks=op.insert.split("\n");for(let i=0;i<chunks.length;i++){

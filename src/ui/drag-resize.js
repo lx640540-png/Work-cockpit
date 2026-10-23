@@ -48,7 +48,7 @@ document.addEventListener("pointerout",event=>{let owner=event.target.closest("[
 document.addEventListener("pointerdown",hideUiTooltip,true);
 document.addEventListener("scroll",hideUiTooltip,true);
 
-window.addEventListener("popstate",event=>{let page=(location.hash||"#today").slice(1);if(["today","week","tasks","projects","memos","data","search"].includes(page)){rememberSearchPosition();currentPage=page;navigationDepth=Number(event.state?.appNavDepth||0);$("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender()}});
+window.addEventListener("popstate",event=>{let page=(location.hash||"#today").slice(1);if(["today","week","tasks","projects","memos","data","search"].includes(page)){rememberSearchPosition();applyTaskPageDefaults(page,currentPage);currentPage=page;navigationDepth=Number(event.state?.appNavDepth||0);$("#mainScroll").scrollTo({top:0,behavior:"auto"});requestRender()}});
 let todayResizeState=null;
 document.addEventListener("pointerdown",event=>{
  let richHandle=event.target.closest?.("[data-rich-height-resizer]");if(richHandle){let key=richHandle.dataset.richHeightResizer,spec=RICH_HEIGHT_SPECS[key],box=richHandle.closest("[data-rich-resize]"),editor=box?.querySelector(".rich-editor");if(!spec||!box||!editor)return;todayResizeState={kind:"richHeight",owner:richHandle,box,key,spec,startY:event.clientY,startHeight:editor.getBoundingClientRect().height};richHandle.classList.add("active");richHandle.setPointerCapture(event.pointerId);event.preventDefault();return}
@@ -63,7 +63,7 @@ document.addEventListener("pointerdown",event=>{
 });
 document.addEventListener("pointermove",event=>{
  let execution=$("#todayExecution");
- if(todayResizeState?.kind==="sidebar"){let stack=$(".today-sidebar-stack"),rect=stack?.getBoundingClientRect();if(rect){uiLayout.todayWaitingShare=Math.max(.2,Math.min(.8,(event.clientY-rect.top)/rect.height));stack.style.setProperty("--waiting-share",uiLayout.todayWaitingShare*100+"%")}}
+ if(todayResizeState?.kind==="sidebar"){let stack=$(".today-sidebar-stack"),rect=stack?.getBoundingClientRect();if(rect){uiLayout.todayWaitingShare=Math.max(.2,Math.min(.8,(event.clientY-rect.top+18)/Math.max(420,Math.min(760,window.innerHeight*.68))));stack.style.setProperty("--waiting-share",uiLayout.todayWaitingShare)}}
  if(todayResizeState?.kind==="weekPlan"||todayResizeState?.kind==="weekReview"){let owner=todayResizeState.splitOwner,rect=owner?.getBoundingClientRect();if(rect){let ratio=Math.max(.34,Math.min(.66,(event.clientX-rect.left)/rect.width)),key=todayResizeState.kind==="weekReview"?"weekReviewLeft":"weekPlanLeft";uiLayout[key]=ratio;owner.style.setProperty("--week-left",(ratio*100).toFixed(2)+"%")}}
  if(todayResizeState?.kind==="project"){uiLayout.projectListWidth=Math.max(280,Math.min(420,todayResizeState.startWidth+event.clientX-todayResizeState.startX));$("#projectWorkspace")?.style.setProperty("--project-list",uiLayout.projectListWidth+"px")}
  if(todayResizeState?.kind==="capture"){let capture=$("#todayCapture"),rect=capture?.getBoundingClientRect();if(rect){let ratio=Math.max(.34,Math.min(.66,(event.clientX-rect.left)/rect.width));uiLayout.quickNoteLeft=ratio;capture.style.setProperty("--quick-left",(ratio*100).toFixed(2)+"%")}}

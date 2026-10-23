@@ -11,15 +11,16 @@ function initScopedPlanningResize(root=document){
   let handle=label.querySelector('[data-planning-resize]');if(handle?.hasAttribute("data-scoped-planning"))return;if(handle)handle.remove();
   handle=document.createElement('span');Object.assign(handle.dataset,{planningResize:'',scopedPlanning:'',tip:'调整当前卡片的编辑列；双击复位'});handle.className='planning-width-handle';handle.tabIndex=0;handle.setAttribute('role','separator');handle.setAttribute('aria-label','调整当前卡片编辑列宽度');handle.setAttribute('aria-orientation','vertical');handle.setAttribute('aria-valuemin','160');handle.setAttribute('aria-valuemax','640');label.append(handle);
   let reveal=document.createElement('button');reveal.type='button';reveal.className='planning-reveal';reveal.setAttribute('aria-expanded','false');label.append(reveal);
-  const preview=()=>{let text=label.querySelector('textarea')?.value.trim();reveal.textContent=text||'编辑推进内容';reveal.title=text||'编辑推进内容'};preview();label.querySelector('textarea')?.addEventListener('input',preview);
-  reveal.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();let expanded=label.classList.toggle('planning-expanded');reveal.setAttribute('aria-expanded',String(expanded));if(expanded)label.querySelector('textarea')?.focus({preventScroll:true})});
+  const preview=()=>{let text=label.querySelector('textarea')?.value.trim();reveal.textContent=label.classList.contains('planning-expanded')?'收起编辑':text||'点击编辑推进内容';reveal.title=text||'点击编辑推进内容';reveal.setAttribute('aria-label',label.classList.contains('planning-expanded')?'收起推进内容编辑':'展开推进内容编辑')};preview();label.querySelector('textarea')?.addEventListener('input',preview);
+  reveal.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();let expanded=label.classList.toggle('planning-expanded');reveal.setAttribute('aria-expanded',String(expanded));preview();schedulePlanningTextareaResize();if(expanded)label.querySelector('textarea')?.focus({preventScroll:true})});
   bindUiSplitter(handle,{read:()=>pref.value,write:value=>{pref.value=value;card.style.setProperty('--planning-editor-width',value+'px');card.querySelectorAll('[data-scoped-planning]').forEach(node=>node.setAttribute('aria-valuenow',Math.round(value)));schedulePlanningTextareaResize()},min:160,max:640,step:16,reset:320,position:event=>event.clientX-label.getBoundingClientRect().left,commit:()=>{if(key==='showcase')return;scopedPlanningPrefs[key]=pref.value;try{localStorage.setItem('work-cockpit-planning-columns-v2',JSON.stringify(scopedPlanningPrefs))}catch{}}});handle.setAttribute('aria-valuenow',Math.round(pref.value));
  });
 }
 function journalMountAboveModal(){
- let panel=$('#workJournal');if(!panel||!journalUI.open)return;
+ let panel=$('#workJournal');if(!panel)return;if(!journalUI.open){syncTaskJournalLayout();return;}
+ if($('#workflowDialog')?.open){if(panel.parentElement!==document.body)document.body.appendChild(panel);return;}
  let modal=[...document.querySelectorAll('dialog[open]')].filter(node=>!panel.contains(node)&&!node.matches('.journal-copy-dialog')).at(-1),host=expandedRichBox&&(!modal||modal.contains(expandedRichBox))?expandedRichBox:modal||document.body;
- if(panel.parentElement!==host){let active=panel.contains(document.activeElement)?document.activeElement:null;host.appendChild(panel);active?.focus({preventScroll:true});journalLayout()}
+ if(panel.parentElement!==host){let active=panel.contains(document.activeElement)?document.activeElement:null;host.appendChild(panel);active?.focus({preventScroll:true})}journalLayout();
 }
 function toggleJournalShortcut(){
  initWorkJournal();let panel=$('#workJournal');
@@ -44,16 +45,17 @@ window.addEventListener('keydown',event=>{
  }
 },true);
 if(VISUAL_PREVIEW_ENABLED){
- new MutationObserver(()=>{if(journalUI.open)journalMountAboveModal()}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['open']});
+ new MutationObserver(()=>{if(journalUI.open)journalMountAboveModal();else syncTaskJournalLayout()}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['open']});
  document.addEventListener('focusin',event=>{let editor=event.target.closest?.('#workJournal [data-journal-review]');if(editor)journalUI.lastReview=editor.dataset.journalReview});
 }
 function componentPreviewMarkup(){
  let sample={...state.tasks[0],id:'component-example',title:'核对样机供电与测试条件，补充复测结论',nextAction:'记录测试条件与验证结果',project:state.projects[0]?.id||'',status:'进行中',priority:'P1',type:'任务',focus:false,week:true,planDate:todayKey(),due:'',completed:''};
- return '<div class="component-preview-content">'+uiSectionHeading('<div><p class="eyebrow">COMPONENTS</p><h1 tabindex="-1">组件展示</h1><p class="muted">与工作台共用结构和样式；在这里检查状态、内容和窄栏适配。</p></div>','<button type="button" class="btn" data-component-back>返回工作台</button>','component-preview-head')+
+ return '<div class="component-preview-content">'+uiSectionHeading('<div><p class="eyebrow">COMPONENTS</p><h1 tabindex="-1">组件展示</h1><p class="muted">与工作台共用任务条、侧栏项、编辑器和分割线；在这里检查状态、内容和窄栏适配。</p></div>','<button type="button" class="btn" data-component-back>返回工作台</button>','component-preview-head')+
  '<div class="component-preview-controls"><label>示例宽度 <input type="range" min="340" max="1120" value="1000" data-component-width><output>1000px</output></label><label>列表状态 <select data-component-state><option value="normal">普通</option><option value="hover">悬停</option><option value="selected">选中</option><option value="disabled">禁用</option></select></label><span>真实悬停、Tab聚焦及拖动也可直接操作</span></div>'+
  '<section class="component-example"><h2>按钮与业务状态</h2><div class="component-control-row"><button class="btn primary">主要操作</button><button class="btn">次要操作</button><button class="link-btn">轻量操作</button><button class="btn danger">删除</button><button class="btn" disabled>暂不可用</button></div><div class="component-control-row">'+['进行中','已完成','等待','暂停'].map(status=>propertyButton({...sample,status},'status',true)).join('')+['P0','P1','P2'].map(priority=>propertyButton({...sample,priority},'priority',true)).join('')+'</div></section>'+
  '<section class="component-example"><h2>任务条与编辑列</h2><p class="muted">拖动输入区右侧分割线只调整本卡片；缩窄容器可检查预览收起与属性换行。</p><div class="component-width-frame"><div class="component-task-example drop-card" data-component-frame>'+taskRow(sample,{scope:'week'})+'</div></div></section>'+
  '<section class="component-example"><h2>共用侧栏列表项：项目与备忘录</h2><div class="component-memo-example" data-component-frame>'+projectListItem({...state.projects[0],name:'样机验证与交付'},{current:true,pinned:true})+'</div><div class="component-memo-example" data-component-frame>'+memoListItem({id:'component-memo',title:'样机验证前的检查',project:sample.project,updatedAt:new Date().toISOString(),pinned:true,content:''},{current:true,selected:false,selecting:false})+'</div></section>'+
+ '<section class="component-example"><h2>执行任务条与就地操作</h2><p class="muted">完成框表示整个事项完成；安排操作在任务详情中完成，工作记录也从详情进入。属性保持可见，置顶固定在最右侧。</p><div class="component-width-frame"><div class="component-task-example drop-card" data-component-frame>'+taskRow(sample,{scope:'today'})+'</div></div></section>'+
  '<section class="component-example"><h2>拖动手柄与插入位置</h2><div class="component-sort-example">'+['确认测试条件','记录实测数据','整理验证结论'].map((title,index)=>'<div class="ui-list-item component-sort-row" data-component-sort="'+index+'">'+uiDragHandle('draggable="true" data-component-drag="'+index+'"')+'<span>'+title+'</span></div>').join('')+'</div></section>'+
  '<section class="component-example"><h2>富文本与标题快捷键</h2><p class="muted">Alt+1 二级标题 · Alt+2 三级标题 · Alt+3 正文。Esc下方按键可随时打开／收回工作记录。</p><div class="editor-box component-rich-example">'+toolbar()+'<div class="rich-editor" data-component-editor contenteditable="true"><h2>验证记录</h2><p>直接编辑这一段，检查工具栏、列表和段落移动。</p><ol><li>核对供电条件</li><li>记录复测结论</li></ol></div></div></section>'+
  '<section class="component-example"><h2>可调整分栏</h2><div class="component-split-example"><div>左侧内容区</div><button class="ui-splitter" type="button" role="separator" aria-label="调整示例分栏" aria-orientation="vertical" aria-valuemin="25" aria-valuemax="75" aria-valuenow="50"></button><div>右侧内容区</div></div><p class="muted">支持拖动、方向键及双击复位。</p></section>'+

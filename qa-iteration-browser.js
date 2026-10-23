@@ -19,7 +19,7 @@ test('weekly comparison excludes older completions and retains removed-task resu
  const p=await fixture(t);await p.evaluate(()=>{state.tasks=[normalizeTask({id:'a',title:'本周图纸审核',status:'进行中',week:true,nextAction:'核对三处修改'}),normalizeTask({id:'old',title:'九月已完成的测试',status:'已完成',week:true,completed:'2026-09-10'}),normalizeTask({id:'done',title:'本周完成的测试',status:'已完成',week:true,completed:'2026-10-21'})];state.weeks={};ensureCurrentWeek();captureCurrentWeek();saveLocal(true);navigate('week')});
  await p.click('[data-week-panel="review"]');await p.waitForSelector('[data-week-result="done"]');assert.equal(await p.locator('.week-comparison [data-open-task="old"]').count(),0);assert.equal(await p.locator('.week-comparison [data-open-task="done"]').count(),1);
  await p.locator('[data-week-result="a"]').fill('三处已确认两处');await p.locator('[data-week-result="a"]').press('Tab');await p.click('.week-comparison [data-open-task="a"]');await p.locator('#draftWeek').uncheck();await p.getByRole('button',{name:'关闭',exact:true}).click();
- await p.waitForSelector('[data-week-result="a"]');assert.equal(await p.locator('[data-week-result="a"]').inputValue(),'三处已确认两处');assert.match(await p.locator('.week-comparison').innerText(),/已移出本周安排/);
+ await p.waitForSelector('[data-week-result="a"]');assert.equal(await p.locator('[data-week-result="a"]').inputValue(),'三处已确认两处');assert.match(await p.locator('.week-comparison').innerText(),/未列入当前本周行动/);
  await p.reload();await p.click('[data-week-panel="review"]');assert.equal(await p.locator('[data-week-result="a"]').inputValue(),'三处已确认两处');
 });
 test('historical rich review disables edits while allowing expansion for reading',async t=>{

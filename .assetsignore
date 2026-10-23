@@ -22,3 +22,5 @@ qa-fixes-browser.js
 qa-journal-browser.js
 qa-journal.js
 qa-ui-layout-browser.js
+
+qa-*.js

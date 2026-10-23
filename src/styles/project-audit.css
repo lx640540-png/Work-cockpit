@@ -1,0 +1,162 @@
+/* Project details: stage first, concise context, then the working list. */
+:root[data-calm-today] .project-detail-card .portfolio-head{padding-bottom:12px;margin-bottom:0}
+.project-brief{margin:0 0 12px;padding:14px 0 12px}
+.project-brief .project-stage{gap:6px;margin:0 0 10px}
+.project-stage-heading{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.project-stage-heading .eyebrow{color:var(--muted);font-size:11px;letter-spacing:0;text-transform:none}
+.project-stage-heading>button{border:0;padding:0;background:transparent;color:var(--text);font:inherit;font-size:16px;line-height:1.5;font-weight:600;text-align:left;overflow-wrap:anywhere}
+.project-stage-heading>button:hover{color:var(--blue)}.project-stage-status{font-size:10px;padding:2px 5px;background:var(--soft);border-radius:4px;color:var(--muted)}
+.project-stage-heading time{margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap}
+.project-criteria{font-size:12px;line-height:1.65}
+.project-criteria summary{display:flex;align-items:flex-start;gap:8px;list-style:none;cursor:pointer}
+.project-criteria summary::-webkit-details-marker{display:none}
+.project-criteria summary>b{flex:none;font-weight:500;color:var(--text)}
+.project-criteria summary>span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-width:0;color:var(--muted);white-space:pre-wrap}
+.project-criteria summary>small{flex:none;color:var(--muted);font-size:0;margin-left:auto}
+.project-criteria summary>small:after{content:"展开";font-size:10px}
+.project-criteria[open] summary>small:after{content:"收起"}.project-criteria[open] summary>span{display:none}
+.project-criteria p{margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--muted)}
+.project-criteria-empty{margin:0;color:var(--muted);font-size:12px}
+#page-projects .project-brief .project-description{width:auto;flex:none;border:0;border-radius:0;background:transparent;padding:0;color:var(--muted);font-size:11px}
+#page-projects .project-brief .project-description summary{padding:0;min-height:0;font-size:11px}
+#page-projects .project-brief .project-description p{padding:0;margin:5px 0;font-size:12px;white-space:pre-wrap}
+.project-brief-metrics{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.project-brief-metrics button{display:flex;align-items:center;gap:6px;padding:3px 7px;border:1px solid var(--line);border-radius:5px;background:transparent;color:var(--muted);font:inherit;font-size:11px}
+.project-brief-metrics strong{font-size:12px;font-weight:600;color:var(--text)}.project-brief-metrics button:hover:not(:disabled){color:var(--blue);background:var(--soft)}
+.project-brief-metrics button:disabled{opacity:.65;cursor:default}.project-brief-metrics>small{margin-left:auto;color:var(--muted);font-size:10px}
+.project-brief .project-brief-columns{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:0}
+.project-brief-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px;margin:0 0 4px}
+.project-brief-heading h3{margin:0;font-size:12px;line-height:1.5;font-weight:600}
+.project-brief-heading>.muted,.project-brief-heading>.link-btn{font-size:10px;flex:none}
+.project-brief .project-brief-task{display:grid;gap:2px;width:100%;padding:3px 0;margin:0 0 5px;border:0;background:transparent;text-align:left}
+.project-brief-task>span,.project-brief-task>small{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.project-brief-task>span{font-size:12px;color:var(--text)}.project-brief-task:hover>span{color:var(--blue)}
+.project-brief-task>small{font-size:11px;line-height:1.5;color:var(--muted);font-weight:400;-webkit-line-clamp:2}
+.project-brief-columns .muted{margin:5px 0;font-size:11px}
+.project-recent{font-size:11px;margin-top:7px;color:var(--muted)}.project-recent summary{cursor:pointer;padding:3px 0}.project-recent summary span{margin-left:5px}.project-recent>div{margin-top:5px;padding:6px 0 0}
+:root[data-calm-today] .project-task-head{display:grid;grid-template-columns:minmax(0,1fr);justify-content:stretch;justify-items:stretch;gap:8px;align-items:stretch;padding:0 0 12px;margin:0}
+.project-task-heading{display:flex;align-items:center;gap:8px;min-width:0}
+.project-task-heading h3{font-size:14px;margin:0;font-weight:600}.project-task-heading .project-result-count{font-size:11px;color:var(--muted)}
+.project-task-heading .project-full-view{margin-left:auto;flex:none;font-size:11px}
+.project-task-search-row .project-task-search{display:block;width:100%;min-width:0}
+.project-task-search-row input{width:100%;font-size:12px}
+:root[data-calm-today] .project-task-tools{display:flex;align-items:center;flex-direction:row;flex-wrap:wrap;gap:6px}
+.project-task-tools .segmented{min-width:0}.project-task-tools .segmented button{font-size:11px;padding-inline:9px}
+.project-task-tools .project-milestone-filter{margin-left:auto}
+.project-task-tools :is(.btn,.multi-filter summary){font-size:11px;white-space:nowrap}
+.project-active-filter{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:var(--blue);justify-self:start}
+.project-active-filter button{border:0;background:var(--soft);border-radius:4px;color:var(--blue);width:22px;height:22px}
+:root[data-calm-today] .project-detail-scroll>.overview-list .task-row{padding-block:10px}
+@container calm-project (max-width:470px){
+ .project-brief .project-brief-columns{grid-template-columns:minmax(0,1fr);gap:10px}
+ .project-brief-metrics>small{display:none}.project-stage-heading time{margin-left:0}
+ .project-task-tools .project-status-filter{width:100%;justify-content:flex-start}
+ .project-task-tools .project-milestone-filter{margin-left:0}
+}
+/* Project settings: stable tabs and one body scroll owner. */
+#projectDialog{width:min(1040px,calc(100vw - 32px));max-width:none;border-radius:10px}
+#projectDialog>form{height:min(740px,calc(100dvh - 32px));max-height:calc(100dvh - 32px);min-height:0}
+#projectDialog .modal-head{padding:18px 24px;border-bottom:1px solid var(--line)}
+#projectDialog .modal-head h2{font-size:19px;line-height:1.4;margin:0}
+#projectDialog .modal-head .eyebrow{display:none}
+#projectDialog #projectEditor{flex:1;min-height:0;padding:0 24px 20px;overflow:auto;overscroll-behavior:contain}
+#projectDialog .project-settings{display:block;min-width:0}
+#projectDialog .project-settings-tabs{position:sticky;top:0;z-index:2;display:flex;gap:20px;background:var(--panel);border-bottom:1px solid var(--line);padding:8px 0 0;margin:0 0 20px}
+#projectDialog .project-settings-tabs button{padding:10px 0;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font:inherit;font-size:12px;white-space:nowrap}
+#projectDialog .project-settings-tabs [aria-selected=true]{border-bottom-color:var(--blue);color:var(--text);font-weight:600}
+#projectDialog [role=tabpanel][hidden]{display:none}
+#projectDialog :is(.project-basic,.milestone-sidebar,.milestone-detail,.milestone-task-panel){border:0;border-radius:0;background:transparent;padding:0;min-width:0}
+#projectDialog .project-basic{max-width:800px}
+#projectDialog .project-settings-section-head{margin:0 0 20px}
+#projectDialog :is(.project-settings-section-head,.milestone-detail-head,.milestone-task-head) h3{font-size:15px;margin:0;font-weight:600}
+#projectDialog .project-settings-section-head p{font-size:12px;margin:5px 0 0;color:var(--muted)}
+#projectDialog .form-grid{gap:18px 20px;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+#projectDialog .field label{font-size:12px;font-weight:500;color:var(--text)}
+#projectDialog .field label small{font-size:11px;font-weight:400;color:var(--muted);margin-left:5px}
+#projectDialog .field :is(input,textarea){border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text);font:inherit;font-size:13px}
+#projectDialog .field input{height:36px;padding:7px 10px}
+#projectDialog .field textarea{padding:9px 10px;line-height:1.7;resize:vertical;min-height:110px;max-height:320px;overflow:auto}
+#projectDialog .field .field-hint{font-size:11px;line-height:1.6;color:var(--muted);margin:4px 0 0;font-weight:400}
+#projectDialog .project-workspace{display:grid;grid-template-columns:228px minmax(0,1fr);align-items:start;gap:24px;min-height:0}
+#projectDialog .milestone-sidebar{display:block;border-right:1px solid var(--line);padding-right:16px;max-height:none}
+#projectDialog .milestone-sidebar-head{padding:0 0 12px;border:0;gap:10px}
+#projectDialog .milestone-sidebar-head b{font-size:12px;font-weight:600}
+#projectDialog .milestone-sidebar-head .btn{font-size:11px;min-height:28px;padding:4px 7px}
+#projectDialog .milestone-list{display:grid;gap:4px;padding:0;max-height:390px;overflow:auto;overscroll-behavior:contain}
+#projectDialog .milestone-nav{min-height:64px;padding:9px 7px;border-radius:6px;grid-template-columns:22px minmax(0,1fr) auto;gap:7px;color:var(--text)}
+#projectDialog .milestone-nav.active{background:color-mix(in srgb,var(--blue) 6%,var(--panel));border-color:color-mix(in srgb,var(--blue) 35%,var(--line))}
+#projectDialog .milestone-index{width:20px;height:20px;font-size:11px;font-weight:500;border-radius:4px;background:var(--soft);color:var(--muted)}
+#projectDialog .milestone-nav b{font-size:12px;line-height:1.5;font-weight:500;white-space:normal;overflow-wrap:anywhere}
+#projectDialog .milestone-nav small{font-size:10px;font-weight:400}
+#projectDialog .milestone-detail-head{margin:0 0 18px;gap:12px;align-items:center}
+#projectDialog .milestone-detail-head .eyebrow{margin:0 0 4px;font-size:10px}
+#projectDialog .milestone-remove{font-size:11px;color:var(--muted);white-space:nowrap}
+#projectDialog .milestone-remove:hover{color:var(--red)}
+#projectDialog .status-choice{display:flex;gap:6px;flex-wrap:wrap}
+#projectDialog .status-choice button{min-height:32px;flex:1;padding:5px 9px;border-radius:5px;font-size:12px;font-weight:400;background:transparent}
+#projectDialog .status-choice button.active{background:color-mix(in srgb,var(--blue) 8%,var(--panel));border-color:color-mix(in srgb,var(--blue) 40%,var(--line));color:var(--blue)}
+#projectDialog .milestone-linked-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+#projectDialog .milestone-linked-summary button{font-size:11px}
+#projectDialog .milestone-task-head{padding:0 0 16px}
+#projectDialog .milestone-task-head p{font-size:11px;line-height:1.7}
+#projectDialog .panel-tabs{justify-content:flex-start;gap:8px;padding-bottom:14px}
+#projectDialog .panel-tabs button{font-size:12px;font-weight:400;min-height:32px;border-radius:5px}
+#projectDialog .milestone-task-list{max-height:none;display:grid;grid-template-columns:minmax(0,1fr);gap:0;padding:0;overflow:visible}
+#projectDialog .milestone-task-row{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;padding:12px 0}
+#projectDialog .milestone-task-link{font-size:13px;font-weight:500}
+#projectDialog .modal-actions{position:relative;display:flex;align-items:center;gap:10px;flex:none;padding:14px 24px;border-top:1px solid var(--line)}
+#projectDialog .project-footer-space{flex:1}
+#projectDialog #projectSaveStatus{font-size:11px}
+#projectDialog .project-maintenance{position:relative;font-size:11px;color:var(--muted)}
+#projectDialog .project-maintenance summary{cursor:pointer}
+#projectDialog .project-maintenance>div{position:absolute;bottom:calc(100% + 12px);left:0;display:grid;width:150px;gap:4px;padding:8px;background:var(--panel);border:1px solid var(--line);border-radius:6px;box-shadow:0 4px 16px #0001;z-index:3}
+#projectDialog .project-maintenance .btn{border:0;text-align:left;background:transparent;font-size:12px}
+#projectDialog .project-maintenance[hidden]{display:none}
+@media(max-width:760px){
+ #projectDialog{width:calc(100vw - 20px)}
+ #projectDialog>form{height:calc(100dvh - 20px);max-height:calc(100dvh - 20px)}
+ #projectDialog .modal-head{padding:14px 16px}
+ #projectDialog #projectEditor{padding:0 16px 16px}
+ #projectDialog .project-workspace{grid-template-columns:minmax(0,1fr);gap:20px}
+ #projectDialog .milestone-sidebar{border-right:0;padding-right:0}
+ #projectDialog .milestone-list{display:flex;max-height:none;gap:8px;padding-bottom:8px}
+ #projectDialog .milestone-nav{flex:0 0 184px}
+ #projectDialog .form-grid{grid-template-columns:minmax(0,1fr);gap:14px}
+ #projectDialog .modal-actions{padding:12px 16px;gap:8px}
+ #projectDialog #projectSaveStatus{display:none}
+ #projectDialog .status-choice button{flex:0 0 calc(50% - 3px)}
+}
+
+.project-brief-context>summary{font-size:11px;line-height:1.6;color:var(--muted);cursor:pointer;padding:3px 0;margin-bottom:4px}
+.project-brief-context>summary small{font-size:10px;font-weight:400;margin-left:8px}
+.project-brief-context[open]>.project-brief-columns{margin-top:4px}
+:root[data-calm-today] .project-detail-scroll .project-task-head{position:static;top:auto;z-index:auto}
+@media(max-width:1150px){
+ :root[data-calm-today] body.project-workspace .project-detail-page .project-master-detail{grid-template-columns:minmax(0,1fr)}
+ #projectShell .project-mobile-tabs{display:flex;gap:8px;flex:none;margin-bottom:8px}
+ #projectShell .project-mobile-tabs .btn{font-size:11px;min-height:30px;padding:4px 10px}
+ #projectShell #projectSplitter{display:none}
+ #projectShell[data-pane=detail] .project-list-panel,#projectShell[data-pane=list] .project-detail-panel{display:none}
+}
+@media(max-height:720px){
+ :root[data-calm-today] body.project-workspace .content{padding-top:14px;padding-bottom:14px}
+ :root[data-calm-today] #projectShell .project-detail-page>.page-head{min-height:40px;display:flex;flex-direction:row;align-items:center;gap:8px;margin-bottom:10px}
+ #projectShell .project-detail-page>.page-head :is(.eyebrow,p){display:none}
+ #projectShell .project-detail-page>.page-head h1{font-size:20px}
+ #projectShell .project-detail-page>.page-head .page-actions{width:auto;gap:6px}
+ #projectShell .project-detail-page>.page-head .btn{font-size:11px;min-height:30px;padding:4px 8px}
+ :root[data-calm-today] .project-detail-card .portfolio-head{padding-bottom:8px;gap:8px}
+ .project-detail-card .portfolio-head .page-actions{gap:6px}
+ .project-detail-card .portfolio-head h2{font-size:18px}
+}
+
+.project-task-search-row{display:flex;align-items:center;gap:8px;min-width:0}
+.project-task-search-row>.project-task-search{flex:1;min-width:0}
+.project-task-search-row>.project-task-options-toggle{flex:none;font-size:11px;white-space:nowrap}
+:root[data-calm-today] .project-task-tools[hidden]{display:none}
+@media(max-height:720px){
+ .project-criteria summary>span{-webkit-line-clamp:1}
+ .project-brief{padding-top:10px;padding-bottom:8px;margin-bottom:8px}
+ .project-brief-metrics{margin:6px 0 7px}
+ .project-brief .project-stage{gap:4px;margin-bottom:7px}
+}

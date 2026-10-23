@@ -1,0 +1,44 @@
+/* Task shell: content yields first, properties wrap, the trailing pin stays centered. */
+.workflow-task-row .task-trailing{display:flex;align-items:center;justify-content:flex-end;gap:2px;width:30px}
+:root[data-visual-preview] .workflow-task-row{position:relative;min-width:0;border-radius:6px;transition:background .12s}
+:root[data-visual-preview] .workflow-task-row:is(:hover,:focus-within){background:var(--ui-hover,var(--soft))}
+:root[data-visual-preview] .workflow-task-row .task-leading{align-self:center;gap:6px}
+:root[data-visual-preview] .workflow-task-row .task-title-link{font-size:14px;font-weight:var(--ui-heading-weight,600);line-height:1.55}
+:root[data-visual-preview] .workflow-task-row .task-meta{max-width:250px;gap:5px;align-self:center}
+:root[data-visual-preview] .workflow-task-row .task-next{font-size:12px;color:var(--muted)}
+:root[data-visual-preview] .workflow-task-row .task-trailing{align-self:center!important;grid-row:1/-1}
+.all-task-list{container-type:inline-size;padding:0 14px 12px;overflow:visible}
+.all-task-select{display:flex;align-items:center;gap:8px;padding:14px 0;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)}
+.all-task-select span{margin-left:auto}.all-task-group h2{margin:16px 0 6px;font-size:12px;font-weight:600;color:var(--muted)}
+.all-task-group h2 small{margin-left:8px;font-size:11px;font-weight:400}
+.all-task-list .task-row{padding-inline:8px}.all-task-list .bulk-check{width:15px;height:15px;flex:none}
+.all-task-group:empty{display:none}
+.quick-capture{display:flex;align-items:center;flex:none;gap:6px;margin:0 0 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);padding:4px 6px}
+.quick-capture input{min-width:0;width:100%;border:0;background:transparent;padding:6px;font:inherit;font-size:12px;color:var(--text);outline:none}
+.quick-capture:focus-within{border-color:var(--ui-focus,var(--blue))}
+.quick-capture button{width:28px;height:28px;flex:none;border:0;border-radius:4px;background:var(--soft);color:var(--muted);font-size:18px}
+.workflow-dialog{padding:0;width:min(640px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 32px);border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text)}
+.workflow-dialog::backdrop{background:#0004}.workflow-dialog header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 20px 14px;border-bottom:1px solid var(--line)}
+.workflow-dialog h2{font-size:17px;margin:0 0 6px}.workflow-dialog header p{font-size:12px;color:var(--muted);margin:0}.workflow-dialog-body{padding:16px 20px;max-height:60dvh;overflow:auto;overscroll-behavior:contain}
+.workflow-dialog footer{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--line)}
+.workflow-search,.workflow-curation-target{display:flex;align-items:center;gap:12px;font-size:12px;margin-bottom:12px}.workflow-search input{flex:1;min-width:0;padding:8px;border:1px solid var(--line);border-radius:6px;color:var(--text);background:var(--panel)}
+.workflow-curation-target select{padding:6px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:5px;font:inherit}
+.workflow-record-choice{display:flex;align-items:flex-start;gap:10px;padding:12px 6px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px;line-height:1.6}.workflow-record-choice:hover{background:var(--soft)}
+.workflow-record-choice input{margin:5px 0 0;flex:none}.workflow-record-choice>span{display:grid;gap:3px;min-width:0;overflow-wrap:anywhere}.workflow-record-choice b{font-weight:500}.workflow-record-choice small{font-size:11px;color:var(--muted)}
+.journal-task-links{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:6px 0 18px;font-size:11px}.journal-task-links>.link-btn{font-size:11px;padding:3px 0;color:var(--muted)}
+.journal-task-chip{display:inline-flex;align-items:center;max-width:100%;border-radius:4px;background:var(--soft);padding:2px 4px}.journal-task-chip button{border:0;background:transparent;color:var(--muted);padding:2px 4px;font:inherit;cursor:pointer}.journal-task-chip button:first-child{min-width:0;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}.journal-task-chip button:hover{color:var(--blue)}
+.journal-curate-all{font-size:12px;margin:4px 0 14px}.weekly-record-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 16px;padding:10px 0;color:var(--muted);font-size:12px}.weekly-record-actions>div{display:flex;flex-wrap:wrap;gap:8px}
+.project-brief{margin:0 0 20px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.project-stage{display:grid;gap:6px;margin:4px 0 18px}.project-stage .eyebrow{font-size:10px}.project-stage>button{padding:0;border:0;background:transparent;color:var(--text);font:inherit;font-size:16px;font-weight:600;text-align:left;justify-self:start}
+.project-stage p{margin:0;font-size:12px;line-height:1.8;color:var(--muted)}.project-stage p b{font-weight:500;color:var(--text);margin-right:8px}.project-stage small{font-size:11px;color:var(--muted)}
+.project-brief-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.project-brief-columns h3{margin:0 0 8px;font-size:12px;font-weight:600}.project-brief-columns h3 small{font-size:10px;color:var(--muted);font-weight:400;margin-left:4px}
+.project-brief-columns button{display:block;padding:3px 0;margin:3px 0;border:0;background:transparent;color:var(--text);font:inherit;font-size:12px;text-align:left;line-height:1.6;overflow-wrap:anywhere}.project-brief-columns button:hover{color:var(--blue)}.project-brief-columns .muted{font-size:12px}
+.task-type-tag{font-size:10px;color:var(--muted)}
+.project-stage .project-description{font-size:11px;color:var(--muted)}
+.project-stage .project-description p{font-size:12px}
+@media(hover:hover){.task-row:is(:hover,:focus-within) .task-quick-actions button{color:var(--text)}}
+@media(max-width:600px){.workflow-dialog header,.workflow-dialog-body,.workflow-dialog footer{padding-inline:14px}.weekly-record-actions{align-items:flex-start}.project-brief-columns{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.workflow-task-row{transition:none!important}}
+
+:root[data-visual-preview] .ui-sidebar-item>:is(.drag-handle,.project-order-handle){width:28px;height:28px;min-height:28px;min-width:28px;padding:7px;align-self:center;justify-self:center}
+:root[data-visual-preview] .ui-sidebar-item>:is(.drag-handle,.project-order-handle) svg{width:10px;height:14px;display:block}

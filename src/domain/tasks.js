@@ -34,8 +34,8 @@ function moveOrder(scope,fromId,toId,position="before"){
 function canAdvanceToday(task){return!task.archived&&!isDone(task)&&!["待处理","等待","暂停"].includes(task.status)}
 function isPlanDue(task,today=todayKey()){return!!task.planDate&&task.planDate<=today}
 function activateScheduledTasks(value=state){
- let changed=false,today=todayKey();
- value.tasks.forEach(task=>{if(canAdvanceToday(task)&&isPlanDue(task,today)&&!task.focus){task.focus=true;task.week=true;task.updatedAt=new Date().toISOString();changed=true}});
+ let changed=false,today=todayKey(),range=planningReviewRange(today);
+ value.tasks.forEach(task=>{if(!canAdvanceToday(task))return;let updated=false;if(task.planDate>=range.start&&task.planDate<=range.end&&!task.week){task.week=true;updated=true}if(isPlanDue(task,today)&&!task.focus){task.focus=true;task.week=true;updated=true}if(updated){task.updatedAt=new Date().toISOString();changed=true}});
  return changed;
 }
 function refreshScheduledTasks(){if(activateScheduledTasks()){captureCurrentWeek();saveLocal(true);requestRender()}}

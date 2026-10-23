@@ -22,10 +22,19 @@ function normalizeProject(raw,index){
  let currentSeen=false;milestones.forEach(milestone=>{if(milestone.status!=="当前阶段")return;if(currentSeen)milestone.status="未开始";else currentSeen=true});
  return{id:String(raw?.id||uid("project")),name:String(raw?.name||"未命名项目"),code:String(raw?.code||""),description:String(raw?.description||""),archived:!!raw?.archived,createdAt:raw?.createdAt||new Date().toISOString(),updatedAt:raw?.updatedAt||new Date().toISOString(),milestones};
 }
+function normalizeChecklistItem(item){
+ let done=!!item?.done,raw=String(item?.completedAt||""),date=/^\d{4}-\d{2}-\d{2}T/.test(raw)?new Date(raw):null;
+ return{id:String(item?.id||uid("check")),text:String(item?.text||""),done,completedAt:done&&date&&Number.isFinite(date.getTime())?date.toISOString():""};
+}
+function setChecklistDone(item,done,now=new Date().toISOString()){
+ let wasDone=!!item.done;item.done=!!done;
+ if(!item.done)item.completedAt="";else if(!wasDone)item.completedAt=now;
+ return item;
+}
 function normalizeTask(raw,index){
  let status=statuses.includes(raw?.status)?raw.status:(raw?.completed?"已完成":"待处理"),priority=priorities.includes(raw?.priority)?raw.priority:(raw?.priority==="A"?"P0":raw?.priority==="B"?"P1":raw?.priority==="C"?"P2":"P1"),completed=status==="已完成"?String(raw?.completed||raw?.updatedAt||todayKey()).slice(0,10):"";
  let inbox=status==="待处理",focus=!!raw?.focus&&status!=="等待";
- return{id:String(raw?.id||uid("task")),title:String(raw?.title||"未命名事项"),nextAction:String(raw?.nextAction??raw?.next??""),notes:sanitizeRichValue(normalizeRich(raw?.notes||raw?.note||"")),obsidianUri:String(raw?.obsidianUri||""),project:raw?.project?String(raw.project):"",milestone:raw?.milestone?String(raw.milestone):"",type:taskTypes.includes(raw?.type)?raw.type:"任务",status,priority,progressLog:normalizeProgressLog(raw?.progressLog),progressDraft:String(raw?.progressDraft||""),focus,week:!!raw?.week||focus,inbox,archived:!!raw?.archived,planDate:String(raw?.planDate||""),due:String(raw?.due||""),followup:String(raw?.followup||""),completed,checklist:Array.isArray(raw?.checklist)?raw.checklist.map((item,itemIndex)=>({id:String(item?.id||uid("check")),text:String(item?.text||""),done:!!item?.done})):[],attachments:Array.isArray(raw?.attachments)?raw.attachments.filter(item=>item&&item.path).map(item=>({id:String(item.id||uid("attachment")),name:String(item.name||"附件"),type:String(item.type||"application/octet-stream"),size:Number(item.size||0),path:String(item.path),createdAt:item.createdAt||new Date().toISOString()})):[],relatedTaskIds:Array.isArray(raw?.relatedTaskIds)?raw.relatedTaskIds.map(String):[],createdAt:raw?.createdAt||new Date().toISOString(),updatedAt:raw?.updatedAt||new Date().toISOString()};
+ return{id:String(raw?.id||uid("task")),title:String(raw?.title||"未命名事项"),nextAction:String(raw?.nextAction??raw?.next??""),notes:sanitizeRichValue(normalizeRich(raw?.notes||raw?.note||"")),obsidianUri:String(raw?.obsidianUri||""),project:raw?.project?String(raw.project):"",milestone:raw?.milestone?String(raw.milestone):"",type:taskTypes.includes(raw?.type)?raw.type:"任务",status,priority,progressLog:normalizeProgressLog(raw?.progressLog),progressDraft:String(raw?.progressDraft||""),focus,week:!!raw?.week||focus,inbox,archived:!!raw?.archived,planDate:String(raw?.planDate||""),due:String(raw?.due||""),followup:String(raw?.followup||""),completed,checklist:Array.isArray(raw?.checklist)?raw.checklist.map(normalizeChecklistItem):[],attachments:Array.isArray(raw?.attachments)?raw.attachments.filter(item=>item&&item.path).map(item=>({id:String(item.id||uid("attachment")),name:String(item.name||"附件"),type:String(item.type||"application/octet-stream"),size:Number(item.size||0),path:String(item.path),createdAt:item.createdAt||new Date().toISOString()})):[],relatedTaskIds:Array.isArray(raw?.relatedTaskIds)?raw.relatedTaskIds.map(String):[],createdAt:raw?.createdAt||new Date().toISOString(),updatedAt:raw?.updatedAt||new Date().toISOString()};
 }
 function normalizeMemo(raw,index){
  return{id:String(raw?.id||uid("memo")),title:String(raw?.title||"新备忘录"),content:sanitizeRichValue(normalizeRich(raw?.content||raw?.body||"")),project:raw?.project?String(raw.project):"",pinned:!!raw?.pinned,archived:!!raw?.archived,createdAt:raw?.createdAt||new Date().toISOString(),updatedAt:raw?.updatedAt||new Date().toISOString()};
@@ -66,6 +75,7 @@ function normalizeState(raw){
  next.order.memoArchived=[...new Set(next.order.memoArchived.filter(id=>memoIds.has(id)))];
  next.order.projects=[...new Set(next.order.projects.filter(id=>projectIds.has(id)))];next.projects.forEach(project=>{if(!next.order.projects.includes(project.id))next.order.projects.push(project.id)});
  if(source.meta?.workJournal)next.meta.workJournal=normalizeWorkJournal(source.meta.workJournal);
+ linkWeeklySummaries(next);
  return next;
 }
 function loadLocalState(){

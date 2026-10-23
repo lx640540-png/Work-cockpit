@@ -5,9 +5,10 @@ function saveRelationsNow(label){
 }
 function handleClick(event){
  let target=event.target.closest("[data-retry-thumb],[data-image-view],button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
+ if(target.hasAttribute("data-task-record"))return openTaskRecord(taskDraft.id);
+ if(handleWorkflowClick(target))return;
  if(target.dataset.projectPane){ui.projectMobilePane=target.dataset.projectPane;return syncProjectMobilePane()}
  if(target.dataset.memoPane){ui.memoPane=target.dataset.memoPane;return syncMemoPane()}
- if(target.hasAttribute('data-toggle-inbox')){ui.inboxExpanded=!ui.inboxExpanded;return requestRender()}
  if(target.hasAttribute('data-edit-obsidian')){let box=$('#obsidianEditor');box.hidden=!box.hidden;if(!box.hidden)$('#taskObsidianUri').focus();return}
  if(target.hasAttribute('data-clear-obsidian')){$('#taskObsidianUri').value='';persistTaskDraft();refreshObsidianLink();return}
  if(target.hasAttribute('data-save-obsidian')){if(!validObsidianUri($('#taskObsidianUri').value))return toast('请粘贴 obsidian://open 格式的笔记链接');persistTaskDraft();refreshObsidianLink();$('#obsidianEditor').hidden=true;return}
@@ -31,7 +32,7 @@ function handleClick(event){
  if(target.dataset.quickNoteToTask!==undefined)return quickNoteToTask();
  if(target.dataset.goTaskProject!==undefined)return goToTaskProject();
  if(target.dataset.returnTask)return openTask(target.dataset.returnTask);
- if(target.dataset.clearProjectTaskFilters!==undefined){ui.projectTaskQuery="";ui.projectMilestoneFilter="all";ui.projectOverviewFilter="all";return requestRender()}
+ if(target.dataset.clearProjectTaskFilters!==undefined){ui.projectTaskQuery="";ui.projectAttentionFilter="all";ui.projectMilestoneFilter="all";ui.projectOverviewFilter="all";return requestRender()}
  if(target.dataset.close)return requestDialogClose(target.dataset.close);
  if(target.id==="backButton"&&navigationDepth>0)return history.back();
  if(target.id==="undoButton"){if(richHistoryAvailable(activeRichEditor,-1))return richApplyHistory(activeRichEditor,-1);return undo()}
@@ -65,11 +66,13 @@ function handleClick(event){
  if(target.dataset.bulkClear!==undefined){ui.selectedTasks.clear();return requestRender()}
  if(target.dataset.bulkArchive!==undefined){let ids=new Set(ui.selectedTasks);ui.selectedTasks.clear();return commit("批量归档事项",draft=>draft.tasks.forEach(task=>{if(ids.has(task.id))task.archived=true}),{immediate:true})}
  if(target.dataset.bulkDelete!==undefined){let ids=new Set(ui.selectedTasks);return confirmAction("删除选中的 "+ids.size+" 项事项？","这些事项会进入回收站；已形成的关键决策会保留。",()=>{commit("批量删除事项",draft=>{draft.tasks.filter(task=>ids.has(task.id)).forEach(task=>draft.trash.unshift({id:uid("trash"),type:"task",deletedAt:new Date().toISOString(),data:clone(task),decisionLinks:draft.decisions.filter(decision=>decision.sourceTaskId===task.id).map(decision=>decision.id)}));draft.tasks=draft.tasks.filter(task=>!ids.has(task.id));draft.tasks.forEach(task=>task.relatedTaskIds=task.relatedTaskIds.filter(id=>!ids.has(id)));draft.decisions.forEach(decision=>{if(ids.has(decision.sourceTaskId))decision.sourceTaskId=""})},{immediate:true});ui.selectedTasks.clear()},"删除")}
- if(target.dataset.selectProject){rememberProjectPosition();ui.projectMobilePane='detail';let pane=target.closest('.project-list-panel'),scrollTop=pane?.scrollTop||0;selectedProjectId=target.dataset.selectProject;ui.projectTaskQuery="";ui.projectMilestoneFilter="all";ui.projectFocusTaskId="";ui.projectReturnTaskId="";requestRender();return requestAnimationFrame(()=>{let next=$('.project-list-panel');if(next)next.scrollTop=scrollTop})}
- if(target.dataset.projectOverview){ui.projectOverviewFilter=target.dataset.projectOverview;return requestRender()}
+ if(target.dataset.selectProject){rememberProjectPosition();ui.projectMobilePane='detail';let pane=target.closest('.project-list-panel'),scrollTop=pane?.scrollTop||0;selectedProjectId=target.dataset.selectProject;ui.projectOverviewFilter="open";ui.projectDateSort="default";ui.projectTaskOptionsOpen=false;ui.projectTaskQuery="";ui.projectAttentionFilter="all";ui.projectMilestoneFilter="all";ui.projectFocusTaskId="";ui.projectReturnTaskId="";requestRender();return requestAnimationFrame(()=>{let next=$('.project-list-panel');if(next)next.scrollTop=scrollTop})}
+ if(target.hasAttribute("data-toggle-project-task-options")){ui.projectTaskOptionsOpen=!ui.projectTaskOptionsOpen;return requestRender()}
+ if(target.hasAttribute("data-clear-project-attention")){ui.projectAttentionFilter="all";return requestRender()}
+ if(target.dataset.projectOverview){if(target.dataset.projectOverview==="done")ui.projectAttentionFilter="all";ui.projectOverviewFilter=target.dataset.projectOverview;return requestRender()}
  if(target.dataset.projectMilestoneFilter){ui.projectMilestoneFilter=target.dataset.projectMilestoneFilter;return requestRender()}
  let favoriteButton=event.target.closest?.("[data-favorite-project]");if(favoriteButton){let id=favoriteButton.dataset.favoriteProject;event.stopPropagation();return commit("切换项目收藏",draft=>draft.favorites=draft.favorites.includes(id)?draft.favorites.filter(value=>value!==id):draft.favorites.concat(id),{immediate:true})}
- if(target.dataset.favoriteOpen){selectedProjectId=target.dataset.favoriteOpen;return navigate("projects",selectedProjectId)}
+ if(target.dataset.favoriteOpen)return navigate("projects",target.dataset.favoriteOpen);
  if(target.dataset.editProject)return openProject(target.dataset.editProject);
  if(target.dataset.openProjectTasks){let quick=ui.projectOverviewFilter==="done"?"done":ui.projectOverviewFilter==="all"?"all":"open";taskFilter={quick,query:"",project:[target.dataset.openProjectTasks],type:[],status:[],group:"none",sort:"manual"};ui.taskOptionsOpen=false;return navigate("tasks")}
  if(target.dataset.viewTaskHistory)return openTaskHistory(target.dataset.viewTaskHistory,target.dataset.historyWeek||"current");
@@ -92,6 +95,9 @@ function handleClick(event){
  if(target.dataset.memoToTask)return memoToTask(target.dataset.memoToTask);
  if(target.dataset.memoTab){memoArchived=target.dataset.memoTab==="archived";selectedMemoId="";ui.selectedMemos.clear();return requestRender()}
  if(target.dataset.toggleChecklist!==undefined){taskChecklistCollapsed=!taskChecklistCollapsed;if(!taskChecklistCollapsed)taskChecklistHeight=0;return refreshChecklist()}
+ if(target.dataset.editCheckTime){checklistTimeEditingId=checklistTimeEditingId===target.dataset.editCheckTime?"":target.dataset.editCheckTime;return refreshChecklist()}
+ if(target.hasAttribute("data-cancel-check-time")){checklistTimeEditingId="";return refreshChecklist()}
+ if(target.dataset.saveCheckTime)return saveChecklistTime(target.dataset.saveCheckTime);
  if(target.dataset.addCheck!==undefined){taskChecklistCollapsed=false;taskChecklistHeight=0;taskDraft.checklist.push({id:uid("check"),text:"",done:false});refreshChecklist({focusLast:true});return scheduleTaskAutosave()}
  if(target.dataset.removeCheck!==undefined){taskChecklistHeight=0;taskDraft.checklist.splice(Number(target.dataset.removeCheck),1);refreshChecklist();return scheduleTaskAutosave()}
  if(target.dataset.addRelated){relatedDraft.add(target.dataset.addRelated);saveRelationsNow("新增关联事项");$("#relatedSearch").value="";$("#relationResults").innerHTML="";$("#relatedList").innerHTML=relationMarkup();return}
@@ -102,6 +108,7 @@ function handleClick(event){
  if(target.dataset.removeAttachment){let item=taskDraft.attachments.find(value=>value.id===target.dataset.removeAttachment);return Cloud.removeAttachment(taskDraft.id,item)}
  if(target.hasAttribute("data-open-obsidian"))return openTaskObsidian();
  if(target.closest(".dropzone"))return $("#attachmentInput").click();
+ if(target.dataset.projectSettingsTab)return changeProjectSettingsTab(target.dataset.projectSettingsTab);
  if(target.dataset.selectMile!==undefined){collectProjectDraft();projectMilestoneIndex=Number(target.dataset.selectMile);return renderProjectEditor()}
  if(target.dataset.projectPanel){collectProjectDraft();projectPanelTab=target.dataset.projectPanel;return renderProjectEditor()}
  if(target.dataset.addMile!==undefined){collectProjectDraft();projectDraft.milestones.push(normalizeMilestone({name:"新里程碑"},projectDraft.milestones.length));projectMilestoneIndex=projectDraft.milestones.length-1;return renderProjectEditor()}
@@ -164,7 +171,7 @@ $("#deleteTaskButton").addEventListener("click",()=>taskDraft&&deleteTask(taskDr
 $("#archiveProjectButton").addEventListener("click",()=>projectDraft&&archiveProject(projectDraft.id));
 $("#deleteProjectButton").addEventListener("click",()=>projectDraft&&deleteProject(projectDraft.id));
 $("#deleteDecisionButton").addEventListener("click",()=>decisionDraft&&deleteDecision(decisionDraft.id));
-$("#choicePopover").addEventListener("click",event=>{let button=event.target.closest("[data-choice]");if(!button)return;let pop=$("#choicePopover");updateProperty(pop.dataset.task,pop.dataset.field,button.dataset.choice);closeChoice()});
+$("#choicePopover").addEventListener("click",event=>{let button=event.target.closest("[data-choice]");if(!button)return;let pop=$("#choicePopover");let id=pop.dataset.task,field=pop.dataset.field,value=button.dataset.choice;closeChoice();updateProperty(id,field,value);requestAnimationFrame(()=>{let anchor=$('[data-task="'+CSS.escape(id)+'"] [data-property="'+field+'"]');if(field==='status'&&value==='等待'){let date=$$('[data-quick-date="'+CSS.escape(id)+'"]').find(node=>node.getBoundingClientRect().height>0);openTaskDateMenu(date||$('.page.active .page-head'),id)}else anchor?.focus({preventScroll:true})})});
 document.addEventListener("input",event=>{
  let target=event.target;
  if(target.matches?.(PLANNING_TEXTAREA_SELECTOR))resizePlanningTextarea(target);
@@ -173,11 +180,11 @@ document.addEventListener("input",event=>{
  else if(target.dataset.weekAction||target.dataset.weekResult){if(weekMode(selectedWeekKey)!=='current')return;let id=target.dataset.weekAction||target.dataset.weekResult,field=target.dataset.weekAction?'text':'result',week=currentWeek();recordDirectEdit('week:'+selectedWeekKey+':'+id+':'+field,'编辑本周推进记录');week.actions=week.actions||{};if(!Object.hasOwn(week.actions,id))week.actions[id]={text:'',result:''};week.actions[id][field]=target.value;saveLocal()}
  else if(target.dataset.topResult!==undefined){if(weekMode(selectedWeekKey)!=='current')return;recordDirectEdit('week:'+selectedWeekKey+':outcome:'+target.dataset.topResult,'记录本周目标结果');currentWeek().topResults[Number(target.dataset.topResult)]=target.value;saveLocal()}
  else if(target.dataset.quickNote!==undefined){let quill=quillFor(target);if(quill){state.quickNote={delta:quill.getContents(),updatedAt:new Date().toISOString()};saveLocal()}}
- else if(target.id==="taskSearch"){taskFilter.query=target.value;renderTasks();requestAnimationFrame(()=>{let input=$("#taskSearch");input?.focus();input?.setSelectionRange(input.value.length,input.value.length)})}
- else if(target.id==="projectTaskSearch"){ui.projectTaskQuery=target.value;renderProjects();requestAnimationFrame(()=>{let input=$("#projectTaskSearch");input?.focus();input?.setSelectionRange(input.value.length,input.value.length)})}
- else if(target.id==="memoSearch"){ui.memoQuery=target.value;renderMemos();requestAnimationFrame(()=>{let input=$("#memoSearch");input?.focus();input?.setSelectionRange(input.value.length,input.value.length)})}
+ else if(target.id==="taskSearch"){if(!event.isComposing)scheduleWorkspaceSearch(target)}
+ else if(target.id==="projectTaskSearch"){if(!event.isComposing)scheduleWorkspaceSearch(target)}
+ else if(target.id==="memoSearch"){if(!event.isComposing)scheduleWorkspaceSearch(target)}
  else if(target.dataset.topIndex!==undefined){let index=Number(target.dataset.topIndex);recordDirectEdit("week:"+selectedWeekKey+":top:"+index,"编辑周重点");let week=currentWeek();week.top[index]=target.value;saveLocal()}
- else if(target.dataset.weekReview){recordDirectEdit("week:"+selectedWeekKey+":"+target.dataset.weekReview,"编辑周复盘");currentWeek()[target.dataset.weekReview]=serializeRichEditor(target);saveLocal()}
+ else if(target.dataset.weekReview){recordDirectEdit("week:"+selectedWeekKey+":"+target.dataset.weekReview,"编辑周复盘");if(weekMode(selectedWeekKey)!=='current')return;let field=Object.keys(WEEKLY_SUMMARY_FIELDS).find(field=>WEEKLY_SUMMARY_FIELDS[field]===target.dataset.weekReview);setWeeklySummary(selectedWeekKey,field,serializeRichEditor(target));syncWeeklySummaryEditors(selectedWeekKey,field,target);saveLocal()}
  else if(target.dataset.memoTitle!==undefined){let memo=memoById(selectedMemoId);if(memo){recordDirectEdit("memo:"+esc(memo.id)+":title","编辑备忘录标题");memo.title=target.value;memo.updatedAt=new Date().toISOString();saveLocal()}}
  else if(target.dataset.memoContent!==undefined){let memo=memoById(selectedMemoId);if(memo){recordDirectEdit("memo:"+esc(memo.id)+":content","编辑备忘录正文");memo.content=serializeRichEditor(target);memo.updatedAt=new Date().toISOString();saveLocal()}}
  else if(target.id==="relatedSearch")$("#relationResults").innerHTML=relationResults(target.value);
@@ -200,7 +207,7 @@ document.addEventListener("change",event=>{
  else if(target.id==="bulkPriority"&&target.value){let ids=new Set(ui.selectedTasks),value=target.value;ui.selectedTasks.clear();commit("批量修改优先级",draft=>draft.tasks.forEach(task=>{if(ids.has(task.id)){task.priority=value;task.updatedAt=new Date().toISOString()}}),{immediate:true})}
  else if(target.id==="weekPicker"){selectedWeekKey=weekKeyFromInput(target.value);ui.showAllWeekDone=false;requestRender()}
  else if(target.dataset.memoProject!==undefined){let memo=memoById(selectedMemoId);if(memo)commit("修改备忘录关联项目",draft=>{let item=draft.memos.find(value=>value.id===memo.id);item.project=target.value;item.updatedAt=new Date().toISOString()},{immediate:true})}
- else if(target.id==="projectTemplate"){collectProjectDraft();projectTemplateMode=target.value;projectDraft.milestones=projectTemplateMode==="hardware"?hardwareMilestoneTemplate():[];projectMilestoneIndex=0;renderProjectEditor()}
+ else if(target.id==="projectTemplate"){changeProjectTemplate(target.value)}
  else if(target.id==="draftProject"){taskDraft.project=target.value;taskDraft.milestone="";$("#draftMilestone").innerHTML=milestoneOptions(taskDraft.project,"");syncHoverSelect($("#draftMilestone"));let jump=$("[data-go-task-project]");if(jump)jump.disabled=!taskDraft.project}
  else if(target.id==="draftStatus"){taskDraft.status=target.value;syncTaskCompletedField()}
  else if(target.id==="draftFocus"){
@@ -211,7 +218,7 @@ document.addEventListener("change",event=>{
  else if(target.id==="draftPlanDate"){let eligible=!taskDraft.archived&&!["待处理","等待","暂停","已完成"].includes($("#draftStatus").value);if(!target.value||target.value>todayKey())$("#draftFocus").checked=false;else if(eligible){$("#draftFocus").checked=true;$("#draftWeek").checked=true}}
  else if(target.id==="decisionProject"){decisionDraft.project=target.value;decisionDraft.milestone="";$("#decisionMilestone").innerHTML=milestoneOptions(decisionDraft.project,"");syncHoverSelect($("#decisionMilestone"))}
  else if(target.id==="decisionSourceTask"&&target.value){let source=taskById(target.value);if(source){decisionDraft.sourceTaskId=source.id;decisionDraft.project=source.project;decisionDraft.milestone=source.milestone;$("#decisionProject").innerHTML=decisionProjectOptions(source.project);$("#decisionMilestone").innerHTML=milestoneOptions(source.project,source.milestone);syncHoverSelect($("#decisionProject"));syncHoverSelect($("#decisionMilestone"))}}
- else if(target.dataset.checkDone!==undefined)taskDraft.checklist[Number(target.dataset.checkDone)].done=target.checked;
+ else if(target.dataset.checkDone!==undefined){setChecklistDone(taskDraft.checklist[Number(target.dataset.checkDone)],target.checked);checklistTimeEditingId="";refreshChecklist();$('[data-check-done="'+target.dataset.checkDone+'"]')?.focus({preventScroll:true});scheduleTaskAutosave()}
  else if(target.id==="attachmentInput"){let files=Array.from(target.files||[]);target.value="";if(files.length)void uploadTaskFiles(files)}
  else if(target.id==="importInput"){let file=target.files?.[0];target.value="";if(file)importFile(file)}
  if(target.closest?.("#taskEditor")&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
@@ -237,4 +244,3 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.que
 
 
 $("#projectDialog").addEventListener("cancel",event=>{event.preventDefault();requestProjectClose()});
-

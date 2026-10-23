@@ -10,13 +10,15 @@
 :root[data-visual-preview] .planning-resizable{padding-right:24px}
 :root[data-visual-preview] .planning-width-handle{right:0;top:22px;bottom:0;width:12px}
 :root[data-visual-preview] .today-flow.today-execution{grid-template-columns:minmax(0,calc(var(--today-left,52%) - 18px)) 12px minmax(0,1fr);column-gap:var(--ui-divider-gap)}
-:root[data-visual-preview] .today-sidebar-stack{padding:0;border:0;align-content:stretch;height:clamp(420px,68dvh,760px);grid-template-rows:clamp(120px,calc(var(--waiting-share,55%) - 18px),calc(100% - 156px)) 12px minmax(120px,1fr);row-gap:var(--ui-divider-gap);min-height:0}
+:root[data-visual-preview] .today-sidebar-stack{padding:0;border:0;align-content:start;align-self:start;height:auto;grid-template-rows:max(120px,calc(clamp(420px,68dvh,760px) * var(--waiting-share,.55) - 18px)) 12px auto;row-gap:var(--ui-divider-gap);min-height:0}
 :root[data-visual-preview] :is(.column-resizer,.project-splitter,.week-splitter,.journal-column-splitter){width:12px;justify-self:stretch}
 .today-sidebar-splitter{position:relative;width:100%;height:12px;min-height:12px;cursor:row-resize}
-.today-sidebar-stack>.today-waiting,.today-sidebar-stack>.today-capture,.today-sidebar-stack>.today-capture>.card{height:100%;min-height:0;min-width:0}
+.today-sidebar-stack>.today-waiting{height:100%;min-height:0;min-width:0}
+.today-sidebar-stack>.today-capture,.today-sidebar-stack>.today-capture>.card{height:auto;min-height:0;min-width:0}
+:root[data-visual-preview] #page-today .today-sidebar-stack .today-inbox .drop-card{overflow:visible}
 :root[data-visual-preview] #page-today .today-sidebar-stack .drop-card{display:flex;flex-direction:column;overflow:hidden}
-.today-sidebar-stack .card-head{flex:none}.today-sidebar-stack .today-task-scroll,.today-sidebar-stack .inbox-items{flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain}
-.today-sidebar-stack .inbox-more{flex:none;align-self:flex-start}
+.today-sidebar-stack .card-head{flex:none}.today-sidebar-stack .today-task-scroll{flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain}
+.today-sidebar-stack .inbox-items{flex:none;min-height:0;max-height:none;overflow:visible;overscroll-behavior:auto}
 :root[data-visual-preview] .week-split-layout{grid-template-columns:minmax(0,calc(var(--week-left,50%) - 18px)) 12px minmax(0,1fr);column-gap:var(--ui-divider-gap)}
 :root[data-visual-preview] .project-master-detail{grid-template-columns:var(--project-list,300px) 12px minmax(0,1fr);column-gap:var(--ui-divider-gap)}
 :root[data-calm-today] .project-detail-card{border-left:0;padding-left:0}

@@ -1,0 +1,36 @@
+/* Avoid a second boundary meeting the sticky topbar while scrolling. */
+:root[data-calm-today] #page-today .summary-grid{border-bottom:0}
+:root[data-calm-today] #todayGrid,:root[data-calm-today] #todayExecution{border-top:0;box-shadow:none}
+.task-record-section .task-section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0}
+.task-support-disclosure>summary{display:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--text);padding:8px 0}
+.task-support-disclosure>.task-support-content{display:block}
+#taskDialog.task-journal-docked{position:fixed;inset:6px auto 6px 8px;margin:0;width:var(--task-available-width);max-width:var(--task-available-width);height:calc(100dvh - 12px);max-height:calc(100dvh - 12px)}
+#taskDialog.task-journal-docked>#taskForm{width:100%;height:100%;max-height:100%;container-type:inline-size;container-name:task-detail}
+.task-journal-tabs{display:none;align-items:center;gap:4px;flex-wrap:wrap}
+.task-journal-tabs button{background:transparent;border:0;border-radius:5px;padding:6px 8px;color:var(--muted);font:inherit;font-size:12px;cursor:pointer}
+.task-journal-tabs button[aria-pressed=true]{background:var(--soft);color:var(--text);font-weight:600}
+.task-journal-compact .task-journal-tabs{display:flex}
+.task-journal-compact .journal-heading h2{display:none}
+#taskDialog.task-journal-compact.task-journal-record>#taskForm,#taskDialog.task-journal-expanded>#taskForm{visibility:hidden;pointer-events:none}
+#taskDialog.task-journal-compact.task-journal-record,#taskDialog.task-journal-expanded{background:transparent;border:0;box-shadow:none;overflow:visible}
+#workJournal .journal-task-context{flex-basis:100%;font-size:11px;line-height:1.6;color:var(--muted);overflow-wrap:anywhere;padding:5px 0}
+#workJournal .journal-task-context[hidden]{display:none}
+@container task-detail (max-width:1120px){
+ #taskEditor.task-editor{grid-template-columns:220px minmax(0,1fr);align-content:start;overflow-y:auto;overscroll-behavior:contain}
+ #taskEditor>.task-column{height:auto;overflow:visible;min-width:0}
+ #taskEditor>.task-content-column{padding-right:0;grid-column:2;grid-row:1}
+ #taskEditor>.attachment-column{grid-column:2;grid-row:2;padding:0;border-left:0}
+ #taskEditor>.task-column:first-child{grid-column:1;grid-row:1/3}
+ .task-support-disclosure>summary{display:list-item}
+ .task-support-disclosure:not([open])>.task-support-content{display:none}
+}
+@media(max-width:1119px){
+ #taskDialog.task-journal-compact{inset:0;margin:0;width:100%;max-width:100%;height:100dvh;max-height:100dvh;border-radius:0}
+ #taskDialog.task-journal-compact>#taskForm{height:100dvh;max-height:100dvh}
+ #taskDialog.task-journal-compact .modal-head{flex-wrap:wrap;gap:8px}
+}
+@container task-detail (max-width:1120px){
+ #taskEditor>.task-column:first-child .form-grid>.field:has(input[type=date]){grid-column:1/-1}
+}
+
+.task-journal-compact #workJournal .journal-resize{display:none}

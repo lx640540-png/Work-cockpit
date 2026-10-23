@@ -23,13 +23,13 @@ function task(extra = {}) {
     planDate: '', followup: '2026-09-10', updatedAt: 'original', ...extra };
 }
 function ruleContext() {
-  const context = vm.createContext({ Date, todayKey: () => '2026-09-05',
+  const context = vm.createContext({ Date, parseDate:key=>new Date(key+'T00:00:00'), fmt:d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'), mondayOf:d=>{let n=new Date(d);n.setDate(n.getDate()-(n.getDay()+6)%7);return n},addDays:(d,n)=>{let r=new Date(d);r.setDate(r.getDate()+n);return r},weekEnd:key=>{let d=new Date(key+'T00:00:00');d.setDate(d.getDate()+6);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}, todayKey: () => '2026-09-05',
     isDone: t => t.status === '已完成',
     state: { tasks: [] }, clone: copy, statuses: ['待处理','进行中','等待','暂停','已完成'],
     priorities: ['P0','P1','P2','P3'], taskTypes: ['任务','临时事项','长期跟进'],
     sanitizeRichValue: x => x, normalizeRich: x => x, uid: () => 'new-id' });
-  for (const name of ['canAdvanceToday','isPlanDue','activateScheduledTasks','setTaskFocus',
-    'setTaskStatus','reconcileTaskEdit','applyTaskCardTransition','normalizeProgressLog','normalizeTask']) {
+  for (const name of ['planningReviewRange','canAdvanceToday','isPlanDue','activateScheduledTasks','setTaskFocus',
+    'setTaskStatus','reconcileTaskEdit','applyTaskCardTransition','normalizeProgressLog','normalizeChecklistItem','normalizeTask']) {
     vm.runInContext(source(name), context);
   }
   vm.runInContext(js.split('\n').find(line => line.startsWith('const TASK_CARD_TRANSITIONS=')), context);

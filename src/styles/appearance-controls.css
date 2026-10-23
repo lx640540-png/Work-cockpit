@@ -28,12 +28,6 @@
 :root[data-visual-preview] .ui-sidebar-item:is(.selected,.active,[data-ui-state=selected]){background:color-mix(in srgb,var(--blue) 8%,var(--panel));border-color:color-mix(in srgb,var(--blue) 45%,var(--line))}
 :root[data-calm-today] .ui-sidebar-item:focus-visible{outline:2px solid var(--ui-focus);outline-offset:1px}
 /* Explicit areas keep pin/unpin and responsive attributes in the same row box. */
-:root[data-visual-preview] .task-row.has-trailing-pin{grid-template-columns:auto minmax(0,1fr) minmax(140px,auto) 30px;grid-template-areas:"leading main meta trailing";grid-template-rows:auto;column-gap:10px;align-items:center}
-:root[data-visual-preview] .task-row.has-trailing-pin>.task-leading{grid-area:leading;align-self:center;padding-block:0}
-:root[data-visual-preview] .task-row.has-trailing-pin>.task-main{grid-area:main;min-width:0}
-:root[data-visual-preview] .task-row.has-trailing-pin>.task-meta{grid-area:meta;align-self:center;min-width:0}
-:root[data-visual-preview] .task-row.scope-week.has-trailing-pin{grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:"leading main trailing"}
-:root[data-visual-preview] .task-row.has-trailing-pin>.task-trailing{grid-area:trailing;align-self:center;justify-self:center;display:grid;place-items:center;width:30px;height:30px;min-width:0}
 :root[data-visual-preview] .task-trailing .pin-task{display:grid;place-items:center;box-sizing:border-box;width:28px;height:28px;padding:0;margin:0;opacity:0}
 :root[data-visual-preview] .task-row:is(:hover,:focus-within,[data-ui-state=hover])>.task-trailing .pin-task,:root[data-visual-preview] .task-trailing .pin-task.active{opacity:1}
 :root[data-visual-preview] .task-table :is(th,td).task-table-trailing{display:table-cell;width:46px;min-width:46px;position:sticky;right:0;background:var(--panel);text-align:center;z-index:1}
@@ -41,10 +35,6 @@
 :root[data-visual-preview] .task-table-trailing .pin-task{display:grid;place-items:center;width:28px;height:28px;margin:auto;padding:0}
 :root[data-visual-preview] .pinned-task-segment.has-pins{margin:0;padding:0;border:0;border-radius:0;background:transparent}
 :root[data-visual-preview] .task-row:first-child,:root[data-visual-preview] #page-today .task-row:first-child{border-top:1px solid transparent}
-@container(max-width:600px){
- :root[data-visual-preview] .task-row.has-trailing-pin:not(.scope-week){grid-template-columns:auto minmax(0,1fr) 30px;grid-template-rows:auto auto;grid-template-areas:"leading main trailing" "leading meta trailing";row-gap:6px}
- :root[data-visual-preview] .task-row.has-trailing-pin:not(.scope-week)>.task-meta{justify-content:flex-start;max-width:100%}
-}
 /* One divider appearance for columns, planning editors and height adjustments. */
 :root[data-calm-today] .ui-resize-divider{background:transparent!important;border:0;box-shadow:none!important;border-radius:0;touch-action:none;cursor:col-resize}
 :root[data-calm-today] .ui-resize-divider:after{content:none!important}

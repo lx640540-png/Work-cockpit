@@ -1,0 +1,22 @@
+/* Standard, grouped, completed and read-only rows share the same slot contract. */
+:root[data-calm-today] .workflow-task-row:not(.has-planning){display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,250px);grid-template-areas:'leading main meta';column-gap:10px;row-gap:6px;align-items:center}
+:root[data-calm-today] .workflow-task-row.has-trailing-pin:not(.has-planning){grid-template-columns:auto minmax(0,1fr) minmax(140px,250px) 30px;grid-template-areas:'leading main meta trailing'}
+:root[data-calm-today] .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr) minmax(0,220px) auto;grid-template-areas:'leading main meta history'}
+:root[data-calm-today] .workflow-task-row:not(.has-planning)>.task-leading{grid-area:leading;align-self:center;margin:0}
+:root[data-calm-today] .workflow-task-row:not(.has-planning)>.task-main{grid-area:main;display:block;min-width:0}
+:root[data-calm-today] .workflow-task-row:not(.has-planning)>.task-meta{grid-area:meta;align-self:center;min-width:0;width:auto;max-width:250px;justify-content:flex-end}
+:root[data-calm-today] .workflow-task-row>.task-trailing{grid-area:trailing;align-self:center;justify-self:center;display:flex;align-items:center;justify-content:flex-end;gap:2px;width:30px;height:30px;min-width:0}
+:root[data-calm-today] .workflow-task-row>.history-row-actions{grid-area:history;flex-wrap:wrap;max-width:100%}
+:root[data-calm-today] .workflow-task-row .task-row-dates{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-width:0;max-width:100%;color:var(--muted);font-size:11px;line-height:1.5}
+:root[data-calm-today] .workflow-task-row .task-meta :is(.followup,.muted){flex-basis:auto;text-align:inherit}
+:root[data-calm-today] .workflow-task-row .task-meta>.task-row-dates{flex:0 1 auto}
+:root[data-calm-today] .workflow-task-row .task-completed-date{white-space:nowrap}
+@container(max-width:760px){
+ :root[data-calm-today] .workflow-task-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta'}
+ :root[data-calm-today] .workflow-task-row.has-trailing-pin:not(.has-planning){grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing' 'leading meta trailing'}
+ :root[data-calm-today] .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history' 'leading meta history'}
+ :root[data-calm-today] .workflow-task-row:not(.has-planning)>.task-meta{justify-content:flex-start;max-width:none}
+}
+@container(max-width:420px){
+ :root[data-calm-today] .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta' 'leading history'}
+}

@@ -12,32 +12,13 @@ function assert(condition, message) {
 }
 
 function functionSource(name) {
-  const marker = `function ${name}(`;
-  const start = js.indexOf(marker);
-  assert(start >= 0, `missing function ${name}`);
-  const brace = js.indexOf('{', start);
-  let depth = 0;
-  let quote = '';
-  let escaped = false;
-  for (let index = brace; index < js.length; index += 1) {
-    const character = js[index];
-    if (quote) {
-      if (escaped) escaped = false;
-      else if (character === '\\') escaped = true;
-      else if (character === quote) quote = '';
-      continue;
-    }
-    if (character === '"' || character === "'" || character === '`') {
-      quote = character;
-      continue;
-    }
-    if (character === '{') depth += 1;
-    if (character === '}') {
-      depth -= 1;
-      if (depth === 0) return js.slice(start, index + 1);
-    }
-  }
-  throw new Error(`unterminated function ${name}`);
+ const start=js.indexOf(`function ${name}(`);
+ assert(start>=0,`missing function ${name}`);
+ for(let end=js.indexOf('}',start);end>=0;end=js.indexOf('}',end+1)){
+  const candidate=js.slice(start,end+1);
+  try{new vm.Script(`(${candidate})`);return candidate}catch{}
+ }
+ throw new Error(`unterminated function ${name}`);
 }
 
 const contracts = [
@@ -54,7 +35,7 @@ const contracts = [
   [html.includes('body.memo-workspace #mainScroll{overflow:hidden;') && html.includes('.memo-list{grid-row:4;min-height:0;overflow:auto'), 'independent memo scrolling'],
   [html.includes('memoMultiSelect:false') && html.includes('data-toggle-memo-select') && html.includes('data-memo-bulk-delete') && html.includes('moveMemosToTrash(ids'), 'memo multi-select and bulk delete'],
   [html.includes('.project-card{position:relative;min-height:305px'), 'project card comfortable height'],
-  [html.includes('.future-week .week-card:not(.top-card)') && html.includes('未来周仅 Top 3 可编辑'), 'future top-only editing'],
+  [html.includes('.future-week .week-card:not(.top-card)') && html.includes('未来周事项按计划日期预览') && functionSource('renderWeek').includes('taskRow(task,{readonly:true})'), 'future plans render read-only rows while Top 3 remains editable'],
   [html.includes('历史周只读快照'), 'past week readonly'],
   [html.includes('confirmTwice("清除全部快照？') && html.includes('confirmTwice("永久清空回收站？') && html.includes('confirmTwice("一键清空业务数据？'), 'two-step destructive confirmation'],
   [html.includes('vendor/quill-2.0.3/quill.js') && html.includes('vendor/quill-2.0.3/quill.core.css') && html.includes('function initQuillEditors(') && html.includes('dataset.quillVersion'), 'locally vendored Quill 2 editor runtime'],
@@ -104,7 +85,7 @@ const contracts = [
   [functionSource('todayWaiting').includes('task.status==="等待"') && !functionSource('todayWaiting').includes('task.followup') && html.includes('跟进逾期 ') && html.includes('今日跟进'), 'waiting card membership is status-exclusive while follow-up reminders remain visible'],
   [html.includes('project-master-detail') && html.includes('project-list-panel') && html.includes('project-detail-panel') && html.includes('projectSplitter'), 'project master detail and independent scrolling'],
   [!html.includes('id="projectSearch"') && html.includes('.project-list-item.selected{border-color:#8eb2fb;background:color-mix(in srgb,var(--blue) 6%,var(--panel));box-shadow:inset 3px 0 var(--blue)}') && html.includes('.project-list-item.pinned-project:not(.selected){border-color:var(--line)}') && html.includes('.project-list-item.pinned-project.selected{border-color:var(--blue)}'), 'project selection uses a subtle fill and blue inner accent while unselected pinned rows keep the neutral border'],
-  [html.includes('.project-workspace>.milestone-task-panel{grid-column:2') && html.includes("+detail+taskPanel+"), 'milestone relations follow completion criteria'],
+  [functionSource('projectSettingsTabs').includes('关联记录') && functionSource('renderProjectEditor').includes("panel('records',projectRecordsMarkup())") && functionSource('projectMilestonesMarkup').includes('milestone-linked-summary'), 'milestone relations have a dedicated panel with a handoff from completion criteria'],
   [html.includes('.task-table th{position:sticky') && html.includes('#page-tasks>.toolbar{position:sticky'), 'all-task toolbar and headers stay frozen'],
   [html.includes('@container (max-width:620px)') && html.includes('.task-main{display:grid;grid-template-columns:'), 'next action responds to card width'],
   [html.includes('const TODAY_LOCAL_SCROLL_SELECTOR=".quick-note-editor>.ql-editor"') && html.includes('.today-flow .today-task-scroll{overflow:visible;max-height:none') && !html.includes('function todayWheelOwner('), 'Today action and waiting lists follow native main-page scrolling; only quick note keeps local scrolling'],
@@ -154,7 +135,7 @@ const contracts = [
   [html.includes('function searchRank(') && functionSource('taskSearchFields').includes('project?.code') && functionSource('collectGlobalResults').includes('project.code') && functionSource('filteredTasks').includes('taskSearchMatch'), 'project code and relevance-aware search'],
   [html.includes('data-summary-target=') && html.includes('data-toggle-week-done') && functionSource('renderWeek').includes('doneItems.slice(0,5)') && functionSource('renderWeek').includes('b.completed.localeCompare(a.completed)'), 'clickable Today summaries and progressive weekly completion list'],
   [functionSource('renderWeek').includes('state.weeks[selectedWeekKey]||emptyWeek()') && !functionSource('renderWeek').includes('state.weeks[selectedWeekKey]=emptyWeek()') && !html.includes('target.dataset.weekShift)*7));ui.showAllWeekDone=false;state.weeks[selectedWeekKey]'), 'week browsing is read-only until the user edits a week'],
-  [functionSource('renderWeek').includes('data-week-panel="plan"') && functionSource('renderWeek').includes('data-week-panel="review"') && functionSource('renderWeek').includes('panel==="review"?weekComparison(week,mode)+reviewMarkup:planMarkup') && html.includes('weekPanel:"plan"'), 'weekly planning and review use focused modes'],
+  [functionSource('renderWeek').includes('data-week-panel="plan"') && functionSource('renderWeek').includes('data-week-panel="review"') && functionSource('renderWeek').includes('panel==="review"?weeklyRecordActions(selectedWeekKey,mode)+weekComparison(week,mode)+reviewMarkup:planMarkup') && html.includes('weekPanel:"plan"'), 'weekly planning and review use focused modes'],
   [functionSource('renderProjectContent').includes('projectTaskQuery') && functionSource('renderProjectContent').includes('id="projectTaskSearch"') && functionSource('renderProjectContent').includes('data-open-project-tasks') && html.includes('target.id==="projectTaskSearch"'), 'project detail has local task search and full-view handoff'],
   [functionSource('renderTasks').includes('data-toggle-task-options') && functionSource('renderTasks').includes('data-hover-task-options') && functionSource('renderTasks').includes('task-advanced-panel') && html.includes('taskOptionsOpen:false') && html.includes('target.dataset.toggleTaskOptions'), 'all-items secondary filters support click and hover disclosure'],
   [functionSource('renderProjectContent').includes('projectMilestoneFilter') && functionSource('renderProjectContent').includes('data-project-milestone-filter') && functionSource('renderProjectContent').includes('project.milestones.map((item,index)') && functionSource('renderProjectContent').includes('task.milestone===ui.projectMilestoneFilter') && html.includes('projectMilestoneFilter:"all"'), 'project task overview lists every milestone as an independent filter without copying tasks'],
@@ -179,14 +160,14 @@ const contracts = [
   [functionSource('toggleRichExpanded').includes('rich-expanded') && functionSource('closeRichExpanded').includes('rich-expanded-open') && html.includes('data-command="expand"') && html.includes('.rich-expanded .rich-editor>.ql-editor'), 'rich text expands the same editor instance and can return to its original layout'],
   [functionSource('outsideDialogPanel').includes('getBoundingClientRect') && html.includes('backdropDialogPress') && html.includes('.history-shell{min-height:0;max-height:none;overflow-y:auto') && html.includes('.history-versions{position:sticky'), 'history modal uses one adaptive scroll owner and closes only through a true backdrop gesture'],
   [functionSource('normalizeDecision').includes('sanitizeRichValue(normalizeRich') && functionSource('renderDecisionEditor').includes('decision-rich-box') && functionSource('collectDecisionDraft').includes('serializeRichEditor($("#decisionConclusion"))') && functionSource('collectDecisionDraft').includes('serializeRichEditor($("#decisionRationale"))'), 'key decision conclusion and rationale use the shared rich-text pipeline'],
-  [html.includes('.table-status-cell{display:flex;align-items:center') && html.includes('.task-table th,.task-table td{vertical-align:middle}') && functionSource('tableRow').includes('class="table-status-cell"'), 'all-items status and neighboring controls share aligned table geometry'],
+  [functionSource('tableRow').includes('taskRow(task') && functionSource('taskRow').includes('task-meta') && functionSource('taskRow').includes('propertyButton(task,"status",readonly)'), 'all-items status and neighboring controls share the common task shell'],
   [html.includes('--muted:#66758b') && html.includes('font-size:12.5px') && html.includes(':focus-visible{outline:3px solid') && html.includes('@media(prefers-reduced-motion:reduce)'), 'clarity pass strengthens secondary text, focus feedback, and reduced-motion support'],
   [html.includes('.today-flow.today-execution{height:auto!important;min-height:0') && !functionSource('renderToday').includes('todayHeightResizer'), 'Today grows with content and no longer enforces the legacy card height'],
   [html.includes('.task-modal .task-column:not(.task-content-column)>.task-section') && html.includes('.preview:not(.has-preview){display:none}') && functionSource('renderTaskEditor').includes("attachmentPreviewId?'has-preview':''"), 'task detail reduces nested card noise and defers empty attachment preview space'],
   [functionSource('editRichDivider').includes('updateContents({ops:') && functionSource('editRichDivider').includes('history.cutoff()') && functionSource('editRichDivider').includes('cancel||value===original') && functionSource('pasteIntoRichDividerLabel').includes('range.insertNode') && html.includes('node.hasAttribute("data-label")?node.dataset.label') && html.includes('value===true?"":value'), 'divider label paste and one-step undo/redo use an atomic Quill change'],
-  [html.includes('class="task-title-link') && functionSource('tableRow').includes('data-open-task') && functionSource('renderProjectOverview').includes('data-open-task') && functionSource('renderProjectContent').includes('data-open-task'), 'task titles consistently open task details without a pencil button'],
+  [html.includes('class="task-title-link') && functionSource('tableRow').includes('taskRow(task') && functionSource('renderProjectOverview').includes('taskRow(task') && functionSource('renderProjectContent').includes('taskRow(task') && functionSource('taskRow').includes('data-open-task'), 'task titles consistently open task details without a pencil button'],
   [html.includes('id="taskAutosaveStatus"') && functionSource('scheduleTaskAutosave').includes('setTimeout(()=>persistTaskDraft(),700)') && functionSource('requestDialogClose').includes('closeTaskDialog()') && functionSource('closeTaskDialog').includes('persistTaskDraft({close:true})'), 'task details debounce autosave and save before backdrop or close-button dismissal'],
-  [functionSource('tableRow').includes('class="task-marker-cell"') && functionSource('renderTasks').includes('<th>行动</th><th>完成</th>') && html.includes('.table-card{max-height:none;overflow-x:auto;overflow-y:visible') && !html.includes('"#page-tasks .table-card",".project-list-panel"'), 'all-items combines action markers and delegates vertical scrolling to the main page'],
+  [functionSource('tableRow').includes('selection:true') && functionSource('renderTasks').includes('all-task-rows') && !functionSource('taskRow').includes('taskQuickActions') && !html.includes('data-workflow-action=') && !html.includes('"#page-tasks .table-card",".project-list-panel"'), 'all-items preserves bulk selection without removed quick actions; the main page owns scrolling'],
   [html.includes('.task-row.scope-week{grid-template-columns:auto minmax(0,1fr)') && html.includes('class="week-task-identity"') && html.includes('.task-row.scope-week .task-main{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(320px,1.4fr) minmax(176px,auto)') && html.includes('.project-overview-task{display:grid;grid-template-columns:minmax(260px,.9fr) minmax(320px,1.35fr) minmax(210px,250px)') && html.includes('.week-action-label textarea,.overview-next-label textarea{display:block;width:100%;min-width:0;height:48px;min-height:48px'), 'weekly and project planning rows reserve readable task, action, and controls columns'],
   [html.includes('.week-action-label textarea,.overview-next-label textarea{display:block;width:100%;min-width:0') && html.includes('const PLANNING_TEXTAREA_SELECTOR="[data-overview-next],[data-week-action]"') && functionSource('resizePlanningTextarea').includes('textarea.scrollHeight') && functionSource('resizePlanningTextarea').includes('textarea.style.overflowY="hidden"') && functionSource('renderApp').includes('resizePlanningTextareas') && html.includes('if(target.matches?.(PLANNING_TEXTAREA_SELECTOR))resizePlanningTextarea(target)'), 'project and weekly planning textareas fill their planning columns and grow without nested scrollbars'],
   [functionSource('renderTaskEditor').includes('data-go-task-project') && functionSource('goToTaskProject').includes('persistTaskDraft({close:true})') && functionSource('goToTaskProject').includes('navigate("projects",project.id)') && functionSource('handleClick').includes('dataset.goTaskProject'), 'task detail saves before jumping to its owning project'],
