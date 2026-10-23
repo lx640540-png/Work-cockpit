@@ -3602,9 +3602,12 @@ document.addEventListener("dragstart",event=>{
  let memo=event.target.closest("[data-memo-drag]");if(memo){dragState={kind:"memo",id:memo.dataset.memoDrag};event.dataTransfer.setData("text/plain",dragState.id);memo.closest(".memo-item")?.classList.add("dragging");return}
  let top=event.target.closest("[data-top-drag]");if(top){dragState={kind:"top",index:Number(top.dataset.topDrag)};event.dataTransfer.setData("text/plain",String(dragState.index))}
 });
-function trackSortableTaskPointer(event){if(!activeSortableTask)return;let point=Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?document.elementFromPoint(event.clientX,event.clientY):event.target,card=point?.closest?.(".drop-card[data-drop-zone]"),targetRow=point?.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;$$('.drop-card[data-drop-zone]').forEach(node=>node.classList.toggle("drag-target",node===card))}}
+function trackSortableTaskPointer(event){if(!activeSortableTask)return;let point=Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?document.elementFromPoint(event.clientX,event.clientY):event.target,card=point?.closest?.(".drop-card[data-drop-zone]"),targetRow=point?.closest?.(".task-row[data-task]");if(targetRow===activeSortableTask||targetRow?.classList.contains("sortable-fallback"))return;let intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;$$('.drop-card[data-drop-zone]').forEach(node=>node.classList.toggle("drag-target",node===card))}}
 document.addEventListener("dragover",trackSortableTaskPointer,true);
 document.addEventListener("pointermove",trackSortableTaskPointer,true);
+// Capture the final visible row before Sortable removes its placeholder.
+document.addEventListener("pointerup",trackSortableTaskPointer,true);
+document.addEventListener("mouseup",trackSortableTaskPointer,true);
 document.addEventListener("dragover",event=>{
  if(activeSortableTask){let card=event.target.closest?.(".drop-card[data-drop-zone]"),targetRow=event.target.closest?.(".task-row[data-task]"),intent=sortableRowIntent(activeSortableTask,card,targetRow,event)||sortableTaskIntent(activeSortableTask,card,event);if(intent){activeSortableTask._taskDropIntent=intent;event.preventDefault();$$(".drop-card[data-drop-zone]").forEach(node=>node.classList.toggle("drag-target",node===card))}return}
  if(!dragState)return;
