@@ -364,7 +364,7 @@ test('iteration: complete search pages past previews and retains context after o
  await page.locator('.search-result-heading [data-search-category="task"]').click();assert.equal(await page.locator('[data-search-task]').count(),20);
  await page.click('[data-search-more="task"]');assert.equal(await page.locator('[data-search-task]').count(),40);
  await page.click('[data-search-more="task"]');assert.equal(await page.locator('[data-search-task]').count(),46);
- await page.waitForFunction(()=>!renderFrame);await page.locator('[data-search-task="s40"]').scrollIntoViewIfNeeded();await page.clock.runFor(60);
+ await page.waitForFunction(()=>!renderFrame&&!searchView.restoring);await page.locator('[data-search-task="s40"]').scrollIntoViewIfNeeded();await page.clock.runFor(60);
  const top=await page.locator('#mainScroll').evaluate(n=>n.scrollTop);assert(top>100);
  await page.click('[data-search-task="s40"]');await page.locator('#taskDialog[open]').waitFor();await page.keyboard.press('Escape');await page.clock.runFor(100);
  assert.equal(await page.locator('#searchPageInput').inputValue(),'查找目标');assert.equal(await page.locator('[data-search-task]').count(),46);

@@ -384,6 +384,8 @@ async function testUrl() {
   await page.waitForSelector('[data-drop-scope="today"][data-task="t1"][data-pinned="0"]');
   assert(await page.locator('[data-drop-zone="today"] .pinned-task-segment.has-pins,[data-drop-zone="today"] .pinned-divider').count() === 0, 'pin grouping remained visible after the last pinned task was cleared');
   const firstTodayBeforeCardDrop = await page.locator('[data-drop-scope="today"][data-task]').first().getAttribute('data-task');
+  // Ordering is tested with complete target rows; nested auto-scroll has a separate regression.
+  await page.setViewportSize({width:1920,height:1080});await page.locator('#todaySidebarSplitter').focus();await page.keyboard.press('End');
   await sortableDragAt(page, '[data-drag-handle="waiting"][data-task="t2"]', '[data-drop-zone="today"] .card-head', 0.5);
   await page.waitForSelector('[data-drop-scope="today"][data-task="t2"]');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
