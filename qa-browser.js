@@ -14,6 +14,8 @@ const dragAt = (page, sourceSelector, targetSelector, ratio = 0.5) => page.evalu
   source.dispatchEvent(new DragEvent('dragend', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
 }, { sourceSelector, targetSelector, ratio });
 const sortableDragAt = async (page, sourceSelector, targetSelector, ratio = 0.5) => {
+  // Measure the drop geometry after layout, without Sortable's decorative transition moving the target between samples.
+  await page.evaluate(()=>taskSortables.forEach(sortable=>sortable.option('animation',0)));
   const source = page.locator(sourceSelector), target = page.locator(targetSelector);
   const scrollStable = async locator => {
     for (let attempt = 0; attempt < 3; attempt += 1) {
