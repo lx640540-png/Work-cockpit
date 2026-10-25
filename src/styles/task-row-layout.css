@@ -24,7 +24,9 @@
 .planning-reveal{display:none}
 /* At medium widths the editor owns a complete second row, never an empty column. */
 @container(max-width:960px){
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{grid-template-areas:'identity meta' 'editor editor';grid-template-columns:minmax(0,1fr) fit-content(230px);gap:8px 12px}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning{grid-template-areas:'leading main' '. main';grid-template-rows:auto auto;row-gap:8px}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning.has-trailing-pin{grid-template-areas:'leading main trailing' '. main .'}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{grid-template-areas:'identity meta' 'editor editor';grid-template-columns:minmax(0,1fr) fit-content(230px);grid-template-rows:subgrid;gap:8px 12px}
  :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta{max-width:230px}
  :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.planning-resizable{padding-right:0}
  :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-width-handle{display:none}
@@ -35,6 +37,8 @@
  :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-trailing-pin:not(.has-planning){grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing' 'leading meta trailing'}
  :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history' 'leading meta history'}
  :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row:not(.has-planning)>.task-meta{justify-content:flex-start;max-width:none}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning{grid-template-areas:'leading main' '. main' '. main';grid-template-rows:auto auto auto;row-gap:6px}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning.has-trailing-pin{grid-template-areas:'leading main trailing' '. main .' '. main .'}
  :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{grid-template-areas:'identity' 'meta' 'editor';grid-template-columns:minmax(0,1fr);gap:6px}
  :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta{justify-content:flex-start;max-width:none}
  :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-reveal{display:block;width:100%;max-width:100%;padding:4px 0;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12px;text-align:left;cursor:pointer}
