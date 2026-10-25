@@ -4,7 +4,7 @@ const http = require('http');
 const path = require('path');
 
 const requestedUrl = process.argv[2];
-const assert = (condition, message) => { if (!condition) throw new Error(message); };
+const assert = require('node:assert/strict');
 const dragAt = (page, sourceSelector, targetSelector, ratio = 0.5) => page.evaluate(({ sourceSelector, targetSelector, ratio }) => {
   const source = document.querySelector(sourceSelector), target = document.querySelector(targetSelector), data = new DataTransfer(), rect = target.getBoundingClientRect(), clientX = rect.left + rect.width / 2, clientY = rect.top + rect.height * ratio;
   source.dispatchEvent(new DragEvent('dragstart', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));

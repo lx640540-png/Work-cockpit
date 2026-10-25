@@ -6,8 +6,8 @@ let planningRowsObserver=null;const observedPlanningRows=new Set();
 function syncPlanningRow(main){
  if(!main.isConnected||!main.getBoundingClientRect().width)return;const label=main.querySelector('.planning-resizable'),card=main.closest('.drop-card,.project-overview-group,.component-task-example,.all-task-list');if(!label||!card)return;
  let width=main.getBoundingClientRect().width,meta=Math.min(210,Math.max(96,Math.round(width*.35))),identity=Math.min(160,Math.max(90,width*.4)),budget=Math.max(0,width-meta-identity-24),preferred=scopedPlanningCards.get(card)?.value||320,effective=Math.min(preferred,budget),hidden=budget<=160;
- const input=label.querySelector('textarea');if(hidden&&label.dataset.composing==='1')hidden=false;if(hidden&&label.contains(document.activeElement))document.activeElement.blur();
- main.style.setProperty('--planning-meta-width',meta+'px');main.style.setProperty('--planning-editor-effective-width',effective+'px');main.style.setProperty('--planning-editor-opacity',Math.max(0,Math.min(1,(budget-160)/64)));main.classList.toggle('is-editor-hidden',hidden);label.setAttribute('aria-hidden',String(hidden));
+ if(hidden&&label.dataset.composing==='1')hidden=false;if(hidden&&label.contains(document.activeElement))document.activeElement.blur();
+ main.style.setProperty('--planning-meta-width',meta+'px');main.style.setProperty('--planning-editor-effective-width',effective+'px');main.style.setProperty('--planning-editor-opacity',Math.max(0,Math.min(1,(budget-160)/16)));main.classList.toggle('is-editor-hidden',hidden);label.setAttribute('aria-hidden',String(hidden));
  label.querySelectorAll('textarea,[data-scoped-planning]').forEach(node=>node.tabIndex=hidden?-1:0);
 }
 function initScopedPlanningResize(root=document){

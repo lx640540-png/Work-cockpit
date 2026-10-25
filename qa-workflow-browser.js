@@ -200,7 +200,7 @@ test('project overview edits original tasks, retains empty projects and schedule
 
 test('weekly next actions share task data and snapshots retain results through completion and rollover',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('a',{week:true,project:'p1',nextAction:'确认目录'}),makeTask('b',{week:true,type:'长期跟进',nextAction:'确认交期'})],{route:'week',projects:projectFixture});
- page.setDefaultTimeout(10000);await page.setViewportSize({width:2560,height:1440});
+ page.setDefaultTimeout(10000);await page.setViewportSize({width:2560,height:1440});await page.evaluate(()=>{uiLayout.weekPlanLeft=.66;saveUiLayout();renderNow()});await page.locator('#page-week [data-overview-next="a"]').waitFor({state:'visible'});
  const weeklyGeometry=await page.locator('[data-drop-zone="week"] .task-row[data-task="a"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),action=box(row.querySelector('.overview-next-label')),meta=box(row.querySelector('.task-meta')),whole=box(row);return{rowHeight:whole.height,actionLeft:action.left,actionRight:action.right,metaLeft:meta.left,metaRight:meta.right,metaTop:meta.top,metaBottom:meta.bottom,actionTop:action.top,actionBottom:action.bottom,rowRight:whole.right}});
  assert(weeklyGeometry.rowHeight<150&&(weeklyGeometry.metaLeft>=weeklyGeometry.actionRight-1||weeklyGeometry.metaTop>=weeklyGeometry.actionBottom-1||weeklyGeometry.metaBottom<=weeklyGeometry.actionTop+1)&&weeklyGeometry.metaRight<=weeklyGeometry.rowRight,JSON.stringify(weeklyGeometry));
  assert(await page.locator('#page-week [data-overview-next="a"]').isVisible());
@@ -297,7 +297,7 @@ test('shared width handles persist per card and compact editors remain reachable
  const value=Number(await handle.getAttribute('aria-valuenow'));assert.equal(value,before+16);
  assert.equal(await page.locator('[data-overview-project="p1"] [data-scoped-planning]').last().getAttribute('aria-valuenow'),String(value));
  await page.reload();assert.equal(await page.locator('[data-overview-project="p1"] [data-scoped-planning]').first().getAttribute('aria-valuenow'),String(value));
- await page.click('[data-page="week"]');await page.locator('#page-week.active').waitFor();const field=page.locator('#page-week [data-overview-next="a"]');assert(await field.isVisible());await page.setViewportSize({width:390,height:844});assert(await field.isHidden());await page.locator('#page-week [data-task="a"] [data-open-task="a"]').click();await page.fill('#taskNext','窄屏保留下一步');await save(page);await page.setViewportSize({width:1920,height:1080});assert.equal(await field.inputValue(),'窄屏保留下一步');
+ await page.click('[data-page="week"]');await page.locator('#page-week.active').waitFor();await page.evaluate(()=>{uiLayout.weekPlanLeft=.66;saveUiLayout();renderNow()});const field=page.locator('#page-week [data-overview-next="a"]');await field.waitFor({state:'visible'});await page.setViewportSize({width:390,height:844});await field.waitFor({state:'hidden'});await page.locator('#page-week [data-task="a"] [data-open-task="a"]').click();await page.fill('#taskNext','窄屏保留下一步');await save(page);await page.setViewportSize({width:1920,height:1080});assert.equal(await field.inputValue(),'窄屏保留下一步');
  await page.setViewportSize({width:800,height:700});const overflow=await page.locator('#mainScroll').evaluate(n=>n.scrollWidth-n.clientWidth);assert(overflow<=1);
 });
 

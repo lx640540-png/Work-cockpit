@@ -1432,6 +1432,9 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 @media(max-width:600px){#page-tasks .task-primary-toolbar>.search-field{max-width:none;flex-basis:calc(100% - 90px)}.task-view-control:first-of-type{margin-left:0}.task-filter-footer{flex-wrap:wrap}.task-filter-footer>span{width:100%}.task-filter-fields>.multi-filter{flex-basis:calc(50% - 8px)}.task-date-filter,.task-date-range{gap:8px}}
 
 .task-drag-placeholder{display:block;width:28px;height:28px;flex:none}
+
+/* Keep mobile list controls outside the fixed work-journal entry's hit area. */
+@media(max-width:820px){#page-tasks .task-primary-toolbar{padding-inline-end:40px}#page-tasks .task-primary-toolbar>.search-field{min-width:120px;flex:1 1 170px;max-width:none}}
 </style>
 </head>
 <body>
@@ -2810,7 +2813,7 @@ function openChoice(trigger,field,id){
 function closeChoice(){let pop=$("#choicePopover");pop._trigger?.setAttribute("aria-expanded","false");pop.hidden=true}
 let activeHoverSelect=null,hoverSelectTimer=0;
 function closeHoverSelect(owner=activeHoverSelect){if(!owner)return;owner.classList.remove("open");let menu=owner.querySelector(".hover-select-menu");if(menu?.isConnected&&menu.popover==="manual"&&typeof menu.hidePopover==="function")menu.hidePopover();menu?.setAttribute("hidden","");owner.querySelector(".hover-select-trigger")?.setAttribute("aria-expanded","false");if(activeHoverSelect===owner)activeHoverSelect=null}
-function openHoverSelect(owner){if(!owner)return;clearTimeout(hoverSelectTimer);if(typeof activeHoverDetail!=="undefined"&&activeHoverDetail)closeHoverDetail(activeHoverDetail);if(activeHoverSelect&&activeHoverSelect!==owner)closeHoverSelect(activeHoverSelect);owner.classList.add("open");let menu=owner.querySelector(".hover-select-menu");menu?.removeAttribute("hidden");if(menu&&typeof menu.showPopover==="function"){menu.popover="manual";menu.showPopover();Object.assign(menu.style,{position:"fixed",margin:"0",inset:"auto",minWidth:"0",maxWidth:"calc(100vw - 16px)",width:Math.max(160,owner.getBoundingClientRect().width)+"px"});positionUiPopover(menu,owner)}owner.querySelector(".hover-select-trigger")?.setAttribute("aria-expanded","true");activeHoverSelect=owner}
+function openHoverSelect(owner){if(!owner||owner.querySelector('select')?.disabled)return;clearTimeout(hoverSelectTimer);if(typeof activeHoverDetail!=="undefined"&&activeHoverDetail)closeHoverDetail(activeHoverDetail);if(activeHoverSelect&&activeHoverSelect!==owner)closeHoverSelect(activeHoverSelect);owner.classList.add("open");let menu=owner.querySelector(".hover-select-menu");menu?.removeAttribute("hidden");if(menu&&typeof menu.showPopover==="function"){menu.popover="manual";menu.showPopover();Object.assign(menu.style,{position:"fixed",margin:"0",inset:"auto",minWidth:"0",maxWidth:"calc(100vw - 16px)",width:Math.max(160,owner.getBoundingClientRect().width)+"px"});positionUiPopover(menu,owner)}owner.querySelector(".hover-select-trigger")?.setAttribute("aria-expanded","true");activeHoverSelect=owner}
 function syncHoverSelect(select){
  let owner=select?.closest(".hover-select"),trigger=owner?.querySelector(".hover-select-trigger"),menu=owner?.querySelector(".hover-select-menu");if(!owner||!trigger||!menu)return;
  let current=select.options[select.selectedIndex],label=trigger.querySelector("span");label.textContent=current?.textContent||"请选择";trigger.disabled=select.disabled;trigger.setAttribute("aria-expanded",owner.classList.contains("open")?"true":"false");
@@ -4220,8 +4223,8 @@ let planningRowsObserver=null;const observedPlanningRows=new Set();
 function syncPlanningRow(main){
  if(!main.isConnected||!main.getBoundingClientRect().width)return;const label=main.querySelector('.planning-resizable'),card=main.closest('.drop-card,.project-overview-group,.component-task-example,.all-task-list');if(!label||!card)return;
  let width=main.getBoundingClientRect().width,meta=Math.min(210,Math.max(96,Math.round(width*.35))),identity=Math.min(160,Math.max(90,width*.4)),budget=Math.max(0,width-meta-identity-24),preferred=scopedPlanningCards.get(card)?.value||320,effective=Math.min(preferred,budget),hidden=budget<=160;
- const input=label.querySelector('textarea');if(hidden&&label.dataset.composing==='1')hidden=false;if(hidden&&label.contains(document.activeElement))document.activeElement.blur();
- main.style.setProperty('--planning-meta-width',meta+'px');main.style.setProperty('--planning-editor-effective-width',effective+'px');main.style.setProperty('--planning-editor-opacity',Math.max(0,Math.min(1,(budget-160)/64)));main.classList.toggle('is-editor-hidden',hidden);label.setAttribute('aria-hidden',String(hidden));
+ if(hidden&&label.dataset.composing==='1')hidden=false;if(hidden&&label.contains(document.activeElement))document.activeElement.blur();
+ main.style.setProperty('--planning-meta-width',meta+'px');main.style.setProperty('--planning-editor-effective-width',effective+'px');main.style.setProperty('--planning-editor-opacity',Math.max(0,Math.min(1,(budget-160)/16)));main.classList.toggle('is-editor-hidden',hidden);label.setAttribute('aria-hidden',String(hidden));
  label.querySelectorAll('textarea,[data-scoped-planning]').forEach(node=>node.tabIndex=hidden?-1:0);
 }
 function initScopedPlanningResize(root=document){
