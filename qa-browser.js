@@ -152,7 +152,7 @@ async function testUrl() {
   assert(!exclusiveFixture.task.focus && !exclusiveFixture.task.inbox, 'waiting state changed inbox classification');
   await page.locator('[data-drop-scope="inbox"][data-task="t9"]').waitFor({state:'detached'});
   // Both task columns scroll with the main page, even when many rows are present.
-  await page.evaluate(() => { document.querySelector('#page-today').style.minHeight='1800px'; mainScroll.scrollTop=0;ui.waitingExpanded.add('undated');renderNow(); });
+  await page.evaluate(() => { document.querySelector('#page-today').style.minHeight='1800px'; mainScroll.scrollTop=0;renderNow(); });
   const todayLocal=page.locator('.today-task-scroll').first();
   await todayLocal.hover();const beforeWheel=await page.evaluate(()=>mainScroll.scrollTop);await page.mouse.wheel(0,120);await page.waitForTimeout(120);
   const routed=await page.evaluate(()=>({main:mainScroll.scrollTop,local:document.querySelector('.today-task-scroll').scrollTop,mode:getComputedStyle(document.querySelector('.today-task-scroll')).overflowY}));
