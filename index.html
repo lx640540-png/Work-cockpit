@@ -1329,44 +1329,32 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-meta :is(.followup,.muted){flex-basis:auto;text-align:inherit}
 :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-meta>.task-row-dates{flex:0 1 auto}
 :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-completed-date{white-space:nowrap}
-/* A missing pin must not leave an empty grid track in grouped planning lists. */
+/* The next-action editor always stays between identity and properties. */
 :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning{grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main'}
 :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning.has-trailing-pin{grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing'}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{display:grid;grid-template-areas:'identity editor meta';grid-template-columns:minmax(180px,1fr) minmax(160px,min(var(--planning-editor-width,320px),40cqi)) fit-content(210px);gap:12px;align-items:center}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning.history-row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history'}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{position:relative;display:grid;grid-template-areas:'identity editor meta';grid-template-columns:minmax(0,1fr) minmax(0,var(--planning-editor-effective-width,min(320px,35cqi))) var(--planning-meta-width,210px);gap:12px;align-items:center;min-width:0}
 :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.week-task-identity{grid-area:identity;min-width:0}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta{grid-area:meta;position:static;width:auto;min-width:0;max-width:210px;margin:0;justify-content:flex-end;align-self:center;flex-wrap:wrap}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>:is(.week-action-label,.overview-next-label){grid-area:editor;width:100%;min-width:0;max-width:100%;margin:0;justify-self:start;box-sizing:border-box}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row textarea{width:100%;min-width:0;max-width:100%;max-height:240px;overflow-y:auto!important;resize:none}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta{grid-area:meta;position:static;width:100%;min-width:0;max-width:100%;margin:0;justify-content:flex-end;align-self:center;flex-wrap:wrap}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.overview-next-label{grid-area:editor;width:100%;min-width:0;max-width:100%;margin:0;justify-self:start;box-sizing:border-box;opacity:var(--planning-editor-opacity,1);transition:opacity 150ms ease}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.overview-next-label:focus-within{opacity:1}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.overview-next-label>span:first-child{white-space:nowrap;overflow:hidden}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row textarea{width:100%;min-width:0;max-width:100%;max-height:120px;overflow-y:auto!important;resize:none;line-height:1.6}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row textarea:not(:focus){mask-image:linear-gradient(to right,#000 calc(100% - 20px),transparent)}
 :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row textarea::placeholder{color:var(--muted);opacity:.8}
 :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-width-handle{top:22px;bottom:0;right:0;width:12px}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row.is-editor-hidden{grid-template-columns:minmax(0,1fr) var(--planning-meta-width,120px);grid-template-areas:'identity meta'}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row.is-editor-hidden>.overview-next-label{position:absolute;left:0;top:0;width:0;max-height:0;padding:0;overflow:hidden;opacity:0;visibility:hidden;pointer-events:none}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .task-date-button{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .planning-reveal{display:none}
-/* At medium widths the editor owns a complete second row, never an empty column. */
-@container(max-width:960px){
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning{grid-template-areas:'leading main' '. main';grid-template-rows:auto auto;row-gap:8px}
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning.has-trailing-pin{grid-template-areas:'leading main trailing' '. main .'}
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{grid-template-areas:'identity meta' 'editor editor';grid-template-columns:minmax(0,1fr) fit-content(230px);grid-template-rows:subgrid;gap:8px 12px}
- :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta{max-width:230px}
- :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.planning-resizable{padding-right:0}
- :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-width-handle{display:none}
-}
-/* Only a genuinely narrow card moves properties below its title. */
 @container(max-width:560px){
  :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta'}
  :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-trailing-pin:not(.has-planning){grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing' 'leading meta trailing'}
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history' 'leading meta history'}
+ :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history' 'leading meta history'}
  :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row:not(.has-planning)>.task-meta{justify-content:flex-start;max-width:none}
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning{grid-template-areas:'leading main' '. main' '. main';grid-template-rows:auto auto auto;row-gap:6px}
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning.has-trailing-pin{grid-template-areas:'leading main trailing' '. main .' '. main .'}
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{grid-template-areas:'identity' 'meta' 'editor';grid-template-columns:minmax(0,1fr);gap:6px}
- :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta{justify-content:flex-start;max-width:none}
- :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-reveal{display:block;width:100%;max-width:100%;padding:4px 0;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12px;text-align:left;cursor:pointer}
- :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-resizable:not(.planning-expanded)>.planning-reveal{white-space:nowrap;overflow:hidden;mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent)}
- :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-resizable:not(.planning-expanded)>:is(span,textarea){display:none}
- :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-expanded>.planning-reveal{color:var(--blue);font-size:11px}
 }
-@container(max-width:420px){
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row{grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta' 'leading history'}
-}
+@container(max-width:420px){:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta' 'leading history'}}
+@media(prefers-reduced-motion:reduce){.overview-next-label{transition:none!important}}
 /* Avoid a second boundary meeting the sticky topbar while scrolling. */
 :root[data-calm-today] #page-today .summary-grid{border-bottom:0}
 :root[data-calm-today] #todayGrid,:root[data-calm-today] #todayExecution{border-top:0;box-shadow:none}
@@ -1414,6 +1402,36 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 .future-week .week-card:not(.top-card) .task-title-link{pointer-events:auto}
 
 .future-week .week-card[data-drop-zone=week]{opacity:1}
+/* Query controls and selection use the same compact workspace controls. */
+#page-tasks .page-head .eyebrow{display:none}
+#page-tasks .task-primary-toolbar{display:flex;align-items:center;flex-direction:row;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+#page-tasks .task-primary-toolbar>.search-field{flex:1 1 260px;width:auto;max-width:420px;min-width:160px}
+#page-tasks .task-primary-toolbar>.task-options-toggle{width:auto;flex:none}
+.task-view-control{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
+.task-view-control:first-of-type{margin-left:auto}.task-view-control select,.task-list-toolbar select{max-width:145px;font:inherit;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text);padding:6px}
+.task-view-control .hover-select{min-width:86px}.task-view-control .hover-select-trigger,.task-list-toolbar .hover-select-trigger{height:32px;min-height:32px;border-radius:6px;font-size:12px}
+#taskFilterPanel{position:fixed;inset:auto;margin:0;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;box-sizing:border-box;padding:16px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);box-shadow:var(--shadow);z-index:130}
+#taskFilterPanel:not(:popover-open),#taskFilterPanel[hidden]{display:none}
+#taskFilterPanel:popover-open{display:block}
+.task-filter-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.task-filter-heading b{font-size:14px}.task-filter-heading .icon-btn{width:28px;min-height:28px;padding:0}
+.task-filter-fields{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.task-filter-fields>.multi-filter{flex:1;min-width:96px}.task-filter-fields summary{font-size:12px;min-height:32px;padding:6px 10px}
+.task-filter-fields .multi-menu{max-width:min(300px,calc(100vw - 40px));max-height:260px;overflow:auto}.task-filter-fields .multi-menu>input{width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--line);border-radius:5px;font:inherit;font-size:12px;margin-bottom:6px}
+.task-date-filter,.task-date-range{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:8px 0}.task-date-filter label,.task-date-range label{display:grid;gap:6px;min-width:0;font-size:12px}
+.task-date-filter select,.task-date-range input{width:100%;min-width:0;box-sizing:border-box;padding:7px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text);font:inherit}
+.task-date-filter .hover-select{display:block}.task-filter-error{font-size:12px;color:var(--red);margin:6px 0}.task-filter-error:empty{display:none}
+.task-filter-shortcuts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.task-filter-shortcuts .btn{font-size:11px;padding:4px 8px;min-height:28px}
+.task-filter-footer{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}.task-filter-footer>span{font-size:11px;color:var(--muted);margin-right:auto}
+.task-active-filters{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:0 0 12px}.task-active-filters[hidden]{display:none}.task-filter-chip{border:1px solid var(--line);background:var(--soft);color:var(--text);font:inherit;font-size:12px;max-width:100%;padding:5px 8px;border-radius:5px;overflow-wrap:anywhere}.task-filter-chip span{margin-left:6px;color:var(--muted)}
+.task-list-toolbar{height:48px;min-height:48px;box-sizing:border-box;display:flex;align-items:center;gap:8px;white-space:nowrap;overflow-x:auto;border-bottom:1px solid var(--line);padding:0;margin:0;background:var(--panel);font-size:12px}
+.task-list-toolbar.bulk-bar{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:0;margin:0;background:var(--panel)}
+.task-list-toolbar>.task-result-count{margin-right:auto;color:var(--muted)}.task-list-toolbar>.task-bulk-exit{margin-left:auto}.task-list-toolbar>*{flex-shrink:0}
+.task-list-toolbar .all-task-select{padding:0;border:0;gap:5px}.task-list-toolbar .hover-select{min-width:82px;max-width:120px}.task-list-toolbar .btn{padding:5px 8px;min-height:30px;font-size:11px}.task-list-toolbar .link-btn{font-size:11px}
+.bulk-plan-date{display:flex;align-items:center;gap:5px;color:var(--muted)}.bulk-plan-date input{width:112px;min-width:0;font:inherit;font-size:11px;padding:4px;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--text)}
+.all-task-group h2 button{display:flex;align-items:center;gap:7px;width:100%;padding:6px 0;border:0;background:transparent;color:var(--muted);font:inherit;text-align:left}.all-task-group h2 button:hover{color:var(--text)}.all-task-group-rows[hidden]{display:none}
+.all-task-list .task-row .bulk-check{width:21px;height:21px;margin:0}.all-task-list .task-row .task-leading{min-height:28px}
+@media(max-width:600px){#page-tasks .task-primary-toolbar>.search-field{max-width:none;flex-basis:calc(100% - 90px)}.task-view-control:first-of-type{margin-left:0}.task-filter-footer{flex-wrap:wrap}.task-filter-footer>span{width:100%}.task-filter-fields>.multi-filter{flex-basis:calc(50% - 8px)}.task-date-filter,.task-date-range{gap:8px}}
+
+.task-drag-placeholder{display:block;width:28px;height:28px;flex:none}
 </style>
 </head>
 <body>
@@ -1581,10 +1599,10 @@ function projectBriefData(project,tasks){
 function appendJournalTaskResult(draft,key,id,blocks){
  const task=draft.tasks.find(item=>item.id===id&&!item.archived);if(!task)return 0;
  const groups=new Map();for(const block of blocks||[]){const text=String(block.text||'').trim();if(!text)continue;if(!groups.has(block.date))groups.set(block.date,[]);groups.get(block.date).push(text)}
- const existing=draft.weeks[key],previous=existing?.actions?.[id]||{text:'',result:''};let result=previous.result||'',added=0;
+ const existing=draft.weeks[key],previous=existing?.actions?.[id]||{result:''};let result=previous.result||'',added=0;
  for(const [date,texts] of groups){for(const text of texts){const entry=date+' · '+text;if(result.includes(entry))continue;result+=(result?'\n\n':'')+entry;added++}}
  if(!added)return 0;
- const week=existing||(draft.weeks[key]=emptyWeek());week.actions||={};week.actions[id]={...previous,result};week.taskIds=[...new Set([...(week.taskIds||[]),id])];week.taskSnapshots||=[];
+ const week=existing||(draft.weeks[key]=emptyWeek());week.actions||={};week.actions[id]={result};week.taskIds=[...new Set([...(week.taskIds||[]),id])];week.taskSnapshots||=[];
  if(!week.taskSnapshots.some(item=>item.id===id))week.taskSnapshots.push(clone(task));return added;
 }
 function planningReviewRange(now=todayKey()){
@@ -1656,7 +1674,7 @@ function normalizeDecision(raw,index){
 }
 function normalizeWeek(raw){
  let base=emptyWeek(),source=raw&&typeof raw==="object"?raw:{};
- return{...base,...clone(source),actions:Object.fromEntries(Object.entries(source.actions||{}).filter(([,value])=>value&&typeof value==="object").map(([id,value])=>[id,{text:String(value.text||""),result:String(value.result||"")}])),topResults:Array.isArray(source.topResults)?source.topResults.slice(0,3).map(value=>String(value||"")):[],top:Array.isArray(source.top)?source.top.slice(0,3).map(value=>typeof value==="object"?String(value.text||value.title||""):String(value||"")):[],taskIds:Array.isArray(source.taskIds)?source.taskIds.map(String):[],carriedTaskIds:Array.isArray(source.carriedTaskIds)?source.carriedTaskIds.map(String):[],taskSnapshots:Array.isArray(source.taskSnapshots)?source.taskSnapshots.map(normalizeTask):[],projectSnapshots:Array.isArray(source.projectSnapshots)?source.projectSnapshots.map(normalizeProject):[],reviewDone:sanitizeRichValue(normalizeRich(source.reviewDone)),reviewMiss:sanitizeRichValue(normalizeRich(source.reviewMiss)),reviewNext:sanitizeRichValue(normalizeRich(source.reviewNext))};
+ return{...base,...clone(source),actions:Object.fromEntries(Object.entries(source.actions||{}).filter(([,value])=>value&&typeof value==="object").map(([id,value])=>[id,{result:String(value.result||"")}])),topResults:Array.isArray(source.topResults)?source.topResults.slice(0,3).map(value=>String(value||"")):[],top:Array.isArray(source.top)?source.top.slice(0,3).map(value=>typeof value==="object"?String(value.text||value.title||""):String(value||"")):[],taskIds:Array.isArray(source.taskIds)?source.taskIds.map(String):[],carriedTaskIds:Array.isArray(source.carriedTaskIds)?source.carriedTaskIds.map(String):[],taskSnapshots:Array.isArray(source.taskSnapshots)?source.taskSnapshots.map(normalizeTask):[],projectSnapshots:Array.isArray(source.projectSnapshots)?source.projectSnapshots.map(normalizeProject):[],reviewDone:sanitizeRichValue(normalizeRich(source.reviewDone)),reviewMiss:sanitizeRichValue(normalizeRich(source.reviewMiss)),reviewNext:sanitizeRichValue(normalizeRich(source.reviewNext))};
 }
 function normalizeState(raw){
  let base=emptyState(),source=raw&&typeof raw==="object"?raw:{},weeks={};
@@ -1704,7 +1722,7 @@ if(!["today","week","tasks","projects","memos","data","search"].includes(current
 let navigationDepth=Number(history.state?.appNavDepth||0);
 if(!history.state?.appRoute)history.replaceState({page:currentPage,appRoute:true,appNavDepth:navigationDepth},"","#"+currentPage);
 let selectedWeekKey=currentWeekKey(),selectedProjectId="",selectedMemoId="",memoArchived=false,projectMilestoneIndex=0,globalSearchQuery="",searchReturnPage="today";
-let taskFilter={quick:"open",query:"",project:[],type:[],status:[],group:"project",sort:"manual"};
+let taskFilter=emptyTaskFilter();
 let taskDraft=null,taskAutosaveTimer=0,taskAutosaveSignature="",taskAutosaveClosing=false,projectDraft=null,projectDraftIsNew=false,projectTemplateMode="hardware",decisionDraft=null,relatedDraft=new Set(),attachmentPreviewId="",taskChecklistCollapsed=false,taskChecklistHeight=0,checklistResizeState=null,projectPanelTab="tasks",historyTaskId="",historySelection="current";
 let undoStack=[],redoStack=[],saveTimer=null,renderFrame=0,confirmCallback=null,dragState=null,directEditSessions=new Set(),activeRichEditor=null,richStates=new WeakMap(),quillEditors=new WeakMap(),quillRegistered=false;
 
@@ -1761,7 +1779,7 @@ function captureWeek(key,close=false){
  let taskSnapshots=state.tasks.filter(task=>member.has(task.id)||completedHere(task)).map(clone);
  taskIds.forEach(id=>{if(!taskSnapshots.some(task=>task.id===id)&&previous.has(id))taskSnapshots.push(clone(previous.get(id)))});
  let projectIds=new Set(taskSnapshots.map(task=>task.project).filter(Boolean));
- let actions={...(week.actions||{})};if(isCurrent)taskSnapshots.filter(task=>member.has(task.id)).forEach(task=>{if(!Object.hasOwn(actions,task.id))actions[task.id]={text:task.nextAction||"",result:""}});
+ let actions={...(week.actions||{})};if(isCurrent)taskSnapshots.filter(task=>member.has(task.id)).forEach(task=>{if(!Object.hasOwn(actions,task.id))actions[task.id]={result:""}});
  week={...emptyWeek(),...week,actions,taskIds,taskSnapshots,projectSnapshots:state.projects.filter(project=>projectIds.has(project.id)).map(clone)};
  if(close&&!week.closedAt)week.closedAt=new Date().toISOString();
  state.weeks[key]=week;return week;
@@ -1778,7 +1796,7 @@ function ensureCurrentWeek(){
   let validTasks=new Set(state.tasks.map(task=>task.id));
   existing={...emptyWeek(),...existing,taskIds:[...new Set([...existing.taskIds,...active])],carriedTaskIds:[...new Set((existing.carriedTaskIds||[]).filter(id=>validTasks.has(id)))],activatedAt:existing.activatedAt||new Date().toISOString(),closedAt:""};
  }
- existing.actions=existing.actions||{};state.tasks.filter(task=>task.week&&!task.archived&&(!isDone(task)||task.completed>=now&&task.completed<=weekEnd(now))).forEach(task=>{if(!Object.hasOwn(existing.actions,task.id))existing.actions[task.id]={text:task.nextAction||"",result:""}});
+ existing.actions=existing.actions||{};state.tasks.filter(task=>task.week&&!task.archived&&(!isDone(task)||task.completed>=now&&task.completed<=weekEnd(now))).forEach(task=>{if(!Object.hasOwn(existing.actions,task.id))existing.actions[task.id]={result:""}});
  state.weeks[now]=existing;state.meta.activeWeekKey=now;
 }
 // Scheduling changes dates and Today membership, never task status or historical weeks.
@@ -1905,6 +1923,52 @@ function applyTaskDraftToState(saved){
  state.tasks.forEach(task=>{if(task.id===saved.id)return;let related=new Set(task.relatedTaskIds||[]);links.has(task.id)?related.add(saved.id):related.delete(saved.id);task.relatedTaskIds=Array.from(related)});
 }
 
+// Device-local query state; filtering never rewrites task membership or ordering.
+function emptyTaskFilter(){return{quick:'open',query:'',project:[],type:[],status:[],priority:[],dateField:'planDate',dateMode:'any',dateFrom:'',dateTo:'',group:'project',sort:'manual'}}
+function normalizeTaskFilter(value={}){
+ let f={...emptyTaskFilter(),...value};for(let key of ['project','type','status','priority'])f[key]=[...new Set(Array.isArray(f[key])?f[key].filter(v=>typeof v==='string'):[])];
+ if(!['open','done','archived','all','waiting','followup','overdue','paused'].includes(f.quick))f.quick='open';
+ if(['waiting','paused'].includes(f.quick)){f.status=[f.quick==='waiting'?'等待':'暂停'];f.quick='open'}
+ if(['followup','overdue'].includes(f.quick)){if(f.quick==='followup')f.status=['等待'];f.dateField=f.quick==='followup'?'followup':'due';f.dateMode=f.quick==='followup'?'due':'overdue';f.quick='open'}
+ if(!['planDate','due','followup'].includes(f.dateField))f.dateField='planDate';if(!['any','none','today','week','due','overdue','range'].includes(f.dateMode))f.dateMode='any';
+ if(!['none','project','status','type'].includes(f.group))f.group='project';if(!['manual','smart','priority','planDate','due','followup','completed'].includes(f.sort))f.sort='manual';
+ f.query=String(f.query||'');f.dateFrom=String(f.dateFrom||'');f.dateTo=String(f.dateTo||'');return f;
+}
+function taskFilterForRange(filter,range){let f=normalizeTaskFilter(filter);f.quick=range;if(range==='done')f.status=[];else if(range==='open')f.status=f.status.filter(v=>v!=='已完成'&&v!=='已归档');return f}
+function taskFilterDateError(f){return f.dateMode==='range'&&((f.dateFrom&&!validTaskDate(f.dateFrom))||(f.dateTo&&!validTaskDate(f.dateTo))||(f.dateFrom&&f.dateTo&&f.dateFrom>f.dateTo))?'日期范围无效，请检查起止日期。':''}
+function taskMatchesFilters(task,filter){
+ let f=normalizeTaskFilter(filter),today=todayKey();
+ if(f.quick==='archived'?!task.archived:task.archived)return false;
+ if(f.quick==='open'&&isDone(task)||f.quick==='done'&&!isDone(task))return false;
+ for(let field of ['project','type','status','priority'])if(f[field].length&&!f[field].includes(task[field]||''))return false;
+ if(taskFilterDateError(f))return false;
+ if(f.dateMode!=='any'){let date=task[f.dateField]||'';if(f.dateMode==='none'){if(date)return false}else{if(!date)return false;if(f.dateMode==='today'&&date!==today||f.dateMode==='overdue'&&date>=today||f.dateMode==='due'&&date>today)return false;if(f.dateMode==='week'&&(date<currentWeekKey()||date>weekEnd(currentWeekKey())))return false;if(f.dateMode==='range'&&(f.dateFrom&&date<f.dateFrom||f.dateTo&&date>f.dateTo))return false}}
+ return !f.query.trim()||taskSearchMatch(task,f.query).score>0;
+}
+function sortFilteredTasks(items,filter){
+ let f=normalizeTaskFilter(filter),manual=pinOrdered(items,'all');if(f.query.trim())return manual.sort((a,b)=>taskSearchMatch(b,f.query).score-taskSearchMatch(a,f.query).score);
+ if(f.sort==='manual')return manual;let order=f.sort==='smart'?smartSort(manual,'all'):manual,rank=new Map(order.map((t,i)=>[t.id,i])),pins=new Map((state.order.pinAll||[]).map((id,i)=>[id,i]));
+ return [...order].sort((a,b)=>{let ap=pins.has(a.id),bp=pins.has(b.id);if(ap||bp)return Number(bp)-Number(ap)||(ap&&bp?pins.get(a.id)-pins.get(b.id):0);if(f.sort==='priority')return taskPriority(a)-taskPriority(b)||rank.get(a.id)-rank.get(b.id);if(['planDate','due','followup','completed'].includes(f.sort)){let x=a[f.sort]||'',y=b[f.sort]||'';return Number(!x)-Number(!y)||(f.sort==='completed'?y.localeCompare(x):x.localeCompare(y))||rank.get(a.id)-rank.get(b.id)}return rank.get(a.id)-rank.get(b.id)});
+}
+function taskFilterChips(filter){
+ let f=normalizeTaskFilter(filter),out=[];for(let [field,title] of [['project','项目'],['status','状态'],['priority','优先级'],['type','类型']])for(let value of f[field])out.push({field,value,label:title+'：'+(field==='project'?(value?projectName(value):'通用事项'):value)});
+ if(f.query.trim())out.push({field:'query',value:'',label:'搜索：'+f.query.trim()});if(f.quick==='all')out.push({field:'range',value:'',label:'范围：全部未归档'});
+ if(f.dateMode!=='any')out.push({field:'date',value:'',label:({planDate:'计划日期',due:'截止日期',followup:'跟进日期'}[f.dateField])+'：'+({none:'未安排',today:'今天',week:'本周',due:'已到期',overdue:'已过期',range:(f.dateFrom||'不限')+'—'+(f.dateTo||'不限')}[f.dateMode])});return out;
+}
+function validateBulkTaskEdit(draft,ids,field,value){
+ let selected=new Set(ids),items=draft.tasks.filter(t=>selected.has(t.id));if(!items.length||items.length!==selected.size)return{ok:false,message:'选中事项已变化，请重新选择'};
+ if(!['status','priority','project','planDate','archive','restore'].includes(field))return{ok:false,message:'不支持的批量操作'};
+ if(field!=='restore'&&items.some(t=>t.archived))return{ok:false,message:'请先恢复归档事项'};
+ if(field==='status'&&!statuses.includes(value)||field==='priority'&&!priorities.includes(value))return{ok:false,message:'请选择有效属性'};
+ if(field==='project'&&value&&!draft.projects.some(p=>p.id===value&&!p.archived))return{ok:false,message:'请选择活跃项目'};
+ if(field==='planDate'&&(!validTaskDate(value)||items.some(isDone)))return{ok:false,message:'请选择有效日期，并先恢复已完成事项'};
+ return{ok:true,items};
+}
+function applyBulkTaskEdit(draft,ids,field,value){
+ let checked=validateBulkTaskEdit(draft,ids,field,value);if(!checked.ok)return checked;let items=checked.items;
+ for(let task of items){let previous={...task};if(field==='status')setTaskStatus(task,value,draft);else if(field==='project'){if(task.project!==value)task.milestone='';task.project=value}else if(field==='archive')task.archived=true;else if(field==='restore')task.archived=false;else task[field]=value;if(field==='planDate'){if(!value)task.focus=false;reconcileTaskEdit(task,previous)}task.updatedAt=new Date().toISOString()}
+ return{ok:true,changed:items.length};
+}
 // Shared structure and interaction primitives; business state stays with each page.
 function uiDragHandle(attributes="",className="drag-handle",label="拖动调整顺序"){
  return '<button type="button" class="'+className+'" aria-label="'+esc(label)+'" data-tip="'+esc(label)+'" '+attributes+'><svg viewBox="0 0 12 18" aria-hidden="true"><circle cx="3" cy="3" r="1.2"/><circle cx="9" cy="3" r="1.2"/><circle cx="3" cy="9" r="1.2"/><circle cx="9" cy="9" r="1.2"/><circle cx="3" cy="15" r="1.2"/><circle cx="9" cy="15" r="1.2"/></svg></button>';
@@ -1956,18 +2020,16 @@ function milestoneOf(task,project){
 function taskRow(task,options={}){
  let scope=options.scope||"",readonly=!!options.readonly,project=options.projectLookup?options.projectLookup(task.project):projectById(task.project),milestone=milestoneOf(task,project),carry=scope==="week"&&currentWeek().carriedTaskIds.includes(task.id);
  let planning=scope==="week"&&!readonly||options.planning==="next";
- let drag=scope&&!readonly&&options.draggable!==false?uiDragHandle('data-drag-handle="'+scope+'" data-task="'+esc(task.id)+'" '+(scope==='all'?'draggable="true"':'')):'<span></span>';
+ let drag=scope&&!readonly&&options.draggable!==false?uiDragHandle('data-drag-handle="'+scope+'" data-task="'+esc(task.id)+'" '+(scope==='all'?'draggable="true"':'')):options.reserveDrag?'<span class="task-drag-placeholder" aria-hidden="true"></span>':'<span></span>';
  let focusToggle=scope==="week"&&!readonly?'<button class="flag-btn focus '+(task.focus?'active':'')+'" type="button" data-toggle-focus="'+esc(task.id)+'" data-tip="'+(task.focus?'移出今日行动（取消已到期计划）':'加入今日行动')+'">★</button>':'';
  let selection=options.selection?'<input type="checkbox" class="bulk-check" data-bulk-select="'+esc(task.id)+'" aria-label="选择'+esc(task.title)+'" '+(ui.selectedTasks.has(task.id)?'checked':'')+'>':'';
- let check=readonly?'<span class="check '+(isDone(task)?"done":"")+'">'+(isDone(task)?"✓":"")+'</span>':'<button class="check '+(isDone(task)?"done":"")+'" type="button" data-toggle-task="'+esc(task.id)+'" aria-label="'+(isDone(task)?"恢复整个事项":"完成整个事项")+'" data-tip="'+(isDone(task)?"恢复整个事项":"完成整个事项")+'">'+(isDone(task)?"✓":"")+'</button>';
+ let check=options.selectionOnly?'':readonly?'<span class="check '+(isDone(task)?"done":"")+'">'+(isDone(task)?"✓":"")+'</span>':'<button class="check '+(isDone(task)?"done":"")+'" type="button" data-toggle-task="'+esc(task.id)+'" aria-label="'+(isDone(task)?"恢复整个事项":"完成整个事项")+'" data-tip="'+(isDone(task)?"恢复整个事项":"完成整个事项")+'">'+(isDone(task)?"✓":"")+'</button>';
  let actionFirst=scope==="today"&&!isDone(task),primary=actionFirst?(task.nextAction||task.title):task.title;
  let next=!isDone(task)&&task.nextAction?'<div class="task-next"><b>下一步 · </b>'+esc(task.nextAction)+'</div>':"";
  let openAttrs=options.historyWeek?'data-view-task-history="'+esc(task.id)+'" data-history-week="'+esc(options.historyWeek)+'"':'data-open-task="'+esc(task.id)+'"';
  let primaryLink='<button class="task-title-link '+(isDone(task)?"done":"")+'" type="button" '+openAttrs+' title="'+esc(primary)+'">'+(options.query?highlightSearch(primary,options.query,true):esc(primary))+'</button>';
  if(actionFirst)next=task.nextAction?'<div class="task-next">事项 · <button class="task-secondary-link" type="button" data-open-task="'+esc(task.id)+'">'+esc(task.title)+'</button></div>':"";
- if(scope==="week"&&!readonly)next='<label class="week-action-label"><span>本周计划</span><textarea rows="2" placeholder="本周想推进到哪一步…" data-week-action="'+esc(task.id)+'" aria-label="'+esc(task.title)+'的本周推进内容">'+esc(currentWeek().actions?.[task.id]?.text||"")+'</textarea></label>';
- if(readonly&&options.weekAction!==undefined)next='<div class="week-plan-history"><b>当周推进 · </b>'+esc(options.weekAction)+'</div>';
- if(options.planning==='next')next='<label class="overview-next-label"><span>下一步行动</span><textarea rows="2" placeholder="下一步要做什么…" data-overview-next="'+esc(task.id)+'" aria-label="'+esc(task.title)+'的下一步" '+(isDone(task)||task.archived?'readonly':'')+'>'+esc(task.nextAction)+'</textarea></label>';
+ if(planning)next='<label class="overview-next-label"><span>下一步</span><textarea rows="2" placeholder="下一步要做什么…" data-overview-next="'+esc(task.id)+'" aria-label="'+esc(task.title)+'的下一步" '+(readonly||isDone(task)||task.archived?'readonly':'')+'>'+esc(task.nextAction)+'</textarea></label>';
  let projectLine=options.projectContext?(milestone?'<div class="task-project">'+esc(milestone.name)+'</div>':''):'<div class="task-project"><i></i>'+esc(project?.name||"通用事项")+(milestone?" · "+esc(milestone.name):"")+'</div>';
  let warningHTML=options.compactDates?(taskDateFlags(task).due?'<span class="date-warning deadline">截止逾期 '+dateShort(task.due)+'</span>':''):taskDateWarnings(task);
  let dates=isDone(task)?'<span class="task-date-label task-completed-date">完成 '+dateShort(task.completed)+'</span>':taskDateButton(task,readonly)+warningHTML+(task.due&&!(options.compactDates&&taskDateFlags(task).due)?'<span class="muted task-deadline">截止 '+dateShort(task.due)+'</span>':"");
@@ -2033,7 +2095,7 @@ function weekKeyFromInput(value){
 function historicalRow(task,week){
  let project=week.projectSnapshots.find(item=>item.id===task.project)||projectById(task.project);
  let weekKey=Object.keys(state.weeks).find(key=>state.weeks[key]===week)||"";
- return taskRow(task,{readonly:true,historyWeek:weekKey,weekAction:(week.taskIds||[]).includes(task.id)?week.actions?.[task.id]?.text||'未记录当周推进内容':undefined,projectLookup:id=>week.projectSnapshots.find(item=>item.id===id)||projectById(id)});
+ return taskRow(task,{readonly:true,planning:'next',historyWeek:weekKey,projectLookup:id=>week.projectSnapshots.find(item=>item.id===id)||projectById(id)});
 }
 function topMarkup(week,mode){
  let rows=week.top.map((text,index)=>'<div class="top-row" data-top-drop="'+index+'"><button class="drag-handle" type="button" draggable="'+(mode!=="past")+'" data-top-drag="'+index+'" '+(mode==="past"?"disabled":"")+'>⠿</button><span class="top-number">'+(index+1)+'</span><input class="top-input" data-top-index="'+index+'" value="'+esc(text)+'" '+(mode==="past"?"readonly":"")+'><button class="top-delete" type="button" data-delete-top="'+index+'" '+(mode==="past"?"disabled":"")+'>×</button></div>').join("");
@@ -2049,59 +2111,42 @@ function renderWeek(){
  else if(mode==="past"){let snapshots=week.taskSnapshots||[];actionItems=snapshots.filter(task=>task.week&&!task.archived&&!isDone(task));doneItems=snapshots.filter(task=>task.completed&&task.completed>=selectedWeekKey&&task.completed<=end).sort((a,b)=>b.completed.localeCompare(a.completed)||String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")));longItems=snapshots.filter(task=>task.type==="长期跟进"&&!task.week&&!isDone(task))}
  else{actionItems=openTasks().filter(task=>task.planDate>=selectedWeekKey&&task.planDate<=end);doneItems=[];longItems=[]}
  let visibleDone=mode==="current"&&!ui.showAllWeekDone?doneItems.slice(0,5):doneItems,doneControls=mode==="current"&&doneItems.length>5?'<button class="link-btn" type="button" data-toggle-week-done>'+(ui.showAllWeekDone?'收起':'展开其余 '+(doneItems.length-5)+' 项')+'</button>':"";
- let actionBody=mode==="future"?(actionItems.length?actionItems.map(task=>taskRow(task,{readonly:true})).join(''):'<div class="empty">该周尚无计划日期对应的事项，可从周复盘确认下周安排。</div>'):mode==="past"?(actionItems.length?actionItems.map(task=>historicalRow(task,week)).join(""):'<div class="empty">该周没有行动事项快照。</div>'):groupedTaskList(actionItems,{scope:"week",empty:"本周还没有行动事项。",grouped:state.order.weekGroup});
+ let actionBody=mode==="future"?(actionItems.length?actionItems.map(task=>taskRow(task,{readonly:true,planning:'next'})).join(''):'<div class="empty">该周尚无计划日期对应的事项，可从周复盘确认下周安排。</div>'):mode==="past"?(actionItems.length?actionItems.map(task=>historicalRow(task,week)).join(""):'<div class="empty">该周没有行动事项快照。</div>'):groupedTaskList(actionItems,{scope:"week",empty:"本周还没有行动事项。",grouped:state.order.weekGroup});
  let doneBody=mode==="future"?'<div class="empty">完成事项会按实际完成日期自动归入。</div>':mode==="past"?(visibleDone.length?visibleDone.map(task=>historicalRow(task,week)).join(""):'<div class="empty">该周没有完成记录。</div>'):groupedTaskList(visibleDone,{scope:"done",empty:"本周还没有完成事项。"});
  let longBody=mode==="future"?'<div class="empty">长期跟进将在该周到来后显示。</div>':mode==="past"?(longItems.length?longItems.map(task=>historicalRow(task,week)).join(""):'<div class="empty">该周没有长期跟进。</div>'):groupedTaskList(longItems,{scope:"long",empty:"目前没有长期跟进事项。"});
  let weekControls=mode==="current"?'<button class="btn soft" type="button" data-review-planning="week">检查安排</button><button class="btn soft" data-smart-sort="week">✦ 智能排序</button><button class="btn soft" data-toggle-group="week">'+(state.order.weekGroup?"取消项目分组":"按项目分组")+'</button>':"";
  let longControls=mode==="current"?'<button class="btn soft" data-smart-sort="long">✦ 智能排序</button>':"";
  let readonly=mode==="past"?" readonly":"",future=mode==="future"?" future-week":"",panel=mode==="future"?"plan":ui.weekPanel;
  let modeBar='<div class="week-mode-bar"><div class="week-mode-tabs"><button type="button" data-week-panel="plan" class="'+(panel==="plan"?"active":"")+'">本周计划</button><button type="button" data-week-panel="review" class="'+(panel==="review"?"active":"")+'" '+(mode==="future"?"disabled":"")+'>周复盘</button></div><span class="week-mode-hint">'+(panel==="plan"?"先定本周成果，再安排推进动作":"对照本周计划，记录实际推进结果")+'</span></div>';
- let planMarkup='<div class="week-grid week-split-layout'+readonly+future+'" id="weekPlanSplit" style="--week-left:'+(uiLayout.weekPlanLeft*100).toFixed(2)+'%"><div class="week-stack"><article class="card week-card top-card">'+cardHead("本周目标 Top 3","本周结束时，希望得到哪三个结果？",topTools)+'<div class="top-list" id="topList">'+topMarkup(week,mode)+'</div></article><article class="card week-card drop-card" data-drop-zone="week" data-drop-label="移至本周推进事项">'+cardHead("本周推进事项",mode==="future"?"按计划日期预排；点击事项名称可调整日期":"这些事项本周具体推进到哪一步？可直接修改下方文字",weekControls)+'<div class="items">'+actionBody+'</div></article></div><button class="week-splitter" id="weekPlanSplitter" type="button" aria-label="调整本周计划左右卡片宽度"></button><div class="week-stack"><article class="card week-card drop-card" data-drop-zone="long" data-drop-label="移至长期跟进">'+cardHead("长期跟进","尚未安排本周；拖入本周后仍保留长期跟进类型",longControls,"orange")+'<div class="items">'+longBody+'</div></article></div></div>';
+ let planMarkup='<div class="week-grid week-split-layout'+readonly+future+'" id="weekPlanSplit" style="--week-left:'+(uiLayout.weekPlanLeft*100).toFixed(2)+'%"><div class="week-stack"><article class="card week-card top-card">'+cardHead("本周目标 Top 3","本周结束时，希望得到哪三个结果？",topTools)+'<div class="top-list" id="topList">'+topMarkup(week,mode)+'</div></article><article class="card week-card drop-card" data-drop-zone="week" data-drop-label="移至本周推进事项">'+cardHead("本周推进事项",mode==="future"?"按计划日期预排；点击事项名称可调整日期":"直接更新下一步，与事项详情保持一致",weekControls)+'<div class="items">'+actionBody+'</div></article></div><button class="week-splitter" id="weekPlanSplitter" type="button" aria-label="调整本周计划左右卡片宽度"></button><div class="week-stack"><article class="card week-card drop-card" data-drop-zone="long" data-drop-label="移至长期跟进">'+cardHead("长期跟进","尚未安排本周；拖入本周后仍保留长期跟进类型",longControls,"orange")+'<div class="items">'+longBody+'</div></article></div></div>';
  let reviewMarkup='<div class="week-review-layout week-split-layout'+readonly+'" id="weekReviewSplit" style="--week-left:'+(uiLayout.weekReviewLeft*100).toFixed(2)+'%"><article class="card week-card">'+cardHead("本周完成",mode==="current"&&doneItems.length>5?"按完成时间显示最近 5 项":"由真实完成日期生成",doneControls)+'<div class="items">'+doneBody+'</div></article><button class="week-splitter" id="weekReviewSplitter" type="button" aria-label="调整周复盘左右卡片宽度"></button><article class="card week-card review-card">'+cardHead("周复盘",mode==="current"?"建议周五填写":"该周复盘快照","")+'<div class="review-grid"><div class="review-field"><label>实际成果</label><p class="field-hint">对照本周计划，实际推进到了哪里？</p>'+resizableRichBox("reviewDoneHeight",toolbar()+'<div class="rich-editor" data-week-review="reviewDone" contenteditable="'+(mode==="current")+'" data-placeholder="本周推进了什么？">'+week.reviewDone+'</div>',"week-review-editor")+'</div><div class="review-field"><label>未完成 / 原因</label><p class="field-hint">卡在哪里？需要改变什么条件？</p>'+resizableRichBox("reviewMissHeight",toolbar()+'<div class="rich-editor" data-week-review="reviewMiss" contenteditable="'+(mode==="current")+'" data-placeholder="哪些未完成，为什么？">'+week.reviewMiss+'</div>',"week-review-editor")+'</div><div class="review-field"><label>下周继续关注</label><p class="field-hint">哪些继续、推迟或停止？</p>'+resizableRichBox("reviewNextHeight",toolbar()+'<div class="rich-editor" data-week-review="reviewNext" contenteditable="'+(mode==="current")+'" data-placeholder="下周最需要继续推动什么？">'+week.reviewNext+'</div>',"week-review-editor")+'</div></div></article></div>';
  $("#page-week").innerHTML=pageHead("WEEKLY CONTROL",title,"只在每周规划与复盘时进入这里；日常工作回到“今天”。",actions)+'<div class="week-banner '+(banner?"show":"")+'">'+esc(banner)+'</div>'+
  modeBar+(panel==="review"?weeklyRecordActions(selectedWeekKey,mode)+weekComparison(week,mode)+reviewMarkup:planMarkup);
 }
-function quickCounts(){
- let open=openTasks(),today=todayKey();
- return{open:open.length,waiting:open.filter(task=>task.status==="等待").length,followup:open.filter(task=>isFollowupDue(task,today)).length,overdue:open.filter(task=>task.due&&task.due<today).length,paused:open.filter(task=>task.status==="暂停").length,done:state.tasks.filter(task=>isDone(task)&&!task.archived).length,archived:state.tasks.filter(task=>task.archived).length};
-}
-function filteredTasks(){
- let today=todayKey(),items=state.tasks.filter(task=>{
-  if(taskFilter.quick==="all"&&task.archived)return false;
-  if(taskFilter.quick==="open"&&(task.archived||isDone(task)))return false;
-  if(taskFilter.quick==="waiting"&&!(!task.archived&&!isDone(task)&&task.status==="等待"))return false;
-  if(taskFilter.quick==="followup"&&!isFollowupDue(task,today))return false;
-  if(taskFilter.quick==="overdue"&&!(!task.archived&&!isDone(task)&&task.due&&task.due<today))return false;
-  if(taskFilter.quick==="paused"&&!(!task.archived&&!isDone(task)&&task.status==="暂停"))return false;
-  if(taskFilter.quick==="done"&&!(!task.archived&&isDone(task)))return false;
-  if(taskFilter.quick==="archived"&&!task.archived)return false;
-  if(taskFilter.project.length&&!taskFilter.project.includes(task.project))return false;if(taskFilter.type.length&&!taskFilter.type.includes(task.type))return false;if(taskFilter.status.length&&!taskFilter.status.includes(task.status))return false;
-  return !taskFilter.query.trim()||taskSearchMatch(task,taskFilter.query).score>0;
- });
- return taskFilter.query.trim()?items.sort((a,b)=>taskSearchMatch(b,taskFilter.query).score-taskSearchMatch(a,taskFilter.query).score):pinOrdered(items,"all");
-}
-function tableRow(task){return taskRow(task,{scope:'all',query:taskFilter.query,attributes:'data-all-task-row',selection:true})}
+function quickCounts(){let f=normalizeTaskFilter(taskFilter);return Object.fromEntries(['open','done','archived'].map(range=>[range,state.tasks.filter(t=>taskMatchesFilters(t,taskFilterForRange(f,range))).length]))}
+function filteredTasks(){taskFilter=normalizeTaskFilter(taskFilter);return sortFilteredTasks(state.tasks.filter(task=>taskMatchesFilters(task,taskFilter)),taskFilter)}
+function tableRow(task){return taskRow(task,{scope:'all',query:taskFilter.query,attributes:'data-all-task-row',reserveDrag:true,selection:ui.taskBulkMode,selectionOnly:ui.taskBulkMode,planning:'next',projectContext:taskFilter.group==='project',readonly:task.archived,draggable:!ui.taskBulkMode&&taskFilter.sort==='manual'&&!taskFilter.query.trim()})}
 function multiFilter(label,field,options){
- let selected=taskFilter[field],title=selected.length?label+" "+selected.length:label;
- return'<details class="multi-filter" data-hover-expand data-filter-detail="'+field+'"><summary>'+esc(title)+'</summary><div class="multi-menu">'+options.map(option=>{let value=typeof option==="string"?option:option.value,text=typeof option==="string"?option:option.label;return'<label><input type="checkbox" data-filter-check="'+field+'" value="'+esc(value)+'" '+(selected.includes(value)?"checked":"")+'><span>'+esc(text)+'</span></label>'}).join("")+'</div></details>';
+ let selected=taskFilter[field],title=selected.length?label+' '+selected.length:label;
+ return'<details class="multi-filter" data-click-only data-filter-detail="'+field+'" '+(ui.taskFilterDetail===field?'open':'')+'><summary>'+esc(title)+'</summary><div class="multi-menu">'+(field==='project'?'<input type="search" data-filter-option-search="project" aria-label="查找筛选项目" placeholder="查找项目…">':'')+options.map(option=>{let value=typeof option==='string'?option:option.value,text=typeof option==='string'?option:option.label;return'<label><input type="checkbox" data-filter-check="'+field+'" value="'+esc(value)+'" '+(selected.includes(value)?'checked':'')+'><span>'+esc(text)+'</span></label>'}).join('')+'</div></details>';
+}
+function taskSelectOptions(options,value){return options.map(([key,label])=>'<option value="'+key+'" '+(key===value?'selected':'')+'>'+label+'</option>').join('')}
+function taskFilterPanelMarkup(){
+ let projects=[{value:'',label:'通用事项／未归属项目'},...state.projects.map(p=>({value:p.id,label:p.name+(p.archived?'（已归档）':'')}))];
+ return'<div id="taskFilterPanel" class="task-advanced-panel" popover="manual" role="dialog" aria-label="筛选事项"><div class="task-filter-heading"><b>筛选事项</b><button class="icon-btn" type="button" data-close-task-filter aria-label="关闭筛选">×</button></div><div class="task-filter-fields">'+multiFilter('项目','project',projects)+multiFilter('状态','status',statuses.filter(s=>s!=='已归档'&&(taskFilter.quick!=='open'||s!=='已完成')))+multiFilter('优先级','priority',priorities)+multiFilter('类型','type',taskTypes)+'</div><div class="task-date-filter"><label>日期类型<select id="taskDateFilterField">'+taskSelectOptions([['planDate','计划日期'],['due','截止日期'],['followup','跟进日期']],taskFilter.dateField)+'</select></label><label>日期条件<select id="taskDateFilterMode">'+taskSelectOptions([['any','不限'],['none','未安排'],['today','今天'],['week','本周'],['due','已到期（含今天）'],['overdue','已过期'],['range','指定范围']],taskFilter.dateMode)+'</select></label></div>'+(taskFilter.dateMode==='range'?'<div class="task-date-range"><label>起始日期<input type="date" id="taskDateFrom" value="'+esc(taskFilter.dateFrom)+'"></label><label>结束日期<input type="date" id="taskDateTo" value="'+esc(taskFilter.dateTo)+'"></label></div>':'')+'<p class="task-filter-error" role="status">'+esc(taskFilterDateError(taskFilter))+'</p><div class="task-filter-shortcuts" aria-label="常用条件"><button class="btn" data-quick="waiting">等待回复</button><button class="btn" data-quick="followup">今日催办</button><button class="btn" data-quick="overdue">截止逾期</button><button class="btn" data-quick="paused">已暂停</button></div><div class="task-filter-footer"><span>同类条件满足其一，不同类别同时满足</span><button class="link-btn" data-reset-filter>清除条件</button><button class="btn primary" data-close-task-filter>完成</button></div></div>';
+}
+function taskListToolbar(items){
+ let count=ui.selectedTasks.size,archived=taskFilter.quick==='archived',disabled=count?'':'disabled';
+ if(!ui.taskBulkMode)return'<div class="task-list-toolbar"><span class="task-result-count">'+items.length+' 项结果</span><button class="btn" type="button" data-task-bulk-mode>批量选择</button></div>';
+ return'<div class="task-list-toolbar bulk-bar"><label class="all-task-select"><input type="checkbox" data-bulk-all aria-label="选择全部筛选结果（含折叠项目）" '+(items.length&&items.every(t=>ui.selectedTasks.has(t.id))?'checked':'')+'>全选</label><b>已选 '+count+' 项</b>'+(!archived?'<select id="bulkStatus" aria-label="批量修改状态" '+disabled+'><option value="">状态</option>'+statuses.filter(s=>s!=='已归档').map(s=>'<option>'+s+'</option>').join('')+'</select><select id="bulkPriority" aria-label="批量修改优先级" '+disabled+'><option value="">优先级</option>'+priorities.map(s=>'<option>'+s+'</option>').join('')+'</select><select id="bulkProject" aria-label="批量修改项目" '+disabled+'><option value="">项目</option><option value="__none">通用事项</option>'+state.projects.filter(p=>!p.archived).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join('')+'</select><label class="bulk-plan-date">计划日期<input id="bulkPlanDate" type="date" aria-label="批量设置计划日期" '+disabled+'></label><button class="btn" data-bulk-clear-plan '+disabled+'>清除计划</button>':'')+'<button class="btn" '+(archived?'data-bulk-restore':'data-bulk-archive')+' '+disabled+'>'+(archived?'恢复':'归档')+'</button><button class="btn danger" data-bulk-delete '+disabled+'>删除</button><button class="link-btn" data-bulk-clear '+disabled+'>取消选择</button><button class="btn task-bulk-exit" data-task-bulk-mode>退出选择</button></div>';
 }
 function renderTasks(){
- let counts=quickCounts(),quick=[["open","所有待办"],["waiting","等待回复"],["followup","今日催办"],["overdue","截止逾期"],["paused","已暂停"],["done","已完成"],["archived","已归档"]],items=filteredTasks();
- let visibleIds=new Set(items.map(task=>task.id));ui.selectedTasks=new Set(Array.from(ui.selectedTasks).filter(id=>visibleIds.has(id)));
- let quickHtml=quick.map(item=>'<button class="quick-btn '+(taskFilter.quick===item[0]?"active":"")+'" data-quick="'+item[0]+'">'+item[1]+' <em>'+counts[item[0]]+'</em></button>').join("");
- let projectOptions=state.projects.filter(project=>!project.archived).map(project=>({value:project.id,label:project.name}));
- let advancedCount=taskFilter.project.length+taskFilter.type.length+taskFilter.status.length,advancedLabel='筛选与分组'+(advancedCount?' · '+advancedCount:'');
- let groups=new Map();
- if(taskFilter.group!=="none")items.forEach(task=>{let key=taskFilter.group==="project"?task.project||"":taskFilter.group==="status"?task.status:task.type,label=taskFilter.group==="project"?projectName(task.project):key;if(!groups.has(key))groups.set(key,{label,items:[]});groups.get(key).items.push(task)});
- if(taskFilter.group==='project'){
-  let rank=new Map(state.order.projects.map((id,index)=>[id,index]));
-  groups=new Map([...groups].sort(([a],[b])=>Number(!a)-Number(!b)||Number(state.favorites.includes(b))-Number(state.favorites.includes(a))||(rank.get(a)??9999)-(rank.get(b)??9999)));
- }
- let body=taskFilter.group==="none"?items.map(tableRow).join(""):Array.from(groups.values()).map(group=>'<section class="all-task-group"><h2>'+esc(group.label)+' <small>'+group.items.length+' 项</small></h2>'+group.items.map(tableRow).join("")+'</section>').join("");
- let bulk=ui.selectedTasks.size?'<div class="bulk-bar"><b>已选择 '+ui.selectedTasks.size+' 项</b><select class="control" id="bulkStatus"><option value="">修改状态</option>'+statuses.map(value=>'<option>'+value+'</option>').join("")+'</select><select class="control" id="bulkPriority"><option value="">修改优先级</option>'+priorities.map(value=>'<option>'+value+'</option>').join("")+'</select><button class="btn" data-bulk-archive>归档</button><button class="btn danger" data-bulk-delete>删除</button><button class="btn" data-bulk-clear>取消选择</button></div>':"";
- $("#page-tasks").innerHTML=pageHead("SINGLE SOURCE OF TRUTH","所有事项","每件事情只保存在这里一次；今天和本周只是视图。",'<button class="btn primary" data-action="new-task">＋ 新建事项</button>')+
- '<div class="quickviews">'+quickHtml+'</div>'+ (taskFilter.query.trim()?'<p class="muted search-order-note">搜索结果按相关度排序；清空搜索后可拖动排序。</p>':'')+'<div class="task-primary-toolbar"><label class="search-field"><span>⌕</span><input id="taskSearch" value="'+esc(taskFilter.query)+'" placeholder="搜索事项、项目编号、里程碑、状态……"></label><button class="btn task-options-toggle '+(ui.taskOptionsOpen?'active':'')+'" type="button" data-hover-task-options data-toggle-task-options aria-expanded="'+(ui.taskOptionsOpen?'true':'false')+'">'+advancedLabel+' '+(ui.taskOptionsOpen?'收起':'展开')+'</button></div><div class="task-advanced-panel" data-hover-task-options-panel '+(ui.taskOptionsOpen?'':'hidden')+'>'+multiFilter("项目","project",projectOptions)+multiFilter("类型","type",taskTypes)+multiFilter("状态","status",statuses)+'<span class="muted">分组</span><div class="segmented"><button data-task-group="none" class="'+(taskFilter.group==="none"?"active":"")+'">不分组</button><button data-task-group="project" class="'+(taskFilter.group==="project"?"active":"")+'">项目</button><button data-task-group="status" class="'+(taskFilter.group==="status"?"active":"")+'">状态</button><button data-task-group="type" class="'+(taskFilter.group==="type"?"active":"")+'">类型</button></div><button class="btn soft" data-smart-sort="all">✦ 智能排序</button><button class="btn" data-reset-filter>清除筛选</button><span class="filter-note">同类筛选按“或”，不同类别按“且”；隐藏事项不会保留批量选择。</span></div>'+
- bulk+'<div class="card all-task-list"><label class="all-task-select"><input class="bulk-check" type="checkbox" data-bulk-all '+(items.length&&items.every(task=>ui.selectedTasks.has(task.id))?'checked':'')+'> 选择当前结果 <span>'+items.length+' 项</span></label><div class="all-task-rows">'+(body||'<div class="empty">没有符合条件的事项。</div>')+'</div></div>';
+ taskFilter=normalizeTaskFilter(taskFilter);let counts=quickCounts(),items=filteredTasks(),visibleIds=new Set(items.map(t=>t.id));ui.selectedTasks=new Set([...ui.selectedTasks].filter(id=>visibleIds.has(id)));
+ let quickHtml=[['open','未完成'],['done','已完成'],['archived','已归档']].map(([key,label])=>'<button class="quick-btn '+(taskFilter.quick===key?'active':'')+'" data-quick="'+key+'" aria-pressed="'+(taskFilter.quick===key)+'">'+label+' <em>'+counts[key]+'</em></button>').join('');
+ let chips=taskFilterChips(taskFilter),groups=new Map();if(taskFilter.group!=='none')items.forEach(task=>{let key=taskFilter.group==='project'?task.project||'':taskFilter.group==='status'?task.status:task.type,label=taskFilter.group==='project'?projectName(task.project):key;if(!groups.has(key))groups.set(key,{label,items:[]});groups.get(key).items.push(task)});
+ if(taskFilter.group==='project'){let rank=new Map(state.order.projects.map((id,i)=>[id,i]));groups=new Map([...groups].sort(([a],[b])=>Number(!a)-Number(!b)||Number(state.favorites.includes(b))-Number(state.favorites.includes(a))||(rank.get(a)??9999)-(rank.get(b)??9999)))}
+ let body=taskFilter.group==='none'?items.map(tableRow).join(''):[...groups].map(([key,group])=>{let groupKey=taskFilter.group+':'+key,closed=ui.collapsedTaskGroups.has(groupKey);return'<section class="all-task-group" data-task-group-key="'+esc(groupKey)+'"><h2><button type="button" data-collapse-task-group="'+esc(groupKey)+'" aria-expanded="'+!closed+'"><span aria-hidden="true">'+(closed?'▸':'▾')+'</span>'+esc(group.label)+' <small>'+group.items.length+' 项</small></button></h2><div class="all-task-group-rows" '+(closed?'hidden':'')+'>'+group.items.map(tableRow).join('')+'</div></section>'}).join('');
+ $('#page-tasks').innerHTML=pageHead('','所有事项','查找、筛选和集中整理事项。','<button class="btn primary" data-action="new-task">＋ 新建事项</button>')+'<div class="quickviews">'+quickHtml+'</div><div class="task-primary-toolbar"><label class="search-field"><span>⌕</span><input id="taskSearch" value="'+esc(taskFilter.query)+'" placeholder="搜索当前范围的事项…"></label><button class="btn task-options-toggle '+(chips.length?'active':'')+'" type="button" data-toggle-task-options aria-haspopup="dialog" aria-expanded="'+ui.taskOptionsOpen+'">筛选'+(chips.length?' · '+chips.length:'')+'</button><label class="task-view-control">分组<select id="taskGroupSelect" aria-label="事项分组">'+taskSelectOptions([['project','项目'],['status','状态'],['type','类型'],['none','不分组']],taskFilter.group)+'</select></label><label class="task-view-control">排序<select id="taskSortSelect" aria-label="事项排序" '+(taskFilter.query.trim()?'disabled':'')+'>'+taskSelectOptions([['manual','手动'],['smart','智能排序'],['priority','优先级'],['planDate','计划日期'],['due','截止日期'],['followup','跟进日期'],['completed','完成日期（最新在前）']],taskFilter.sort)+'</select></label></div>'+taskFilterPanelMarkup()+'<div class="task-active-filters" '+(chips.length?'':'hidden')+'>'+chips.map(c=>'<button class="task-filter-chip" type="button" data-remove-task-filter="'+c.field+'" data-filter-value="'+esc(c.value)+'" aria-label="移除'+esc(c.label)+'">'+esc(c.label)+' <span aria-hidden="true">×</span></button>').join('')+'<button class="link-btn" data-reset-filter>清除条件</button></div>'+(taskFilter.query.trim()?'<p class="muted search-order-note">搜索结果按相关度排序；清空搜索后恢复所选排序。</p>':'')+'<div class="card all-task-list">'+taskListToolbar(items)+'<div class="all-task-rows">'+(body||'<div class="empty"><p>'+esc(taskFilterDateError(taskFilter)||'当前范围与筛选条件下没有事项。')+'</p>'+(chips.length?'<button class="btn" data-reset-filter>清除筛选条件</button>':'')+'</div>')+'</div></div>';
 }
 function sortProjectTasksByDate(tasks,mode){
  if(!['asc','desc'].includes(mode))return tasks;
@@ -2142,8 +2187,8 @@ function renderProjectOverview(){
 function weekComparison(week,mode){
  let readonly=mode!=="current",snapshots=week.taskSnapshots||[],members=new Set(week.taskIds||[]),planned=snapshots.filter(task=>members.has(task.id));
  let tops=(week.top||[]).map((text,index)=>'<div class="week-outcome"><b>'+(index+1)+' · '+esc(text)+'</b><label>实际结果<textarea rows="2" data-top-result="'+index+'" '+(readonly?'readonly':'')+' placeholder="达成了什么？还有哪些差距？">'+esc(week.topResults?.[index]||'')+'</textarea></label></div>').join('');
- let rows=planned.map(task=>{let action=week.actions?.[task.id],project=week.projectSnapshots?.find(project=>project.id===task.project),live=readonly?task:taskById(task.id),removed=!task.week||task.archived||!live,openAttrs=readonly||!live?'data-view-task-history="'+esc(task.id)+'" data-history-week="'+esc(Object.keys(state.weeks).find(key=>state.weeks[key]===week)||selectedWeekKey)+'"':'data-open-task="'+esc(task.id)+'"';return '<tr><th scope="row"><button class="task-title-link" type="button" '+openAttrs+'>'+esc(task.title)+'</button><small class="muted">'+esc(project?.name||'通用事项')+'</small></th><td class="week-plan-text">'+esc(action?.text||'未记录当周推进内容')+'</td><td><div class="week-result-cell"><span class="pill status-'+esc(task.status)+'">'+esc(task.status)+'</span>'+(removed?'<small class="muted">未列入当前本周行动</small>':'')+'<textarea rows="3" data-week-result="'+esc(task.id)+'" '+(readonly?'readonly':'')+' aria-label="'+esc(task.title)+'的本周实际结果" placeholder="实际推进到了哪里？">'+esc(action?.result||'')+'</textarea>'+'</div></td></tr>'}).join('');
- return '<section class="card week-comparison"><div class="card-head"><div><h2>本周目标与推进对照</h2><p class="field-hint">对照本周计划记录实际结果；阶段推进不等于整个事项完成。</p></div>'+helpDisclosure('本周计划首次由下一步带入，之后单独维护并可调整；它不是冻结的周初原稿。历史周只读；旧周未保存的内容显示未记录，不用当前内容补写。')+'</div><div class="week-outcomes">'+(tops||'<p class="muted">这周没有设置 Top 3。</p>')+'</div><table class="week-comparison-table"><thead><tr><th>本周事项</th><th>本周计划</th><th>实际进展</th></tr></thead><tbody>'+rows+'</tbody></table>'+(!rows?'<div class="empty">这周没有推进事项记录。</div>':'')+'</section>';
+ let rows=planned.map(task=>{let action=week.actions?.[task.id],project=week.projectSnapshots?.find(project=>project.id===task.project),live=readonly?task:taskById(task.id),removed=!task.week||task.archived||!live,openAttrs=readonly||!live?'data-view-task-history="'+esc(task.id)+'" data-history-week="'+esc(Object.keys(state.weeks).find(key=>state.weeks[key]===week)||selectedWeekKey)+'"':'data-open-task="'+esc(task.id)+'"';return '<tr><th scope="row"><button class="task-title-link" type="button" '+openAttrs+'>'+esc(task.title)+'</button><small class="muted">'+esc(project?.name||'通用事项')+'</small></th><td class="week-plan-text">'+esc((live||task).nextAction||'未填写下一步')+'</td><td><div class="week-result-cell"><span class="pill status-'+esc(task.status)+'">'+esc(task.status)+'</span>'+(removed?'<small class="muted">未列入当前本周行动</small>':'')+'<textarea rows="3" data-week-result="'+esc(task.id)+'" '+(readonly?'readonly':'')+' aria-label="'+esc(task.title)+'的本周实际结果" placeholder="实际推进到了哪里？">'+esc(action?.result||'')+'</textarea>'+'</div></td></tr>'}).join('');
+ return '<section class="card week-comparison"><div class="card-head"><div><h2>本周目标与推进对照</h2><p class="field-hint">对照下一步记录实际结果；阶段推进不等于整个事项完成。</p></div>'+helpDisclosure('当前周显示事项最新的下一步；历史周读取当周任务记录，保持只读。')+'</div><div class="week-outcomes">'+(tops||'<p class="muted">这周没有设置 Top 3。</p>')+'</div><table class="week-comparison-table"><thead><tr><th>本周事项</th><th>下一步</th><th>实际进展</th></tr></thead><tbody>'+rows+'</tbody></table>'+(!rows?'<div class="empty">这周没有推进事项记录。</div>':'')+'</section>';
 }
 function renderProjectContent(){
  if(ui.projectView==="overview")return renderProjectOverview();
@@ -2227,7 +2272,7 @@ function renderData(){
  $("#page-data").innerHTML=pageHead("DATA SAFETY","数据与恢复","导出、快照、回收站与清空都经过统一数据仓库。",'<button class="btn" data-export>导出 JSON</button><button class="btn" data-import>导入 JSON</button>')+'<div class="data-grid"><article class="card feature-card"><div class="feature-head"><h2>恢复快照</h2><button class="btn danger" data-clear-snapshots>清除全部</button></div><p>导入、清空、云端覆盖等高风险操作前自动创建。</p><div class="data-list">'+(snapshots||'<div class="empty">暂无快照。</div>')+'</div></article><article class="card feature-card"><div class="feature-head"><h2>回收站</h2><button class="btn danger" data-clear-trash>清除全部</button></div><p>删除的事项、项目、备忘录和关键决策可在这里恢复。</p><div class="data-list">'+(trash||'<div class="empty">回收站为空。</div>')+'</div></article><article class="card feature-card danger-zone"><div class="feature-head"><div><h2>清空业务数据</h2><p>清空事项、项目、备忘录、关键决策与周计划；账号和云连接配置不会删除。</p></div><button class="btn danger" data-clear-business>一键清空</button></div></article></div>';
 }
 
-const ui={projectView:"overview",renderedPage:"",projectMobilePane:"detail",memoPane:"list",overviewFilter:"open",collapsedProjects:new Set(),projectQuery:"",projectTaskQuery:"",projectDateSort:"default",projectAttentionFilter:"all",projectTaskOptionsOpen:false,projectBriefExpanded:new Map(),projectMilestoneFilter:"all",projectFocusTaskId:"",projectReturnTaskId:"",memoQuery:"",memoMultiSelect:false,selectedMemos:new Set(),showArchivedProjects:false,projectOverviewFilter:"open",selectedTasks:new Set(),showAllWeekDone:false,weekPanel:"plan",taskOptionsOpen:false};
+const ui={projectView:"overview",renderedPage:"",projectMobilePane:"detail",memoPane:"list",overviewFilter:"open",collapsedProjects:new Set(),projectQuery:"",projectTaskQuery:"",projectDateSort:"default",projectAttentionFilter:"all",projectTaskOptionsOpen:false,projectBriefExpanded:new Map(),projectMilestoneFilter:"all",projectFocusTaskId:"",projectReturnTaskId:"",memoQuery:"",memoMultiSelect:false,selectedMemos:new Set(),showArchivedProjects:false,projectOverviewFilter:"open",selectedTasks:new Set(),showAllWeekDone:false,weekPanel:"plan",taskBulkMode:false,collapsedTaskGroups:new Set(),taskFilterDetail:"",taskOptionsOpen:false};
 const THEME_KEY="work-cockpit-theme-v1";
 function applyTheme(value,remember=true){let preference=value||"system",dark=preference==="dark"||preference==="system"&&matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.dataset.theme=dark?"dark":"light";if(remember)localStorage.setItem(THEME_KEY,preference);let button=$("#themeButton");if(button){button.textContent=dark?"☀":"◐";button.dataset.tip=dark?"切换到浅色模式":"切换到暗夜模式"}let meta=$("meta[name=theme-color]");if(meta)meta.content=dark?"#080f1c":"#2468f2"}
 function toggleTheme(){applyTheme(document.documentElement.dataset.theme==="dark"?"light":"dark")}
@@ -2260,8 +2305,8 @@ function renderApp(){
  if(typeof syncVisualPreview==="function")syncVisualPreview();
  ui.renderedPage=currentPage;
 }
-function bindTransientInputs(){initPlanningResize();initTableSorting()}
-const PLANNING_TEXTAREA_SELECTOR="[data-overview-next],[data-week-action]";
+function bindTransientInputs(){initPlanningResize();initTableSorting();syncTaskFilterPopover()}
+const PLANNING_TEXTAREA_SELECTOR="[data-overview-next]";
 function resizePlanningTextarea(textarea){
  if(!textarea?.matches?.(PLANNING_TEXTAREA_SELECTOR))return;
  textarea.style.height="0px";
@@ -3123,8 +3168,8 @@ document.addEventListener('pointerup',endPlanningResize);document.addEventListen
 document.addEventListener('dblclick',event=>{if(!event.target.closest?.('[data-planning-resize]')||event.target.closest('[data-scoped-planning]'))return;event.preventDefault();applyPlanningWidth(45);savePlanningWidth()});
 document.addEventListener('keydown',event=>{if(!event.target.matches?.('[data-planning-resize]')||event.target.hasAttribute("data-scoped-planning"))return;let value=event.key==='ArrowLeft'?planningWidth-2:event.key==='ArrowRight'?planningWidth+2:event.key==='Home'?20:event.key==='End'?70:null;if(value===null)return;event.preventDefault();event.stopPropagation();applyPlanningWidth(value);savePlanningWidth()},true);
 function initTableSorting(){
- tableSortables.forEach(sortable=>sortable.destroy());tableSortables=[];if(typeof Sortable!=='function'||taskFilter.query.trim()||taskFilter.sort!=="manual")return;
- document.querySelectorAll('#page-tasks .all-task-group,#page-tasks .all-task-rows:not(:has(.all-task-group))').forEach(body=>{let before=[];tableSortables.push(new Sortable(body,{draggable:'.task-row[data-task]',handle:'[data-drag-handle="all"]',forceFallback:true,fallbackOnBody:true,fallbackTolerance:4,animation:150,scroll:true,onStart(){before=Array.from(body.querySelectorAll('.task-row[data-task]'),row=>row.dataset.task)},onEnd(){let after=Array.from(body.querySelectorAll('.task-row[data-task]'),row=>row.dataset.task);commit('调整事项顺序',draft=>{draft.order.all=reconcileVisibleOrder(draft.order.all,before,after)},{immediate:true})}}))});
+ tableSortables.forEach(sortable=>sortable.destroy());tableSortables=[];if(typeof Sortable!=='function'||taskFilter.query.trim()||taskFilter.sort!=="manual"||ui.taskBulkMode)return;
+ document.querySelectorAll('#page-tasks .all-task-group-rows:not([hidden]),#page-tasks .all-task-rows:not(:has(.all-task-group))').forEach(body=>{let before=[];tableSortables.push(new Sortable(body,{draggable:'.task-row[data-task]',handle:'[data-drag-handle="all"]',forceFallback:true,fallbackOnBody:true,fallbackTolerance:4,animation:150,scroll:true,onStart(){before=Array.from(body.querySelectorAll('.task-row[data-task]'),row=>row.dataset.task)},onEnd(){let after=Array.from(body.querySelectorAll('.task-row[data-task]'),row=>row.dataset.task);commit('调整事项顺序',draft=>{draft.order.all=reconcileVisibleOrder(draft.order.all,before,after)},{immediate:true})}}))});
 }
 let taskDateTrigger=null;
 function taskDateButton(task,readonly=false){
@@ -3339,6 +3384,45 @@ document.addEventListener('change',event=>{
  if(event.target.id==='curationTarget'){const field=$('#curationTaskField');if(field){field.hidden=event.target.value!=='task';if(!field.hidden)$('#curationTask')?.focus()}}
 });
 document.addEventListener('click',event=>{const button=event.target.closest('[data-review-planning]');if(button)openPlanningReview(button.dataset.reviewPlanning)});
+function syncTaskFilterPopover(){
+ const panel=$('#taskFilterPanel'),trigger=$('[data-toggle-task-options]');if(!panel||!trigger)return;
+ if(currentPage!=='tasks'||!ui.taskOptionsOpen){if(panel.matches(':popover-open'))panel.hidePopover();panel.hidden=true;trigger.setAttribute('aria-expanded','false');return}
+ panel.hidden=false;if(typeof panel.showPopover==='function'&&!panel.matches(':popover-open'))panel.showPopover();trigger.setAttribute('aria-expanded','true');positionUiPopover(panel,trigger);
+}
+function closeTaskFilters(restore=false){ui.taskOptionsOpen=false;syncTaskFilterPopover();if(restore)$('[data-toggle-task-options]')?.focus({preventScroll:true})}
+function refreshTaskFilterFocus(selector){requestRender();requestAnimationFrame(()=>{const target=$(selector);target?.focus({preventScroll:true});syncTaskFilterPopover()})}
+function runBulkTaskEdit(field,value){
+ const ids=[...ui.selectedTasks],check=validateBulkTaskEdit(state,ids,field,value);if(!check.ok)return toast(check.message);
+ const label={status:'修改状态',priority:'修改优先级',project:'修改项目',planDate:'设置计划日期',archive:'归档',restore:'恢复'}[field];commit('批量'+label,draft=>applyBulkTaskEdit(draft,ids,field,value),{immediate:true});toast('已为 '+ids.length+' 项事项'+label);
+}
+function handleTaskFilterClick(target){
+ if(currentPage!=='tasks')return false;
+ if(target.hasAttribute('data-toggle-task-options')){ui.taskOptionsOpen=!ui.taskOptionsOpen;syncTaskFilterPopover();return true}
+ if(target.hasAttribute('data-close-task-filter')){closeTaskFilters(true);return true}
+ if(target.dataset.quick){const range=target.dataset.quick;taskFilter=['open','done','archived'].includes(range)?taskFilterForRange(taskFilter,range):normalizeTaskFilter({...taskFilter,quick:range});ui.selectedTasks.clear();requestRender();return true}
+ if(target.hasAttribute('data-reset-filter')){let {quick,group,sort}=taskFilter;taskFilter={...emptyTaskFilter(),quick:quick==='all'?'open':quick,group,sort};requestRender();return true}
+ if(target.dataset.removeTaskFilter){const field=target.dataset.removeTaskFilter,value=target.dataset.filterValue;if(['project','status','priority','type'].includes(field))taskFilter[field]=taskFilter[field].filter(v=>v!==value);else if(field==='query')taskFilter.query='';else if(field==='date'){taskFilter.dateMode='any';taskFilter.dateFrom='';taskFilter.dateTo=''}else if(field==='range')taskFilter.quick='open';requestRender();return true}
+ if(target.hasAttribute('data-collapse-task-group')){let key=target.dataset.collapseTaskGroup;ui.collapsedTaskGroups.has(key)?ui.collapsedTaskGroups.delete(key):ui.collapsedTaskGroups.add(key);requestRender();return true}
+ if(target.hasAttribute('data-task-bulk-mode')){ui.taskBulkMode=!ui.taskBulkMode;ui.selectedTasks.clear();requestRender();return true}
+ if(target.hasAttribute('data-bulk-clear-plan')){runBulkTaskEdit('planDate','');return true}
+ if(target.hasAttribute('data-bulk-archive')||target.hasAttribute('data-bulk-restore')){runBulkTaskEdit(target.hasAttribute('data-bulk-restore')?'restore':'archive',true);return true}
+ return false;
+}
+function handleTaskFilterChange(target){
+ if(currentPage!=='tasks')return false;
+ if(target.dataset.filterCheck){const field=target.dataset.filterCheck;if(!['project','status','priority','type'].includes(field))return true;let values=new Set(taskFilter[field]);target.checked?values.add(target.value):values.delete(target.value);taskFilter[field]=[...values];ui.taskFilterDetail=field;refreshTaskFilterFocus('[data-filter-check="'+field+'"][value="'+CSS.escape(target.value)+'"]');return true}
+ const fields={taskDateFilterField:'dateField',taskDateFilterMode:'dateMode',taskDateFrom:'dateFrom',taskDateTo:'dateTo',taskGroupSelect:'group',taskSortSelect:'sort'};
+ if(fields[target.id]){taskFilter[fields[target.id]]=target.value;refreshTaskFilterFocus('#'+target.id);return true}
+ const bulk={bulkStatus:'status',bulkPriority:'priority',bulkProject:'project',bulkPlanDate:'planDate'};
+ if(bulk[target.id]){if(target.value)runBulkTaskEdit(bulk[target.id],target.value==='__none'?'':target.value);return true}
+ return false;
+}
+function onTaskFilterPointerDown(event){if(currentPage==='tasks'&&ui.taskOptionsOpen&&!event.target.closest?.('#taskFilterPanel,[data-toggle-task-options],.multi-menu,.hover-select-menu'))closeTaskFilters()}
+document.addEventListener('pointerdown',onTaskFilterPointerDown);
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&currentPage==='tasks'&&ui.taskOptionsOpen){event.preventDefault();event.stopImmediatePropagation();closeTaskFilters(true)}},true);
+document.addEventListener('toggle',event=>{const node=event.target;if(node.matches?.('details[data-click-only][data-filter-detail]')&&node.isConnected){if(node.open)ui.taskFilterDetail=node.dataset.filterDetail;else if(ui.taskFilterDetail===node.dataset.filterDetail)ui.taskFilterDetail=''}},true);
+document.addEventListener('input',event=>{const input=event.target;if(!input.dataset.filterOptionSearch)return;let query=input.value.trim().toLocaleLowerCase();input.closest('.multi-menu').querySelectorAll('label').forEach(label=>label.hidden=!label.textContent.toLocaleLowerCase().includes(query))});
+window.addEventListener('resize',()=>{if(ui.taskOptionsOpen)syncTaskFilterPopover()});
 function saveRelationsNow(label){
  let existing=taskById(taskDraft.id);if(!existing)return;
  let next=Array.from(relatedDraft);
@@ -3348,6 +3432,7 @@ function handleClick(event){
  let target=event.target.closest("[data-retry-thumb],[data-image-view],button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
  if(target.hasAttribute("data-task-record"))return openTaskRecord(taskDraft.id);
  if(handleWorkflowClick(target))return;
+ if(handleTaskFilterClick(target))return;
  if(target.dataset.projectPane){ui.projectMobilePane=target.dataset.projectPane;return syncProjectMobilePane()}
  if(target.dataset.memoPane){ui.memoPane=target.dataset.memoPane;return syncMemoPane()}
  if(target.hasAttribute('data-edit-obsidian')){let box=$('#obsidianEditor');box.hidden=!box.hidden;if(!box.hidden)$('#taskObsidianUri').focus();return}
@@ -3361,7 +3446,7 @@ function handleClick(event){
  if(target.dataset.quickDate)return openTaskDateMenu(target,target.dataset.quickDate);
  if(target.dataset.setTaskDate!==undefined)return applyQuickTaskDate(target.dataset.setTaskDate);
  if(target.dataset.applyTaskDate!==undefined)return applyQuickTaskDate($("#quickTaskDate").value);
- if(target.dataset.openAllWaiting!==undefined){taskFilter={...taskFilter,quick:"waiting",query:"",project:[],type:[],status:[]};return navigate("tasks")}
+ if(target.dataset.openAllWaiting!==undefined){taskFilter=normalizeTaskFilter({...emptyTaskFilter(),quick:"waiting"});return navigate("tasks")}
  if(target.dataset.page)return navigate(target.dataset.page);
  if(target.hasAttribute("data-project-date-sort")){let modes=["default","desc","asc"];ui.projectDateSort=modes[(modes.indexOf(ui.projectDateSort)+1)%modes.length];toast({desc:"完成日期：最新在前",asc:"完成日期：最早在前",default:"已恢复默认排序"}[ui.projectDateSort]);return requestRender()}
  if(target.dataset.projectView){rememberProjectPosition();ui.projectView=target.dataset.projectView;return requestRender()}
@@ -3399,12 +3484,7 @@ function handleClick(event){
   let scope=target.dataset.smartSort,items=scope==="today"?todayAdvance():scope==="waiting"?todayWaiting():scope==="week"?weekTasks():scope==="long"?longTasks():filteredTasks();return applySmartOrder(items,scope);
  }
  if(target.dataset.toggleGroup){let scope=target.dataset.toggleGroup;return commit("切换项目分组",draft=>draft.order[scope+"Group"]=!draft.order[scope+"Group"],{history:false})}
- if(target.dataset.quick){taskFilter.quick=target.dataset.quick;return requestRender()}
- if(target.dataset.toggleTaskOptions!==undefined){ui.taskOptionsOpen=!ui.taskOptionsOpen;return requestRender()}
- if(target.dataset.taskGroup){taskFilter.group=target.dataset.taskGroup;return requestRender()}
- if(target.dataset.resetFilter!==undefined){taskFilter={quick:"open",query:"",project:[],type:[],status:[],group:"project",sort:"manual"};ui.taskOptionsOpen=false;return requestRender()}
  if(target.dataset.bulkClear!==undefined){ui.selectedTasks.clear();return requestRender()}
- if(target.dataset.bulkArchive!==undefined){let ids=new Set(ui.selectedTasks);ui.selectedTasks.clear();return commit("批量归档事项",draft=>draft.tasks.forEach(task=>{if(ids.has(task.id))task.archived=true}),{immediate:true})}
  if(target.dataset.bulkDelete!==undefined){let ids=new Set(ui.selectedTasks);return confirmAction("删除选中的 "+ids.size+" 项事项？","这些事项会进入回收站；已形成的关键决策会保留。",()=>{commit("批量删除事项",draft=>{draft.tasks.filter(task=>ids.has(task.id)).forEach(task=>draft.trash.unshift({id:uid("trash"),type:"task",deletedAt:new Date().toISOString(),data:clone(task),decisionLinks:draft.decisions.filter(decision=>decision.sourceTaskId===task.id).map(decision=>decision.id)}));draft.tasks=draft.tasks.filter(task=>!ids.has(task.id));draft.tasks.forEach(task=>task.relatedTaskIds=task.relatedTaskIds.filter(id=>!ids.has(id)));draft.decisions.forEach(decision=>{if(ids.has(decision.sourceTaskId))decision.sourceTaskId=""})},{immediate:true});ui.selectedTasks.clear()},"删除")}
  if(target.dataset.selectProject){rememberProjectPosition();ui.projectMobilePane='detail';let pane=target.closest('.project-list-panel'),scrollTop=pane?.scrollTop||0;selectedProjectId=target.dataset.selectProject;ui.projectOverviewFilter="open";ui.projectDateSort="default";ui.projectTaskOptionsOpen=false;ui.projectTaskQuery="";ui.projectAttentionFilter="all";ui.projectMilestoneFilter="all";ui.projectFocusTaskId="";ui.projectReturnTaskId="";requestRender();return requestAnimationFrame(()=>{let next=$('.project-list-panel');if(next)next.scrollTop=scrollTop})}
  if(target.hasAttribute("data-toggle-project-task-options")){ui.projectTaskOptionsOpen=!ui.projectTaskOptionsOpen;return requestRender()}
@@ -3491,8 +3571,8 @@ function closeHoverDetail(details){if(!details)return;clearTimeout(hoverDetailTi
 function openHoverDetail(details){if(!details)return;clearTimeout(hoverDetailTimers.get(details));if(activeHoverSelect)closeHoverSelect(activeHoverSelect);if(activeHoverDetail&&activeHoverDetail!==details)closeHoverDetail(activeHoverDetail);details.open=true;activeHoverDetail=details}
 function showTaskOptionsHover(){if(currentPage!=="tasks")return;clearTimeout(taskOptionsHoverTimer);let button=$("[data-hover-task-options]"),panel=$("[data-hover-task-options-panel]");if(!button||!panel)return;panel.hidden=false;button.classList.add("hover-open");button.setAttribute("aria-expanded","true")}
 function hideTaskOptionsHover(){if(ui.taskOptionsOpen)return;let button=$("[data-hover-task-options]"),panel=$("[data-hover-task-options-panel]");if(panel)panel.hidden=true;if(button){button.classList.remove("hover-open");button.setAttribute("aria-expanded","false")}}
-document.addEventListener("pointerover",event=>{if(!isMouseHover(event))return;let details=event.target.closest?.("details.multi-filter");if(details&&!details.contains(event.relatedTarget))openHoverDetail(details);let taskOwner=event.target.closest?.("[data-hover-task-options],[data-hover-task-options-panel]");if(taskOwner&&!taskOwner.contains(event.relatedTarget))showTaskOptionsHover()});
-document.addEventListener("pointerout",event=>{if(!isMouseHover(event))return;let details=event.target.closest?.("details.multi-filter");if(details&&!details.contains(event.relatedTarget)){let next=event.relatedTarget?.closest?.("details.multi-filter");if(next&&next!==details){closeHoverDetail(details);openHoverDetail(next)}else{let timer=setTimeout(()=>{if(!details.matches(":hover")&&!details.matches(":focus-within"))closeHoverDetail(details)},70);hoverDetailTimers.set(details,timer)}}let taskOwner=event.target.closest?.("[data-hover-task-options],[data-hover-task-options-panel]");if(taskOwner&&!taskOwner.contains(event.relatedTarget)&&!event.relatedTarget?.closest?.("[data-hover-task-options],[data-hover-task-options-panel]")){clearTimeout(taskOptionsHoverTimer);taskOptionsHoverTimer=setTimeout(()=>{let button=$("[data-hover-task-options]"),panel=$("[data-hover-task-options-panel]");if(!button?.matches(":hover,:focus-within")&&!panel?.matches(":hover,:focus-within"))hideTaskOptionsHover()},90)}});
+document.addEventListener("pointerover",event=>{if(!isMouseHover(event))return;let details=event.target.closest?.("details.multi-filter:not([data-click-only])");if(details&&!details.contains(event.relatedTarget))openHoverDetail(details);let taskOwner=event.target.closest?.("[data-hover-task-options],[data-hover-task-options-panel]");if(taskOwner&&!taskOwner.contains(event.relatedTarget))showTaskOptionsHover()});
+document.addEventListener("pointerout",event=>{if(!isMouseHover(event))return;let details=event.target.closest?.("details.multi-filter:not([data-click-only])");if(details&&!details.contains(event.relatedTarget)){let next=event.relatedTarget?.closest?.("details.multi-filter:not([data-click-only])");if(next&&next!==details){closeHoverDetail(details);openHoverDetail(next)}else{let timer=setTimeout(()=>{if(!details.matches(":hover")&&!details.matches(":focus-within"))closeHoverDetail(details)},70);hoverDetailTimers.set(details,timer)}}let taskOwner=event.target.closest?.("[data-hover-task-options],[data-hover-task-options-panel]");if(taskOwner&&!taskOwner.contains(event.relatedTarget)&&!event.relatedTarget?.closest?.("[data-hover-task-options],[data-hover-task-options-panel]")){clearTimeout(taskOptionsHoverTimer);taskOptionsHoverTimer=setTimeout(()=>{let button=$("[data-hover-task-options]"),panel=$("[data-hover-task-options-panel]");if(!button?.matches(":hover,:focus-within")&&!panel?.matches(":hover,:focus-within"))hideTaskOptionsHover()},90)}});
 document.addEventListener("selectionchange",()=>rememberRichSelection());
 document.addEventListener("pointerdown",event=>{let block=event.target.closest?.(".quick-note-editor .ql-editor p,.quick-note-editor .ql-editor li");if(!block)return;let rect=block.getBoundingClientRect();if(event.clientX<=rect.left+25){event.preventDefault();event.stopPropagation();toggleQuickNoteLine(block)}});
 document.addEventListener("pointerdown",event=>{let command=event.target.closest("[data-command]");if(command){let editor=richEditorFor(command);if(editor){let quill=quillFor(editor);if(quill){activeRichEditor=editor;updateRichToolbar(editor)}else{richState(editor);rememberRichSelection(editor)}}event.preventDefault()}});
@@ -3517,7 +3597,7 @@ document.addEventListener("input",event=>{
  if(target.matches?.(PLANNING_TEXTAREA_SELECTOR))resizePlanningTextarea(target);
  if(target.matches?.(".rich-editor")){richInput(target);if(event.inputType==="insertText"&&event.data===" ")setTimeout(()=>richShortcutAfterInput(target),0)}
  if(target.dataset.overviewNext){let task=taskById(target.dataset.overviewNext);if(task&&!task.archived&&!isDone(task)){recordDirectEdit('next:'+task.id,'修改下一步');task.nextAction=target.value;task.updatedAt=new Date().toISOString();captureCurrentWeek();saveLocal()}}
- else if(target.dataset.weekAction||target.dataset.weekResult){if(weekMode(selectedWeekKey)!=='current')return;let id=target.dataset.weekAction||target.dataset.weekResult,field=target.dataset.weekAction?'text':'result',week=currentWeek();recordDirectEdit('week:'+selectedWeekKey+':'+id+':'+field,'编辑本周推进记录');week.actions=week.actions||{};if(!Object.hasOwn(week.actions,id))week.actions[id]={text:'',result:''};week.actions[id][field]=target.value;saveLocal()}
+ else if(target.dataset.weekResult){if(weekMode(selectedWeekKey)!=='current')return;let id=target.dataset.weekResult,week=currentWeek();recordDirectEdit('week:'+selectedWeekKey+':'+id+':result','编辑本周实际结果');week.actions||={};week.actions[id]={result:target.value};saveLocal()}
  else if(target.dataset.topResult!==undefined){if(weekMode(selectedWeekKey)!=='current')return;recordDirectEdit('week:'+selectedWeekKey+':outcome:'+target.dataset.topResult,'记录本周目标结果');currentWeek().topResults[Number(target.dataset.topResult)]=target.value;saveLocal()}
  else if(target.dataset.quickNote!==undefined){let quill=quillFor(target);if(quill){state.quickNote={delta:quill.getContents(),updatedAt:new Date().toISOString()};saveLocal()}}
  else if(target.id==="taskSearch"){if(!event.isComposing)scheduleWorkspaceSearch(target)}
@@ -3535,16 +3615,14 @@ document.addEventListener("input",event=>{
 document.addEventListener("compositionstart",event=>{if(event.target.matches?.("#globalSearch,#searchPageInput"))event.target.dataset.composing="1"});
 document.addEventListener("compositionend",event=>{if(event.target.matches?.("#globalSearch,#searchPageInput")){event.target.dataset.composing="0";let source=event.target;requestAnimationFrame(()=>updateGlobalSearch(source.value,source.id))}});
 $("#globalSearch").addEventListener("focus",event=>{if(currentPage==="search")focusSearchPage();else if(event.target.value.trim())updateGlobalSearch(event.target.value,"globalSearch")});
-document.addEventListener("focusout",event=>{let editor=event.target.closest?.(".rich-editor");if(editor&&!quillFor(editor)){richFlush(editor);let clean=serializeRichEditor(editor),live=clean||"<p><br></p>";if(live!==editor.innerHTML){editor.innerHTML=live;updateRichEmpty(editor);richSyncCurrent(editor);notifyRichInput(editor,"formatBlock")}}if(event.target.matches?.("[data-overview-next],[data-week-action],[data-week-result],[data-top-result],[data-top-index],[data-week-review],[data-memo-title],[data-memo-content]")||editor?.matches?.("[data-week-review],[data-memo-content]"))directEditSessions.clear()});
+document.addEventListener("focusout",event=>{let editor=event.target.closest?.(".rich-editor");if(editor&&!quillFor(editor)){richFlush(editor);let clean=serializeRichEditor(editor),live=clean||"<p><br></p>";if(live!==editor.innerHTML){editor.innerHTML=live;updateRichEmpty(editor);richSyncCurrent(editor);notifyRichInput(editor,"formatBlock")}}if(event.target.matches?.("[data-overview-next],[data-week-result],[data-top-result],[data-top-index],[data-week-review],[data-memo-title],[data-memo-content]")||editor?.matches?.("[data-week-review],[data-memo-content]"))directEditSessions.clear()});
 document.addEventListener("change",event=>{
  let target=event.target;
+ if(handleTaskFilterChange(target))return;
  if(target.id==="searchTaskSort")return changeSearchTaskSort(target.value);
  else if(target.dataset.overviewDate){let id=target.dataset.overviewDate,value=target.value,field=target.dataset.dateField;if(!['planDate','followup'].includes(field))return;return setTaskDate(id,field,value)}
- else if(target.dataset.filterCheck){let field=target.dataset.filterCheck,value=target.value,list=taskFilter[field];target.checked?list.push(value):taskFilter[field]=list.filter(item=>item!==value);taskFilter[field]=[...new Set(taskFilter[field])];renderTasks();requestAnimationFrame(()=>{$('[data-filter-detail="'+field+'"]')?.setAttribute("open","")})}
  else if(target.dataset.bulkSelect){target.checked?ui.selectedTasks.add(target.dataset.bulkSelect):ui.selectedTasks.delete(target.dataset.bulkSelect);requestRender()}
  else if(target.dataset.bulkAll!==undefined){let items=filteredTasks();target.checked?items.forEach(task=>ui.selectedTasks.add(task.id)):items.forEach(task=>ui.selectedTasks.delete(task.id));requestRender()}
- else if(target.id==="bulkStatus"&&target.value){let ids=new Set(ui.selectedTasks),value=target.value;ui.selectedTasks.clear();commit("批量修改状态",draft=>draft.tasks.filter(task=>ids.has(task.id)).forEach(task=>setTaskStatus(task,value,draft)),{immediate:true})}
- else if(target.id==="bulkPriority"&&target.value){let ids=new Set(ui.selectedTasks),value=target.value;ui.selectedTasks.clear();commit("批量修改优先级",draft=>draft.tasks.forEach(task=>{if(ids.has(task.id)){task.priority=value;task.updatedAt=new Date().toISOString()}}),{immediate:true})}
  else if(target.id==="weekPicker"){selectedWeekKey=weekKeyFromInput(target.value);ui.showAllWeekDone=false;requestRender()}
  else if(target.dataset.memoProject!==undefined){let memo=memoById(selectedMemoId);if(memo)commit("修改备忘录关联项目",draft=>{let item=draft.memos.find(value=>value.id===memo.id);item.project=target.value;item.updatedAt=new Date().toISOString()},{immediate:true})}
  else if(target.id==="projectTemplate"){changeProjectTemplate(target.value)}
@@ -4030,7 +4108,7 @@ const WORKSPACE_VIEW_KEY='work-cockpit-workspace-v1';
 let workspacePositions={},workspaceTimer=0;
 function workspacePosition(){return{main:$('#mainScroll')?.scrollTop||0,memoList:$('.memo-list')?.scrollTop||0,memoBody:$('.memo-editor-body .ql-editor')?.scrollTop||0}}
 function rememberWorkspace(){if(ui.renderedPage===currentPage)workspacePositions[currentPage]=workspacePosition();rememberProjectPosition();rememberSearchPosition();try{localStorage.setItem(WORKSPACE_VIEW_KEY,JSON.stringify({taskFilter,selectedProjectId,selectedMemoId,selectedWeekKey,globalSearchQuery,memoArchived,ui:{projectView:ui.projectView,projectOverviewFilter:ui.projectOverviewFilter,projectMilestoneFilter:ui.projectMilestoneFilter,projectTaskQuery:ui.projectTaskQuery,projectDateSort:ui.projectDateSort,memoQuery:ui.memoQuery,memoPane:ui.memoPane,showArchivedProjects:ui.showArchivedProjects,weekPanel:ui.weekPanel},projectPositions:[...projectPositions],searchView,positions:workspacePositions}))}catch{}}
-function restoreWorkspacePreferences(){taskFilter.group="project";try{let saved=JSON.parse(localStorage.getItem(WORKSPACE_VIEW_KEY)||'null');if(!saved)return;let filter=saved.taskFilter||{};for(let key of ['project','type','status'])if(Array.isArray(filter[key]))taskFilter[key]=filter[key].filter(value=>typeof value==='string');if(['open','all','waiting','followup','overdue','paused','done','archived'].includes(filter.quick))taskFilter.quick=filter.quick;if(typeof filter.query==='string')taskFilter.query=filter.query;for(let key of ['projectTaskQuery','memoQuery'])if(typeof saved.ui?.[key]==='string')ui[key]=saved.ui[key];for(let [key,choices] of Object.entries({projectDateSort:['default','desc','asc'],projectView:['overview','detail'],projectOverviewFilter:['open','done','all'],memoPane:['list','editor'],weekPanel:['plan','review']}))if(choices.includes(saved.ui?.[key]))ui[key]=saved.ui[key];if(typeof saved.ui?.showArchivedProjects==='boolean')ui.showArchivedProjects=saved.ui.showArchivedProjects;if(typeof saved.ui?.projectMilestoneFilter==='string')ui.projectMilestoneFilter=saved.ui.projectMilestoneFilter;selectedProjectId=String(saved.selectedProjectId||'');selectedMemoId=String(saved.selectedMemoId||'');if(journalDateValid(saved.selectedWeekKey||''))selectedWeekKey=fmt(mondayOf(parseDate(saved.selectedWeekKey)));memoArchived=!!saved.memoArchived;globalSearchQuery=String(saved.globalSearchQuery||'');$('#globalSearch').value=globalSearchQuery;if(saved.searchView){if(Object.hasOwn(SEARCH_CATEGORIES,saved.searchView.category)||saved.searchView.category==='all')searchView.category=saved.searchView.category;if(Object.hasOwn(SEARCH_TASK_SORTS,saved.searchView.taskSort))searchView.taskSort=saved.searchView.taskSort;searchView.groupTasksByProject=!!saved.searchView.groupTasksByProject;searchView.scrollTop=Math.max(0,Number(saved.searchView.scrollTop)||0);searchView.windowY=Math.max(0,Number(saved.searchView.windowY)||0)}for(let [key,value] of saved.projectPositions||[])if(typeof key==='string'&&value)projectPositions.set(key,value);workspacePositions=saved.positions&&typeof saved.positions==='object'?saved.positions:{}}catch{}}
+function restoreWorkspacePreferences(){taskFilter.group="project";try{let saved=JSON.parse(localStorage.getItem(WORKSPACE_VIEW_KEY)||'null');if(!saved)return;taskFilter=normalizeTaskFilter(saved.taskFilter||{});taskFilter.group='project';for(let key of ['projectTaskQuery','memoQuery'])if(typeof saved.ui?.[key]==='string')ui[key]=saved.ui[key];for(let [key,choices] of Object.entries({projectDateSort:['default','desc','asc'],projectView:['overview','detail'],projectOverviewFilter:['open','done','all'],memoPane:['list','editor'],weekPanel:['plan','review']}))if(choices.includes(saved.ui?.[key]))ui[key]=saved.ui[key];if(typeof saved.ui?.showArchivedProjects==='boolean')ui.showArchivedProjects=saved.ui.showArchivedProjects;if(typeof saved.ui?.projectMilestoneFilter==='string')ui.projectMilestoneFilter=saved.ui.projectMilestoneFilter;selectedProjectId=String(saved.selectedProjectId||'');selectedMemoId=String(saved.selectedMemoId||'');if(journalDateValid(saved.selectedWeekKey||''))selectedWeekKey=fmt(mondayOf(parseDate(saved.selectedWeekKey)));memoArchived=!!saved.memoArchived;globalSearchQuery=String(saved.globalSearchQuery||'');$('#globalSearch').value=globalSearchQuery;if(saved.searchView){if(Object.hasOwn(SEARCH_CATEGORIES,saved.searchView.category)||saved.searchView.category==='all')searchView.category=saved.searchView.category;if(Object.hasOwn(SEARCH_TASK_SORTS,saved.searchView.taskSort))searchView.taskSort=saved.searchView.taskSort;searchView.groupTasksByProject=!!saved.searchView.groupTasksByProject;searchView.scrollTop=Math.max(0,Number(saved.searchView.scrollTop)||0);searchView.windowY=Math.max(0,Number(saved.searchView.windowY)||0)}for(let [key,value] of saved.projectPositions||[])if(typeof key==='string'&&value)projectPositions.set(key,value);workspacePositions=saved.positions&&typeof saved.positions==='object'?saved.positions:{}}catch{}}
 function restoreWorkspacePosition(){let page=currentPage,saved=workspacePositions[page];if(!saved)return;requestAnimationFrame(()=>{if(currentPage!==page)return;if(!['search','projects'].includes(page))$('#mainScroll').scrollTop=Number(saved.main)||0;if(page==='memos'){let list=$('.memo-list'),body=$('.memo-editor-body .ql-editor');if(list)list.scrollTop=Number(saved.memoList)||0;if(body)body.scrollTop=Number(saved.memoBody)||0}})}
 document.addEventListener('scroll',()=>{clearTimeout(workspaceTimer);workspaceTimer=setTimeout(rememberWorkspace,80)},true);
 document.addEventListener('input',()=>{clearTimeout(workspaceTimer);workspaceTimer=setTimeout(rememberWorkspace,80)});
@@ -4138,18 +4216,28 @@ document.addEventListener('click',event=>{
 let componentPreview={open:false,page:null,focus:null},journalShortcutReturn=null;
 const scopedPlanningCards=new WeakMap();
 let scopedPlanningPrefs={};try{scopedPlanningPrefs=JSON.parse(localStorage.getItem('work-cockpit-planning-columns-v2')||'{}')}catch{}
+let planningRowsObserver=null;const observedPlanningRows=new Set();
+function syncPlanningRow(main){
+ if(!main.isConnected||!main.getBoundingClientRect().width)return;const label=main.querySelector('.planning-resizable'),card=main.closest('.drop-card,.project-overview-group,.component-task-example,.all-task-list');if(!label||!card)return;
+ let width=main.getBoundingClientRect().width,meta=Math.min(210,Math.max(96,Math.round(width*.35))),identity=Math.min(160,Math.max(90,width*.4)),budget=Math.max(0,width-meta-identity-24),preferred=scopedPlanningCards.get(card)?.value||320,effective=Math.min(preferred,budget),hidden=budget<=160;
+ const input=label.querySelector('textarea');if(hidden&&label.dataset.composing==='1')hidden=false;if(hidden&&label.contains(document.activeElement))document.activeElement.blur();
+ main.style.setProperty('--planning-meta-width',meta+'px');main.style.setProperty('--planning-editor-effective-width',effective+'px');main.style.setProperty('--planning-editor-opacity',Math.max(0,Math.min(1,(budget-160)/64)));main.classList.toggle('is-editor-hidden',hidden);label.setAttribute('aria-hidden',String(hidden));
+ label.querySelectorAll('textarea,[data-scoped-planning]').forEach(node=>node.tabIndex=hidden?-1:0);
+}
 function initScopedPlanningResize(root=document){
- root.querySelectorAll('.week-action-label,.overview-next-label').forEach(label=>{
-  let card=label.closest('.drop-card,.project-overview-group,.component-task-example');if(!card)return;
-  let key=card.closest('#componentPreview')?'showcase':card.dataset.overviewProject!==undefined?'project:'+card.dataset.overviewProject:'week:'+(card.dataset.dropZone||'actions');
+ if(!planningRowsObserver)planningRowsObserver=new ResizeObserver(entries=>entries.forEach(entry=>syncPlanningRow(entry.target)));
+ for(const row of observedPlanningRows)if(!row.isConnected){planningRowsObserver.unobserve(row);observedPlanningRows.delete(row)}
+ root.querySelectorAll('.overview-next-label').forEach(label=>{
+  let card=label.closest('.drop-card,.project-overview-group,.component-task-example,.all-task-list');if(!card)return;
+  let key=card.closest('#componentPreview')?'showcase':card.matches('.all-task-list')?'all:tasks':card.dataset.overviewProject!==undefined?'project:'+card.dataset.overviewProject:'week:'+(card.dataset.dropZone||'actions');
   if(!scopedPlanningCards.has(card)){let value=Math.max(160,Math.min(640,Number(scopedPlanningPrefs[key])||320));scopedPlanningCards.set(card,{key,value});card.style.setProperty('--planning-editor-width',value+'px')}
-  let pref=scopedPlanningCards.get(card);label.classList.add('planning-resizable');label.style.removeProperty('--planning-width');
-  let handle=label.querySelector('[data-planning-resize]');if(handle?.hasAttribute("data-scoped-planning"))return;if(handle)handle.remove();
-  handle=document.createElement('span');Object.assign(handle.dataset,{planningResize:'',scopedPlanning:'',tip:'调整当前卡片的编辑列；双击复位'});handle.className='planning-width-handle';handle.tabIndex=0;handle.setAttribute('role','separator');handle.setAttribute('aria-label','调整当前卡片编辑列宽度');handle.setAttribute('aria-orientation','vertical');handle.setAttribute('aria-valuemin','160');handle.setAttribute('aria-valuemax','640');label.append(handle);
-  let reveal=document.createElement('button');reveal.type='button';reveal.className='planning-reveal';reveal.setAttribute('aria-expanded','false');label.append(reveal);
-  const preview=()=>{let text=label.querySelector('textarea')?.value.trim();reveal.textContent=label.classList.contains('planning-expanded')?'收起编辑':text||'点击编辑推进内容';reveal.title=text||'点击编辑推进内容';reveal.setAttribute('aria-label',label.classList.contains('planning-expanded')?'收起推进内容编辑':'展开推进内容编辑')};preview();label.querySelector('textarea')?.addEventListener('input',preview);
-  reveal.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();let expanded=label.classList.toggle('planning-expanded');reveal.setAttribute('aria-expanded',String(expanded));preview();schedulePlanningTextareaResize();if(expanded)label.querySelector('textarea')?.focus({preventScroll:true})});
-  bindUiSplitter(handle,{read:()=>pref.value,write:value=>{pref.value=value;card.style.setProperty('--planning-editor-width',value+'px');card.querySelectorAll('[data-scoped-planning]').forEach(node=>node.setAttribute('aria-valuenow',Math.round(value)));schedulePlanningTextareaResize()},min:160,max:640,step:16,reset:320,position:event=>event.clientX-label.getBoundingClientRect().left,commit:()=>{if(key==='showcase')return;scopedPlanningPrefs[key]=pref.value;try{localStorage.setItem('work-cockpit-planning-columns-v2',JSON.stringify(scopedPlanningPrefs))}catch{}}});handle.setAttribute('aria-valuenow',Math.round(pref.value));
+  let pref=scopedPlanningCards.get(card),main=label.closest('.ui-planning-row');label.classList.add('planning-resizable');
+  if(!label.querySelector('[data-scoped-planning]')){
+   let handle=document.createElement('span');Object.assign(handle.dataset,{planningResize:'',scopedPlanning:'',tip:'调整当前卡片的下一步列；双击复位'});handle.className='planning-width-handle';handle.tabIndex=0;handle.setAttribute('role','separator');handle.setAttribute('aria-label','调整下一步列宽度');handle.setAttribute('aria-orientation','vertical');handle.setAttribute('aria-valuemin','160');handle.setAttribute('aria-valuemax','640');label.append(handle);
+   bindUiSplitter(handle,{read:()=>pref.value,write:value=>{pref.value=value;card.style.setProperty('--planning-editor-width',value+'px');card.querySelectorAll('[data-scoped-planning]').forEach(node=>node.setAttribute('aria-valuenow',Math.round(value)));card.querySelectorAll('.ui-planning-row').forEach(syncPlanningRow);schedulePlanningTextareaResize()},min:160,max:640,step:16,reset:320,position:event=>event.clientX-label.getBoundingClientRect().left,commit:()=>{if(key==='showcase')return;scopedPlanningPrefs[key]=pref.value;try{localStorage.setItem('work-cockpit-planning-columns-v2',JSON.stringify(scopedPlanningPrefs))}catch{}}});handle.setAttribute('aria-valuenow',Math.round(pref.value));
+   label.addEventListener('compositionstart',()=>label.dataset.composing='1');label.addEventListener('compositionend',()=>{label.dataset.composing='0';syncPlanningRow(main)});
+  }
+  if(main){if(!observedPlanningRows.has(main)){observedPlanningRows.add(main);planningRowsObserver.observe(main)}syncPlanningRow(main)}
  });
 }
 function journalMountAboveModal(){

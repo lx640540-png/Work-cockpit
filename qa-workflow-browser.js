@@ -182,13 +182,13 @@ test('project overview edits original tasks, retains empty projects and schedule
  await row.locator('[data-open-task="long"]').click();await page.check('#draftWeek');await save(page);
  await page.clock.runFor(250);
  let data=await stored(page);assert.equal(data.tasks.length,2);assert.equal(data.tasks[0].type,'长期跟进');assert.equal(data.tasks[0].week,true);
- assert.equal(data.weeks['2026-08-31'].actions.long.text,'发出目录确认');
+ assert.equal(data.weeks['2026-08-31'].actions.long.text,undefined);
  const longNext='需要等外壳一起寄送，先整理清单以及需要提前处理的事项，再联系供应商确认寄送时间，并把确认结果更新到项目记录中。';
  await page.locator('[data-overview-next="long"]').fill(longNext);
  const overviewTextarea=await page.locator('[data-overview-next="long"]').evaluate(node=>{const box=node.getBoundingClientRect(),parent=node.parentElement.getBoundingClientRect();return{clientHeight:node.clientHeight,scrollHeight:node.scrollHeight,width:box.width,parentWidth:parent.width-parseFloat(getComputedStyle(node.parentElement).paddingRight||0),overflowY:getComputedStyle(node).overflowY,resize:getComputedStyle(node).resize}});
- assert(overviewTextarea.width>=overviewTextarea.parentWidth-2&&overviewTextarea.clientHeight>=overviewTextarea.scrollHeight-2&&['hidden','auto'].includes(overviewTextarea.overflowY)&&overviewTextarea.resize==='none',JSON.stringify(overviewTextarea));
+ assert(overviewTextarea.width>=overviewTextarea.parentWidth-2&&overviewTextarea.clientHeight<=120&&overviewTextarea.clientHeight>0&&['hidden','auto'].includes(overviewTextarea.overflowY)&&overviewTextarea.resize==='none',JSON.stringify(overviewTextarea));
  await page.locator('[data-overview-next="long"]').fill('根据反馈修改目录');await page.locator('[data-overview-next="long"]').press('Tab');await page.clock.fastForward(250);
- data=await stored(page);assert.equal(data.tasks[0].nextAction,'根据反馈修改目录');assert.equal(data.weeks['2026-08-31'].actions.long.text,'发出目录确认');
+ data=await stored(page);assert.equal(data.tasks[0].nextAction,'根据反馈修改目录');assert.equal(data.weeks['2026-08-31'].actions.long.text,undefined);
  await row.locator('[data-quick-date="long"]').click();await page.fill('#quickTaskDate',future);await page.click('[data-apply-task-date]');
  data=await stored(page);assert.equal(data.tasks[0].planDate,future);assert.equal(data.tasks[0].focus,false);
  await page.click('[data-collapse-project="p1"]');await page.locator('[data-overview-project="p1"] .task-row[data-task="long"]').waitFor({state:'hidden'});assert.equal(await page.locator('[data-overview-project="p1"] .task-row[data-task="long"]').isVisible(),false);
@@ -198,32 +198,32 @@ test('project overview edits original tasks, retains empty projects and schedule
  await page.reload();assert.equal((await stored(page)).tasks[0].nextAction,'根据反馈修改目录');
 });
 
-test('weekly planning and review retain their action and results through completion and rollover',{timeout:30000},async t=>{
+test('weekly next actions share task data and snapshots retain results through completion and rollover',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('a',{week:true,project:'p1',nextAction:'确认目录'}),makeTask('b',{week:true,type:'长期跟进',nextAction:'确认交期'})],{route:'week',projects:projectFixture});
- page.setDefaultTimeout(10000);
- const weeklyGeometry=await page.locator('[data-drop-zone="week"] .task-row[data-task="a"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),action=box(row.querySelector('.week-action-label')),meta=box(row.querySelector('.task-meta')),whole=box(row);return{rowHeight:whole.height,actionLeft:action.left,actionRight:action.right,metaLeft:meta.left,metaRight:meta.right,metaTop:meta.top,metaBottom:meta.bottom,actionTop:action.top,actionBottom:action.bottom,rowRight:whole.right}});
+ page.setDefaultTimeout(10000);await page.setViewportSize({width:2560,height:1440});
+ const weeklyGeometry=await page.locator('[data-drop-zone="week"] .task-row[data-task="a"]').evaluate(row=>{const box=node=>node.getBoundingClientRect(),action=box(row.querySelector('.overview-next-label')),meta=box(row.querySelector('.task-meta')),whole=box(row);return{rowHeight:whole.height,actionLeft:action.left,actionRight:action.right,metaLeft:meta.left,metaRight:meta.right,metaTop:meta.top,metaBottom:meta.bottom,actionTop:action.top,actionBottom:action.bottom,rowRight:whole.right}});
  assert(weeklyGeometry.rowHeight<150&&(weeklyGeometry.metaLeft>=weeklyGeometry.actionRight-1||weeklyGeometry.metaTop>=weeklyGeometry.actionBottom-1||weeklyGeometry.metaBottom<=weeklyGeometry.actionTop+1)&&weeklyGeometry.metaRight<=weeklyGeometry.rowRight,JSON.stringify(weeklyGeometry));
- if(await page.locator('[data-week-action="a"]').isHidden())await page.locator('[data-task="a"] .planning-reveal').click();
+ assert(await page.locator('#page-week [data-overview-next="a"]').isVisible());
  const longWeekAction='确认目录并完成初稿，同时补齐结构示意、测试结论和仍待确认的问题，提交给相关人员审核后记录下一轮修改项。';
- await page.locator('[data-week-action="a"]').fill(longWeekAction);
- const weekTextarea=await page.locator('[data-week-action="a"]').evaluate(node=>{const box=node.getBoundingClientRect(),parent=node.parentElement.getBoundingClientRect();return{clientHeight:node.clientHeight,scrollHeight:node.scrollHeight,width:box.width,parentWidth:parent.width-parseFloat(getComputedStyle(node.parentElement).paddingRight||0),overflowY:getComputedStyle(node).overflowY,resize:getComputedStyle(node).resize}});
- assert(weekTextarea.width>=weekTextarea.parentWidth-2&&weekTextarea.clientHeight>=weekTextarea.scrollHeight-2&&['hidden','auto'].includes(weekTextarea.overflowY)&&weekTextarea.resize==='none',JSON.stringify(weekTextarea));
- await page.locator('[data-week-action="a"]').fill('确认目录并完成初稿');await page.locator('[data-week-action="a"]').press('Tab');
+ await page.locator('[data-overview-next="a"]').fill(longWeekAction);
+ const weekTextarea=await page.locator('[data-overview-next="a"]').evaluate(node=>{const box=node.getBoundingClientRect(),parent=node.parentElement.getBoundingClientRect();return{clientHeight:node.clientHeight,scrollHeight:node.scrollHeight,width:box.width,parentWidth:parent.width-parseFloat(getComputedStyle(node.parentElement).paddingRight||0),overflowY:getComputedStyle(node).overflowY,resize:getComputedStyle(node).resize}});
+ assert(weekTextarea.width>=weekTextarea.parentWidth-2&&weekTextarea.clientHeight<=120&&weekTextarea.clientHeight>0&&['hidden','auto'].includes(weekTextarea.overflowY)&&weekTextarea.resize==='none',JSON.stringify(weekTextarea));
+ await page.locator('[data-overview-next="a"]').fill('确认目录并完成初稿');await page.locator('[data-overview-next="a"]').press('Tab');
  await page.click('[data-add-top]');await page.locator('[data-top-index="0"]').fill('形成可审核初稿');await page.locator('[data-top-index="0"]').press('Tab');
  await page.click('[data-week-panel="review"]');assert.match(await page.locator('.week-comparison').textContent(),/确认目录并完成初稿/);
  await page.locator('[data-week-result="a"]').fill('目录已确认，初稿完成一半');await page.locator('[data-week-result="a"]').press('Tab');
  await page.locator('[data-top-result="0"]').fill('部分达成，待补插图');await page.locator('[data-top-result="0"]').press('Tab');
  await page.clock.fastForward(250);
  await page.evaluate(()=>updateTask('a','test next action',task=>{task.nextAction='补充插图'}));
- assert.equal((await stored(page)).weeks['2026-08-31'].actions.a.text,'确认目录并完成初稿');
+ assert.equal((await stored(page)).weeks['2026-08-31'].actions.a.text,undefined);assert.equal((await stored(page)).tasks.find(t=>t.id==='a').nextAction,'补充插图');
  await page.click('[data-week-panel="plan"]');await page.locator('[data-toggle-task="b"]').click();
  await page.click('[data-week-panel="review"]');assert.match(await page.locator('.week-comparison').textContent(),/事项 b/);
  const before=(await stored(page)).weeks['2026-08-31'];
  // Freeze the target wall-clock date independently of timer advancement.
  await page.clock.setFixedTime(new Date('2026-09-08T12:00:00+08:00'));await page.clock.runFor(61000);await page.waitForFunction(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).meta.activeWeekKey==='2026-09-07');
- let data=await stored(page);assert.equal(data.weeks['2026-08-31'].actions.a.text,'确认目录并完成初稿');assert.equal(data.weeks['2026-08-31'].actions.a.result,'目录已确认，初稿完成一半');assert.equal(data.weeks['2026-08-31'].topResults[0],'部分达成，待补插图');
+ let data=await stored(page);assert.equal(data.weeks['2026-08-31'].actions.a.text,undefined);assert.equal(data.weeks['2026-08-31'].actions.a.result,'目录已确认，初稿完成一半');assert.equal(data.weeks['2026-08-31'].topResults[0],'部分达成，待补插图');
  assert.deepEqual(data.weeks['2026-08-31'].taskSnapshots,before.taskSnapshots);
- assert.equal(data.weeks['2026-09-07'].actions.a.text,'补充插图');assert.equal(data.weeks['2026-09-07'].actions.a.result,'');assert.equal(data.weeks['2026-09-07'].taskIds.includes('b'),false);assert.equal(data.weeks['2026-09-07'].taskSnapshots.some(task=>task.id==='b'),false);
+ assert.equal(data.weeks['2026-09-07'].actions.a.text,undefined);assert.equal(data.weeks['2026-09-07'].taskSnapshots.find(t=>t.id==='a').nextAction,'补充插图');assert.equal(data.weeks['2026-09-07'].actions.a.result,'');assert.equal(data.weeks['2026-09-07'].taskIds.includes('b'),false);assert.equal(data.weeks['2026-09-07'].taskSnapshots.some(task=>task.id==='b'),false);
  await page.waitForFunction(()=>!renderFrame&&document.querySelector('#weekPicker').value===weekInputValue(currentWeekKey()));
  await page.click('[data-week-shift="-1"]');await page.clock.runFor(100);await page.waitForFunction(()=>!renderFrame&&document.querySelector('#weekPicker').value===weekInputValue('2026-08-31'));
  await page.locator('[data-week-result="a"][readonly]').waitFor({state:'visible'});
@@ -255,7 +255,7 @@ test('overview preserves notes verbatim, uses waiting follow-up dates, and suppo
  await page.locator('.inline-help summary').focus();assert.equal(await page.locator('.inline-help').getAttribute('open'),'');await page.keyboard.press('Escape');assert.equal(await page.locator('.inline-help').getAttribute('open'),null);
  await page.setViewportSize({width:390,height:844});
  const width=await page.evaluate(()=>({body:document.documentElement.scrollWidth,viewport:innerWidth,main:mainScroll.scrollWidth,client:mainScroll.clientWidth}));assert(width.body<=width.viewport+1&&width.main<=width.client+1,JSON.stringify(width));
- assert.equal(await page.locator('[data-overview-next="wait"]').isVisible(),false);await page.locator('[data-task="wait"] .planning-reveal').click();assert.equal(await page.locator('[data-overview-next="wait"]').isVisible(),true);
+ assert.equal(await page.locator('[data-overview-next="wait"]').isVisible(),false);await page.locator('[data-task="wait"] [data-open-task="wait"]').click();assert.equal(await page.inputValue('#taskNext'),before.nextAction);await page.fill('#taskNext','窄窗口中继续编辑');await save(page);assert.equal((await stored(page)).tasks[0].nextAction,'窄窗口中继续编辑');
 });
 
 
@@ -297,7 +297,7 @@ test('shared width handles persist per card and compact editors remain reachable
  const value=Number(await handle.getAttribute('aria-valuenow'));assert.equal(value,before+16);
  assert.equal(await page.locator('[data-overview-project="p1"] [data-scoped-planning]').last().getAttribute('aria-valuenow'),String(value));
  await page.reload();assert.equal(await page.locator('[data-overview-project="p1"] [data-scoped-planning]').first().getAttribute('aria-valuenow'),String(value));
- await page.click('[data-page="week"]');await page.locator('#page-week.active').waitFor();const field=page.locator('#page-week [data-week-action="a"]');assert(await field.isVisible());await page.setViewportSize({width:390,height:844});assert(await field.isHidden());await page.locator('#page-week [data-task="a"] .planning-reveal').click();assert(await field.isVisible());
+ await page.click('[data-page="week"]');await page.locator('#page-week.active').waitFor();const field=page.locator('#page-week [data-overview-next="a"]');assert(await field.isVisible());await page.setViewportSize({width:390,height:844});assert(await field.isHidden());await page.locator('#page-week [data-task="a"] [data-open-task="a"]').click();await page.fill('#taskNext','窄屏保留下一步');await save(page);await page.setViewportSize({width:1920,height:1080});assert.equal(await field.inputValue(),'窄屏保留下一步');
  await page.setViewportSize({width:800,height:700});const overflow=await page.locator('#mainScroll').evaluate(n=>n.scrollWidth-n.clientWidth);assert(overflow<=1);
 });
 
@@ -352,7 +352,7 @@ test('iteration: compact Today counts only actionable follow-ups and exposes tot
  await page.click('[data-toggle-task="due-wait"]');await page.waitForFunction(()=>document.querySelector('.today-waiting .card-subtitle').textContent.includes('待催办 2 项'));
  assert.match(await page.locator('[data-open-all-waiting]').textContent(),/4/);
  await page.click('[data-open-all-waiting]');await page.locator('#page-tasks.active').waitFor();assert.equal(await page.locator('#page-tasks .task-row[data-task]').count(),4);
- await page.click('[data-quick="followup"]');await page.waitForFunction(()=>document.querySelectorAll('#page-tasks .task-row[data-task]').length===2);
+ await page.click('[data-toggle-task-options]');await page.click('[data-quick="followup"]');await page.waitForFunction(()=>document.querySelectorAll('#page-tasks .task-row[data-task]').length===2);
  assert.equal(await page.locator('#page-tasks .task-row[data-task="past-wait"]').count(),1);
 });
 

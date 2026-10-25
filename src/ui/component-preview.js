@@ -2,18 +2,28 @@
 let componentPreview={open:false,page:null,focus:null},journalShortcutReturn=null;
 const scopedPlanningCards=new WeakMap();
 let scopedPlanningPrefs={};try{scopedPlanningPrefs=JSON.parse(localStorage.getItem('work-cockpit-planning-columns-v2')||'{}')}catch{}
+let planningRowsObserver=null;const observedPlanningRows=new Set();
+function syncPlanningRow(main){
+ if(!main.isConnected||!main.getBoundingClientRect().width)return;const label=main.querySelector('.planning-resizable'),card=main.closest('.drop-card,.project-overview-group,.component-task-example,.all-task-list');if(!label||!card)return;
+ let width=main.getBoundingClientRect().width,meta=Math.min(210,Math.max(96,Math.round(width*.35))),identity=Math.min(160,Math.max(90,width*.4)),budget=Math.max(0,width-meta-identity-24),preferred=scopedPlanningCards.get(card)?.value||320,effective=Math.min(preferred,budget),hidden=budget<=160;
+ const input=label.querySelector('textarea');if(hidden&&label.dataset.composing==='1')hidden=false;if(hidden&&label.contains(document.activeElement))document.activeElement.blur();
+ main.style.setProperty('--planning-meta-width',meta+'px');main.style.setProperty('--planning-editor-effective-width',effective+'px');main.style.setProperty('--planning-editor-opacity',Math.max(0,Math.min(1,(budget-160)/64)));main.classList.toggle('is-editor-hidden',hidden);label.setAttribute('aria-hidden',String(hidden));
+ label.querySelectorAll('textarea,[data-scoped-planning]').forEach(node=>node.tabIndex=hidden?-1:0);
+}
 function initScopedPlanningResize(root=document){
- root.querySelectorAll('.week-action-label,.overview-next-label').forEach(label=>{
-  let card=label.closest('.drop-card,.project-overview-group,.component-task-example');if(!card)return;
-  let key=card.closest('#componentPreview')?'showcase':card.dataset.overviewProject!==undefined?'project:'+card.dataset.overviewProject:'week:'+(card.dataset.dropZone||'actions');
+ if(!planningRowsObserver)planningRowsObserver=new ResizeObserver(entries=>entries.forEach(entry=>syncPlanningRow(entry.target)));
+ for(const row of observedPlanningRows)if(!row.isConnected){planningRowsObserver.unobserve(row);observedPlanningRows.delete(row)}
+ root.querySelectorAll('.overview-next-label').forEach(label=>{
+  let card=label.closest('.drop-card,.project-overview-group,.component-task-example,.all-task-list');if(!card)return;
+  let key=card.closest('#componentPreview')?'showcase':card.matches('.all-task-list')?'all:tasks':card.dataset.overviewProject!==undefined?'project:'+card.dataset.overviewProject:'week:'+(card.dataset.dropZone||'actions');
   if(!scopedPlanningCards.has(card)){let value=Math.max(160,Math.min(640,Number(scopedPlanningPrefs[key])||320));scopedPlanningCards.set(card,{key,value});card.style.setProperty('--planning-editor-width',value+'px')}
-  let pref=scopedPlanningCards.get(card);label.classList.add('planning-resizable');label.style.removeProperty('--planning-width');
-  let handle=label.querySelector('[data-planning-resize]');if(handle?.hasAttribute("data-scoped-planning"))return;if(handle)handle.remove();
-  handle=document.createElement('span');Object.assign(handle.dataset,{planningResize:'',scopedPlanning:'',tip:'调整当前卡片的编辑列；双击复位'});handle.className='planning-width-handle';handle.tabIndex=0;handle.setAttribute('role','separator');handle.setAttribute('aria-label','调整当前卡片编辑列宽度');handle.setAttribute('aria-orientation','vertical');handle.setAttribute('aria-valuemin','160');handle.setAttribute('aria-valuemax','640');label.append(handle);
-  let reveal=document.createElement('button');reveal.type='button';reveal.className='planning-reveal';reveal.setAttribute('aria-expanded','false');label.append(reveal);
-  const preview=()=>{let text=label.querySelector('textarea')?.value.trim();reveal.textContent=label.classList.contains('planning-expanded')?'收起编辑':text||'点击编辑推进内容';reveal.title=text||'点击编辑推进内容';reveal.setAttribute('aria-label',label.classList.contains('planning-expanded')?'收起推进内容编辑':'展开推进内容编辑')};preview();label.querySelector('textarea')?.addEventListener('input',preview);
-  reveal.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();let expanded=label.classList.toggle('planning-expanded');reveal.setAttribute('aria-expanded',String(expanded));preview();schedulePlanningTextareaResize();if(expanded)label.querySelector('textarea')?.focus({preventScroll:true})});
-  bindUiSplitter(handle,{read:()=>pref.value,write:value=>{pref.value=value;card.style.setProperty('--planning-editor-width',value+'px');card.querySelectorAll('[data-scoped-planning]').forEach(node=>node.setAttribute('aria-valuenow',Math.round(value)));schedulePlanningTextareaResize()},min:160,max:640,step:16,reset:320,position:event=>event.clientX-label.getBoundingClientRect().left,commit:()=>{if(key==='showcase')return;scopedPlanningPrefs[key]=pref.value;try{localStorage.setItem('work-cockpit-planning-columns-v2',JSON.stringify(scopedPlanningPrefs))}catch{}}});handle.setAttribute('aria-valuenow',Math.round(pref.value));
+  let pref=scopedPlanningCards.get(card),main=label.closest('.ui-planning-row');label.classList.add('planning-resizable');
+  if(!label.querySelector('[data-scoped-planning]')){
+   let handle=document.createElement('span');Object.assign(handle.dataset,{planningResize:'',scopedPlanning:'',tip:'调整当前卡片的下一步列；双击复位'});handle.className='planning-width-handle';handle.tabIndex=0;handle.setAttribute('role','separator');handle.setAttribute('aria-label','调整下一步列宽度');handle.setAttribute('aria-orientation','vertical');handle.setAttribute('aria-valuemin','160');handle.setAttribute('aria-valuemax','640');label.append(handle);
+   bindUiSplitter(handle,{read:()=>pref.value,write:value=>{pref.value=value;card.style.setProperty('--planning-editor-width',value+'px');card.querySelectorAll('[data-scoped-planning]').forEach(node=>node.setAttribute('aria-valuenow',Math.round(value)));card.querySelectorAll('.ui-planning-row').forEach(syncPlanningRow);schedulePlanningTextareaResize()},min:160,max:640,step:16,reset:320,position:event=>event.clientX-label.getBoundingClientRect().left,commit:()=>{if(key==='showcase')return;scopedPlanningPrefs[key]=pref.value;try{localStorage.setItem('work-cockpit-planning-columns-v2',JSON.stringify(scopedPlanningPrefs))}catch{}}});handle.setAttribute('aria-valuenow',Math.round(pref.value));
+   label.addEventListener('compositionstart',()=>label.dataset.composing='1');label.addEventListener('compositionend',()=>{label.dataset.composing='0';syncPlanningRow(main)});
+  }
+  if(main){if(!observedPlanningRows.has(main)){observedPlanningRows.add(main);planningRowsObserver.observe(main)}syncPlanningRow(main)}
  });
 }
 function journalMountAboveModal(){

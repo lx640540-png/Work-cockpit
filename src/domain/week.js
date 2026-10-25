@@ -11,7 +11,7 @@ function captureWeek(key,close=false){
  let taskSnapshots=state.tasks.filter(task=>member.has(task.id)||completedHere(task)).map(clone);
  taskIds.forEach(id=>{if(!taskSnapshots.some(task=>task.id===id)&&previous.has(id))taskSnapshots.push(clone(previous.get(id)))});
  let projectIds=new Set(taskSnapshots.map(task=>task.project).filter(Boolean));
- let actions={...(week.actions||{})};if(isCurrent)taskSnapshots.filter(task=>member.has(task.id)).forEach(task=>{if(!Object.hasOwn(actions,task.id))actions[task.id]={text:task.nextAction||"",result:""}});
+ let actions={...(week.actions||{})};if(isCurrent)taskSnapshots.filter(task=>member.has(task.id)).forEach(task=>{if(!Object.hasOwn(actions,task.id))actions[task.id]={result:""}});
  week={...emptyWeek(),...week,actions,taskIds,taskSnapshots,projectSnapshots:state.projects.filter(project=>projectIds.has(project.id)).map(clone)};
  if(close&&!week.closedAt)week.closedAt=new Date().toISOString();
  state.weeks[key]=week;return week;
@@ -28,6 +28,6 @@ function ensureCurrentWeek(){
   let validTasks=new Set(state.tasks.map(task=>task.id));
   existing={...emptyWeek(),...existing,taskIds:[...new Set([...existing.taskIds,...active])],carriedTaskIds:[...new Set((existing.carriedTaskIds||[]).filter(id=>validTasks.has(id)))],activatedAt:existing.activatedAt||new Date().toISOString(),closedAt:""};
  }
- existing.actions=existing.actions||{};state.tasks.filter(task=>task.week&&!task.archived&&(!isDone(task)||task.completed>=now&&task.completed<=weekEnd(now))).forEach(task=>{if(!Object.hasOwn(existing.actions,task.id))existing.actions[task.id]={text:task.nextAction||"",result:""}});
+ existing.actions=existing.actions||{};state.tasks.filter(task=>task.week&&!task.archived&&(!isDone(task)||task.completed>=now&&task.completed<=weekEnd(now))).forEach(task=>{if(!Object.hasOwn(existing.actions,task.id))existing.actions[task.id]={result:""}});
  state.weeks[now]=existing;state.meta.activeWeekKey=now;
 }

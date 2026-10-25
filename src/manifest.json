@@ -27,7 +27,8 @@
     "styles/interaction-fixes.css",
     "styles/task-row-layout.css",
     "styles/task-journal-layout.css",
-    "styles/workflow-closure.css"
+    "styles/workflow-closure.css",
+    "styles/task-filters.css"
   ],
   "scripts": [
     "core/runtime.js",
@@ -41,6 +42,7 @@
     "domain/week.js",
     "domain/task-dates.js",
     "domain/tasks.js",
+    "domain/task-filters.js",
     "ui/components.js",
     "ui/task-list.js",
     "pages/today.js",
@@ -68,6 +70,7 @@
     "ui/task-dates.js",
     "ui/workflow.js",
     "ui/workflow-closure.js",
+    "ui/task-filters.js",
     "ui/events.js",
     "ui/drag-resize.js",
     "core/cloud.js",
