@@ -166,9 +166,9 @@ async function testUrl() {
     const state = JSON.parse(localStorage.getItem('work-cockpit-v6') || 'null');
     return fixture && state?.tasks?.find(task => task.id === 't2')?.followup === fixture.today;
   });
-  await page.click('#page-today [data-summary-target="week"]');
+  await page.click('[data-page="week"]');
   await page.waitForSelector('#page-week.active');
-  assert(await page.locator('#page-week .week-grid').count() === 1, 'Today weekly summary did not open the weekly workflow');
+  assert(await page.locator('#page-week .week-grid').count() === 1, 'weekly navigation did not open the weekly workflow');
   await page.evaluate(() => { window.__weeklyFeatureState = { state: clone(state), undo: clone(undoStack), redo: clone(redoStack), layout: clone(uiLayout) }; });
   const weekOrderBeforeFocus = await page.locator('[data-drop-zone="week"] .task-row[data-task]').evaluateAll(nodes => nodes.map(node => node.dataset.task).join(','));
   assert(await page.locator('[data-drop-zone="week"] [data-task="t4"] [data-toggle-focus="t4"].active').count() === 1, 'weekly action row did not show the active Today focus state');
@@ -182,10 +182,11 @@ async function testUrl() {
   await page.click('[data-page="today"]');
   await page.waitForSelector('#page-today.active [data-drop-zone="today"] [data-task="t4"]');
   await page.evaluate(() => { const task=taskById('t4');task.status='已完成';task.completed=todayKey();task.focus=false;task.week=true;saveLocal(true);requestRender(); });
-  await page.waitForFunction(() => document.querySelector('#page-today [data-summary-target="done"]')?.textContent.includes('1'));
-  await page.click('#page-today [data-summary-target="done"]');
+  await page.waitForSelector('#page-today.active');
+  await page.click('[data-page="week"]');
+  await page.click('[data-week-panel="review"]');
   await page.waitForSelector('#page-week.active [data-week-panel="review"].active');
-  assert(await page.locator('#page-week .week-review-layout').count() === 1, 'Today completion summary did not open the current weekly review');
+  assert(await page.locator('#page-week .week-review-layout').count() === 1, 'weekly review did not open the completed list');
   const completedTitle = page.locator('#page-week .week-review-layout .task-title-link').first();
   assert(await completedTitle.count() === 1 && !!await completedTitle.getAttribute('title'), 'weekly completed title is missing its full-title hover text');
   const ellipsisState = await completedTitle.evaluate(node => { node.style.width='72px'; node.textContent='用于验证两行截断的超长完成事项名称'; const style=getComputedStyle(node); return { overflow:style.overflow, clamp:style.webkitLineClamp, clipped:node.scrollHeight>node.clientHeight }; });

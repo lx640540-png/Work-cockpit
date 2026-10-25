@@ -17,7 +17,7 @@
 .today-sidebar-stack>.today-capture,.today-sidebar-stack>.today-capture>.card{height:auto;min-height:0;min-width:0}
 :root[data-visual-preview] #page-today .today-sidebar-stack .today-inbox .drop-card{overflow:visible}
 :root[data-visual-preview] #page-today .today-sidebar-stack .drop-card{display:flex;flex-direction:column;overflow:hidden}
-.today-sidebar-stack .card-head{flex:none}.today-sidebar-stack .today-task-scroll{flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain}
+.today-sidebar-stack .card-head{flex:none}.today-sidebar-stack .today-task-scroll{flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain;scroll-padding-block:12px;padding-bottom:12px!important}
 .today-sidebar-stack .inbox-items{flex:none;min-height:0;max-height:none;overflow:visible;overscroll-behavior:auto}
 :root[data-visual-preview] .week-split-layout{grid-template-columns:minmax(0,calc(var(--week-left,50%) - 18px)) 12px minmax(0,1fr);column-gap:var(--ui-divider-gap)}
 :root[data-visual-preview] .project-master-detail{grid-template-columns:var(--project-list,300px) 12px minmax(0,1fr);column-gap:var(--ui-divider-gap)}

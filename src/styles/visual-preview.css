@@ -43,7 +43,7 @@ html[data-visual-preview] body:is(.memo-workspace,.project-workspace) .app{heigh
 :root[data-calm-today] .btn.primary:hover{background:color-mix(in srgb,var(--blue) 90%,#000);color:#fff}
 :root[data-calm-today] .sync-badge{background:transparent;border-color:transparent;color:var(--muted);font-size:11px;font-weight:400;box-shadow:none}
 :root[data-calm-page] .content{width:min(1480px,calc(100% - 80px));margin:auto;padding:32px 0 48px}
-:root[data-calm-today] #page-today .page-head{flex-direction:row;align-items:center;gap:16px;margin-bottom:24px}
+:root[data-calm-today] #page-today .page-head{flex-direction:row;align-items:center;gap:16px;margin-bottom:20px}
 :root[data-calm-today] #page-today .page-head h1{font-size:25px;line-height:1.4;font-weight:600;letter-spacing:-.02em}
 :root[data-calm-today] .date-chip{padding:0;border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:400}
 :root[data-calm-today] #page-today .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:0 0 28px;padding:0 0 20px;border-bottom:1px solid var(--line)}
@@ -68,13 +68,12 @@ html[data-visual-preview] body:is(.memo-workspace,.project-workspace) .app{heigh
 :root[data-calm-today] #page-today .items{padding:0;border-top:1px solid var(--line)}
 :root[data-calm-today] #page-today .task-section{padding:10px 0 0;margin:0;border:0;border-radius:0;background:transparent!important}
 :root[data-calm-today] #page-today .task-section-title{margin:0;padding:7px 0;font-size:11px;font-weight:500;color:var(--muted)}
-:root[data-calm-today] #page-today .task-row{min-height:var(--preview-row-height,78px);padding:12px 0;gap:12px;border-color:var(--line)}
+:root[data-calm-today] #page-today .task-row{min-height:var(--preview-row-height,78px);padding:12px 0;border-color:var(--line)}
 :root[data-calm-today] #page-today .task-title-link{font-size:14px;line-height:1.6;font-weight:600;color:var(--ink)}
 :root[data-calm-today] #page-today .task-secondary-link{font-weight:400;color:inherit}
 :root[data-calm-today] #page-today .task-next{margin-top:4px;font-size:12px;line-height:1.65;color:var(--text)}
 :root[data-calm-today] #page-today .task-project{margin-top:4px;font-size:11px;line-height:1.5;color:var(--muted)}
 :root[data-calm-today] #page-today .task-project i{width:4px;height:4px;background:var(--muted-soft)}
-:root[data-calm-today] #page-today .task-meta{max-width:245px;gap:5px}
 :root[data-calm-today] #page-today :is(.property-btn,.pill){min-height:23px;padding:2px 6px;border-radius:5px;font-size:10px;font-weight:500}
 :root[data-calm-today] #page-today .task-date-button{font-size:10px}
 :root[data-calm-today] #page-today .link-btn{font-size:11px;font-weight:500}
