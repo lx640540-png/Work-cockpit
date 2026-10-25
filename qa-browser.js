@@ -407,7 +407,8 @@ async function testUrl() {
   assert(saved.order.waiting.indexOf('t1') === saved.order.waiting.indexOf('t2') - 1, 'cross-card task did not land at the release row');
   assert(saved.order.pinWaiting.includes('t1') && saved.order.pinWaiting.includes('t2') && !saved.order.pinToday.includes('t1'), 'cross-card drag did not transfer the existing pin without changing unrelated pins');
   const waitingPinnedDom = await page.locator('[data-drop-zone="waiting"] .task-row[data-pinned="1"]').evaluateAll(rows => rows.map(row => row.dataset.task));
-  assert(waitingPinnedDom.join(',') === 't2,t1', `pinned DOM order changed after cross-card drag: ${waitingPinnedDom.join(',')}`);
+  // A flat waiting list displays both dated and undated pins in the actual drop order.
+  assert(waitingPinnedDom.join(',') === 't1,t2', `flat pinned DOM order disagrees with the release position: ${waitingPinnedDom.join(',')}`);
   assert(saved.order.waiting.filter(id => id !== 't1').join() === orderBeforeDrop.waiting.filter(id => id !== 't1').join(), 'cross-card drop reordered unrelated target tasks');
   assert(saved.order.today.filter(id => id !== 't1').join() === orderBeforeDrop.today.filter(id => id !== 't1').join(), 'cross-card drop reordered unrelated source tasks');
   const todayPeersAfterDrop = await page.locator('[data-drop-zone="today"] .task-row[data-task]').evaluateAll(rows => rows.map(row => row.dataset.task).filter(id => id !== 't1'));
