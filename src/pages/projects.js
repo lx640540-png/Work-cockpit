@@ -5,9 +5,9 @@ function sortProjectTasksByDate(tasks,mode){
 }
 function projectListItem(project,options){
  options||={};
- let favorite=options.pinned??state.favorites.includes(project.id),projectTasks=state.tasks.filter(task=>task.project===project.id&&!task.archived),done=projectTasks.filter(isDone).length;
+ let favorite=options.pinned??state.favorites.includes(project.id),open=state.tasks.filter(task=>task.project===project.id&&!task.archived&&!isDone(task)).length;
  let pin='<button type="button" class="favorite '+(favorite?"active":"")+'" data-favorite-project="'+esc(project.id)+'" data-tip="'+(favorite?"取消置顶收藏":"置顶并收藏项目")+'" aria-label="'+(favorite?"取消置顶收藏":"置顶并收藏项目")+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2l8 8-3 1-4 4 1 5-1 1-5-6-5 5-1-1 5-5-6-5 1-1 5 1 4-4z"/></svg></button>';
- return uiSidebarItem({className:'project-list-item '+(favorite?'pinned-project ':'')+((options.current??(selectedProjectId===project.id))?'selected':''),attributes:'data-select-project="'+esc(project.id)+'" data-project-drop="'+esc(project.id)+'" tabindex="0"',title:project.name,titleClass:'project-list-name',leading:uiDragHandle('draggable="true" data-project-drag="'+esc(project.id)+'"','project-order-handle','拖动调整项目顺序'),detail:'<span class="project-completion" aria-label="已完成 '+done+' 项，共 '+projectTasks.length+' 项"><strong>'+(projectTasks.length?done+' / '+projectTasks.length:'暂无任务')+'</strong>'+(projectTasks.length?'<small>已完成</small>':'')+'</span>',pin});
+ return uiSidebarItem({className:'project-list-item '+(favorite?'pinned-project ':'')+((options.current??(selectedProjectId===project.id))?'selected':''),attributes:'data-select-project="'+esc(project.id)+'" data-project-drop="'+esc(project.id)+'" tabindex="0"',title:project.name,titleClass:'project-list-name',leading:uiDragHandle('draggable="true" data-project-drag="'+esc(project.id)+'"','project-order-handle','拖动调整项目顺序'),detail:'<span class="project-completion" title="未完成 '+open+' 项" aria-label="未完成 '+open+' 项"><strong>'+open+'</strong></span>',pin});
 }
 function currentMilestone(project){return project.milestones.find(item=>item.status==="当前阶段")||project.milestones.find(item=>item.status==="阻塞")}
 function nextMilestone(project){let current=project.milestones.indexOf(currentMilestone(project));return project.milestones.slice(Math.max(0,current+1)).find(item=>item.status!=="已完成")}
@@ -45,7 +45,7 @@ function renderProjectContent(){
  let rank=new Map(state.order.projects.map((id,index)=>[id,index]));
  let visible=state.projects.filter(project=>project.archived===ui.showArchivedProjects).sort((a,b)=>Number(state.favorites.includes(b.id))-Number(state.favorites.includes(a.id))||(rank.get(a.id)??Number.MAX_SAFE_INTEGER)-(rank.get(b.id)??Number.MAX_SAFE_INTEGER));
  if(!selectedProjectId||!visible.some(project=>project.id===selectedProjectId))selectedProjectId=visible[0]?.id||"";
- let rows=visible.map(project=>projectListItem(project));
+ let rows=visible.map((project,index)=>projectListItem(project)+(index<visible.length-1?'<div class="project-list-divider" aria-hidden="true"></div>':''));
  let pinCount=visible.filter(project=>state.favorites.includes(project.id)).length;
  if(pinCount){rows.unshift('<div class="project-pin-divider">置顶项目</div>');if(pinCount<visible.length)rows.splice(pinCount+1,0,'<div class="project-pin-divider ordinary">其他项目</div>')}
  let project=projectById(selectedProjectId);

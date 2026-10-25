@@ -57,7 +57,6 @@ function handleClick(event){
  if(target.dataset.smartSort){
   let scope=target.dataset.smartSort,items=scope==="today"?todayAdvance():scope==="waiting"?todayWaiting():scope==="week"?weekTasks():scope==="long"?longTasks():filteredTasks();return applySmartOrder(items,scope);
  }
- if(target.dataset.summaryTarget){let scope=target.dataset.summaryTarget;if(scope==="week")return navigate("week");if(scope==="done"){selectedWeekKey=currentWeekKey();ui.weekPanel="review";ui.showAllWeekDone=false;return navigate("week")}let card=$('.drop-card[data-drop-zone="'+scope+'"]');card?.scrollIntoView({behavior:"smooth",block:"center"});card?.focus?.({preventScroll:true});return}
  if(target.dataset.toggleGroup){let scope=target.dataset.toggleGroup;return commit("切换项目分组",draft=>draft.order[scope+"Group"]=!draft.order[scope+"Group"],{history:false})}
  if(target.dataset.quick){taskFilter.quick=target.dataset.quick;return requestRender()}
  if(target.dataset.toggleTaskOptions!==undefined){ui.taskOptionsOpen=!ui.taskOptionsOpen;return requestRender()}
@@ -235,7 +234,6 @@ document.addEventListener("keydown",event=>{
  if(!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.shiftKey&&["1","2","3","4","5"].includes(event.key)&&!event.target.closest("input,textarea,select,[contenteditable=true],.hover-select")&&!$("dialog[open]")){event.preventDefault();navigate(["today","week","tasks","projects","memos"][Number(event.key)-1])}
 });
 
-document.addEventListener('toggle',event=>{let owner=event.target;if(owner.dataset?.waitingGroup){owner.open?ui.waitingExpanded.add(owner.dataset.waitingGroup):ui.waitingExpanded.delete(owner.dataset.waitingGroup)}},true);
 document.addEventListener('pointerover',event=>{if(!isMouseHover(event))return;let owner=event.target.closest?.('.inline-help');if(owner)owner.open=true});
 document.addEventListener('pointerout',event=>{let owner=event.target.closest?.('.inline-help');if(owner&&!owner.contains(event.relatedTarget)&&!owner.matches(':focus-within'))owner.open=false});
 document.addEventListener('focusin',event=>{let owner=event.target.closest?.('.inline-help');if(owner)owner.open=true});

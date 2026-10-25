@@ -35,7 +35,6 @@ body.project-workspace .project-detail-card{height:100%;min-height:0;display:fle
 .project-mobile-tabs,.memo-mobile-tabs{display:none}
 .today-inbox .inbox-items{max-height:none;overflow:visible;overscroll-behavior:auto}
 .today-inbox .empty{padding:12px 16px}
-.today-flow .today-sidebar-stack .today-waiting>.items{max-height:460px;overflow:auto;overscroll-behavior:contain}
 mark{background:#fff0a8;color:#523b00;border-radius:3px;padding:0 .04em}
 :root[data-theme=dark] mark{background:#665018;color:#fff3bf}
 .search-match-source,.search-match-preview{display:block;font-size:12px;line-height:1.5;margin-top:4px;overflow-wrap:anywhere}

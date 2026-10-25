@@ -54,7 +54,7 @@ test('memo panes fit viewport and scroll independently; navigation restores main
 });
 test('project cards show completed count and status colors differ in both themes',async t=>{
  const page=await fixture(t,[makeTask('a',{project:'p'}),makeTask('b',{project:'p',status:'已完成'})],{projects:[{id:'p',name:'项目名称',milestones:[]}],route:'projects'});
- await page.click('[data-project-view="detail"]');assert.equal(await page.locator('.project-completion strong').textContent(),'1 / 2');assert.equal(await page.locator('.project-list-milestone,.project-list-item .progress').count(),0);
+ await page.click('[data-project-view="detail"]');assert.equal(await page.locator('.project-completion strong').textContent(),'1');assert.equal(await page.locator('.project-list-milestone,.project-list-item .progress').count(),0);
  await page.click('[data-favorite-project="p"]');assert.deepEqual((await stored(page)).favorites,['p']);
  for(const theme of ['light','dark']){
   const colors=await page.evaluate(theme=>{applyTheme(theme);const a=document.createElement('span'),b=document.createElement('span');a.className='pill status-进行中';b.className='pill status-已完成';document.body.append(a,b);const colors=[a,b].map(n=>getComputedStyle(n).backgroundColor);a.remove();b.remove();return colors},theme);assert.notEqual(colors[0],colors[1]);
@@ -231,16 +231,16 @@ test('weekly planning and review retain their action and results through complet
  await page.reload();data=await stored(page);assert.equal(data.weeks['2026-08-31'].actions.a.result,'目录已确认，初稿完成一半');
 });
 
-test('Today highlights next actions and pins while dated waiting stays separate and expandable',{timeout:30000},async t=>{
+test('Today highlights next actions and shows all waiting dates in a continuous list',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('do',{focus:true,nextAction:'发出样品确认'}),makeTask('fallback',{focus:true,nextAction:''}),makeTask('due',{status:'等待',followup:today}),makeTask('later',{status:'等待',followup:future}),makeTask('no-date',{status:'等待',followup:''})]);
  assert.equal(await page.locator('[data-task="do"] .task-title-link').textContent(),'发出样品确认');
  assert.equal(await page.locator('[data-task="fallback"] .task-title-link').textContent(),'事项 fallback');
  assert.equal(await page.locator('[data-drop-zone="today"] [data-task="due"]').count(),0);
  assert.equal(await page.locator('[data-drop-zone="waiting"] .task-row[data-task="due"]').isVisible(),true);
- assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),false);assert.equal(await page.locator('.task-row[data-task="no-date"]').isVisible(),true);
- await page.click('[data-waiting-group="future"] summary');assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true);
+ assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true);assert.equal(await page.locator('.task-row[data-task="no-date"]').isVisible(),true);
+ assert.equal(await page.locator('[data-waiting-group]').count(),0);assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true);
  await page.locator('[data-pin-task="do"]').click();await page.locator('.section-caption').waitFor({state:'visible'});assert.match(await page.locator('.section-caption').textContent(),/今日先做/);
- assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true,'expanded state survives render');
+ assert.equal(await page.locator('.task-row[data-task="later"]').isVisible(),true,'flat waiting list survives render');
  const modes=await page.locator('.today-task-scroll').evaluateAll(nodes=>nodes.map(node=>getComputedStyle(node).overflowY));assert(modes.includes('visible'));assert(modes.every(mode=>['visible','auto'].includes(mode)));
  const positions=await page.evaluate(()=>{const box=s=>document.querySelector(s).getBoundingClientRect();return {actionBottom:box('[data-drop-zone="today"]').bottom,noteTop:box('.quick-note-card').top,waitTop:box('[data-drop-zone="waiting"]').top,actionTop:box('[data-drop-zone="today"]').top,inboxTop:box('#todayCapture').top,waitBottom:box('[data-drop-zone="waiting"]').bottom}});
  assert(positions.noteTop>=positions.actionBottom);assert(Math.abs(positions.waitTop-positions.actionTop)<2);assert(positions.inboxTop>=positions.waitBottom);
@@ -268,7 +268,7 @@ test('legacy handled markers never hide active or due waiting tasks after reload
   if(reload)await page.reload();
   assert.equal(await page.locator('[data-drop-zone="today"] .task-row[data-task="active"]').count(),1);
   assert.equal(await page.locator('[data-drop-zone="waiting"] .task-row[data-task="waiting"]').count(),1);
-  assert.equal(await page.locator('[data-summary-target="waiting"] strong').textContent(),'1');
+  assert.match(await page.locator('.today-waiting .card-subtitle').textContent(),/待催办 1 项/);
  }
 });
 
@@ -297,7 +297,7 @@ test('shared width handles persist per card and compact editors remain reachable
  const value=Number(await handle.getAttribute('aria-valuenow'));assert.equal(value,before+16);
  assert.equal(await page.locator('[data-overview-project="p1"] [data-scoped-planning]').last().getAttribute('aria-valuenow'),String(value));
  await page.reload();assert.equal(await page.locator('[data-overview-project="p1"] [data-scoped-planning]').first().getAttribute('aria-valuenow'),String(value));
- await page.click('[data-page="week"]');await page.locator('#page-week.active').waitFor();const field=page.locator('#page-week [data-week-action="a"]');assert(await field.isHidden());await page.locator('#page-week [data-task="a"] .planning-reveal').click();assert(await field.isVisible());
+ await page.click('[data-page="week"]');await page.locator('#page-week.active').waitFor();const field=page.locator('#page-week [data-week-action="a"]');assert(await field.isVisible());await page.setViewportSize({width:390,height:844});assert(await field.isHidden());await page.locator('#page-week [data-task="a"] .planning-reveal').click();assert(await field.isVisible());
  await page.setViewportSize({width:800,height:700});const overflow=await page.locator('#mainScroll').evaluate(n=>n.scrollWidth-n.clientWidth);assert(overflow<=1);
 });
 
@@ -346,10 +346,10 @@ test('iteration: quick dates preserve status, deadlines, week and historical rec
 
 test('iteration: compact Today counts only actionable follow-ups and exposes total waiting',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('due-wait',{status:'等待',followup:today}),makeTask('past-wait',{status:'等待',followup:'2026-09-04'}),makeTask('later',{status:'等待'}),makeTask('undated',{status:'等待',followup:''}),makeTask('handled-wait',{status:'等待',followup:today,handledOn:today}),makeTask('archived-wait',{status:'等待',followup:today,archived:true})]);
- assert.equal(await page.locator('[data-summary-target="waiting"] strong').textContent(),'3');
+ assert.match(await page.locator('.today-waiting .card-subtitle').textContent(),/待催办 3 项/);
  assert.match(await page.locator('[data-open-all-waiting]').textContent(),/5/);
- assert((await page.locator('[data-summary-target="waiting"]').boundingBox()).height<=56);
- await page.click('[data-toggle-task="due-wait"]');await page.waitForFunction(()=>document.querySelector('[data-summary-target="waiting"] strong').textContent==='2');
+ assert.equal(await page.locator('#page-today .summary-grid').count(),0);
+ await page.click('[data-toggle-task="due-wait"]');await page.waitForFunction(()=>document.querySelector('.today-waiting .card-subtitle').textContent.includes('待催办 2 项'));
  assert.match(await page.locator('[data-open-all-waiting]').textContent(),/4/);
  await page.click('[data-open-all-waiting]');await page.locator('#page-tasks.active').waitFor();assert.equal(await page.locator('#page-tasks .task-row[data-task]').count(),4);
  await page.click('[data-quick="followup"]');await page.waitForFunction(()=>document.querySelectorAll('#page-tasks .task-row[data-task]').length===2);
@@ -590,5 +590,5 @@ test('completion: overview collapse corners, inbox disclosure and empty project 
  const page=await fixture(t,Array.from({length:9},(_,i)=>makeTask('i'+i,{status:'待处理',inbox:true})),{projects:[{id:'empty',name:'一个很长很长很长很长很长很长的项目名称',milestones:[]}]});
  assert((await page.locator('[data-drop-zone="inbox"] .card-title').textContent()).includes('9'));assert.equal(await page.locator('.inbox-items .task-row').count(),9);assert.equal(await page.locator('.inbox-items').evaluate(n=>getComputedStyle(n).overflowY),'visible');
  await page.click('[data-page="projects"]');await page.click('[data-collapse-project="empty"]');await page.waitForSelector('.project-overview-group.is-collapsed');const corners=await page.locator('.is-collapsed .project-overview-head').evaluate(n=>{let c=getComputedStyle(n);return{top:c.borderTopLeftRadius,bottom:c.borderBottomLeftRadius,border:c.borderBottomWidth}});assert.equal(corners.top,corners.bottom);assert.equal(corners.border,'0px');
- await page.click('[data-project-view="detail"]');assert.equal(await page.locator('.project-completion strong').textContent(),'暂无任务');
+ await page.click('[data-project-view="detail"]');assert.equal(await page.locator('.project-completion strong').textContent(),'0');
 });
