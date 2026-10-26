@@ -3392,7 +3392,12 @@ function syncTaskFilterPopover(){
  if(currentPage!=='tasks'||!ui.taskOptionsOpen){if(panel.matches(':popover-open'))panel.hidePopover();panel.hidden=true;trigger.setAttribute('aria-expanded','false');return}
  panel.hidden=false;if(typeof panel.showPopover==='function'&&!panel.matches(':popover-open'))panel.showPopover();trigger.setAttribute('aria-expanded','true');positionUiPopover(panel,trigger);
 }
-function closeTaskFilters(restore=false){ui.taskOptionsOpen=false;syncTaskFilterPopover();if(restore)$('[data-toggle-task-options]')?.focus({preventScroll:true})}
+function closeTaskFilters(restore=false){
+ const panel=$('#taskFilterPanel');ui.taskOptionsOpen=false;ui.taskFilterDetail='';
+ if(activeHoverSelect&&panel?.contains(activeHoverSelect))closeHoverSelect(activeHoverSelect);
+ panel?.querySelectorAll('details[open]').forEach(detail=>detail.open=false);
+ syncTaskFilterPopover();if(restore)$('[data-toggle-task-options]')?.focus({preventScroll:true});
+}
 function refreshTaskFilterFocus(selector){requestRender();requestAnimationFrame(()=>{const target=$(selector);target?.focus({preventScroll:true});syncTaskFilterPopover()})}
 function runBulkTaskEdit(field,value){
  const ids=[...ui.selectedTasks],check=validateBulkTaskEdit(state,ids,field,value);if(!check.ok)return toast(check.message);
