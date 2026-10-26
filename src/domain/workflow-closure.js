@@ -2,10 +2,10 @@
 function appendJournalTaskResult(draft,key,id,blocks){
  const task=draft.tasks.find(item=>item.id===id&&!item.archived);if(!task)return 0;
  const groups=new Map();for(const block of blocks||[]){const text=String(block.text||'').trim();if(!text)continue;if(!groups.has(block.date))groups.set(block.date,[]);groups.get(block.date).push(text)}
- const existing=draft.weeks[key],previous=existing?.actions?.[id]||{text:'',result:''};let result=previous.result||'',added=0;
+ const existing=draft.weeks[key],previous=existing?.actions?.[id]||{result:''};let result=previous.result||'',added=0;
  for(const [date,texts] of groups){for(const text of texts){const entry=date+' · '+text;if(result.includes(entry))continue;result+=(result?'\n\n':'')+entry;added++}}
  if(!added)return 0;
- const week=existing||(draft.weeks[key]=emptyWeek());week.actions||={};week.actions[id]={...previous,result};week.taskIds=[...new Set([...(week.taskIds||[]),id])];week.taskSnapshots||=[];
+ const week=existing||(draft.weeks[key]=emptyWeek());week.actions||={};week.actions[id]={result};week.taskIds=[...new Set([...(week.taskIds||[]),id])];week.taskSnapshots||=[];
  if(!week.taskSnapshots.some(item=>item.id===id))week.taskSnapshots.push(clone(task));return added;
 }
 function planningReviewRange(now=todayKey()){

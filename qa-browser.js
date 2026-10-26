@@ -4,7 +4,7 @@ const http = require('http');
 const path = require('path');
 
 const requestedUrl = process.argv[2];
-const assert = (condition, message) => { if (!condition) throw new Error(message); };
+const assert = require('node:assert/strict');
 const dragAt = (page, sourceSelector, targetSelector, ratio = 0.5) => page.evaluate(({ sourceSelector, targetSelector, ratio }) => {
   const source = document.querySelector(sourceSelector), target = document.querySelector(targetSelector), data = new DataTransfer(), rect = target.getBoundingClientRect(), clientX = rect.left + rect.width / 2, clientY = rect.top + rect.height * ratio;
   source.dispatchEvent(new DragEvent('dragstart', { dataTransfer: data, bubbles: true, cancelable: true, clientX, clientY }));
@@ -233,24 +233,21 @@ async function testUrl() {
   await page.click('[data-page="tasks"]');
   await page.waitForSelector('#page-tasks.active');
   assert(await page.locator('#page-tasks .task-advanced-panel').isHidden(), 'secondary task filters are expanded by default');
-  await page.locator('[data-hover-task-options]').hover();
-  await page.waitForSelector('#page-tasks .task-advanced-panel:not([hidden])');
-  await page.locator('[data-filter-detail="project"] summary').hover();
-  await page.waitForFunction(() => document.querySelector('[data-filter-detail="project"]')?.open === true);
-  await page.locator('[data-filter-detail="type"] summary').hover();
-  await page.waitForFunction(() => document.querySelector('[data-filter-detail="type"]')?.open === true && document.querySelector('[data-filter-detail="project"]')?.open === false);
-  await page.locator('#page-tasks .all-task-list').hover(); await page.waitForTimeout(140);
-  assert(await page.locator('#page-tasks .task-advanced-panel').isHidden(), 'hover-opened task filters did not close after the pointer left');
-  await page.click('[data-toggle-task-options]');
-  await page.waitForSelector('#page-tasks .task-advanced-panel:not([hidden])');
-  assert(await page.locator('#page-tasks .task-advanced-panel').isVisible(), 'task filter and grouping options did not expand');
-  await page.check('[data-bulk-select="t1"]');
-  await page.click('[data-quick="waiting"]');
+  await page.locator('[data-toggle-task-options]').hover();
+  assert(await page.locator('#taskFilterPanel').isHidden(), 'hover must not open click-only filters');
+  const listTop=await page.locator('.all-task-list').evaluate(n=>n.getBoundingClientRect().top);
+  await page.click('[data-toggle-task-options]');await page.waitForSelector('#taskFilterPanel:popover-open');
+  assert.equal(await page.locator('.all-task-list').evaluate(n=>n.getBoundingClientRect().top),listTop,'opening filters moved the task list');
+  await page.locator('[data-filter-detail="project"] summary').click();await page.waitForFunction(()=>document.querySelector('[data-filter-detail="project"]').open);
+  await page.locator('[data-filter-detail="type"] summary').hover();assert.equal(await page.locator('[data-filter-detail="type"]').getAttribute('open'),null);
+  await page.locator('[data-close-task-filter]').first().click();await page.click('[data-task-bulk-mode]');
+  await page.check('[data-bulk-select="t1"]');await page.click('[data-toggle-task-options]');await page.click('[data-quick="waiting"]');
   await page.waitForSelector('[data-bulk-select="t1"]', { state: 'detached' });
-  assert(await page.locator('#page-tasks .bulk-bar').count() === 0, 'filter change retained a hidden task in bulk selection');
-  await page.click('[data-quick="open"]');
+  assert.equal(await page.evaluate(()=>ui.selectedTasks.size),0,'filter change retained a hidden task in bulk selection');
+  await page.locator('[data-close-task-filter]').first().click();await page.locator('.task-active-filters [data-reset-filter]').click();
   await page.waitForSelector('[data-bulk-select="t1"]');
   assert(!await page.locator('[data-bulk-select="t1"]').isChecked(), 'hidden bulk selection returned after restoring the filter');
+  await page.click('[data-task-bulk-mode]');
   await page.evaluate(() => {
     const pageNode = document.querySelector('#page-tasks');
     pageNode.style.minHeight = '1800px';
@@ -732,7 +729,7 @@ async function testUrl() {
     return { rowCenter:row.getBoundingClientRect().y+row.getBoundingClientRect().height/2,verticalAlign:getComputedStyle(row.querySelector('.task-trailing')).alignSelf, statusCenter:status.y+status.height/2, priorityCenter:priority.y+priority.height/2, pinCenter:pin.y+pin.height/2 };
   });
   assert(tableAlignment.verticalAlign === 'center' && Math.abs(tableAlignment.statusCenter-tableAlignment.priorityCenter) < 1 && Math.abs(tableAlignment.rowCenter-tableAlignment.pinCenter) < 1, `all-items status controls are not vertically aligned: ${JSON.stringify(tableAlignment)}`);
-  const taskTableType = await page.locator('#page-tasks').evaluate(root => ({ heading:parseFloat(getComputedStyle(root.querySelector('.all-task-select')).fontSize), title:parseFloat(getComputedStyle(root.querySelector('.task-title-link')).fontSize), muted:getComputedStyle(root.querySelector('.task-project')).color }));
+  const taskTableType = await page.locator('#page-tasks').evaluate(root => ({ heading:parseFloat(getComputedStyle(root.querySelector('.task-list-toolbar')).fontSize), title:parseFloat(getComputedStyle(root.querySelector('.task-title-link')).fontSize), muted:getComputedStyle(root.querySelector('.all-task-group h2 button')).color }));
   assert(taskTableType.heading >= 12 && taskTableType.title >= 14, `all-items typography hierarchy remained too small: ${JSON.stringify(taskTableType)}`);
   await page.evaluate(() => { window.__taskDetailFixture = { state:clone(state), undo:clone(undoStack), redo:clone(redoStack) }; });
   await page.click('#page-tasks.active [data-open-task="t1"]');

@@ -66,14 +66,20 @@ test('Today uses the right side at medium widths and releases the full title wid
  await p.setViewportSize({width:390,height:844});const narrow=await p.locator('[data-drop-scope="today"][data-task="ui-a"]').evaluate(n=>{const main=n.querySelector('.task-main').getBoundingClientRect(),meta=n.querySelector('.task-meta').getBoundingClientRect(),pin=n.querySelector('.task-trailing').getBoundingClientRect();return{mainRight:main.right,pinLeft:pin.left,metaTop:meta.top,mainBottom:main.bottom,overflow:n.scrollWidth-n.clientWidth}});assert(narrow.metaTop>=narrow.mainBottom-1,JSON.stringify(narrow));assert(narrow.pinLeft-narrow.mainRight<=12,JSON.stringify(narrow));assert(narrow.overflow<=1);
 });
 
-test('planning layout frees the editor column when stacked and retains edits across all widths',async t=>{
- const p=await fixture(t);await p.setViewportSize({width:2560,height:1440});await p.evaluate(()=>{taskById('ui-a').week=true;uiLayout.weekPlanLeft=.8;saveLocal(true);navigate('week')});await p.waitForSelector('[data-week-action="ui-a"]');
+test('next actions remain horizontal, fade out without a blank column and retain edits across widths',async t=>{
+ const p=await fixture(t);await p.setViewportSize({width:2560,height:1440});await p.evaluate(()=>{taskById('ui-a').week=true;uiLayout.weekPlanLeft=.8;saveLocal(true);navigate('week')});await p.waitForSelector('#page-week [data-overview-next="ui-a"]');
  for(const width of [1100,760,480]){
-  await p.locator('[data-drop-zone="week"]').evaluate((n,width)=>{n.style.width=width+'px'},width);const row=p.locator('[data-drop-scope="week"][data-task="ui-a"]');await p.evaluate(()=>new Promise(requestAnimationFrame));
-  if(width===480){assert(await row.locator('.planning-reveal').isVisible());assert(await row.locator('textarea').isHidden());await row.locator('.planning-reveal').click()}
-  assert(await row.locator('textarea').isVisible());const g=await row.evaluate(n=>{const r=e=>{const a=e.getBoundingClientRect();return{x:a.x,right:a.right,top:a.top,bottom:a.bottom,width:a.width}};return{main:r(n.querySelector('.ui-planning-row')),identity:r(n.querySelector('.week-task-identity')),editor:r(n.querySelector('.planning-resizable')),meta:r(n.querySelector('.task-meta')),leading:r(n.querySelector('.task-leading')),pin:r(n.querySelector('.task-trailing')),overflow:n.scrollWidth-n.clientWidth}});assert(g.overflow<=1,JSON.stringify({width,g}));const center=r=>(r.top+r.bottom)/2;assert(Math.abs(center(g.leading)-center(g.identity))<=1&&Math.abs(center(g.pin)-center(g.identity))<=1,JSON.stringify({width,g}));
-  if(width===1100){assert(g.editor.x>=g.identity.right-1&&g.meta.x>=g.editor.right-1,JSON.stringify(g))}else{assert(g.editor.top>=g.identity.bottom-1&&g.editor.top>=g.meta.bottom-1,JSON.stringify(g));assert(Math.abs(g.editor.width-g.main.width)<=1,JSON.stringify(g))}
-  await row.locator('textarea').fill('保留复测结论 '+width);await row.locator('textarea').press('Tab');
+  await p.locator('[data-drop-zone="week"]').evaluate((n,width)=>{n.style.width=width+'px'},width);const row=p.locator('[data-drop-scope="week"][data-task="ui-a"]');await p.waitForFunction(()=>!renderFrame);await p.evaluate(()=>new Promise(requestAnimationFrame));
+  const field=row.locator('textarea');
+  if(width===480){
+   await p.waitForFunction(()=>document.querySelector('#page-week [data-task="ui-a"] .ui-planning-row').classList.contains('is-editor-hidden'));
+   assert(await field.isHidden());assert.equal(await field.getAttribute('tabindex'),'-1');assert.equal(await row.locator('.overview-next-label').evaluate(n=>n.getBoundingClientRect().height),0);
+   await row.locator('[data-open-task="ui-a"]').click();await p.fill('#taskNext','保留复测结论 '+width);await p.click('#saveTaskButton');await p.waitForFunction(()=>!document.querySelector('#taskDialog').open);
+  }else{
+   assert(await field.isVisible());await field.fill('保留复测结论 '+width);await field.press('Tab');
+   const g=await row.evaluate(n=>{const r=e=>{const a=e.getBoundingClientRect();return{x:a.x,right:a.right,top:a.top,bottom:a.bottom,width:a.width}};return{identity:r(n.querySelector('.week-task-identity')),editor:r(n.querySelector('.planning-resizable')),meta:r(n.querySelector('.task-meta')),leading:r(n.querySelector('.task-leading')),pin:r(n.querySelector('.task-trailing')),overflow:n.scrollWidth-n.clientWidth}});
+   assert(g.overflow<=1,JSON.stringify({width,g}));const center=r=>(r.top+r.bottom)/2;assert(Math.abs(center(g.leading)-center(g.identity))<=1&&Math.abs(center(g.pin)-center(g.identity))<=1,JSON.stringify({width,g}));assert(g.editor.x>=g.identity.right-1&&g.meta.x>=g.editor.right-1,JSON.stringify(g));
+  }
  }
- await p.reload();await p.waitForSelector('[data-week-action="ui-a"]');assert.equal(await p.locator('[data-week-action="ui-a"]').inputValue(),'保留复测结论 480');
+ await p.reload();await p.waitForSelector('#page-week [data-overview-next="ui-a"]');assert.equal(await p.locator('#page-week [data-overview-next="ui-a"]').inputValue(),'保留复测结论 480');
 });

@@ -34,7 +34,7 @@ test('summary filters agree with visible counters and never include completed wa
 });
 test('old grouping preferences cannot defeat the project default; manual grouping works within the current visit',()=>{
  const c=vm.createContext({Map,Set,Object,Array,String,JSON,taskFilter:{query:'',project:[],type:[],status:[],group:'none',quick:'open'},ui:{},localStorage:{getItem:()=>JSON.stringify({taskFilter:{query:'充电',project:[],type:[],status:[],group:'none',quick:'open'},selectedProjectId:'p1'})},WORKSPACE_VIEW_KEY:'view',projectPositions:new Map(),searchView:{},workspacePositions:{},journalDateValid:()=>false,$:()=>({value:''})});
- vm.runInContext(readFunction('src/ui/view-state.js','restoreWorkspacePreferences'),c);vm.runInContext(readFunction('src/ui/view-state.js','applyTaskPageDefaults'),c);
+ vm.runInContext(readFunction('src/domain/task-filters.js','emptyTaskFilter'),c);vm.runInContext(readFunction('src/domain/task-filters.js','normalizeTaskFilter'),c);vm.runInContext(readFunction('src/ui/view-state.js','restoreWorkspacePreferences'),c);vm.runInContext(readFunction('src/ui/view-state.js','applyTaskPageDefaults'),c);
  c.restoreWorkspacePreferences();assert.equal(c.taskFilter.group,'project');assert.equal(c.taskFilter.query,'充电');assert.equal(c.selectedProjectId,'p1');
  c.taskFilter.group='status';c.applyTaskPageDefaults('tasks','tasks');assert.equal(c.taskFilter.group,'status');
  c.applyTaskPageDefaults('today','tasks');c.applyTaskPageDefaults('tasks','today');assert.equal(c.taskFilter.group,'project');

@@ -4,7 +4,7 @@ if(!["today","week","tasks","projects","memos","data","search"].includes(current
 let navigationDepth=Number(history.state?.appNavDepth||0);
 if(!history.state?.appRoute)history.replaceState({page:currentPage,appRoute:true,appNavDepth:navigationDepth},"","#"+currentPage);
 let selectedWeekKey=currentWeekKey(),selectedProjectId="",selectedMemoId="",memoArchived=false,projectMilestoneIndex=0,globalSearchQuery="",searchReturnPage="today";
-let taskFilter={quick:"open",query:"",project:[],type:[],status:[],group:"project",sort:"manual"};
+let taskFilter=emptyTaskFilter();
 let taskDraft=null,taskAutosaveTimer=0,taskAutosaveSignature="",taskAutosaveClosing=false,projectDraft=null,projectDraftIsNew=false,projectTemplateMode="hardware",decisionDraft=null,relatedDraft=new Set(),attachmentPreviewId="",taskChecklistCollapsed=false,taskChecklistHeight=0,checklistResizeState=null,projectPanelTab="tasks",historyTaskId="",historySelection="current";
 let undoStack=[],redoStack=[],saveTimer=null,renderFrame=0,confirmCallback=null,dragState=null,directEditSessions=new Set(),activeRichEditor=null,richStates=new WeakMap(),quillEditors=new WeakMap(),quillRegistered=false;
 
