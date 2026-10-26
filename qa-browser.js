@@ -729,7 +729,7 @@ async function testUrl() {
     return { rowCenter:row.getBoundingClientRect().y+row.getBoundingClientRect().height/2,verticalAlign:getComputedStyle(row.querySelector('.task-trailing')).alignSelf, statusCenter:status.y+status.height/2, priorityCenter:priority.y+priority.height/2, pinCenter:pin.y+pin.height/2 };
   });
   assert(tableAlignment.verticalAlign === 'center' && Math.abs(tableAlignment.statusCenter-tableAlignment.priorityCenter) < 1 && Math.abs(tableAlignment.rowCenter-tableAlignment.pinCenter) < 1, `all-items status controls are not vertically aligned: ${JSON.stringify(tableAlignment)}`);
-  const taskTableType = await page.locator('#page-tasks').evaluate(root => ({ heading:parseFloat(getComputedStyle(root.querySelector('.all-task-select')).fontSize), title:parseFloat(getComputedStyle(root.querySelector('.task-title-link')).fontSize), muted:getComputedStyle(root.querySelector('.task-project')).color }));
+  const taskTableType = await page.locator('#page-tasks').evaluate(root => ({ heading:parseFloat(getComputedStyle(root.querySelector('.task-list-toolbar')).fontSize), title:parseFloat(getComputedStyle(root.querySelector('.task-title-link')).fontSize), muted:getComputedStyle(root.querySelector('.all-task-group h2 button')).color }));
   assert(taskTableType.heading >= 12 && taskTableType.title >= 14, `all-items typography hierarchy remained too small: ${JSON.stringify(taskTableType)}`);
   await page.evaluate(() => { window.__taskDetailFixture = { state:clone(state), undo:clone(undoStack), redo:clone(redoStack) }; });
   await page.click('#page-tasks.active [data-open-task="t1"]');
