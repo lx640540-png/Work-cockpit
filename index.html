@@ -3638,7 +3638,7 @@ function initRichImageFormatter(editor,quill){
   };
   onDestroy=()=>this.bar?.remove();
  }
- class WorkImageSpec extends ImageSpec{getActions=()=>[ResizeAction,ImageTools]}
+ class WorkImageSpec extends ImageSpec{getActions=()=>[new ResizeAction(this.formatter),new ImageTools(this.formatter)]}
  const formatter=new Formatter(quill,{specs:[WorkImageSpec],align:{allowAligning:false},delete:{allowKeyboardDelete:false},resize:{allowResizeModeChange:false,useRelativeSize:true,minimumWidthPx:24,handleStyle:{height:"8px",width:"8px",border:"1px solid var(--blue)",borderRadius:"2px",backgroundColor:"var(--panel,#fff)"}},overlay:{style:{backgroundColor:"transparent",border:"1px solid var(--blue)",zIndex:"20"}},image:{registerImageTitleBlot:false,allowAltTitleEdit:false,allowCompressor:false,linkOptions:{allowLinkEdit:false},autoHeight:true},video:{registerCustomVideoBlot:false,registerBackspaceFix:false},tooltip:{containTooltipPosition:false}});
  editor.__imageFormatter=formatter;
  quill.root.addEventListener("dblclick",event=>{if(event.target.matches?.("img.rich-image")){formatter.hide();void openRichImage(event.target)}});
