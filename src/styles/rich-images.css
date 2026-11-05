@@ -6,7 +6,7 @@
 .rich-image-upload>[contenteditable="false"]{display:inline-flex;align-items:center;gap:8px;min-width:0;overflow-wrap:anywhere}
 .rich-image-upload button{flex:none;border:0;background:transparent;color:var(--blue);padding:2px;cursor:pointer;font:inherit;text-decoration:underline}
 .rich-image-upload[data-upload-status="failed"],.rich-image-upload[data-upload-status="missing"]{border-color:var(--orange,#c7772a)}
-.rich-image-tools{position:absolute;top:4px;right:4px;display:flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:6px;background:var(--panel,#fff);box-shadow:0 2px 8px #0001;pointer-events:auto;white-space:nowrap;max-width:calc(100% - 8px);overflow:auto}
+.rich-image-tools{position:absolute;top:4px;right:4px;display:flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:6px;background:var(--panel,#fff);box-shadow:0 2px 8px #0001;pointer-events:auto;white-space:nowrap;width:max-content;max-width:none;overflow:auto}
 .rich-image-tools button{height:26px;padding:0 7px;background:transparent;border:0;border-radius:4px;color:var(--text);font:inherit;font-size:12px;cursor:pointer}
 .rich-image-tools button:hover{background:var(--bg)}
 .rich-image-tools button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}

@@ -75,8 +75,9 @@ function initRichImageFormatter(editor,quill){
   onCreate=()=>{
    let bar=document.createElement("div");bar.className="rich-image-tools";bar.setAttribute("role","toolbar");bar.setAttribute("aria-label","图片操作");
    for(let [label,action] of [["缩小",-10],["放大",10],["查看大图",0]]){let button=document.createElement("button");button.type="button";button.textContent=label;button.addEventListener("pointerdown",event=>event.preventDefault());button.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();let image=this.formatter.currentSpec?.getTargetElement();if(!image)return;if(!action){void openRichImage(image);return}let blot=Quill.find(image),root=this.formatter.quill.root,base=root.clientWidth-parseFloat(getComputedStyle(root).paddingLeft)-parseFloat(getComputedStyle(root).paddingRight),size=image.getBoundingClientRect().width/base*100;this.formatter.quill.formatText(this.formatter.quill.getIndex(blot),1,"width",Math.max(5,Math.min(100,size+action))+"%","user");this.formatter.update()});bar.appendChild(button)}
-   this.bar=bar;this.formatter.overlay.appendChild(bar);
+   this.bar=bar;this.formatter.overlay.appendChild(bar);this.onUpdate();
   };
+  onUpdate=()=>{if(!this.bar)return;let root=this.formatter.quill.root,area=root.getBoundingClientRect(),overlay=this.formatter.overlay.getBoundingClientRect();this.bar.style.maxWidth=Math.max(80,area.width-16)+"px";let width=this.bar.getBoundingClientRect().width,left=Math.max(area.left+8,Math.min(overlay.right-width-4,area.right-width-8));this.bar.style.left=(left-overlay.left)+"px";this.bar.style.right="auto"};
   onDestroy=()=>this.bar?.remove();
  }
  class WorkImageSpec extends ImageSpec{getActions=()=>[new ResizeAction(this.formatter),new ImageTools(this.formatter)]}
