@@ -87,6 +87,7 @@ function initRichImageFormatter(editor,quill){
  let destroyToolbar=formatter.toolbar.destroy;
  formatter.toolbar.destroy=()=>{let toolbar=formatter.toolbar;if(toolbar.element.parentNode!==formatter.overlay)formatter.overlay.appendChild(toolbar.element);destroyToolbar()};
  formatter.overlay.addEventListener("dblclick",event=>{if(event.target.closest(".rich-image-tools,.blot-formatter__resize-handle"))return;let image=formatter.currentSpec?.getTargetElement();if(image){event.preventDefault();event.stopPropagation();formatter.hide();void openRichImage(image)}});
+ let toolsObserver=new ResizeObserver(()=>{for(let action of formatter.actions)if(action instanceof ImageTools)action.onUpdate()});toolsObserver.observe(quill.root);editor.__imageToolsObserver=toolsObserver;
  editor.__imageFormatter=formatter;
  quill.root.addEventListener("dblclick",event=>{if(event.target.matches?.("img.rich-image")){formatter.hide();void openRichImage(event.target)}});
  // Overlay handles stay inside the editor's own scrolling/stacking context.
@@ -160,7 +161,7 @@ async function richImageSignedUrl(resource,force=false){
  if(result.error||!result.data?.signedUrl)throw Error(result.error?.message||"图片地址不可用");let url=result.data.signedUrl;richImageUrls.set(key,{url,expires:Date.now()+25*60*1000});return url;
 }
 function refreshRichImages(root=document){
- for(let editor of richImageEditors)if(!editor.isConnected){editor.__imageWidthObserver?.disconnect();if(editor.__imageWidthTimer){clearTimeout(editor.__imageWidthTimer);richImageWriteOwner(editor.__richImageOwner,richImageEditorValue(editor))}editor.__imageFormatter?.destroy();richImageEditors.delete(editor)}
+ for(let editor of richImageEditors)if(!editor.isConnected){editor.__imageWidthObserver?.disconnect();editor.__imageToolsObserver?.disconnect();if(editor.__imageWidthTimer){clearTimeout(editor.__imageWidthTimer);richImageWriteOwner(editor.__richImageOwner,richImageEditorValue(editor))}editor.__imageFormatter?.destroy();richImageEditors.delete(editor)}
  root.querySelectorAll(".rich-image-upload").forEach(paintRichUpload);
  root.querySelectorAll("img.rich-image").forEach(image=>{
   let user=Cloud.user?.id||"",signature=user+"|"+image.dataset.richImagePath;if(image.__richImageSignature===signature)return;image.__richImageSignature=signature;image.dataset.imageState="loading";
