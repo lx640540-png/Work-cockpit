@@ -1,0 +1,21 @@
+/* Shared image rules apply to editable and read-only rich text. */
+.rich-image{display:inline-block;max-width:100%;height:auto;vertical-align:middle;border-radius:6px;object-fit:contain;cursor:zoom-in}
+.readonly .rich-image{pointer-events:auto}
+.rich-image[data-image-state="loading"],.rich-image[data-image-state="failed"]{min-width:96px;min-height:64px;background:var(--surface-soft,var(--bg));border:1px solid var(--line);object-fit:contain}
+.rich-image[data-image-state="failed"]{opacity:.6}
+.rich-image-upload{display:inline-flex;align-items:center;gap:8px;max-width:100%;padding:8px 10px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);font-size:12px;white-space:normal;vertical-align:middle;user-select:none}
+.rich-image-upload>[contenteditable="false"]{display:inline-flex;align-items:center;gap:8px;min-width:0;overflow-wrap:anywhere}
+.rich-image-upload button{flex:none;border:0;background:transparent;color:var(--blue);padding:2px;cursor:pointer;font:inherit;text-decoration:underline}
+.rich-image-upload[data-upload-status="failed"],.rich-image-upload[data-upload-status="missing"]{border-color:var(--orange,#c7772a)}
+.rich-image-tools{position:absolute;top:4px;right:4px;display:flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:6px;background:var(--panel,#fff);box-shadow:0 2px 8px #0001;pointer-events:auto;white-space:nowrap;width:max-content;max-width:none;overflow:auto}
+.rich-image-tools button{height:26px;padding:0 7px;background:transparent;border:0;border-radius:4px;color:var(--text);font:inherit;font-size:12px;cursor:pointer}
+.rich-image-tools button:hover{background:var(--bg)}
+.rich-image-tools button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.rich-editor .blot-formatter__resize-handle{touch-action:none;opacity:1}
+.task-attachment-paste:hover{outline:1px dashed var(--line);outline-offset:4px;border-radius:6px}
+.image-viewer header{gap:12px;flex-wrap:wrap}
+.image-viewer header>b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.image-viewer header>div{flex-wrap:wrap;gap:4px}
+.image-viewer .image-viewer-body{align-items:flex-start;justify-content:flex-start;position:relative}
+.image-viewer .image-viewer-body>img{margin:auto;flex:none;max-width:none;height:auto}
+@media(max-width:600px){.image-viewer header{padding:10px}.image-viewer header button{padding:5px}.rich-image-tools button{padding:0 4px}}

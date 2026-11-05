@@ -29,6 +29,7 @@ function renderApp(){
  if(typeof restoreWorkspacePosition==="function")restoreWorkspacePosition();
  syncWorkJournal();
  if(typeof syncVisualPreview==="function")syncVisualPreview();
+ if(typeof initUiResizeDividers==="function")initUiResizeDividers();
  ui.renderedPage=currentPage;
 }
 function bindTransientInputs(){initPlanningResize();initTableSorting();syncTaskFilterPopover()}
