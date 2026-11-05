@@ -1510,6 +1510,7 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 @media(max-width:820px){#page-tasks .task-primary-toolbar{padding-inline-end:40px}#page-tasks .task-primary-toolbar>.search-field{min-width:120px;flex:1 1 170px;max-width:none}}
 /* Shared image rules apply to editable and read-only rich text. */
 .rich-image{display:inline-block;max-width:100%;height:auto;vertical-align:middle;border-radius:6px;object-fit:contain;cursor:zoom-in}
+.readonly .rich-image{pointer-events:auto}
 .rich-image[data-image-state="loading"],.rich-image[data-image-state="failed"]{min-width:96px;min-height:64px;background:var(--surface-soft,var(--bg));border:1px solid var(--line);object-fit:contain}
 .rich-image[data-image-state="failed"]{opacity:.6}
 .rich-image-upload{display:inline-flex;align-items:center;gap:8px;max-width:100%;padding:8px 10px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);font-size:12px;white-space:normal;vertical-align:middle;user-select:none}
@@ -2436,6 +2437,7 @@ function renderApp(){
  if(typeof restoreWorkspacePosition==="function")restoreWorkspacePosition();
  syncWorkJournal();
  if(typeof syncVisualPreview==="function")syncVisualPreview();
+ if(typeof initUiResizeDividers==="function")initUiResizeDividers();
  ui.renderedPage=currentPage;
 }
 function bindTransientInputs(){initPlanningResize();initTableSorting();syncTaskFilterPopover()}
