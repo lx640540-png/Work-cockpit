@@ -28,7 +28,8 @@
     "styles/task-row-layout.css",
     "styles/task-journal-layout.css",
     "styles/workflow-closure.css",
-    "styles/task-filters.css"
+    "styles/task-filters.css",
+    "styles/rich-images.css"
   ],
   "scripts": [
     "core/runtime.js",
@@ -37,6 +38,7 @@
     "domain/work-journal.js",
     "domain/workflow.js",
     "domain/workflow-closure.js",
+    "domain/rich-images.js",
     "core/model.js",
     "core/store.js",
     "domain/week.js",
@@ -71,6 +73,7 @@
     "ui/workflow.js",
     "ui/workflow-closure.js",
     "ui/task-filters.js",
+    "ui/rich-images.js",
     "ui/events.js",
     "ui/drag-resize.js",
     "core/cloud.js",

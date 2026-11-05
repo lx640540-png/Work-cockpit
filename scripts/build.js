@@ -17,12 +17,14 @@ function joinFiles(names) {
     return read(name);
   }).join('');
 }
-const script = joinFiles(manifest.scripts);
+// Pinned Apache-2.0 Quill 2 image formatter; bundled locally for offline/static hosting.
+const formatterRoot = path.join(root, 'vendor/quill-blot-formatter2-3.2.0');
+const script = fs.readFileSync(path.join(formatterRoot, 'index.js'), 'utf8') + '\n' + joinFiles(manifest.scripts);
 new vm.Script(script, { filename: 'work-cockpit.js' });
 const names = [...script.matchAll(/^function (\w+)\(/gm)].map(match => match[1]);
 if (new Set(names).size !== names.length) throw new Error('Duplicate application function');
 let html = read('index.template.html');
-for (const [marker, value] of [['{{APP_STYLES}}', joinFiles(manifest.styles)], ['{{APP_SCRIPT}}', script]]) {
+for (const [marker, value] of [['{{APP_STYLES}}', fs.readFileSync(path.join(formatterRoot, 'quill-blot-formatter2.css'), 'utf8') + '\n' + joinFiles(manifest.styles)], ['{{APP_SCRIPT}}', script]]) {
   if (html.split(marker).length !== 2) throw new Error('Expected one template marker: ' + marker);
   html = html.replace(marker, () => value);
 }

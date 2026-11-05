@@ -149,6 +149,16 @@ const Cloud={
    if(taskDraft?.id===taskId){taskDraft.attachments.push(meta);let list=$(".attachment-list");if(list)list.innerHTML=attachmentMarkup()}
   }
  },
+ async uploadRichImage(owner,file){
+  if(!this.user||!this.client)throw Error("请登录云端后上传");
+  if(!RICH_IMAGE_TYPES.includes(file.type)||file.size>50*1024*1024)throw Error("请选择不超过 50MB 的图片");
+  if(owner.type==="task"&&!taskById(owner.id))throw Error("原事项已删除");
+  let userId=this.user.id,client=this.client,epoch=this.syncEpoch,safe=(file.name||"粘贴图片.png").replace(/[^\w.\-\u4e00-\u9fa5]/g,"_"),folder=String(owner.id||"document").replace(/[^\w.-]/g,"_"),path=userId+"/rich-"+owner.type+"/"+folder+"/"+uid("image")+"-"+safe;
+  let result=await client.storage.from("task-attachments").upload(path,file,{upsert:false});
+  if(result.error)throw Error("上传失败："+(result.error.message||file.name));
+  if(this.user?.id!==userId||this.client!==client||this.syncEpoch!==epoch){try{await client.storage.from("task-attachments").remove([path])}catch{}throw Error("登录账户已变化，图片未插入")}
+  return normalizeRichImage({id:uid("image"),path,name:file.name||"粘贴图片.png",type:file.type});
+ },
  async previewAttachment(item,container){
   if(!item||!container)return;if(!this.client||!this.user){container.textContent="请登录后查看附件";return}let token=uid("preview"),userId=this.user.id,taskId=taskDraft?.id;container.dataset.previewToken=token;
   let current=()=>container.isConnected&&container.dataset.previewToken===token&&this.user?.id===userId&&taskDraft?.id===taskId;
