@@ -3650,6 +3650,7 @@ function initRichImageFormatter(editor,quill){
  // no image has ever been selected. Keep its normal cleanup idempotent.
  let destroyToolbar=formatter.toolbar.destroy;
  formatter.toolbar.destroy=()=>{let toolbar=formatter.toolbar;if(toolbar.element.parentNode!==formatter.overlay)formatter.overlay.appendChild(toolbar.element);destroyToolbar()};
+ formatter.overlay.addEventListener("dblclick",event=>{if(event.target.closest(".rich-image-tools,.blot-formatter__resize-handle"))return;let image=formatter.currentSpec?.getTargetElement();if(image){event.preventDefault();event.stopPropagation();formatter.hide();void openRichImage(image)}});
  editor.__imageFormatter=formatter;
  quill.root.addEventListener("dblclick",event=>{if(event.target.matches?.("img.rich-image")){formatter.hide();void openRichImage(event.target)}});
  // Overlay handles stay inside the editor's own scrolling/stacking context.
@@ -3712,7 +3713,7 @@ function paintRichUpload(node){
  let host=node.querySelector('[contenteditable="false"]')||node;host.replaceChildren();
  let text=document.createElement("span");text.textContent=({queued:"等待上传",uploading:"图片上传中…",done:"图片已上传",failed:job?.error||"上传失败",missing:"上传未完成，请重新选择图片"}[status])+" · "+node.dataset.uploadName;host.appendChild(text);
  node.dataset.uploadStatus=status;
- if(["failed","missing"].includes(status)){let button=document.createElement("button");button.type="button";button.dataset.richUploadAction=node.dataset.richUpload;button.textContent=job?.file?"重试":"重新选择";host.appendChild(button)}
+ if(["failed","missing"].includes(status)&&quillFor(node.closest(".rich-editor"))?.isEnabled()){let button=document.createElement("button");button.type="button";button.dataset.richUploadAction=node.dataset.richUpload;button.textContent=job?.file?"重试":"重新选择";host.appendChild(button)}
 }
 async function richImageSignedUrl(resource,force=false){
  let image=normalizeRichImage(resource),userId=Cloud.user?.id,client=Cloud.client,epoch=Cloud.syncEpoch;if(!image||!userId||!client)throw Error("请登录后查看图片");
