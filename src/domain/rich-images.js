@@ -21,3 +21,9 @@ function clipboardImageFiles(data){
  let files=Array.from(data?.files||[]).filter(file=>RICH_IMAGE_TYPES.includes(file.type));if(files.length)return files;
  return Array.from(data?.items||[]).filter(item=>item.kind==="file"&&RICH_IMAGE_TYPES.includes(item.type)).map(item=>item.getAsFile()).filter(Boolean);
 }
+
+function richImageFileDrop(event){
+ if(!event.target.closest?.(".rich-editor"))return false;
+ let files=Array.from(event.dataTransfer?.files||[]);if(files.length)return files.every(file=>RICH_IMAGE_TYPES.includes(file.type));
+ let items=Array.from(event.dataTransfer?.items||[]).filter(item=>item.kind==="file");return items.length>0&&items.every(item=>RICH_IMAGE_TYPES.includes(item.type));
+}

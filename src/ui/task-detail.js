@@ -146,14 +146,14 @@ async function uploadTaskFiles(files){
 function taskFileDrag(event){return Array.from(event.dataTransfer?.types||[]).includes("Files")}
 function clearTaskFileDrop(){ $("#taskDialog")?.classList.remove("file-drag-over") }
 document.addEventListener("dragover",event=>{
- if(!$("#taskDialog")?.open||!taskFileDrag(event)||event.target.closest?.(".rich-editor"))return;
+ if(!$("#taskDialog")?.open||!taskFileDrag(event)||richImageFileDrop(event))return;
  event.preventDefault();event.stopImmediatePropagation();
  let inside=!!event.target.closest?.("#taskDialog");
  $("#taskDialog").classList.toggle("file-drag-over",inside);event.dataTransfer.dropEffect=inside?"copy":"none";
 },true);
 document.addEventListener("dragleave",event=>{if(!event.relatedTarget||!$("#taskDialog")?.contains(event.relatedTarget))clearTaskFileDrop()},true);
 document.addEventListener("drop",event=>{
- if(!$("#taskDialog")?.open||!taskFileDrag(event)||event.target.closest?.(".rich-editor"))return;
+ if(!$("#taskDialog")?.open||!taskFileDrag(event)||richImageFileDrop(event))return;
  event.preventDefault();event.stopImmediatePropagation();clearTaskFileDrop();
  if(event.target.closest?.("#taskDialog"))void uploadTaskFiles(Array.from(event.dataTransfer.files||[]));
 },true);
