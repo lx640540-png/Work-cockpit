@@ -31,7 +31,7 @@ function richImageWriteOwner(owner,value){
   if(decisionDraft?.id===owner.id&&$("#decisionDialog")?.open){decisionDraft[owner.field]=value;return true}
   target=decisionById(owner.id);if(!target)return false;target[owner.field]=value;target.updatedAt=now;
  }else return false;
- saveLocal(true);return true;
+ try{saveLocal(true);return true}catch{return false}
 }
 function richImageEditorValue(editor){return editor.__richImageOwner?.type==="quick"?quillFor(editor).getContents():serializeRichEditor(editor)}
 function registerRichImageFormats(){
