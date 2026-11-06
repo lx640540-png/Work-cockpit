@@ -7,9 +7,11 @@ async function boot(){
  applyTheme(localStorage.getItem(THEME_KEY)||"system",false);
  restoreWorkspacePreferences();
  renderApp();
+ window.WorkbenchLoader?.setMessage("正在检查登录与同步状态");
  await Cloud.init();
  refreshScheduledTasks();
  document.documentElement.classList.remove("booting");
+ window.WorkbenchLoader?.finish();
 }
-boot().catch(error=>{console.error("应用启动失败",error);document.documentElement.classList.remove("booting");toast("启动时发生错误，本机数据未删除")});
+boot().catch(error=>{console.error("应用启动失败",error);document.documentElement.classList.remove("booting");window.WorkbenchLoader?.finish();toast("启动时发生错误，本机数据未删除")});
 

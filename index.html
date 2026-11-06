@@ -82,7 +82,7 @@ div.ql-editor .ql-image-align-right[data-title]::after {
 }
 
 :root{--bg:#eef3ff;--panel:#fff;--side:#edf3ff;--soft:#f6f8fc;--ink:#18253f;--text:#40506b;--muted:#66758b;--muted-soft:#7b899d;--line:#dfe6f1;--blue:#2468f2;--green:#18a766;--green-bg:#e9f8f0;--orange:#e9861a;--orange-bg:#fff4e6;--red:#e44e59;--red-bg:#ffedf0;--purple:#8358e8;--purple-bg:#f1edff;--shadow:0 14px 38px rgba(45,70,120,.09);--r:18px;--sidebar:250px}
-*{box-sizing:border-box}html,body{height:100%;margin:0}html{background:var(--bg)}body{font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:radial-gradient(circle at 8% 4%,#dfe9ff 0,transparent 30%),radial-gradient(circle at 96% 92%,#eee6ff 0,transparent 28%),var(--bg);overflow:hidden}button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}html.booting body::before{content:'工作台';position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#f6f9ff;color:var(--blue);font-size:17px;font-weight:850;letter-spacing:.08em}html.booting .app,html.booting .cloud-gate{visibility:hidden}
+*{box-sizing:border-box}html,body{height:100%;margin:0}html{background:var(--bg)}body{font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:radial-gradient(circle at 8% 4%,#dfe9ff 0,transparent 30%),radial-gradient(circle at 96% 92%,#eee6ff 0,transparent 28%),var(--bg);overflow:hidden}button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}html.booting .app,html.booting .cloud-gate{visibility:hidden}
 .app{width:calc(100vw - 32px);height:calc(100dvh - 32px);margin:16px;display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);overflow:hidden;background:rgba(255,255,255,.95);border:1px solid rgba(255,255,255,.9);border-radius:24px;box-shadow:0 25px 70px rgba(45,66,116,.13)}
 .sidebar{min-height:0;display:flex;flex-direction:column;padding:20px 16px 16px;background:linear-gradient(180deg,#eef4ff,#e8f0ff);border-right:1px solid #e0e7f3;overflow:hidden}.brand{display:flex;align-items:center;gap:11px;padding:0 5px 20px;border-bottom:1px solid #dfe6f2}.brand-mark{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:var(--blue);color:#fff;box-shadow:0 8px 20px rgba(36,104,242,.25);font-weight:900;font-size:20px}.brand strong{display:block;font-size:16px}.brand small{display:block;color:var(--muted);font-size:11px}.nav{display:grid;gap:5px;padding:17px 0 12px}.nav-button{width:100%;display:grid;grid-template-columns:23px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:10px 11px;border:0;border-radius:11px;background:transparent;color:#53637e;text-align:left;font-weight:750}.nav-button:hover{background:rgba(255,255,255,.58)}.nav-button.active{background:#dbe8ff;color:var(--blue);box-shadow:inset 3px 0 var(--blue)}.nav-icon{width:21px;text-align:center}.nav-count{min-width:22px;height:20px;display:grid;place-items:center;padding:0 6px;border:0;border-radius:10px;background:#dce8ff;color:#2468f2;font-size:10px;font-weight:850}.nav-key{min-width:18px;height:19px;display:grid;place-items:center;border:1px solid #cbd5e4;border-bottom-width:2px;border-radius:5px;background:rgba(255,255,255,.72);font:9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#7a879a}.favorites{min-height:0;padding:13px 5px;border-top:1px solid #dfe6f2;overflow:auto}.favorites-head{display:flex;justify-content:space-between;margin-bottom:8px;color:#8390a6;font-size:11px;font-weight:800}.favorite-link{width:100%;display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:6px 1px;color:#5c6d88;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.favorite-link i{width:7px;height:7px;border-radius:50%;background:var(--blue)}.sidebar-note{margin-top:auto;padding:15px 5px 1px;border-top:1px solid #dfe6f2;color:#71809a;font-size:11px}.sidebar-note b{display:block;color:#53637d}
 .main{min-width:0;min-height:0;display:grid;grid-template-rows:74px minmax(0,1fr);overflow:hidden}.topbar{display:flex;align-items:center;gap:15px;padding:0 24px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.93);z-index:10}.back{height:36px;padding:0 11px;border:1px solid var(--line);border-radius:9px;background:#fff}.global-search{width:min(470px,42vw);margin:auto;position:relative}.global-search input{width:100%;height:38px;padding:0 44px 0 35px;border:1px solid var(--line);border-radius:11px;background:#fbfcff;outline:0}.global-search span{position:absolute;left:12px;top:9px;color:#8492a9}.global-search kbd{position:absolute;right:8px;top:7px;padding:2px 6px;border:1px solid #dce4f0;border-radius:6px;background:#f5f7fb;color:#8491a7;font-size:10px}.top-actions{display:flex;align-items:center;gap:7px}.btn{min-height:36px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#40516d;font-weight:750;white-space:nowrap}.btn:hover{border-color:#b8c8df}.btn.primary{color:#fff;background:var(--blue);border-color:var(--blue);box-shadow:0 7px 16px rgba(36,104,242,.2)}.btn.danger{color:var(--red);border-color:#f2c9ce;background:#fff7f8}.btn.soft{color:var(--blue);border-color:#d2e1ff;background:#f0f5ff}.icon-btn{width:34px;height:34px;padding:0;display:grid;place-items:center;border:1px solid var(--line);border-radius:9px;background:#fff;color:#70809a}.sync-badge{height:36px;padding:0 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#60708a;font-weight:750}.sync-badge.synced{color:var(--blue);background:#eef4ff}.sync-badge.syncing{color:var(--orange);background:var(--orange-bg)}.sync-badge.error,.sync-badge.conflict{color:var(--red);background:var(--red-bg)}
@@ -238,6 +238,52 @@ body{line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimize
 .obsidian-link-row input{min-width:0;flex:1}
 .attachment-column .dropzone{width:100%;cursor:pointer;color:var(--muted)}
 #taskDialog.file-drag-over .dropzone{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,var(--panel));color:var(--blue);outline:2px solid var(--blue);outline-offset:2px}
+/* Startup-only SVG loader. Variables and selectors stay within this component. */
+.wb-loader {
+ --wb-loader-bg:#f5f9ff;
+ --wb-loader-brand:#2563eb;
+ --wb-loader-accent:#38bdf8;
+ --wb-loader-track:rgba(37,99,235,.14);
+ --wb-loader-muted:#7b8ba5;
+ position:fixed;inset:0;z-index:10000;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ background:var(--wb-loader-bg);
+ font-family:inherit;
+ transition:opacity .45s ease,visibility .45s;
+}
+:root[data-theme="dark"] .wb-loader {
+ --wb-loader-bg:#0b1220;--wb-loader-brand:#6aa6ff;
+ --wb-loader-accent:#22d3ee;--wb-loader-track:rgba(106,166,255,.18);--wb-loader-muted:#8a9bb8;
+}
+.wb-loader.is-hidden {opacity:0;visibility:hidden;pointer-events:none}
+.wb-loader__mark {width:120px;height:120px;display:block;flex:none}
+.wb-loader__ticks {
+ fill:none;stroke:var(--wb-loader-track);stroke-width:2;stroke-dasharray:1.5 7.5;
+ transform-origin:60px 60px;animation:wb-loader-spin 28s linear infinite;
+}
+.wb-loader__orbit {transform-origin:60px 60px;animation:wb-loader-spin 3.6s linear infinite reverse}
+.wb-loader__orbit circle {fill:var(--wb-loader-accent)}
+.wb-loader__track {fill:none;stroke:var(--wb-loader-track);stroke-width:2.5}
+.wb-loader__arc {
+ fill:none;stroke:url(#wb-loader-arc-gradient);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:84 193;
+ transform-origin:60px 60px;animation:wb-loader-spin 1.5s cubic-bezier(.5,.15,.5,.85) infinite;
+}
+.wb-loader__tile {fill:var(--wb-loader-brand);opacity:.22;animation:wb-loader-tile 1.8s ease-in-out infinite;animation-delay:var(--wb-loader-delay)}
+.wb-loader__title {margin:22px 0 0;font-size:17px;font-weight:600;letter-spacing:.12em;text-indent:.12em;color:var(--wb-loader-brand)}
+.wb-loader__hint {margin:8px 20px 0;max-width:340px;text-align:center;font-size:12px;letter-spacing:.06em;color:var(--wb-loader-muted);animation:wb-loader-breathe 2.4s ease-in-out infinite}
+.wb-loader__recovery {margin-top:18px}
+.wb-loader__recovery[hidden] {display:none}
+.wb-loader__retry {border:1px solid var(--wb-loader-track);border-radius:8px;padding:8px 14px;background:transparent;color:var(--wb-loader-brand);cursor:pointer}
+.wb-loader__retry:hover {background:var(--wb-loader-track)}
+.wb-loader__retry:focus-visible {outline:2px solid var(--wb-loader-brand);outline-offset:4px}
+.wb-loader.is-stalled :is(.wb-loader__ticks,.wb-loader__orbit,.wb-loader__arc,.wb-loader__tile,.wb-loader__hint) {animation:none}
+@keyframes wb-loader-spin {to{transform:rotate(360deg)}}
+@keyframes wb-loader-tile {0%,100%{opacity:.22}35%{opacity:1}70%{opacity:.22}}
+@keyframes wb-loader-breathe {0%,100%{opacity:.55}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce) {
+ .wb-loader {transition:none}
+ .wb-loader :is(.wb-loader__ticks,.wb-loader__orbit,.wb-loader__arc,.wb-loader__tile,.wb-loader__hint) {animation:none}
+}
 /* Unified task rows and project-first planning surfaces. */
 .drop-card,.week-card,.project-overview-group{container-type:inline-size}
 .task-row,.task-row.has-focus-toggle,.today-flow .task-row{grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;min-height:68px;padding:11px 8px}
@@ -1532,6 +1578,101 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 </style>
 </head>
 <body>
+<div class="wb-loader" id="app-loader" role="status" aria-live="polite" aria-label="工作台加载中">
+  <svg class="wb-loader__mark" viewBox="0 0 120 120" aria-hidden="true">
+    <defs>
+      <linearGradient id="wb-loader-arc-gradient" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="var(--wb-loader-accent)" stop-opacity="0"/>
+        <stop offset="1" stop-color="var(--wb-loader-brand)"/>
+      </linearGradient>
+    </defs>
+
+    <circle class="wb-loader__ticks" cx="60" cy="60" r="55"/>
+    <g class="wb-loader__orbit"><circle cx="60" cy="5" r="2.6"/></g>
+
+    <circle class="wb-loader__track" cx="60" cy="60" r="44"/>
+    <circle class="wb-loader__arc" cx="60" cy="60" r="44"/>
+
+    <g>
+      <rect class="wb-loader__tile" style="--wb-loader-delay:0s"     x="43"   y="43"   width="10" height="10" rx="2.5"/>
+      <rect class="wb-loader__tile" style="--wb-loader-delay:.15s"   x="55"   y="43"   width="10" height="10" rx="2.5"/>
+      <rect class="wb-loader__tile" style="--wb-loader-delay:.3s"    x="67"   y="43"   width="10" height="10" rx="2.5"/>
+      <rect class="wb-loader__tile" style="--wb-loader-delay:.15s"   x="43"   y="55"   width="10" height="10" rx="2.5"/>
+      <rect class="wb-loader__tile" style="--wb-loader-delay:.3s"    x="55"   y="55"   width="10" height="10" rx="2.5"/>
+      <rect class="wb-loader__tile" style="--wb-loader-delay:.45s"   x="67"   y="55"   width="10" height="10" rx="2.5"/>
+      <rect class="wb-loader__tile" style="--wb-loader-delay:.3s"    x="43"   y="67"   width="10" height="10" rx="2.5"/>
+      <rect class="wb-loader__tile" style="--wb-loader-delay:.45s"   x="55"   y="67"   width="10" height="10" rx="2.5"/>
+      <rect class="wb-loader__tile" style="--wb-loader-delay:.6s"    x="67"   y="67"   width="10" height="10" rx="2.5"/>
+    </g>
+  </svg>
+
+  <p class="wb-loader__title">工作台</p>
+  <p class="wb-loader__hint" id="app-loader-hint">正在准备工作环境</p>
+  <div class="wb-loader__recovery" id="app-loader-recovery" hidden><button class="wb-loader__retry" id="app-loader-retry" type="button">重新加载</button></div>
+  <noscript><style>.wb-loader__hint{display:none}.wb-loader *{animation:none!important}</style><p class="wb-loader__hint" style="display:block">请启用 JavaScript 后重新加载工作台。</p></noscript>
+</div>
+<script data-boot-loader>// Runs before external libraries: recovery remains available if a CDN stalls.
+(function () {
+ const root = document.documentElement;
+ const loader = document.getElementById('app-loader');
+ if (!loader) return;
+ const hint = document.getElementById('app-loader-hint');
+ const recovery = document.getElementById('app-loader-recovery');
+ const retry = document.getElementById('app-loader-retry');
+ let finished = false, removalTimer;
+
+ function setMessage(message) {
+  if (!finished && !loader.classList.contains('is-stalled')) hint.textContent = message;
+ }
+ function showRecovery(message) {
+  if (finished) return;
+  loader.classList.add('is-stalled');
+  loader.setAttribute('aria-label', '工作台启动未完成');
+  hint.textContent = message;
+  recovery.hidden = false;
+ }
+ function onStartupError(event) {
+  if (root.classList.contains('booting') && (event.error || event.message)) {
+   showRecovery('启动未能完成，请重新加载。本机数据不会被清除。');
+  }
+ }
+ function onStartupRejection() {
+  if (root.classList.contains('booting')) showRecovery('启动未能完成，请重新加载。本机数据不会被清除。');
+ }
+ function onTransitionEnd(event) {
+  if (event.target === loader && event.propertyName === 'opacity') remove();
+ }
+ function remove() {
+  clearTimeout(removalTimer);
+  loader.removeEventListener('transitionend', onTransitionEnd);
+  retry.removeEventListener('click', reload);
+  loader.remove();
+ }
+ function reload() { window.location.reload(); }
+ function finish() {
+  if (finished) return;
+  finished = true;
+  clearTimeout(watchdog);
+  window.removeEventListener('error', onStartupError);
+  window.removeEventListener('unhandledrejection', onStartupRejection);
+  root.classList.remove('booting');
+  loader.setAttribute('aria-hidden', 'true');
+  // Reduced motion and missing transition events must never leave a shield behind.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { remove(); return; }
+  loader.addEventListener('transitionend', onTransitionEnd);
+  loader.classList.add('is-hidden');
+  removalTimer = setTimeout(remove, 650);
+ }
+ const watchdog = setTimeout(function () {
+  // Keep the account/data shield in place until normal initialization settles.
+  showRecovery('启动耗时较长，请检查网络后重新加载。本机数据不会被清除。');
+ }, 15000);
+ retry.addEventListener('click', reload);
+ window.addEventListener('error', onStartupError);
+ window.addEventListener('unhandledrejection', onStartupRejection);
+ window.WorkbenchLoader = Object.freeze({ setMessage, finish });
+})();
+</script>
 <div class="app" id="app">
 <aside class="sidebar"><div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M9.7 14.3 14.3 9.7M8.3 17.1l-1.1 1.1a3.3 3.3 0 0 1-4.7-4.7l3.2-3.2a3.3 3.3 0 0 1 4.7 0M15.7 6.9l1.1-1.1a3.3 3.3 0 0 1 4.7 4.7l-3.2 3.2a3.3 3.3 0 0 1-4.7 0" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></div><div><strong>工作台</strong><small>智能硬件项目中枢</small></div></div><nav class="nav" id="nav">
 <button class="nav-button active" data-page="today"><span class="nav-icon">⌂</span><span>今天</span><span class="nav-count" data-count="today">0</span><span class="nav-key">1</span></button>
@@ -4749,10 +4890,12 @@ async function boot(){
  applyTheme(localStorage.getItem(THEME_KEY)||"system",false);
  restoreWorkspacePreferences();
  renderApp();
+ window.WorkbenchLoader?.setMessage("正在检查登录与同步状态");
  await Cloud.init();
  refreshScheduledTasks();
  document.documentElement.classList.remove("booting");
+ window.WorkbenchLoader?.finish();
 }
-boot().catch(error=>{console.error("应用启动失败",error);document.documentElement.classList.remove("booting");toast("启动时发生错误，本机数据未删除")});
+boot().catch(error=>{console.error("应用启动失败",error);document.documentElement.classList.remove("booting");window.WorkbenchLoader?.finish();toast("启动时发生错误，本机数据未删除")});
 
 </script></body></html>

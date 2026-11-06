@@ -5,7 +5,8 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'src/manifest.json'), 'utf8'));
 const read = name => fs.readFileSync(path.join(root, 'src', name), 'utf8');
-const listed = new Set([...manifest.styles, ...manifest.scripts]);
+const startup = manifest.startup || [];
+const listed = new Set([...manifest.styles, ...startup, ...manifest.scripts]);
 for (const entry of fs.readdirSync(path.join(root, 'src'), { recursive: true })) {
   const name = entry.split(path.sep).join('/');
   if (/\.(js|css)$/.test(name) && !listed.has(name)) throw new Error('Unlisted source: ' + name);
@@ -20,11 +21,13 @@ function joinFiles(names) {
 // Pinned Apache-2.0 Quill 2 image formatter; bundled locally for offline/static hosting.
 const formatterRoot = path.join(root, 'vendor/quill-blot-formatter2-3.2.0');
 const script = fs.readFileSync(path.join(formatterRoot, 'index.js'), 'utf8') + '\n' + joinFiles(manifest.scripts);
+const startupScript = joinFiles(startup);
+new vm.Script(startupScript, { filename: 'work-cockpit-startup.js' });
 new vm.Script(script, { filename: 'work-cockpit.js' });
 const names = [...script.matchAll(/^function (\w+)\(/gm)].map(match => match[1]);
 if (new Set(names).size !== names.length) throw new Error('Duplicate application function');
 let html = read('index.template.html');
-for (const [marker, value] of [['{{APP_STYLES}}', fs.readFileSync(path.join(formatterRoot, 'quill-blot-formatter2.css'), 'utf8') + '\n' + joinFiles(manifest.styles)], ['{{APP_SCRIPT}}', script]]) {
+for (const [marker, value] of [['{{APP_STYLES}}', fs.readFileSync(path.join(formatterRoot, 'quill-blot-formatter2.css'), 'utf8') + '\n' + joinFiles(manifest.styles)], ['{{STARTUP_SCRIPT}}', startupScript], ['{{APP_SCRIPT}}', script]]) {
   if (html.split(marker).length !== 2) throw new Error('Expected one template marker: ' + marker);
   html = html.replace(marker, () => value);
 }
