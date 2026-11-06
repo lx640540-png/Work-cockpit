@@ -1,3 +1,4 @@
+const switchProjectView = require('./scripts/qa-project-view');
 const { chromium } = require('playwright');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -54,7 +55,7 @@ test('memo panes fit viewport and scroll independently; navigation restores main
 });
 test('project cards show completed count and status colors differ in both themes',async t=>{
  const page=await fixture(t,[makeTask('a',{project:'p'}),makeTask('b',{project:'p',status:'已完成'})],{projects:[{id:'p',name:'项目名称',milestones:[]}],route:'projects'});
- await page.click('[data-project-view="detail"]');assert.equal(await page.locator('.project-completion strong').textContent(),'1');assert.equal(await page.locator('.project-list-milestone,.project-list-item .progress').count(),0);
+ await switchProjectView(page,'detail');assert.equal(await page.locator('.project-completion strong').textContent(),'1');assert.equal(await page.locator('.project-list-milestone,.project-list-item .progress').count(),0);
  await page.click('[data-favorite-project="p"]');assert.deepEqual((await stored(page)).favorites,['p']);
  for(const theme of ['light','dark']){
   const colors=await page.evaluate(theme=>{applyTheme(theme);const a=document.createElement('span'),b=document.createElement('span');a.className='pill status-进行中';b.className='pill status-已完成';document.body.append(a,b);const colors=[a,b].map(n=>getComputedStyle(n).backgroundColor);a.remove();b.remove();return colors},theme);assert.notEqual(colors[0],colors[1]);
@@ -554,20 +555,20 @@ test('completion: shared search matches tokens, reversed tokens and title gaps w
  });
  for(const pair of result.matches)assert.deepEqual(pair,[['search'],['search']]);assert.equal(result.noMatch,0);assert(!result.html.includes('<img'));assert(result.html.includes('<mark>靶机异常</mark>'));assert(result.source.includes('备注'));
  await page.fill('#taskSearch','异常 靶机');await page.waitForFunction(()=>!renderFrame&&document.querySelectorAll('#page-tasks mark').length===2);assert.equal(await page.locator('[data-task="search"] mark').count(),2);
- await page.click('[data-page="projects"]');await page.click('[data-project-view="detail"]');await page.fill('#projectTaskSearch','更换 模块');assert.equal(await page.locator('[data-project-task="search"]').count(),1);
+ await page.click('[data-page="projects"]');await switchProjectView(page,'detail');await page.fill('#projectTaskSearch','更换 模块');assert.equal(await page.locator('[data-project-task="search"]').count(),1);
 });
 
 test('completion: project panels stay inside viewport and preserve per-view positions',async t=>{
  const projects=Array.from({length:25},(_,i)=>({id:'p'+i,name:'项目 '+i,milestones:[]}));
  const page=await fixture(t,Array.from({length:45},(_,i)=>makeTask('t'+i,{project:'p0'})),{projects,route:'projects'});
- await page.click('[data-project-view="detail"]');await page.waitForSelector('body.project-workspace');
+ await switchProjectView(page,'detail');await page.waitForSelector('body.project-workspace');
  for(const size of [{width:1600,height:900},{width:1280,height:640}]){
   await page.setViewportSize(size);
   const g=await page.evaluate(()=>{const main=$('#mainScroll'),left=$('.project-list-panel'),right=$('.project-detail-scroll');left.scrollTop=120;right.scrollTop=180;return {main:main.scrollHeight-main.clientHeight,overflow:getComputedStyle(main).overflowY,left:left.scrollTop,right:right.scrollTop,bottom:$('#projectWorkspace').getBoundingClientRect().bottom,height:innerHeight}});
   assert.equal(g.overflow,'hidden');assert(g.main<=2,JSON.stringify(g));assert(g.bottom<=g.height,JSON.stringify(g));assert(g.left>0);assert(g.right>0);
  }
- await page.click('[data-project-view="overview"]');await page.waitForFunction(()=>!document.body.classList.contains('project-workspace'));
- await page.click('[data-project-view="detail"]');await page.waitForSelector('.project-detail-scroll');assert(await page.locator('.project-detail-scroll').evaluate(n=>n.scrollTop>=170));
+ await switchProjectView(page,'overview');await page.waitForFunction(()=>!document.body.classList.contains('project-workspace'));
+ await switchProjectView(page,'detail');await page.waitForSelector('.project-detail-scroll');assert(await page.locator('.project-detail-scroll').evaluate(n=>n.scrollTop>=170));
  await page.setViewportSize({width:390,height:844});await page.click('[data-project-pane="list"]');assert(await page.locator('.project-list-panel').isVisible());assert(!(await page.locator('.project-detail-panel').isVisible()));await page.click('[data-select-project="p0"]');await page.waitForSelector('.project-detail-panel',{state:'visible'});assert(!(await page.locator('.project-list-panel').isVisible()));
 });
 
@@ -590,5 +591,5 @@ test('completion: overview collapse corners, inbox disclosure and empty project 
  const page=await fixture(t,Array.from({length:9},(_,i)=>makeTask('i'+i,{status:'待处理',inbox:true})),{projects:[{id:'empty',name:'一个很长很长很长很长很长很长的项目名称',milestones:[]}]});
  assert((await page.locator('[data-drop-zone="inbox"] .card-title').textContent()).includes('9'));assert.equal(await page.locator('.inbox-items .task-row').count(),9);assert.equal(await page.locator('.inbox-items').evaluate(n=>getComputedStyle(n).overflowY),'visible');
  await page.click('[data-page="projects"]');await page.click('[data-collapse-project="empty"]');await page.waitForSelector('.project-overview-group.is-collapsed');const corners=await page.locator('.is-collapsed .project-overview-head').evaluate(n=>{let c=getComputedStyle(n);return{top:c.borderTopLeftRadius,bottom:c.borderBottomLeftRadius,border:c.borderBottomWidth}});assert.equal(corners.top,corners.bottom);assert.equal(corners.border,'0px');
- await page.click('[data-project-view="detail"]');assert.equal(await page.locator('.project-completion strong').textContent(),'0');
+ await switchProjectView(page,'detail');assert.equal(await page.locator('.project-completion strong').textContent(),'0');
 });

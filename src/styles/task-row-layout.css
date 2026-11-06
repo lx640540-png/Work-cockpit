@@ -11,7 +11,7 @@
 :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-meta :is(.followup,.muted){flex-basis:auto;text-align:inherit}
 :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-meta>.task-row-dates{flex:0 1 auto}
 :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-completed-date{white-space:nowrap}
-/* The next-action editor always stays between identity and properties. */
+/* Next-action editors use the middle column, then a full row in narrow cards. */
 :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning{grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main'}
 :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning.has-trailing-pin{grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing'}
 :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning.history-row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history'}
@@ -25,8 +25,10 @@
 :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row textarea:not(:focus){mask-image:linear-gradient(to right,#000 calc(100% - 20px),transparent)}
 :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row textarea::placeholder{color:var(--muted);opacity:.8}
 :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-width-handle{top:22px;bottom:0;right:0;width:12px}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row.is-editor-hidden{grid-template-columns:minmax(0,1fr) var(--planning-meta-width,120px);grid-template-areas:'identity meta'}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row.is-editor-hidden>.overview-next-label{position:absolute;left:0;top:0;width:0;max-height:0;padding:0;overflow:hidden;opacity:0;visibility:hidden;pointer-events:none}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row.is-editor-stacked{grid-template-columns:minmax(0,1fr);grid-template-areas:'identity' 'editor' 'meta';row-gap:6px}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row.is-editor-stacked>.overview-next-label{position:relative;width:100%;opacity:1;visibility:visible}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row.is-editor-stacked>.task-meta{justify-content:flex-start}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row.is-editor-stacked .planning-width-handle{display:none}
 :root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .task-date-button{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .planning-reveal{display:none}
 @container(max-width:560px){
@@ -37,3 +39,12 @@
 }
 @container(max-width:420px){:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta' 'leading history'}}
 @media(prefers-reduced-motion:reduce){.overview-next-label{transition:none!important}}
+
+/* Context stays beside the title; removing its old row also removes its height. */
+.task-title-line{display:flex;align-items:baseline;gap:6px 10px;flex-wrap:nowrap;min-width:0}
+.task-title-line>.task-title-link{flex:0 1 auto;min-width:0}
+.task-context-source{flex:0 1 auto;min-width:3em;max-width:10em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;line-height:1.5;font-weight:400;color:var(--muted)}
+:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row{min-height:56px;padding:8px 6px}
+:root[data-calm-today] #page-today .workflow-task-row{min-height:var(--preview-row-height,60px);padding:8px 0}
+:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.overview-next-label:has(>.visually-hidden) .planning-width-handle{top:0}
+:root[data-calm-today] .project-overview-group .overview-next-label>textarea{min-height:42px;padding:7px 9px}

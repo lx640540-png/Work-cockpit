@@ -8,3 +8,35 @@
 .project-completion small{color:var(--muted);font-size:10px}
 .project-list-item:hover{border-color:color-mix(in srgb,var(--blue) 40%,var(--line))}
 .project-list-item:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+/* Shared view menu releases the old vertical navigation gutter. */
+:root[data-visual-preview] #page-projects #projectShell{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:0;min-width:0}
+.project-view-menu{position:relative;display:inline-block;font:inherit;z-index:15}
+.project-view-menu>summary{display:flex;align-items:center;gap:10px;list-style:none;cursor:pointer;color:var(--ink);font:inherit}
+.project-view-menu>summary::-webkit-details-marker{display:none}
+.project-view-menu>summary>span{font-size:15px;color:var(--muted)}
+.project-view-menu>summary:focus-visible{outline:2px solid var(--blue);outline-offset:4px;border-radius:4px}
+.project-view-options{position:absolute;top:calc(100% + 10px);left:0;min-width:176px;padding:6px;border:1px solid var(--line);border-radius:8px;background:var(--panel);box-shadow:var(--shadow)}
+.project-view-options button{display:block;width:100%;padding:9px 12px;border:0;border-radius:5px;background:transparent;text-align:left;font-size:13px;color:var(--text)}
+.project-view-options button:is(:hover,[aria-checked=true]){background:var(--soft);color:var(--blue)}
+:root[data-calm-today] #projectShell[data-view=detail]>.project-view-body{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:16px;height:100%;min-height:0;overflow:hidden}
+:root[data-calm-today] #projectShell[data-view=detail]>.project-view-body>.project-view-header{grid-row:1;margin-bottom:0}
+:root[data-calm-today] #projectShell[data-view=detail]>.project-view-body>.project-detail-page{grid-row:2;height:100%;min-height:0}
+:root[data-calm-today] #projectShell .project-master-detail{height:100%;min-height:0}
+:root[data-calm-today] .project-overview-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 12px;padding:12px 18px}
+:root[data-calm-today] .project-overview-context{grid-column:1/-1;margin:0;font-size:11px;gap:8px}
+:root[data-calm-today] .project-overview-context>.link-btn{padding:0;margin-left:auto;font-size:11px}
+:root[data-calm-today] .project-overview-stats{align-self:center;gap:5px}
+:root[data-calm-today] .project-health-note{color:var(--orange)}
+:root[data-calm-today] .project-brief{display:block;margin-bottom:14px}
+:root[data-calm-today] .project-stage{padding:0 0 10px;border:0;background:transparent}
+:root[data-calm-today] .project-stage-unset{display:flex;align-items:center;gap:8px}
+:root[data-calm-today] .project-brief-metrics{display:flex;gap:12px;flex-wrap:wrap;margin:0;padding:8px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+:root[data-calm-today] .project-recent{margin:20px 0 0;padding:12px 0 0;border-top:1px solid var(--line)}
+@media(max-width:900px){
+ :root[data-calm-today] #projectShell[data-view=detail]>.project-view-body{grid-template-rows:auto auto minmax(0,1fr);gap:10px}
+ :root[data-calm-today] #projectShell[data-view=detail]>.project-view-body>.project-mobile-tabs{grid-row:2}
+ :root[data-calm-today] #projectShell[data-view=detail]>.project-view-body>.project-detail-page{grid-row:3}
+ :root[data-calm-today] .project-overview-head{grid-template-columns:minmax(0,1fr);gap:6px}
+ :root[data-calm-today] .project-overview-stats{justify-content:flex-start}
+}

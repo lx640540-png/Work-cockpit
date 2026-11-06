@@ -1,3 +1,4 @@
+const switchProjectView = require('./scripts/qa-project-view');
 const { chromium } = require('playwright');
 const fs = require('fs');
 const http = require('http');
@@ -823,7 +824,7 @@ async function testUrl() {
 
   await page.evaluate(() => { const project = projectById('p1'); window.__projectMilestoneFixture = clone(project.milestones); project.milestones.push({ id: 'm2', name: 'DVT 验证', due: '', status: '未开始', criteria: '' }, { id: 'm3', name: '小批试产', due: '', status: '未开始', criteria: '' }); saveLocal(true); });
   await page.click('[data-page="projects"]');
-  await page.click('[data-project-view="detail"]');
+  await switchProjectView(page,'detail');
   await page.waitForSelector('#page-projects.active .project-master-detail', { state: 'visible' });
   assert(await page.locator('.project-master-detail').count() === 1, 'project master-detail workspace missing');
   const projectOverflow = await page.locator('.project-list-panel,.project-detail-scroll').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).overflowY));
@@ -904,7 +905,7 @@ async function testUrl() {
   await page.waitForSelector('#page-tasks.active');
   const projectHandoffFilter = await page.evaluate(() => taskFilter);
   assert(projectHandoffFilter.query === '' && projectHandoffFilter.type.length === 0 && projectHandoffFilter.status.length === 0 && projectHandoffFilter.project.join(',') === 'p1', `project full-view handoff retained stale filters: ${JSON.stringify(projectHandoffFilter)}`);
-  await page.reload({ waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => !document.documentElement.classList.contains('booting')); await page.click('[data-page="projects"]');await page.click('[data-project-view="detail"]');
+  await page.reload({ waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => !document.documentElement.classList.contains('booting')); await page.click('[data-page="projects"]');await switchProjectView(page,'detail');
   await page.waitForFunction(() => document.querySelector('#page-projects.active')?.querySelectorAll('[data-project-drop]').length === 3);
   const projectOrderAfterReload = await page.locator('#page-projects.active [data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop));
   assert(projectOrderAfterReload.join(',') === 'p2,p1,p3', `project pin order did not survive reload: ${projectOrderAfterReload.join(',')}`);
