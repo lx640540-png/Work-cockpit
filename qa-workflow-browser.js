@@ -248,15 +248,15 @@ test('Today highlights next actions and shows all waiting dates in a continuous 
  await page.locator('[data-toggle-task="do"]').click();assert.equal((await stored(page)).tasks.find(task=>task.id==='do').status,'已完成');
 });
 
-test('overview preserves notes verbatim, uses waiting follow-up dates, and supports narrow viewports',{timeout:30000},async t=>{
+test('overview keeps notes in task details, uses waiting follow-up dates, and supports narrow inline edits',{timeout:30000},async t=>{
  const page=await fixture(t,[makeTask('wait',{project:'p1',status:'等待',notes:'<p>第一段记录</p><p>第二段记录，尚未收到最终确认。</p>'})],{route:'projects',projects:projectFixture});
  const before=(await stored(page)).tasks[0];await page.click('[data-overview-project="p1"] [data-quick-date="wait"]');await page.click('[data-set-task-date="'+today+'"]');
  let data=await stored(page);assert.equal(data.tasks[0].followup,today);assert.equal(data.tasks[0].planDate,before.planDate);assert.equal(data.tasks[0].notes,before.notes);assert.equal(data.tasks[0].focus,false);
- await page.locator('.progress-record summary').click();assert.match(await page.locator('.progress-record>div').textContent(),/第二段记录/);
+ assert.equal(await page.locator('.project-overview-tasks .progress-record').count(),0);await page.locator('[data-task="wait"] [data-open-task="wait"]').click();await page.locator('#taskDialog[open]').waitFor();assert.match(await page.locator('#taskNotes .ql-editor').innerText(),/第二段记录/);await page.locator('#taskForm .modal-actions [data-close="taskDialog"]').click();
  await page.locator('.inline-help summary').focus();assert.equal(await page.locator('.inline-help').getAttribute('open'),'');await page.keyboard.press('Escape');assert.equal(await page.locator('.inline-help').getAttribute('open'),null);
  await page.setViewportSize({width:390,height:844});
  const width=await page.evaluate(()=>({body:document.documentElement.scrollWidth,viewport:innerWidth,main:mainScroll.scrollWidth,client:mainScroll.clientWidth}));assert(width.body<=width.viewport+1&&width.main<=width.client+1,JSON.stringify(width));
- assert.equal(await page.locator('[data-overview-next="wait"]').isVisible(),false);await page.locator('[data-task="wait"] [data-open-task="wait"]').click();assert.equal(await page.inputValue('#taskNext'),before.nextAction);await page.fill('#taskNext','窄窗口中继续编辑');await save(page);assert.equal((await stored(page)).tasks[0].nextAction,'窄窗口中继续编辑');
+ assert.equal(await page.locator('[data-overview-next="wait"]').isVisible(),true);assert.equal(await page.locator('[data-overview-next="wait"]').inputValue(),before.nextAction);await page.locator('[data-overview-next="wait"]').fill('窄窗口中继续编辑');await page.locator('[data-overview-next="wait"]').press('Tab');assert.equal((await stored(page)).tasks[0].nextAction,'窄窗口中继续编辑');
 });
 
 
@@ -298,7 +298,7 @@ test('shared width handles persist per card and compact editors remain reachable
  const value=Number(await handle.getAttribute('aria-valuenow'));assert.equal(value,before+16);
  assert.equal(await page.locator('[data-overview-project="p1"] [data-scoped-planning]').last().getAttribute('aria-valuenow'),String(value));
  await page.reload();assert.equal(await page.locator('[data-overview-project="p1"] [data-scoped-planning]').first().getAttribute('aria-valuenow'),String(value));
- await page.click('[data-page="week"]');await page.locator('#page-week.active').waitFor();await page.evaluate(()=>{uiLayout.weekPlanLeft=.66;saveUiLayout();renderNow()});const field=page.locator('#page-week [data-overview-next="a"]');await field.waitFor({state:'visible'});await page.setViewportSize({width:390,height:844});await field.waitFor({state:'hidden'});await page.locator('#page-week [data-task="a"] [data-open-task="a"]').click();await page.fill('#taskNext','窄屏保留下一步');await save(page);await page.setViewportSize({width:1920,height:1080});assert.equal(await field.inputValue(),'窄屏保留下一步');
+ await page.click('[data-page="week"]');await page.locator('#page-week.active').waitFor();await page.evaluate(()=>{uiLayout.weekPlanLeft=.66;saveUiLayout();renderNow()});const field=page.locator('#page-week [data-overview-next="a"]');await field.waitFor({state:'visible'});await page.setViewportSize({width:390,height:844});await field.waitFor({state:'visible'});await page.waitForFunction(()=>document.querySelector('#page-week [data-task="a"] .ui-planning-row').classList.contains('is-editor-stacked'));await field.fill('窄屏保留下一步');await field.press('Tab');await page.setViewportSize({width:1920,height:1080});assert.equal(await field.inputValue(),'窄屏保留下一步');
  await page.setViewportSize({width:800,height:700});const overflow=await page.locator('#mainScroll').evaluate(n=>n.scrollWidth-n.clientWidth);assert(overflow<=1);
 });
 
