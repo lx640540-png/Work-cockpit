@@ -48,6 +48,16 @@ async function settled(page) {
  await page.waitForFunction(() => !document.documentElement.classList.contains('booting'));
  await page.locator('#app-loader').waitFor({ state: 'detached' });
 }
+async function captureStartup(page, filename) {
+ // The intentionally blocked parser prevents document.fonts.ready from settling.
+ // Capture the already-painted startup state without waiting for page completion.
+ const session = await page.context().newCDPSession(page);
+ try {
+  const { data } = await session.send('Page.captureScreenshot', { format: 'png' });
+  fs.mkdirSync(path.dirname(filename), { recursive: true });
+  fs.writeFileSync(filename, Buffer.from(data, 'base64'));
+ } finally { await session.detach(); }
+}
 test('loader appears before a blocked external library, honors explicit light, and leaves after boot only', async t => {
  const { page, release } = await fixture(t, { theme: 'light', colorScheme: 'dark' });
  assert.equal(await page.locator('.wb-loader__tile').count(), 9);
@@ -55,7 +65,7 @@ test('loader appears before a blocked external library, honors explicit light, a
  assert.equal(await page.locator('.wb-loader__arc').evaluate(el => getComputedStyle(el).animationName), 'wb-loader-spin');
  assert.equal(await page.locator('.app').evaluate(el => getComputedStyle(el).visibility), 'hidden');
  assert.equal(await page.evaluate(() => getComputedStyle(document.body, '::before').content), 'none');
- await page.screenshot({ path: 'artifacts/browser-regression/loader-light.png' });
+ await captureStartup(page, 'artifacts/browser-regression/loader-light.png');
  release(); await settled(page);
  await page.click('[data-page="week"]');
  assert.equal(await page.locator('#app-loader').count(), 0);
@@ -67,7 +77,7 @@ test('explicit dark theme and reduced motion are honored before application star
  assert.equal(await page.locator('#app-loader').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(11, 18, 32)');
  const animations = await page.locator('#app-loader [class]').evaluateAll(nodes => nodes.map(el => getComputedStyle(el).animationName));
  assert(animations.every(name => name === 'none'));
- await page.screenshot({ path: 'artifacts/browser-regression/loader-dark-reduced-motion.png' });
+ await captureStartup(page, 'artifacts/browser-regression/loader-dark-reduced-motion.png');
  release(); await settled(page);
 });
 test('a stalled dependency stops animation and offers retry without exposing unverified account data', async t => {
@@ -78,7 +88,7 @@ test('a stalled dependency stops animation and offers retry without exposing unv
  assert.equal(await page.locator('.wb-loader__arc').evaluate(el => getComputedStyle(el).animationName), 'none');
  assert.equal(await page.locator('.app').evaluate(el => getComputedStyle(el).visibility), 'hidden');
  assert.equal(await page.evaluate(() => localStorage.getItem('loader-data-sentinel')), '本机内容保持不变');
- await page.screenshot({ path: 'artifacts/browser-regression/loader-timeout.png' });
+ await captureStartup(page, 'artifacts/browser-regression/loader-timeout.png');
  // An eventual successful startup still dismisses the recovery screen.
  release(); await page.clock.resume(); await settled(page);
 });
