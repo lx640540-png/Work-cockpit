@@ -256,7 +256,7 @@ test('overview keeps notes in task details, uses waiting follow-up dates, and su
  await page.locator('.inline-help summary').focus();assert.equal(await page.locator('.inline-help').getAttribute('open'),'');await page.keyboard.press('Escape');assert.equal(await page.locator('.inline-help').getAttribute('open'),null);
  await page.setViewportSize({width:390,height:844});
  const width=await page.evaluate(()=>({body:document.documentElement.scrollWidth,viewport:innerWidth,main:mainScroll.scrollWidth,client:mainScroll.clientWidth}));assert(width.body<=width.viewport+1&&width.main<=width.client+1,JSON.stringify(width));
- assert.equal(await page.locator('[data-overview-next="wait"]').isVisible(),true);assert.equal(await page.locator('[data-overview-next="wait"]').inputValue(),before.nextAction);await page.locator('[data-overview-next="wait"]').fill('窄窗口中继续编辑');await page.locator('[data-overview-next="wait"]').press('Tab');assert.equal((await stored(page)).tasks[0].nextAction,'窄窗口中继续编辑');
+ assert.equal(await page.locator('[data-overview-next="wait"]').isVisible(),true);assert.equal(await page.locator('[data-overview-next="wait"]').inputValue(),before.nextAction);await page.locator('[data-overview-next="wait"]').fill('窄窗口中继续编辑');await page.locator('[data-overview-next="wait"]').press('Tab');await page.waitForFunction(()=>JSON.parse(localStorage.getItem('work-cockpit-v6')).tasks.find(task=>task.id==='wait').nextAction==='窄窗口中继续编辑');assert.equal((await stored(page)).tasks[0].nextAction,'窄窗口中继续编辑');
 });
 
 
