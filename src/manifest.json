@@ -1,6 +1,10 @@
 {
+  "startup": [
+    "core/boot-loader.js"
+  ],
   "styles": [
     "styles/base.css",
+    "styles/boot-loader.css",
     "styles/task-rows.css",
     "styles/planning-inputs.css",
     "styles/task-table.css",
