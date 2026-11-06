@@ -2,7 +2,7 @@ const TODAY_LOCAL_SCROLL_SELECTOR=".quick-note-editor>.ql-editor";
 let todayScrollabilityFrame=0;
 function syncTodayScrollability(root=document){$$(TODAY_LOCAL_SCROLL_SELECTOR,root).forEach(node=>node.classList.toggle("can-local-scroll",node.scrollHeight>node.clientHeight+1))}
 function scheduleTodayScrollability(){cancelAnimationFrame(todayScrollabilityFrame);todayScrollabilityFrame=requestAnimationFrame(()=>{todayScrollabilityFrame=0;syncTodayScrollability()})}
-window.addEventListener("resize",()=>{scheduleTodayScrollability();schedulePlanningTextareaResize()});
+window.addEventListener("resize",()=>{syncTodayPanels();scheduleTodayScrollability();schedulePlanningTextareaResize()});
 const DRAG_SCROLL_SELECTORS=["#mainScroll",".today-task-scroll",".quick-note-editor>.ql-editor",".project-list-panel",".project-detail-panel",".project-detail-scroll",".memo-list",".task-content-column"];
 function captureDragScroll(){return DRAG_SCROLL_SELECTORS.flatMap(selector=>$$(selector).map((node,index)=>({selector,index,top:node.scrollTop,left:node.scrollLeft})))}
 function restoreDragScroll(snapshot){requestAnimationFrame(()=>snapshot.forEach(item=>{let node=$$(item.selector)[item.index];if(node){node.scrollTop=item.top;node.scrollLeft=item.left}}))}
@@ -59,7 +59,7 @@ document.addEventListener("pointerdown",event=>{
  if(event.target.id==="projectSplitter"){todayResizeState={kind:"project",owner:event.target,startX:event.clientX,startWidth:uiLayout.projectListWidth};event.target.classList.add("active");event.target.setPointerCapture(event.pointerId);event.preventDefault();return}
  if(event.target.id==="captureResizer"){let capture=$("#todayCapture");if(!capture)return;todayResizeState={kind:"capture",owner:event.target};event.target.classList.add("active");event.target.setPointerCapture(event.pointerId);event.preventDefault();return}
  if(event.target.id==="todaySidebarSplitter"){todayResizeState={kind:"sidebar",owner:event.target};event.target.classList.add("active");event.target.setPointerCapture(event.pointerId);event.preventDefault();return}
- if(event.target.id==="todayResizer"){let execution=$("#todayExecution");if(!execution)return;todayResizeState={kind:"columns",owner:event.target};event.target.classList.add("active");event.target.setPointerCapture(event.pointerId);event.preventDefault();return}
+ if(event.target.id==="todayResizer"){let execution=$("#todayExecution");if(!execution)return;todayResizeState={kind:"columns",owner:event.target,startRatio:uiLayout.todayLeft,startCollapsed:uiLayout.todayCollapsed||"",pending:"",candidate:uiLayout.todayLeft};event.target.classList.add("active");event.target.setPointerCapture(event.pointerId);event.preventDefault();return}
  if(event.target.id==="todayHeightResizer"){let execution=$("#todayExecution");if(!execution)return;todayResizeState={kind:"height",owner:event.target,startY:event.clientY,startHeight:execution.getBoundingClientRect().height};event.target.classList.add("active");event.target.setPointerCapture(event.pointerId);event.preventDefault();return}
  if(event.target.id==="quickNoteHeightResizer"){let editor=$(".quick-note-editor>.ql-editor");if(!editor)return;todayResizeState={kind:"quickNoteHeight",owner:event.target,startY:event.clientY,startHeight:editor.getBoundingClientRect().height};event.target.classList.add("active");event.target.setPointerCapture(event.pointerId);event.preventDefault();return}
  if(event.target.id==="checklistResizer"){let section=$(".checklist-section"),column=$(".task-content-column");if(!section||!column||taskChecklistCollapsed)return;checklistResizeState={startY:event.clientY,startHeight:section.getBoundingClientRect().height,min:58,max:Math.max(240,Math.min(720,column.scrollHeight))};event.target.classList.add("active");event.target.setPointerCapture(event.pointerId);event.preventDefault()}
@@ -70,16 +70,38 @@ document.addEventListener("pointermove",event=>{
  if(todayResizeState?.kind==="weekPlan"||todayResizeState?.kind==="weekReview"){let owner=todayResizeState.splitOwner,rect=owner?.getBoundingClientRect();if(rect){let ratio=Math.max(.34,Math.min(.66,(event.clientX-rect.left)/rect.width)),key=todayResizeState.kind==="weekReview"?"weekReviewLeft":"weekPlanLeft";uiLayout[key]=ratio;owner.style.setProperty("--week-left",(ratio*100).toFixed(2)+"%")}}
  if(todayResizeState?.kind==="project"){uiLayout.projectListWidth=Math.max(280,Math.min(420,todayResizeState.startWidth+event.clientX-todayResizeState.startX));$("#projectWorkspace")?.style.setProperty("--project-list",uiLayout.projectListWidth+"px")}
  if(todayResizeState?.kind==="capture"){let capture=$("#todayCapture"),rect=capture?.getBoundingClientRect();if(rect){let ratio=Math.max(.34,Math.min(.66,(event.clientX-rect.left)/rect.width));uiLayout.quickNoteLeft=ratio;capture.style.setProperty("--quick-left",(ratio*100).toFixed(2)+"%")}}
- if(todayResizeState?.kind==="columns"&&execution){let rect=execution.getBoundingClientRect(),ratio=Math.max(.38,Math.min(.66,(event.clientX-rect.left)/rect.width));uiLayout.todayLeft=ratio;execution.style.setProperty("--today-left",(ratio*100).toFixed(2)+"%")}
+ if(todayResizeState?.kind==="columns"&&execution){
+  const rect=execution.getBoundingClientRect(),raw=(event.clientX-rect.left)/rect.width,ratio=Math.max(.28,Math.min(.72,raw)),resize=todayResizeState;
+  resize.candidate=ratio;
+  if(resize.startCollapsed){resize.pending=(resize.startCollapsed==='left'?raw>.16:raw<.84)?'restore-'+resize.startCollapsed:'';}
+  else{resize.pending=raw<.14?'left':raw>.86?'right':'';uiLayout.todayLeft=ratio;execution.style.setProperty('--today-left',(ratio*100).toFixed(2)+'%');}
+  previewTodayCollapse(resize.pending);
+ }
  if(todayResizeState?.kind==="height"&&execution){let max=Math.max(480,innerHeight-300),height=Math.max(400,Math.min(max,todayResizeState.startHeight+event.clientY-todayResizeState.startY));uiLayout.todayHeight=Math.round(height);execution.style.setProperty("--today-height",uiLayout.todayHeight+"px")}
  if(todayResizeState?.kind==="quickNoteHeight"){let height=Math.max(155,Math.min(520,todayResizeState.startHeight+event.clientY-todayResizeState.startY));uiLayout.quickNoteHeight=Math.round(height);$(".quick-note-card")?.style.setProperty("--quick-note-height",uiLayout.quickNoteHeight+"px");scheduleTodayScrollability()}
  if(todayResizeState?.kind==="richHeight"){let value=Math.max(todayResizeState.spec.min,Math.min(todayResizeState.spec.max,todayResizeState.startHeight+event.clientY-todayResizeState.startY));uiLayout[todayResizeState.key]=Math.round(value);todayResizeState.box.style.setProperty("--rich-editor-height",uiLayout[todayResizeState.key]+"px")}
  if(todayResizeState)scheduleTodayScrollability();
  if(checklistResizeState){let height=Math.max(checklistResizeState.min,Math.min(checklistResizeState.max,checklistResizeState.startHeight+event.clientY-checklistResizeState.startY)),section=$(".checklist-section");taskChecklistHeight=Math.round(height);if(section)section.style.height=taskChecklistHeight+"px"}
 });
-function finishResize(){if(todayResizeState){todayResizeState.owner?.classList.remove("active");saveUiLayout();scheduleTodayScrollability();resizePlanningTextareas($("#page-"+currentPage))}todayResizeState=null;checklistResizeState=null;$("#checklistResizer")?.classList.remove("active")}
+function finishResize(event){
+ if(todayResizeState){
+  const resize=todayResizeState;
+  if(resize.kind==='columns'){
+   if(event?.type==='pointerup'){
+    if(resize.pending.startsWith('restore-')){uiLayout.todayCollapsed='';uiLayout.todayLeft=resize.candidate;}
+    else if(['left','right'].includes(resize.pending)){uiLayout.todayCollapsed=resize.pending;uiLayout.todayLeft=resize.startRatio;}
+   }else{uiLayout.todayCollapsed=resize.startCollapsed;uiLayout.todayLeft=resize.startRatio;}
+   $('#todayExecution')?.style.setProperty('--today-left',(uiLayout.todayLeft*100).toFixed(2)+'%');
+   previewTodayCollapse('');syncTodayPanels();
+  }
+  resize.owner?.classList.remove('active');saveUiLayout();scheduleTodayScrollability();resizePlanningTextareas($('#page-'+currentPage));
+ }
+ todayResizeState=null;checklistResizeState=null;$('#checklistResizer')?.classList.remove('active');
+}
 document.addEventListener("pointerup",finishResize);document.addEventListener("pointercancel",finishResize);document.addEventListener("lostpointercapture",finishResize);
 document.addEventListener("dblclick",event=>{let richHandle=event.target.closest?.("[data-rich-height-resizer]");if(richHandle){let key=richHandle.dataset.richHeightResizer,spec=RICH_HEIGHT_SPECS[key],box=richHandle.closest("[data-rich-resize]");if(!spec||!box)return;uiLayout[key]=spec.default;saveUiLayout();box.style.setProperty("--rich-editor-height",spec.default+"px");toast("文本框高度已恢复默认");return}if(event.target.id==="checklistResizer"){taskChecklistHeight=0;$(".checklist-section")?.style.removeProperty("height");toast("检查清单高度已恢复自适应")}else if(event.target.id==="todayHeightResizer"){uiLayout.todayHeight=460;saveUiLayout();$("#todayExecution")?.style.setProperty("--today-height","460px");scheduleTodayScrollability();toast("执行区高度已恢复默认")}else if(event.target.id==="quickNoteHeightResizer"){uiLayout.quickNoteHeight=190;saveUiLayout();$(".quick-note-card")?.style.setProperty("--quick-note-height","190px");scheduleTodayScrollability();toast("速记输入区高度已恢复默认")}else if(event.target.id==="weekPlanSplitter"||event.target.id==="weekReviewSplitter"){let review=event.target.id==="weekReviewSplitter",key=review?"weekReviewLeft":"weekPlanLeft",value=review ? .46 : .5;uiLayout[key]=value;saveUiLayout();$(review?"#weekReviewSplit":"#weekPlanSplit")?.style.setProperty("--week-left",(value*100)+"%");toast("本周页面分栏已恢复默认")}});
 
 
 window.addEventListener("blur",()=>{document.documentElement.removeAttribute("data-task-dragging");$$(".drag-before,.drag-after,.drag-over").forEach(node=>node.classList.remove("drag-before","drag-after","drag-over"))});
+
+document.addEventListener('click',event=>{const button=event.target.closest?.('[data-today-fold]');if(button){event.preventDefault();toggleTodayPanel(button.dataset.todayFold)}});

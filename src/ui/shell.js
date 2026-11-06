@@ -33,11 +33,11 @@ function renderApp(){
  ui.renderedPage=currentPage;
 }
 function bindTransientInputs(){initPlanningResize();initTableSorting();syncTaskFilterPopover()}
-const PLANNING_TEXTAREA_SELECTOR="[data-overview-next]";
+const PLANNING_TEXTAREA_SELECTOR="[data-overview-next],[data-week-result],[data-top-result]";
 function resizePlanningTextarea(textarea){
  if(!textarea?.matches?.(PLANNING_TEXTAREA_SELECTOR))return;
  textarea.style.height="0px";
- textarea.style.height=Math.max(48,Math.ceil(textarea.scrollHeight)+2)+"px";
+ textarea.style.height=Math.max(textarea.matches?.("[data-week-result],[data-top-result]")?42:48,Math.ceil(textarea.scrollHeight)+2)+"px";
  textarea.style.overflowY="hidden";
 }
 function resizePlanningTextareas(root=document){
@@ -45,7 +45,7 @@ function resizePlanningTextareas(root=document){
  // Batch writes, then reads, then final writes: one layout pass for the list.
  let textareas=Array.from(root.querySelectorAll(PLANNING_TEXTAREA_SELECTOR));
  textareas.forEach(textarea=>{textarea.style.height="0px"});
- let heights=textareas.map(textarea=>Math.max(48,Math.ceil(textarea.scrollHeight)+2));
+ let heights=textareas.map(textarea=>Math.max(textarea.matches?.("[data-week-result],[data-top-result]")?42:48,Math.ceil(textarea.scrollHeight)+2));
  textareas.forEach((textarea,index)=>{textarea.style.height=heights[index]+"px";textarea.style.overflowY="hidden"});
 }
 let planningResizeFrame=0;

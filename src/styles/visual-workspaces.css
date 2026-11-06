@@ -96,7 +96,7 @@
 :root[data-calm-today] .task-table .group-row td{background:var(--soft)!important;font-size:12px;font-weight:500;color:var(--text)}
 :root[data-calm-today] .table-next b{font-weight:500;color:var(--text)}
 /* Projects: retain the two established views and the independent scroll panes. */
-:root[data-calm-today] .project-shell{gap:20px}
+:root[data-calm-today] .project-shell{gap:0;grid-template-columns:minmax(0,1fr)}
 :root[data-calm-today] .project-view-nav button{border-radius:7px;font-size:12px;font-weight:500;padding:14px 10px;background:var(--panel)}
 :root[data-calm-today] .project-view-nav button[aria-pressed=true]{border-color:color-mix(in srgb,var(--blue) 30%,var(--line));background:color-mix(in srgb,var(--blue) 7%,var(--panel))}
 :root[data-calm-today] .project-overview-groups{gap:24px}
@@ -223,9 +223,9 @@
 /* Readable review text, including long Chinese paragraphs and rich lists. */
 :root[data-calm-today] #page-week .week-comparison-table{table-layout:fixed;line-height:1.7}
 :root[data-calm-today] .week-comparison-table .week-plan-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.75}
-:root[data-calm-today] .week-result-cell{grid-template-columns:minmax(0,1fr);gap:6px}
-:root[data-calm-today] .week-result-cell>.pill{justify-self:start}
-:root[data-calm-today] .week-comparison-table .week-result-cell textarea{height:72px;min-height:72px;font-family:inherit;font-size:13px;line-height:1.7;padding:8px 10px}
+:root[data-calm-today] .week-result-cell{display:block}
+
+:root[data-calm-today] .week-comparison-table .week-result-cell textarea{min-height:42px;font-family:inherit;font-size:13px;line-height:20px;padding:8px 10px}
 :root[data-calm-today] .review-field:not(.rich-expanded) .ql-editor{font-family:inherit;font-size:14px;line-height:1.8;color:var(--text);overflow-wrap:anywhere}
 :root[data-calm-today] .review-field:not(.rich-expanded) .editor-box{min-width:0}
 /* Dragging uses a soft destination surface and the existing insertion lines. */

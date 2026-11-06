@@ -1,10 +1,24 @@
-/* Compact review rows; retain vertical resizing for longer written results. */
-.week-comparison-table :is(th,td){vertical-align:middle;padding:8px 12px}
-.week-comparison-table th[scope=row]{width:28%}
-.week-comparison-table th[scope=row] small{margin-top:3px}
-.week-plan-text{width:30%}
-.week-result-cell{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center}
-.week-comparison-table .week-result-cell textarea{height:52px;min-height:52px;margin-top:0;padding:5px 8px;line-height:20px;overflow-y:auto;resize:vertical}
-.week-result-cell .pill{align-self:center}
+/* Three-column review: snapshot identity, independent status, and growing results. */
+.week-comparison-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.week-comparison-table{width:100%;min-width:570px;table-layout:fixed;border-collapse:collapse}
+.week-comparison-table col.week-item-column{width:33%}
+.week-comparison-table col.week-status-column{width:96px}
+.week-comparison-table :is(th,td){vertical-align:middle;padding:10px 12px}
+.week-comparison-table th[scope=row]{width:auto;text-align:left;font-weight:500}
+.week-comparison-table .week-status-cell{text-align:center;white-space:nowrap}
+.week-comparison-table th[scope=row] small{display:block;margin-top:3px;font-size:11px}
+.week-result-cell{display:block;min-width:0}
+.week-next-details{margin-top:5px;font-size:11px;font-weight:400;color:var(--muted)}
+.week-next-details summary{cursor:pointer;width:fit-content}
+.week-next-details p{margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.week-outcomes.is-empty{display:block;min-height:0;padding:0 18px 10px}
+.week-outcomes.is-empty p{margin:0;font-size:12px}
+:root[data-calm-today] #page-week .week-comparison-table{display:table;width:100%;min-width:570px;table-layout:fixed}
+:root[data-calm-today] #page-week .week-comparison-table thead{display:table-header-group}
+:root[data-calm-today] #page-week .week-comparison-table tbody{display:table-row-group;width:auto}
+:root[data-calm-today] #page-week .week-comparison-table tr{display:table-row;width:auto;padding:0}
+:root[data-calm-today] #page-week .week-comparison-table :is(th,td){display:table-cell;width:auto;vertical-align:middle;padding:10px 12px}
+:root[data-calm-today] #page-week .week-comparison-table th:nth-child(2){text-align:center}
+:root[data-calm-today] #page-week .week-result-cell textarea,.week-outcome textarea{width:100%;min-height:42px;height:auto;max-height:none;margin:0;padding:8px 10px;line-height:20px;font-size:13px;font-family:inherit;overflow-y:hidden;resize:none;box-sizing:border-box}
+:root[data-calm-today] #page-week .week-outcomes.is-empty{display:block;min-height:0;padding:0 18px 10px}
 #weekReviewSplit .task-row{min-height:56px;padding-top:7px;padding-bottom:7px}
-@media(max-width:1000px){.week-comparison-table th[scope=row],.week-comparison-table .week-plan-text{width:100%}}

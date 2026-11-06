@@ -73,3 +73,12 @@
 :root[data-calm-today] #workJournal .ql-editor{font-size:15px;line-height:1.8}
 :root[data-calm-today].ui-scroll-active{scrollbar-color:var(--ui-scroll-thumb) transparent}
 :root[data-calm-today].ui-scroll-active::-webkit-scrollbar-thumb{background:var(--ui-scroll-thumb)}
+
+/* Project and memo sidebars share one inset separator and the same row geometry. */
+:root[data-visual-preview] :is(.memo-list,.project-list){gap:0}
+:root[data-visual-preview] .ui-sidebar-item,:root[data-visual-preview] .ui-sidebar-item.selecting{min-height:68px;padding:9px 8px;margin:0}
+.ui-sidebar-divider{display:none;position:absolute;bottom:-1px;left:44px;right:8px;height:1px;background:var(--line);pointer-events:none}
+.ui-sidebar-item:not(:last-child)>.ui-sidebar-divider{display:block}
+.ui-sidebar-item:is(.selected,.active)>.ui-sidebar-divider,.ui-sidebar-item:has(+.ui-sidebar-item:is(.selected,.active))>.ui-sidebar-divider{opacity:0}
+:root[data-visual-preview] .ui-sidebar-item:is(.drop-before,.drag-before){box-shadow:inset 0 2px var(--blue)}
+:root[data-visual-preview] .ui-sidebar-item:is(.drop-after,.drag-after){box-shadow:inset 0 -2px var(--blue)}

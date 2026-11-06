@@ -27,5 +27,5 @@ function bindUiSplitter(handle,{read,write,min=0,max=1,step=.02,reset=.5,positio
 
 // Shared sidebar row: pages supply content and business attributes, never layout.
 function uiSidebarItem({className="",attributes="",title="",titleClass="",leading="",selection="",meta="",detail="",pin=""}){
- return '<article class="ui-list-item ui-sidebar-item '+className+'" '+attributes+'>'+selection+leading+'<div class="ui-sidebar-main memo-item-main"><div class="ui-sidebar-title memo-item-title"><h3 class="'+titleClass+'" title="'+esc(title)+'">'+esc(title)+'</h3></div>'+(meta?'<div class="ui-sidebar-meta memo-meta">'+meta+'</div>':'')+'</div>'+(detail?'<div class="ui-sidebar-detail">'+detail+'</div>':'')+'<div class="ui-sidebar-trailing">'+pin+'</div></article>';
+ return '<article class="ui-list-item ui-sidebar-item '+className+'" '+attributes+'>'+selection+leading+'<div class="ui-sidebar-main memo-item-main"><div class="ui-sidebar-title memo-item-title"><h3 class="'+titleClass+'" title="'+esc(title)+'">'+esc(title)+'</h3></div>'+(meta?'<div class="ui-sidebar-meta memo-meta">'+meta+'</div>':'')+'</div>'+(detail?'<div class="ui-sidebar-detail">'+detail+'</div>':'')+'<div class="ui-sidebar-trailing">'+pin+'</div><span class="ui-sidebar-divider" aria-hidden="true"></span></article>';
 }

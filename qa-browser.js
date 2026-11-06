@@ -1,7 +1,15 @@
+const switchProjectView = require('./scripts/qa-project-view');
 const { chromium } = require('playwright');
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
+
+async function dragProjectAfter(page, source, target) {
+  const destination = page.locator('[data-project-drop="' + target + '"]');
+  const box = await destination.boundingBox();
+  assert(box, 'project drop target is not visible');
+  await page.locator('[data-project-drag="' + source + '"]').dragTo(destination, {targetPosition: {x: Math.min(80, box.width / 2), y: box.height * .8}});
+}
 
 const requestedUrl = process.argv[2];
 const assert = require('node:assert/strict');
@@ -823,7 +831,7 @@ async function testUrl() {
 
   await page.evaluate(() => { const project = projectById('p1'); window.__projectMilestoneFixture = clone(project.milestones); project.milestones.push({ id: 'm2', name: 'DVT 验证', due: '', status: '未开始', criteria: '' }, { id: 'm3', name: '小批试产', due: '', status: '未开始', criteria: '' }); saveLocal(true); });
   await page.click('[data-page="projects"]');
-  await page.click('[data-project-view="detail"]');
+  await switchProjectView(page,'detail');
   await page.waitForSelector('#page-projects.active .project-master-detail', { state: 'visible' });
   assert(await page.locator('.project-master-detail').count() === 1, 'project master-detail workspace missing');
   const projectOverflow = await page.locator('.project-list-panel,.project-detail-scroll').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).overflowY));
@@ -871,10 +879,10 @@ async function testUrl() {
 	  assert(selectedStyle.background !== selectedStyle.panel && selectedStyle.shadow === 'none' && selectedStyle.border !== 'rgb(222, 228, 238)', `selected project lacks the subtle fill, blue border, or unified selection edge: ${JSON.stringify(selectedStyle)}`);
   assert(await page.getByText('里程碑相关任务', { exact: true }).count() === 0, 'project main page still renders milestone-related tasks');
   const selectedBeforeDrag = await page.locator('.project-list-item.selected').getAttribute('data-select-project');
-  await page.locator('[data-project-drag="p1"]').dragTo(page.locator('[data-project-drop="p3"]'), { targetPosition: { x: 80, y: 70 } });
+  await dragProjectAfter(page, 'p1', 'p3');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.projects.join(',') === 'p1,p2,p3', 'cross-group drag changed pinned project order');
-  await page.locator('[data-project-drag="p2"]').dragTo(page.locator('[data-project-drop="p3"]'), { targetPosition: { x: 80, y: 70 } });
+  await dragProjectAfter(page, 'p2', 'p3');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
   assert(saved.order.projects.join(',') === 'p1,p3,p2', 'same-group project drag did not persist the indicated after position');
   assert(await page.locator('.project-list-item.selected').getAttribute('data-select-project') === selectedBeforeDrag, 'project drag changed the selected project');
@@ -883,7 +891,7 @@ async function testUrl() {
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6'))); assert(saved.order.projects.join(',') === favoriteOrder, 'pin toggling rewrote the manual project order');
   assert((await page.locator('[data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop))).join(',') === 'p1,p2,p3', 'newly pinned project did not move into the top section');
   assert(await page.locator('[data-select-project="p2"] .favorite.active').count() === 1, 'project pin button did not show its active state');
-  await page.locator('[data-project-drag="p1"]').dragTo(page.locator('[data-project-drop="p2"]'), { targetPosition: { x: 80, y: 70 } });
+  await dragProjectAfter(page, 'p1', 'p2');
 
   await page.waitForFunction(() => [...document.querySelectorAll('[data-project-drop]')].map(n => n.dataset.projectDrop).join(',') === 'p2,p1,p3');
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('work-cockpit-v6')));
@@ -904,7 +912,7 @@ async function testUrl() {
   await page.waitForSelector('#page-tasks.active');
   const projectHandoffFilter = await page.evaluate(() => taskFilter);
   assert(projectHandoffFilter.query === '' && projectHandoffFilter.type.length === 0 && projectHandoffFilter.status.length === 0 && projectHandoffFilter.project.join(',') === 'p1', `project full-view handoff retained stale filters: ${JSON.stringify(projectHandoffFilter)}`);
-  await page.reload({ waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => !document.documentElement.classList.contains('booting')); await page.click('[data-page="projects"]');await page.click('[data-project-view="detail"]');
+  await page.reload({ waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => !document.documentElement.classList.contains('booting')); await page.click('[data-page="projects"]');await switchProjectView(page,'detail');
   await page.waitForFunction(() => document.querySelector('#page-projects.active')?.querySelectorAll('[data-project-drop]').length === 3);
   const projectOrderAfterReload = await page.locator('#page-projects.active [data-project-drop]').evaluateAll(nodes => nodes.map(node => node.dataset.projectDrop));
   assert(projectOrderAfterReload.join(',') === 'p2,p1,p3', `project pin order did not survive reload: ${projectOrderAfterReload.join(',')}`);

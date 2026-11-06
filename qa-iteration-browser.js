@@ -1,6 +1,7 @@
 const {chromium}=require('playwright');
 const fs=require('node:fs'),http=require('node:http'),path=require('node:path'),assert=require('node:assert/strict');
 const {test,before,after}=require('node:test');
+const switchProjectView=require('./scripts/qa-project-view');
 let browser,server,origin;
 before(async()=>{
  server=http.createServer((req,res)=>{const name=new URL(req.url,'http://localhost').pathname.slice(1)||'index.html';if(!['index.html','vendor/quill-2.0.3/quill.js','vendor/quill-2.0.3/quill.core.css','vendor/sortablejs-1.15.6/Sortable.min.js'].includes(name))return res.writeHead(404).end();res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'text/html');fs.createReadStream(path.join(__dirname,name)).pipe(res)});
@@ -45,4 +46,42 @@ test('today separators paint one centered line with equal gutters; vertical drag
 });
 test('planning divider painting stays inside its hit target and focusing text does not draw a row frame',async t=>{
  const p=await fixture(t);await p.click('[data-page="week"]');await p.locator('[data-week-panel="plan"]').click();await p.evaluate(()=>{uiLayout.weekPlanLeft=.66;saveUiLayout();renderNow()});await p.setViewportSize({width:2560,height:1440});await p.waitForSelector('[data-scoped-planning].ui-resize-divider');const handle=p.locator('[data-scoped-planning]').first();const geometry=await handle.evaluate(n=>{const r=n.getBoundingClientRect(),p=getComputedStyle(n,'::before'),style=getComputedStyle(n);return{position:style.position,width:r.width,line:p.width,overflow:style.overflowX,extra:getComputedStyle(n,'::after').content}});assert.equal(geometry.position,'absolute');assert.equal(geometry.line,'1px');assert.equal(geometry.overflow,'hidden');assert(geometry.width<=12);assert(['none','normal'].includes(geometry.extra));await p.locator('#page-week [data-overview-next]').first().focus();assert.equal(await p.locator('.task-row').first().evaluate(n=>getComputedStyle(n).boxShadow),'none');
+});
+
+test('today folds on release, restores its previous width, and preserves the mounted note editor',async t=>{
+ const p=await fixture(t),note=p.locator('.quick-note-editor .ql-editor');
+ await note.fill('收起期间保留这份速记');
+ await p.evaluate(()=>{window.foldNote=document.querySelector('.quick-note-editor');window.foldQuill=quillFor(window.foldNote)});
+ const ratio=await p.evaluate(()=>uiLayout.todayLeft),before=await p.locator('.today-action-stack').boundingBox();
+ await p.click('[data-today-fold="right"]');assert.equal(await p.locator('.today-sidebar-stack').isVisible(),false);assert((await p.locator('.today-action-stack').boundingBox()).width>before.width+100);
+ await p.click('[data-today-fold="right"]');assert.equal(await p.evaluate(()=>uiLayout.todayLeft),ratio);
+ const grid=await p.locator('#todayExecution').boundingBox(),handle=await p.locator('#todayResizer').boundingBox(),y=handle.y+35;
+ await p.mouse.move(handle.x+handle.width/2,y);await p.mouse.down();await p.mouse.move(grid.x+grid.width*.08,y,{steps:8});
+ assert.equal(await p.locator('#todayExecution').getAttribute('data-collapsed'),'');assert.equal(await p.locator('.today-fold-preview').isVisible(),true);assert.equal(await p.locator('.today-action-stack').isVisible(),true);
+ await p.mouse.up();assert.equal(await p.locator('#todayExecution').getAttribute('data-collapsed'),'left');assert.equal(await p.evaluate(()=>uiLayout.todayLeft),ratio);
+ await p.click('[data-today-fold="left"]');assert.equal(await note.innerText(),'收起期间保留这份速记');assert.equal(await p.evaluate(()=>window.foldNote===document.querySelector('.quick-note-editor')&&window.foldQuill===quillFor(window.foldNote)),true);
+ await p.setViewportSize({width:900,height:700});assert.equal(await p.locator('#todayResizer').isVisible(),true);
+ await p.click('[data-today-fold="right"]');await p.setViewportSize({width:390,height:844});await p.waitForFunction(()=>document.querySelector('#todayExecution').dataset.collapsed==='');
+ assert.equal(await p.locator('.today-action-stack').isVisible(),true);assert.equal(await p.locator('.today-sidebar-stack').isVisible(),true);assert.equal(await p.locator('[data-today-fold="right"]').isVisible(),false);
+});
+
+test('review keeps three clear columns, grows results and confines narrow horizontal scrolling to the table',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{state.projects=[normalizeProject({id:'p',name:'复测项目'})];state.tasks=[normalizeTask({id:'r',title:'当周复测事项',project:'p',status:'等待',week:true,nextAction:'确认复测资料'})];state.weeks={};ensureCurrentWeek();captureCurrentWeek();selectedWeekKey=currentWeekKey();ui.weekPanel='review';navigate('week')});
+ await p.locator('[data-week-result="r"]').waitFor();assert.deepEqual(await p.locator('.week-comparison-table thead th').allTextContents(),['本周事项','状态','实际结果']);
+ assert.equal(await p.locator('.week-next-details').getAttribute('open'),null);assert.equal(await p.locator('.week-outcomes.is-empty').count(),1);
+ const result=p.locator('[data-week-result="r"]');const compact=(await result.boundingBox()).height;await result.fill('第一行结果\n第二行结论\n第三行补充\n第四行事项');assert((await result.boundingBox()).height>compact+35);
+ const widths=await p.locator('.week-comparison-table thead th').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().width));assert(widths[2]>widths[0]);assert(widths[1]<120);
+ await p.setViewportSize({width:390,height:844});const narrow=await p.locator('.week-comparison-scroll').evaluate(n=>({width:n.clientWidth,scroll:n.scrollWidth,header:getComputedStyle(n.querySelector('thead')).display,outer:document.documentElement.scrollWidth-document.documentElement.clientWidth}));assert(narrow.scroll>narrow.width);assert.equal(narrow.header,'table-header-group');assert(narrow.outer<=1,JSON.stringify(narrow));
+ await p.setViewportSize({width:1920,height:1080});await p.evaluate(()=>{state.weeks['2026-10-12']=clone(currentWeek());state.weeks['2026-10-12'].closedAt='2026-10-18';taskById('r').title='后来改名';taskById('r').status='已完成';projectById('p').name='后来项目';selectedWeekKey='2026-10-12';renderNow()});
+ assert.match(await p.locator('.week-comparison').innerText(),/当周复测事项/);assert.match(await p.locator('.week-comparison').innerText(),/复测项目/);assert.doesNotMatch(await p.locator('.week-comparison').innerText(),/后来改名|后来项目/);assert.equal(await result.getAttribute('readonly'),'');assert.match(await result.inputValue(),/第四行事项/);
+});
+
+test('project overview stays concise and editable in narrow cards; reminder counts filter the single detail list',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{state.projects=[normalizeProject({id:'p',name:'样机项目'})];state.tasks=[normalizeTask({id:'a',title:'验证当前方案',project:'p',status:'进行中',nextAction:'确认复测条件',notes:'<p>这段长备注只在详情中查看</p>'}),normalizeTask({id:'w',title:'等待供应商资料',project:'p',status:'等待',followup:todayKey()}),normalizeTask({id:'done',title:'已经完成的复测',project:'p',status:'已完成',completed:todayKey()})];state.order.projects=['p'];selectedProjectId='p';ui.projectView='overview';ui.projectOverviewFilter='open';navigate('projects')});
+ await p.locator('[data-overview-next="a"]').waitFor();assert.equal(await p.locator('.project-view-nav').count(),0);assert.doesNotMatch(await p.locator('.project-overview-groups').innerText(),/这段长备注|健康/);assert.equal(await p.locator('.project-overview-tasks .task-context-source').count(),0);
+ assert.equal(await p.locator('[data-overview-next="a"]').getAttribute('placeholder'),'下一步做什么…');assert((await p.locator('[data-overview-next="a"]').boundingBox()).width>=400);
+ await p.setViewportSize({width:390,height:844});await p.waitForFunction(()=>document.querySelector('.ui-planning-row.is-editor-stacked'));assert.equal(await p.locator('[data-overview-next="a"]').isVisible(),true);assert((await p.locator('[data-overview-next="a"]').boundingBox()).width>=160);
+ await p.setViewportSize({width:1920,height:1080});await switchProjectView(p,'detail');assert.equal(await p.getByRole('button',{name:'设置当前阶段',exact:true}).count(),1);assert.equal(await p.locator('.project-brief [data-open-task]').count(),0);assert.equal(await p.locator('.project-recent').getAttribute('open'),null);assert.equal(await p.locator('.overview-list + .project-recent').count(),1);
+ await p.getByRole('button',{name:'查看等待事项，1项',exact:true}).click();await p.waitForFunction(()=>document.querySelectorAll('[data-project-task]').length===1);assert.equal(await p.locator('[data-project-task]').getAttribute('data-project-task'),'w');await p.click('[data-clear-project-attention]');await p.waitForFunction(()=>document.querySelectorAll('[data-project-task]').length===2);
+ const projects=await p.locator('.project-list-item.ui-sidebar-item .ui-sidebar-divider').count();assert.equal(projects,1);await p.evaluate(()=>{state.memos=[normalizeMemo({id:'m1',title:'备忘录一'}),normalizeMemo({id:'m2',title:'备忘录二'}),normalizeMemo({id:'m3',title:'备忘录三'})];navigate('memos')});await p.locator('.memo-item.ui-sidebar-item').first().waitFor();assert.equal(await p.locator('.memo-item .ui-sidebar-divider').count(),3);
 });

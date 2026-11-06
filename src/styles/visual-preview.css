@@ -31,7 +31,8 @@ html[data-visual-preview] body:is(.memo-workspace,.project-workspace) .app{heigh
 :root[data-calm-today] .favorite-link i{background:var(--muted-soft);width:5px;height:5px}
 :root[data-calm-today] .sidebar-note{border-color:var(--line);font-size:11px;line-height:1.7;color:var(--muted)}
 :root[data-calm-today] .sidebar-note b{font-weight:500;color:var(--text)}
-:root[data-calm-today] .main{grid-template-rows:64px minmax(0,1fr)}
+:root[data-calm-today] .main{grid-template-columns:minmax(0,1fr);grid-template-rows:64px minmax(0,1fr)}
+:root[data-calm-today] .global-search{min-width:0}
 :root[data-calm-today] .topbar{background:var(--panel);border-color:var(--line);padding:0 32px;gap:16px}
 :root[data-calm-today] .global-search input{background:var(--panel);border-color:var(--line);border-radius:7px;height:34px;color:var(--ink);font-size:12px}
 :root[data-calm-today] .global-search kbd{background:transparent;border-color:var(--line);color:var(--muted)}

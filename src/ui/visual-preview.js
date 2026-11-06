@@ -37,7 +37,7 @@ function syncVisualPreview(){
  root.toggleAttribute("data-calm-page",visualPreview.mode==="new"&&currentPage==="today");
  root.dataset.previewFrame=visualPreview.frame;
  root.style.setProperty("--preview-radius",visualPreview.radius+"px");
- root.style.setProperty("--preview-row-height",visualPreview.density==="compact"?"66px":"78px");
+ root.style.setProperty("--preview-row-height",visualPreview.density==="compact"?"52px":"60px");
  $$("[data-preview-mode]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.previewMode===visualPreview.mode)));
  let note=$("#uiPreviewNote");if(note)note.textContent="项目 · 任务 · 工作记录";
  $("#previewRadiusValue")?.replaceChildren(String(visualPreview.radius));
