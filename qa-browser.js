@@ -612,8 +612,8 @@ async function testUrl() {
   await page.click('.memo-editor-body [data-command="divider"]');
   let richDividerLocator = quillRoot.locator('.rich-divider').first();
   assert(await richDividerLocator.count() === 1, 'rich-text divider toolbar button did not insert a divider');
-  let dividerStyle = await richDividerLocator.evaluate(node => ({ opacity:getComputedStyle(node).opacity, align:getComputedStyle(node.querySelector('.rich-divider-label')).textAlign }));
-  assert(dividerStyle.opacity === '0.7' && dividerStyle.align === 'center', `rich-text divider did not use the required 70% centered style: ${JSON.stringify(dividerStyle)}`);
+  let dividerStyle = await richDividerLocator.evaluate(node => ({ opacity:getComputedStyle(node).opacity, color:getComputedStyle(node,'::before').backgroundColor, align:getComputedStyle(node.querySelector('.rich-divider-label')).textAlign }));
+  assert(dividerStyle.opacity === '1' && dividerStyle.color === 'rgb(223, 227, 234)' && dividerStyle.align === 'center', `rich-text divider did not use the reference gray centered style: ${JSON.stringify(dividerStyle)}`);
   await richDividerLocator.dblclick();
   const dividerLabel = quillRoot.locator('.rich-divider-label[contenteditable="true"]');
   await dividerLabel.evaluate(label => { const data=new DataTransfer();data.setData('text/plain','阶段总结');label.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true})); });
