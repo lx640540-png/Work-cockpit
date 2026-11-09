@@ -539,7 +539,7 @@ test('rich text: highlighter icons retain size and selection across colors, them
  }
  for(const [width,theme] of [[1600,'light'],[760,'dark']]){
   await page.setViewportSize({width,height:1000});await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
-  if(width===760)await page.click('[data-task-focus]');
+  if(width===760){if(await page.locator('#taskSupportPanel').isVisible())await page.click('[data-task-support-close]');await page.click('[data-task-focus]')}
   const sizes=await page.locator('.task-notes-editor .rich-highlight-button').evaluateAll(nodes=>nodes.map(n=>{const b=n.getBoundingClientRect(),s=n.querySelector('svg').getBoundingClientRect();return[b.width,b.height,s.width,s.height,s.left>=b.left&&s.right<=b.right&&s.top>=b.top&&s.bottom<=b.bottom]}));
   assert.deepEqual(sizes,Array(3).fill([29,29,18,18,true]));
   assert.equal(await page.locator('.task-notes-editor .rich-toolbar').evaluate(n=>n.scrollWidth<=n.clientWidth),true,'toolbar overflowed');
