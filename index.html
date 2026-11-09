@@ -590,6 +590,9 @@ mark{background:#fff0a8;color:#523b00;border-radius:3px;padding:0 .04em}
 @media(max-width:820px) and (max-height:600px){#workJournal{grid-template-rows:auto minmax(0,auto) minmax(64px,1fr) auto}}
 
 :root[data-theme="dark"] .journal-calendar-grid button.selected:not(.week-selected){color:#0d1522}
+
+/* Separate every date heading from its editable daily record. */
+#workJournal .journal-date-row{border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}
 #localSaveBanner{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1800;padding:12px 18px;background:var(--panel);border:1px solid var(--red);border-radius:12px;color:var(--red);box-shadow:var(--shadow);max-width:90vw}#localSaveBanner[hidden]{display:none}#localSaveBanner button{margin-left:12px;padding:6px;color:var(--blue);border:1px solid var(--line);background:var(--soft);border-radius:7px}.attachment-large-preview{border:0;background:transparent;color:var(--muted);cursor:zoom-in;width:100%;display:grid;justify-items:center;padding:8px}.attachment-large-preview small{margin-top:6px}.attachment-thumb{cursor:zoom-in}.image-viewer{width:min(1100px,94vw);height:min(800px,90dvh);max-height:90dvh;padding:0;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:14px}.image-viewer[open]{display:flex;flex-direction:column}.image-viewer header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}.image-viewer header b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.image-viewer header div{display:flex;flex:none;gap:5px}.image-viewer button{border:1px solid var(--line);border-radius:7px;padding:6px 10px;background:var(--soft);color:var(--text)}.image-viewer-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:16px;text-align:center}.image-viewer-body img{display:block;max-width:none;max-height:none;margin:auto}.search-order-note{font-size:12px}#page-tasks:has(#taskSearch:not([value=""])) [data-drag-handle="all"]{opacity:.25}
 @media(max-width:600px){.image-viewer header{flex-wrap:wrap}.image-viewer header div{width:100%;justify-content:flex-end}}
 /* Transient feedback must never cover the drawer's copy action. */
@@ -1669,6 +1672,171 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 .image-viewer .image-viewer-body{align-items:flex-start;justify-content:flex-start;position:relative}
 .image-viewer .image-viewer-body>img{margin:auto;flex:none;max-width:none;height:auto}
 @media(max-width:600px){.image-viewer header{padding:10px}.image-viewer header button{padding:5px}.rich-image-tools button{padding:0 4px}}
+.rich-editor.ql-container .ql-editor [data-rich-depth]{margin-left:calc(var(--rich-fold-depth, 0) * 20px)!important}
+.rich-editor.ql-container .ql-editor .rich-fold-title{position:relative;padding-left:24px!important;min-height:1.5em}
+.ql-editor .rich-fold-hidden{display:none!important}
+.ql-editor .rich-fold-arrow{position:absolute;left:0;top:0;width:22px;height:1.5em;padding:0;border:0;background:transparent;color:#64748b;cursor:pointer;font-size:inherit;line-height:inherit;pointer-events:auto!important}
+.ql-editor .rich-fold-arrow:hover{background:#e8edf3;border-radius:4px;color:#334155}
+.ql-editor .rich-fold-arrow:focus-visible{outline:2px solid #6096ce;outline-offset:1px}
+.rich-toolbar [data-command^="fold"]{white-space:nowrap;font-size:12px;padding-inline:6px}
+.rich-editor.quick-note-editor.ql-container .ql-editor :is(p,li).rich-fold-title{padding-left:56px!important}
+.quick-note-editor .ql-editor :is(p,li).rich-fold-title>.rich-fold-arrow{left:28px}
+.rich-editor[data-empty="false"] .ql-editor.ql-blank:before{display:none}
+@media(max-width:720px){.rich-editor.ql-container .ql-editor [data-rich-depth]{margin-left:calc(var(--rich-fold-depth, 0) * 12px)!important}}
+#taskDialog[data-task-layout]{border-radius:13px;font-size:13px;max-height:calc(100dvh - 12px)}
+#taskDialog[data-task-layout]>#taskForm{height:100%;max-height:100%;container-type:inline-size;container-name:task-detail}
+#taskDialog[data-task-layout] #taskEditor{display:grid;position:relative;gap:0;padding:0;min-height:0;height:auto;max-height:none;overflow:hidden;align-content:stretch}
+#taskDialog[data-task-layout] #taskEditor>.task-column{grid-column:auto;grid-row:auto;height:100%;min-height:0;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:0}
+#taskDialog[data-task-layout] #taskEditor>.task-content-column{overflow-x:hidden}
+#taskDialog[data-task-layout] #taskEditor>.attachment-column{position:relative;border-left:1px solid var(--line);border-top:0;overflow:hidden;background:var(--panel)}
+#taskDialog[data-task-layout] #taskEditor>.attachment-column[hidden]{display:none!important}
+.task-editor-inner{width:100%;margin:0 auto}
+.task-support-scroll{height:100%;overflow-y:auto;overscroll-behavior:contain}
+.task-name-field{gap:6px}.task-name-field>label{font-size:12px;color:var(--muted);font-weight:400}
+.task-support-shortcuts{display:flex;gap:6px;flex-wrap:wrap}
+.task-support-shortcuts button{border:1px solid var(--line);border-radius:7px;font:inherit}
+.task-support-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:700}
+.task-support-heading button{width:30px;height:30px;border:0;background:transparent;color:var(--muted);font-size:19px;border-radius:7px}
+#taskDialog[data-task-layout] .task-support-content{overflow:visible;height:auto;min-height:0;padding:0}
+#taskDialog[data-task-layout] .task-support-content>[hidden]{display:none!important}
+.task-notes-field .obsidian-heading{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.task-notes-field .obsidian-summary{margin-left:auto;display:flex;gap:8px}
+.task-focus-toggle{font:inherit;font-size:11px;color:var(--blue);border:0;background:transparent;padding:2px 0;white-space:nowrap}
+#taskDialog[data-task-layout] .task-notes-editor:not(.rich-expanded){border:1px solid var(--line);overflow:visible;min-height:0}
+#taskDialog[data-task-layout] .task-notes-editor:not(.rich-expanded)>.rich-editor{height:auto!important;min-height:0!important;max-height:none;overflow:visible!important}
+#taskDialog[data-task-layout] .task-notes-editor:not(.rich-expanded)>.rich-editor>.ql-editor{height:auto!important;max-height:none;overflow:visible!important;overflow-wrap:anywhere}
+#taskDialog[data-task-layout] .task-notes-editor>.rich-toolbar{min-height:43px;gap:3px;flex-wrap:wrap;background:var(--panel);border-radius:10px 10px 0 0}
+#taskDialog[data-task-layout] .task-notes-editor>.rich-toolbar button{font-size:11.5px;min-width:26px;height:27px;font-weight:400;padding-inline:6px}
+#taskDialog[data-task-layout] .task-notes-editor>.rich-toolbar>.rich-expand-button{display:none}
+#taskDialog[data-task-layout] .task-notes-editor.rich-expanded>.rich-toolbar>.rich-expand-button{display:inline-flex}
+#taskDialog[data-task-layout] .modal-actions{align-items:center;gap:9px}
+#taskDialog[data-task-layout] .modal-actions>.btn{height:auto;min-height:34px;padding:9px 12px;font-size:12px;border-radius:7px}
+#taskDialog .checklist-section{padding:0!important;border:1px solid color-mix(in srgb,var(--blue) 17%,var(--line));border-radius:9px;background:var(--panel);overflow:hidden;min-height:0}
+#taskDialog .checklist-dropdown-head{width:100%;display:flex;justify-content:flex-start;align-items:center;gap:10px;min-height:40px;height:auto;padding:10px 14px;border:0;border-radius:0;background:transparent;color:var(--blue);font:inherit;font-size:12px;text-align:left;cursor:pointer}
+.checklist-progress,.checklist-chevron{color:var(--muted);font-size:11px}
+#draftChecklistContent[hidden]{display:none!important}
+#taskDialog #draftChecklist{gap:0;padding:0}
+#taskDialog #draftChecklist .checklist-item{margin:0;min-height:42px;padding:5px 12px 5px 4px;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;gap:6px}
+#taskDialog #draftChecklist .checklist-item>.checklist-text{color:var(--text)}
+#taskDialog #draftChecklist .checklist-item.is-done>.checklist-text{text-decoration:line-through;color:var(--muted)}
+.checklist-add-bottom{width:100%;border:0;border-top:1px solid var(--line);background:transparent;color:var(--blue);font:inherit;font-size:12px;text-align:left;padding:10px 14px;min-height:38px}
+.checklist-add-bottom:hover{background:var(--soft)}
+/* Single double-column editor based on the supplied v4.3 layout. */
+#taskDialog[data-task-layout=d]{--line:#e6e8ee;--soft:#f7f8fa;--blue:#2769ea;--text:#292d35;--ink:#181b22;--muted:#7a818c;--panel:#fff;width:min(1180px,calc(100vw - 32px));height:min(1000px,calc(100dvh - 32px));margin:16px auto}
+#taskDialog[data-task-layout=d] .modal-head{height:52px;min-height:52px;padding:0 14px 0 22px;gap:12px}
+#taskDialog[data-task-layout=d] .modal-head h2{font-size:16px;font-weight:600}
+#taskDialog[data-task-layout=d] .modal-actions{height:58px;padding:0 18px}
+#taskDialog[data-task-layout=d] #taskEditor{grid-template-columns:minmax(0,1fr)}
+#taskDialog[data-task-layout=d][data-task-support-open=true] #taskEditor{grid-template-columns:minmax(0,1fr) 300px}
+#taskDialog[data-task-layout=d] #taskEditor>.task-properties-column{display:none}
+#taskDialog[data-task-layout=d] #taskEditor>.task-content-column{padding:12px 22px 14px}
+#taskDialog[data-task-layout=d] .task-editor-inner{max-width:none}
+.task-v43-title-row[hidden],.task-v43-chips[hidden],.task-v43-time[hidden]{display:none!important}
+.task-v43-title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;margin-bottom:10px}
+#taskDialog[data-task-layout=d] .task-name-field{flex:1;min-width:min(260px,100%);margin:0}
+#taskDialog[data-task-layout=d] .task-name-field>label{font-size:12px;margin-bottom:2px}
+#taskDialog[data-task-layout=d] .title-input{height:40px;border:0;border-bottom:1px solid transparent;border-radius:0;padding:2px 0;font-size:20px;font-weight:600}
+#taskDialog[data-task-layout=d] .title-input:hover{border-bottom-color:var(--line)}
+#taskDialog[data-task-layout=d] .title-input:focus{border-bottom-color:#a7c4fc;box-shadow:none}
+#taskDialog[data-task-layout=d] .task-support-shortcuts{gap:6px;margin:0 0 4px}
+#taskDialog[data-task-layout=d] .task-support-shortcuts button{height:30px;min-height:30px;padding:0 10px;font-size:12px;border-radius:7px;background:#f9fafc;color:#5d6777}
+#taskDialog[data-task-layout=d] .task-support-shortcuts button.active{border-color:#c9dbff;background:#eef4ff;color:#2769ea}
+.task-v43-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+#taskDialog[data-task-layout=d] .task-v43-chips>.field{display:flex;flex-direction:row;align-items:center;gap:6px;min-width:0;max-width:100%;height:32px;padding:0 4px 0 10px;border:1px solid var(--line);border-radius:8px;background:#fbfcfe;margin:0!important}
+#taskDialog[data-task-layout=d] .task-v43-chips .field>label{font-size:12px;font-weight:400;color:var(--muted);white-space:nowrap}
+#taskDialog[data-task-layout=d] .task-v43-chips .hover-select{min-width:65px;width:auto;max-width:240px}
+#taskDialog[data-task-layout=d] .task-v43-chips .hover-select-trigger{height:30px;min-height:30px;border:0;background:transparent;padding:0 6px;gap:8px;border-radius:0;font-size:13px;font-weight:400;box-shadow:none}
+.task-v43-time{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:9px 12px;margin-bottom:10px}
+#taskDialog[data-task-layout=d] .task-v43-time>.field{width:124px;gap:4px;min-width:0;margin:0}
+#taskDialog[data-task-layout=d] .task-v43-time .field>label{font-size:11.5px;font-weight:400;color:var(--muted);line-height:1.4}
+#taskDialog[data-task-layout=d] .task-v43-time .field>label small{display:none}
+#taskDialog[data-task-layout=d] .task-v43-time input:not([type=checkbox]){height:34px;min-height:34px;width:100%;padding:0 8px;border-radius:8px;background:#fff;font-size:12px}
+.task-v43-flags{margin-left:auto;display:flex;flex-direction:column;gap:6px;font-size:12.5px;padding-bottom:3px}
+#taskDialog[data-task-layout=d] .task-v43-flags>label{display:flex;align-items:center;gap:6px;margin:0!important;font-size:12px;font-weight:400}
+#taskDialog[data-task-layout=d] .task-v43-flags input[type=checkbox]{width:15px;height:15px;accent-color:#2769ea}
+#taskDialog[data-task-layout=d] .task-record-section{padding:0;margin:0;border:0;background:none}
+#taskDialog[data-task-layout=d] .task-record-section .task-section-title{margin:0;font-size:11px}
+#taskDialog[data-task-layout=d] .task-record-section .task-section-title>span{display:none}
+#taskDialog[data-task-layout=d] .task-next-field{padding:8px 12px;border:1px solid #c9dbff;border-radius:10px;background:#eef4ff;margin:0 0 10px;gap:5px}
+#taskDialog[data-task-layout=d] .task-next-field>label{color:#2769ea;font-size:12.5px;font-weight:600}
+#taskDialog[data-task-layout=d] .task-next-field textarea{min-height:42px;padding:8px 11px;font-size:13.5px;line-height:1.5;border-color:#c8dafc;background:#fff;border-radius:8px}
+#taskDialog[data-task-layout=d] .task-notes-field{margin-top:0!important}
+#taskDialog[data-task-layout=d] .task-notes-field .obsidian-heading{margin-bottom:5px}
+#taskDialog[data-task-layout=d] .task-notes-editor{border-radius:10px}
+#taskDialog[data-task-layout=d] .task-notes-editor:not(.rich-expanded)>.rich-editor>.ql-editor{min-height:300px!important;padding:14px 18px 40px;font-size:13.5px;line-height:1.8}
+#taskDialog[data-task-layout=d] .task-notes-editor>.rich-toolbar{border-bottom:1px solid #e9ecf0;padding:5px 8px}
+#taskDialog[data-task-layout=d] .task-support-scroll{padding:14px}
+#taskDialog[data-task-layout=d] .task-support-heading{font-size:13px;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:14px}
+#taskDialog[data-task-layout=d] .task-support-content>.task-section{border:0;padding:0;background:transparent}
+#taskDialog[data-task-layout=d] .checklist-resizer{display:none}
+#taskDialog[data-task-layout] .checklist-section{border:1px solid #f0dad7;background:#fff4f3;border-radius:10px}
+#taskDialog[data-task-layout] .checklist-dropdown-head{color:#333842;background:transparent}
+#taskDialog[data-task-layout] #draftChecklist .checklist-item{background:transparent;border-top-color:#f0e4e2}
+#taskDialog[data-task-layout] #draftChecklist .checklist-item>.checklist-text{background:transparent}
+#taskDialog[data-task-layout] .checklist-add-bottom{border-top-color:#f0e4e2}
+#taskDialog[data-task-layout=d] .checklist-section{margin:0 0 14px!important}
+#taskDialog[data-task-layout=d] #draftChecklist .checklist-item{padding:7px 8px 7px 2px;min-height:42px}
+/* One soft sage green for existing and new annotations, including saved notes. */
+.rich-highlight-green{background:#dcebd9}
+.rich-highlight-button.green{--highlight-swatch:#7caa72}
+:root[data-theme=dark] .rich-highlight-green{background:#2b4027;color:#e0eddb}
+/* Document dividers use the reference's gray, independent of text color. */
+.rich-divider{opacity:1;color:var(--muted)}
+.rich-divider:before,.rich-divider:after{height:1px;background:#dfe3ea}
+.rich-divider.selected:before,.rich-divider.selected:after{height:1px;background:var(--blue)}
+.rich-tool-separator{background:#e9ecf0}
+.hover-select-trigger>b[aria-hidden]{font-size:16px;line-height:1;flex:none}
+.ql-editor .rich-fold-arrow{font-size:1.15em;width:24px}
+.checklist-chevron{font-size:14px}
+:root[data-theme=dark] #taskDialog[data-task-layout=d]{--line:#344050;--soft:#1d2735;--panel:#111c2e;--text:#dce3ec;--ink:#f1f5fa;--muted:#a4afbd}
+:root[data-theme=dark] #taskDialog[data-task-layout=d] :is(.task-v43-chips>.field,.task-v43-time input:not([type=checkbox])){background:var(--panel)}
+:root[data-theme=dark] #taskDialog[data-task-layout] .checklist-section{background:#322322;border-color:#65433f}
+:root[data-theme=dark] .rich-divider:before,:root[data-theme=dark] .rich-divider:after{background:#465365}
+@container task-detail (max-width:880px){
+ #taskDialog[data-task-layout=d] .task-v43-time>.field{width:calc(50% - 6px)}
+ #taskDialog[data-task-layout=d] .task-v43-flags{margin-left:0}
+ #taskDialog[data-task-layout=d] .modal-head{height:auto;min-height:52px;flex-wrap:wrap;padding:8px 14px}
+ #taskDialog[data-task-layout=d] #taskEditor>.task-content-column{padding:12px 15px}
+}
+@media(max-width:880px){#taskDialog[data-task-layout=d]{width:100vw;height:100dvh;max-height:100dvh;margin:0;border-radius:0}}
+:root[data-calm-today] #taskDialog[data-task-layout] .checklist-section{background:#fff4f3!important;border:1px solid #f0dad7;border-radius:10px;padding:0!important}
+#taskDialog[data-task-layout=d] .task-name-field .title-input{height:40px;padding:2px 0;border:0;border-bottom:1px solid transparent;border-radius:0;font-size:20px;background:transparent}
+#taskDialog[data-task-layout=d] .task-name-field .title-input:focus{border-bottom-color:#a7c4fc}
+#taskDialog[data-task-layout=d] .modal-head .eyebrow{display:none}
+#taskDialog[data-task-layout=d] .modal-actions>[data-close=taskDialog]{display:none}
+#taskDialog[data-task-layout=d] #deleteTaskButton{order:1}
+#taskDialog[data-task-layout=d] .modal-actions>span[style]{order:2}
+#taskDialog[data-task-layout=d] #taskAutosaveStatus{order:3}
+#taskDialog[data-task-layout=d] #saveTaskButton{order:4}
+:root[data-theme=dark][data-calm-today] #taskDialog[data-task-layout] .checklist-section{background:#322322!important;border-color:#65433f}
+
+#taskDialog[data-task-layout=d].task-journal-docked{margin:0;width:var(--task-available-width);height:calc(100dvh - 12px)}
+#taskDialog[data-task-layout=d].task-journal-compact{margin:0;height:100dvh}
+
+/* Native-select style chevron and compact fold toolbar symbols. */
+.hover-select-trigger .select-chevron{width:12px;height:8px;flex:none;display:block;pointer-events:none}
+.rich-toolbar .rich-fold-tool{display:inline-flex;align-items:center;justify-content:center;min-width:29px;width:29px;padding:0}
+.rich-fold-tool .fold-tool-icon{display:block;flex:none;pointer-events:none;width:13px;height:13px}
+.rich-fold-tool.large .fold-tool-icon{width:18px;height:18px}
+#taskDialog[data-task-layout=d] .task-v43-flags{margin-left:0;padding:0;align-self:center}
+#taskDialog[data-task-layout=d] .task-v43-time>.task-record-section{margin-left:auto;align-self:center;flex:none}
+#taskDialog[data-task-layout=d] .task-v43-time>.task-record-section .task-section-title{padding:0;border:0}
+/* Shared editor shells paint their own intact perimeter above child backgrounds. */
+.editor-box,.memo-editor-body{position:relative}
+.editor-box:after,.memo-editor-body:after{content:"";position:absolute;inset:-1px;z-index:3;pointer-events:none;border:1px solid var(--line);border-radius:inherit}
+.editor-box>.rich-toolbar,.memo-editor-body>.rich-toolbar{border-top-left-radius:inherit;border-top-right-radius:inherit}
+.editor-box>.rich-editor,.memo-editor-body>.rich-editor{border-bottom-left-radius:inherit;border-bottom-right-radius:inherit}
+.rich-toolbar [data-command=unfold][hidden]{display:none!important}
+.rich-soft-break{white-space:pre-wrap}
+/* Match keyboard focus to the app instead of the browser's black outline. */
+#taskDialog[data-task-layout] button:focus{outline:none}
+#taskDialog[data-task-layout] button:focus-visible{outline:1px solid var(--blue);outline-offset:2px;box-shadow:none}
+@container task-detail (max-width:880px){
+ #taskDialog[data-task-layout] #taskEditor{grid-template-columns:minmax(0,1fr)!important}
+ #taskDialog[data-task-layout] #taskEditor>.attachment-column{position:absolute;z-index:4;top:0;right:0;bottom:0;width:min(85%,330px);height:100%;background:var(--panel);box-shadow:-6px 0 30px #172d401a}
+}
+
+#taskDialog[data-task-layout] .task-notes-editor>.rich-toolbar .rich-highlight-button{padding:0;width:29px;min-width:29px;height:29px}
 </style>
 </head>
 <body>
@@ -2371,10 +2539,10 @@ function uiSidebarItem({className="",attributes="",title="",titleClass="",leadin
 }
 function richHighlightButton(color,label){return'<button type="button" class="rich-highlight-button '+color+'" data-command="highlight'+color[0].toUpperCase()+color.slice(1)+'" data-tip="'+label+'色高亮；再次点击清除" aria-label="'+label+'色高亮" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 12 6-8 5 4-6 8-5-4Zm0 0-3 5 4 1 4-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path class="rich-highlight-swatch" d="M3 20h18v3H3z"/></svg></button>'}
 function toolbar(){
- return'<div class="rich-toolbar"><div class="rich-tool-group rich-heading-tools" aria-label="标题层级"><button type="button" data-command="paragraph" data-tip="正文（Alt+3）">正文</button><button type="button" data-command="heading2" data-tip="二级标题（Alt+1）">H2</button><button type="button" data-command="heading3" data-tip="三级标题（Alt+2）">H3</button></div><span class="rich-tool-separator" aria-hidden="true"></span><button type="button" data-command="bold" data-tip="加粗（Ctrl/Cmd+B）">B</button><button type="button" data-command="underline" data-tip="下划线（Ctrl/Cmd+U）"><u>U</u></button><div class="rich-tool-group rich-highlight-tools" aria-label="文字高亮">'+richHighlightButton('yellow','黄')+richHighlightButton('green','绿')+richHighlightButton('blue','蓝')+'</div><span class="rich-tool-separator" aria-hidden="true"></span><button type="button" data-command="insertUnorderedList" data-tip="项目符号列表；选中多行可批量转换（- 加空格）">•</button><button type="button" data-command="insertOrderedList" data-tip="编号列表；选中多行可批量转换（1. 加空格）">1.</button><button type="button" data-command="divider" data-tip="插入分割线（-- 加空格）；双击可编辑文字">—</button><button type="button" data-command="outdent" data-tip="减少段落或列表缩进（列表中 Shift+Tab）">←</button><button type="button" data-command="indent" data-tip="增加段落或列表缩进（列表中 Tab）">→</button><button type="button" data-command="removeFormat" data-tip="清除所选文字格式">清除格式</button><button type="button" class="rich-expand-button" data-command="expand" data-tip="展开阅读与编辑" aria-label="展开阅读与编辑" aria-pressed="false">⛶</button></div>';
+ return'<div class="rich-toolbar"><div class="rich-tool-group rich-heading-tools" aria-label="标题层级"><button type="button" data-command="paragraph" data-tip="正文（Alt+3）">正文</button><button type="button" data-command="heading2" data-tip="二级标题（Alt+1）">H2</button><button type="button" data-command="heading3" data-tip="三级标题（Alt+2）">H3</button></div><span class="rich-tool-separator" aria-hidden="true"></span><button type="button" data-command="bold" data-tip="加粗（Ctrl/Cmd+B）">B</button><button type="button" data-command="underline" data-tip="下划线（Ctrl/Cmd+U）"><u>U</u></button><div class="rich-tool-group rich-highlight-tools" aria-label="文字高亮">'+richHighlightButton('yellow','黄')+richHighlightButton('green','绿')+richHighlightButton('blue','蓝')+'</div><span class="rich-tool-separator" aria-hidden="true"></span><button type="button" data-command="insertUnorderedList" data-tip="项目符号列表；选中多行可批量转换（- 加空格）">•</button><button type="button" data-command="insertOrderedList" data-tip="编号列表；选中多行可批量转换（1. 加空格）">1.</button><button type="button" class="rich-fold-tool small" aria-label="折叠文本" data-command="foldText" data-tip="折叠文本：当前行作摘要；选中多行时其余行作内容。保留正文和层级"><svg class="fold-tool-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 4 13.5 4 8 13Z" fill="currentColor"/></svg></button><button type="button" class="rich-fold-tool large" aria-label="折叠标题" data-command="foldHeading" data-tip="折叠标题：当前行作折叠标题；正文空行按 Enter 退出折叠。保留正文和层级"><svg class="fold-tool-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 4 13.5 4 8 13Z" fill="currentColor"/></svg></button><button type="button" data-command="unfold" data-tip="取消当前折叠结构，保留全部内容" aria-label="取消折叠" hidden>取消折叠</button><button type="button" data-command="divider" data-tip="插入分割线（-- 加空格）；双击可编辑文字">—</button><button type="button" data-command="outdent" data-tip="减少段落或列表缩进（列表中 Shift+Tab）">←</button><button type="button" data-command="indent" data-tip="增加段落或列表缩进（列表中 Tab）">→</button><button type="button" data-command="removeFormat" data-tip="清除所选文字格式">清除格式</button><button type="button" class="rich-expand-button" data-command="expand" data-tip="展开阅读与编辑" aria-label="展开阅读与编辑" aria-pressed="false">⛶</button></div>';
 }
 function resizableRichBox(key,content,className=""){let spec=RICH_HEIGHT_SPECS[key],height=Math.round(uiLayout[key]||spec.default);return'<div class="editor-box rich-resizable '+className+'" data-rich-resize="'+key+'" style="--rich-editor-height:'+height+'px">'+content+'<button class="rich-height-resizer" type="button" data-rich-height-resizer="'+key+'" data-tip="上下拖动调整高度；双击恢复默认" aria-label="调整富文本框高度" aria-orientation="horizontal"></button></div>'}
-function quickNoteToolbar(){return'<div class="rich-toolbar"><button type="button" data-command="bold" data-tip="加粗（Ctrl/Cmd+B）">B</button><button type="button" data-command="insertUnorderedList" data-tip="项目符号列表">•</button><button type="button" data-command="insertOrderedList" data-tip="编号列表">1.</button><button type="button" data-command="divider" data-tip="插入分割线（-- 加空格）；双击可编辑文字">—</button><button type="button" class="quick-to-task" data-quick-note-to-task data-tip="选中文字；未选择时转换当前整行">转为事项</button></div>'}
+function quickNoteToolbar(){return'<div class="rich-toolbar"><button type="button" data-command="bold" data-tip="加粗（Ctrl/Cmd+B）">B</button><button type="button" data-command="insertUnorderedList" data-tip="项目符号列表">•</button><button type="button" data-command="insertOrderedList" data-tip="编号列表">1.</button><button type="button" class="rich-fold-tool small" aria-label="折叠文本" data-command="foldText" data-tip="折叠文本：当前行作摘要；选中多行时其余行作内容。保留正文和层级"><svg class="fold-tool-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 4 13.5 4 8 13Z" fill="currentColor"/></svg></button><button type="button" class="rich-fold-tool large" aria-label="折叠标题" data-command="foldHeading" data-tip="折叠标题：当前行作折叠标题；正文空行按 Enter 退出折叠。保留正文和层级"><svg class="fold-tool-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2.5 4 13.5 4 8 13Z" fill="currentColor"/></svg></button><button type="button" data-command="unfold" data-tip="取消当前折叠结构，保留全部内容" aria-label="取消折叠" hidden>取消折叠</button><button type="button" data-command="divider" data-tip="插入分割线（-- 加空格）；双击可编辑文字">—</button><button type="button" class="quick-to-task" data-quick-note-to-task data-tip="选中文字；未选择时转换当前整行">转为事项</button></div>'}
 function quickNoteCard(){return'<article class="card quick-note-card" style="--quick-note-height:'+Math.round(uiLayout.quickNoteHeight)+'px">'+cardHead("今日速记","持续保留的一份速记板；每行可完成或直接转为事项","")+'<div class="quick-note-body">'+quickNoteToolbar()+'<div class="rich-editor quick-note-editor" data-quick-note contenteditable="true" data-placeholder="输入零碎事项，Enter 新增一行……"></div><div class="quick-note-placeholder" aria-hidden="true">输入零碎事项，Enter 新增一行……</div></div><button class="quick-note-height-resizer" id="quickNoteHeightResizer" type="button" data-tip="上下拖动调整速记输入区高度；双击恢复默认" aria-label="调整速记输入区高度" aria-orientation="horizontal"></button><div class="quick-note-status">自动保存；点击行首完成框切换状态</div></article>'}
 function cardHead(title,subtitle,tools,dot){
  return'<div class="card-head"><div><div class="card-title"><i class="'+(dot||"")+'"></i>'+esc(title)+'</div>'+(subtitle?'<div class="card-subtitle">'+esc(subtitle)+'</div>':"")+'</div><div class="card-tools">'+(tools||"")+'</div></div>';
@@ -2772,7 +2940,7 @@ try{for(let job of JSON.parse(localStorage.getItem(UPLOAD_RETRY_KEY)||"[]")){if(
 function rememberUploadQueue(){try{localStorage.setItem(UPLOAD_RETRY_KEY,JSON.stringify([...taskUploads.values()].filter(job=>job.status!=="done").map(({file,...job})=>job)))}catch{}}
 
 let uploadQueueRunning=false;
-function renderTaskUploadQueue(){rememberUploadQueue();let node=$('#taskUploadQueue');if(!node||!taskDraft)return;let jobs=[...taskUploads.values()].filter(j=>j.taskId===taskDraft.id&&j.userId===Cloud.user?.id);node.innerHTML=jobs.map(job=>'<div class="upload-job" data-status="'+job.status+'"><b title="'+esc(job.name)+'">'+esc(job.name)+'</b><span>'+({queued:'等待上传',uploading:'上传中…',done:'已上传',failed:'上传失败'}[job.status])+'</span><small>'+Math.ceil(job.size/1024)+' KB'+(job.error?' · '+esc(job.error):'')+'</small>'+(job.status==='failed'?'<button class="link-btn" type="button" data-retry-upload="'+job.id+'">重试</button><button class="link-btn" type="button" data-reselect-upload="'+job.id+'">重新选择</button>':'')+(job.status!=='uploading'?'<button class="link-btn" type="button" data-discard-upload="'+job.id+'">移除</button>':'')+'</div>').join('')}
+function renderTaskUploadQueue(){rememberUploadQueue();let node=$('#taskUploadQueue');if(!node||!taskDraft)return;let jobs=[...taskUploads.values()].filter(j=>j.taskId===taskDraft.id&&j.userId===Cloud.user?.id);if(jobs.length&&typeof taskLayoutContext!=="undefined"&&taskLayoutContext?.id===taskDraft.id)showTaskSupport("attachments",true);node.innerHTML=jobs.map(job=>'<div class="upload-job" data-status="'+job.status+'"><b title="'+esc(job.name)+'">'+esc(job.name)+'</b><span>'+({queued:'等待上传',uploading:'上传中…',done:'已上传',failed:'上传失败'}[job.status])+'</span><small>'+Math.ceil(job.size/1024)+' KB'+(job.error?' · '+esc(job.error):'')+'</small>'+(job.status==='failed'?'<button class="link-btn" type="button" data-retry-upload="'+job.id+'">重试</button><button class="link-btn" type="button" data-reselect-upload="'+job.id+'">重新选择</button>':'')+(job.status!=='uploading'?'<button class="link-btn" type="button" data-discard-upload="'+job.id+'">移除</button>':'')+'</div>').join('')}
 function discardTaskUpload(id){let job=taskUploads.get(id);if(!job||job.status==='uploading')return;job.file=null;taskUploads.delete(id);renderTaskUploadQueue()}
 function reselectTaskUpload(id){let job=taskUploads.get(id);if(!job||job.status!=='failed')return;let input=document.createElement('input');input.type='file';input.onchange=()=>{if(!input.files.length)return;let taskId=job.taskId;discardTaskUpload(id);enqueueTaskUploads(taskId,input.files)};input.click()}
 async function enqueueTaskUploads(taskId,files){
@@ -2813,7 +2981,7 @@ function checklistMarkup(){
  return taskDraft.checklist.map((item,index)=>{
   let editing=item.done&&checklistTimeEditingId===item.id,time=item.done?'<button class="checklist-time" type="button" data-edit-check-time="'+esc(item.id)+'" aria-label="查看或修改检查项完成时间：'+esc(item.text)+'" aria-expanded="'+editing+'" title="'+esc(checklistFullTime(item.completedAt))+'">'+esc(checklistTimeLabel(item))+'</button>':'';
   let edit=editing?'<div class="checklist-time-editor"><p>完成时间 · '+esc(checklistFullTime(item.completedAt))+'</p><label for="checklistCompletedAt">修改完成时间</label><input id="checklistCompletedAt" type="datetime-local" step="60" value="'+esc(checklistLocalTime(item.completedAt))+'"><div><button class="btn" type="button" data-cancel-check-time>取消</button><button class="btn" type="button" data-save-check-time="'+esc(item.id)+'">保存时间</button></div></div>':'';
-  return '<div class="attachment-item checklist-item" data-check-drop="'+index+'"><button class="drag-handle" type="button" draggable="true" data-check-drag="'+index+'" aria-label="拖动调整检查项顺序">⠿</button><input type="checkbox" data-check-done="'+index+'" aria-label="完成检查项：'+esc(item.text)+'" '+(item.done?'checked':'')+'><input class="checklist-text" type="text" data-check-text="'+index+'" data-check-id="'+esc(item.id)+'" aria-label="检查项内容" value="'+esc(item.text)+'" placeholder="检查项">'+time+'<button class="icon-btn" type="button" data-remove-check="'+index+'" aria-label="删除检查项">×</button>'+edit+'</div>';
+  return '<div class="attachment-item checklist-item '+(item.done?'is-done':'')+'" data-check-drop="'+index+'"><button class="drag-handle" type="button" draggable="true" data-check-drag="'+index+'" aria-label="拖动调整检查项顺序">⠿</button><input type="checkbox" data-check-done="'+index+'" aria-label="完成检查项：'+esc(item.text)+'" '+(item.done?'checked':'')+'><input class="checklist-text" type="text" data-check-text="'+index+'" data-check-id="'+esc(item.id)+'" aria-label="检查项内容" value="'+esc(item.text)+'" placeholder="检查项">'+time+'<button class="icon-btn" type="button" data-remove-check="'+index+'" aria-label="删除检查项">×</button>'+edit+'</div>';
  }).join("")||'<div class="muted" style="font-size:11px">暂无检查项</div>';
 }
 function saveChecklistTime(id){
@@ -2861,16 +3029,16 @@ function openTask(id,prefill={}){
 }
 function renderTaskEditor(){
  let existing=!!taskById(taskDraft.id),project=projectById(taskDraft.project);
- let notesEditor=resizableRichBox("taskNotesHeight",toolbar()+'<div class="rich-editor" id="taskNotes" contenteditable="true" data-placeholder="补充背景、判断和结果……">'+taskDraft.notes+'</div>',"task-notes-editor");
- $("#taskEditor").innerHTML='<aside class="task-column"><section class="task-section"><div class="task-section-title">任务属性</div><div class="form-grid"><div class="field"><label>类型</label><select id="draftType">'+taskTypes.map(value=>'<option '+(taskDraft.type===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>状态</label><select id="draftStatus">'+statuses.map(value=>'<option '+(taskDraft.status===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>优先级</label><select id="draftPriority">'+priorities.map(value=>'<option '+(taskDraft.priority===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>计划日期 <small>准备哪天做</small></label><input id="draftPlanDate" type="date" value="'+esc(taskDraft.planDate)+'"></div><div class="field"><label>截止日期 <small>最晚何时完成</small></label><input id="draftDue" type="date" value="'+esc(taskDraft.due)+'"></div><div class="field"><label>完成日期</label><input id="draftCompleted" type="date" value="'+esc(taskDraft.completed)+'" '+(taskDraft.status==="已完成"?"":"disabled")+'></div><div class="field"><label>跟进日期 <small>等待时何时再问</small></label><input id="draftFollowup" type="date" value="'+esc(taskDraft.followup)+'"></div></div><label style="display:flex;gap:8px;margin-top:11px"><input id="draftFocus" type="checkbox" '+(taskDraft.focus?"checked":"")+'> 加入今日行动（同时加入本周）</label><label style="display:flex;gap:8px;margin-top:7px"><input id="draftWeek" type="checkbox" '+(taskDraft.week?"checked":"")+'> 加入本周行动</label></section>'+
+ let notesEditor='<div class="editor-box task-notes-editor">'+toolbar()+'<div class="rich-editor" id="taskNotes" contenteditable="true" data-placeholder="补充背景、判断和结果……">'+taskDraft.notes+'</div></div>';
+ $("#taskEditor").innerHTML='<aside class="task-column"><section class="task-section"><div class="task-section-title">任务属性</div><div class="form-grid"><div class="field"><label>类型</label><select id="draftType">'+taskTypes.map(value=>'<option '+(taskDraft.type===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>状态</label><select id="draftStatus">'+statuses.map(value=>'<option '+(taskDraft.status===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>优先级</label><select id="draftPriority">'+priorities.map(value=>'<option '+(taskDraft.priority===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>计划日期 <small>准备哪天做</small></label><input id="draftPlanDate" type="date" value="'+esc(taskDraft.planDate)+'"></div><div class="field"><label>截止日期 <small>最晚何时完成</small></label><input id="draftDue" type="date" value="'+esc(taskDraft.due)+'"></div><div class="field"><label>完成日期</label><input id="draftCompleted" type="date" value="'+esc(taskDraft.completed)+'" '+(taskDraft.status==="已完成"?"":"disabled")+'></div><div class="field"><label>跟进日期 <small>等待时何时再问</small></label><input id="draftFollowup" type="date" value="'+esc(taskDraft.followup)+'"></div></div><label style="display:flex;gap:8px;margin-top:11px"><input id="draftFocus" type="checkbox" '+(taskDraft.focus?"checked":"")+'> 加入今日行动</label><label style="display:flex;gap:8px;margin-top:7px"><input id="draftWeek" type="checkbox" '+(taskDraft.week?"checked":"")+'> 加入本周行动</label></section>'+
  '<section class="task-section"><div class="task-section-title task-project-section-title"><span>项目关系</span><button class="link-btn task-project-link" type="button" data-go-task-project '+(taskDraft.project?'':'disabled')+'>进入项目 ↗</button></div><div class="field"><label>所属项目</label><select id="draftProject">'+projectOptions(taskDraft.project)+'</select></div><div class="field" style="margin-top:9px"><label>里程碑</label><select id="draftMilestone">'+milestoneOptions(taskDraft.project,taskDraft.milestone)+'</select></div></section>'+
  '<section class="task-section task-record-section"><div class="task-section-title"><span>工作记录</span><button class="link-btn" type="button" data-task-record>记工作记录 ↗</button></div></section></aside>'+
- '<section class="task-column task-content-column"><div class="field"><label>事项名称</label><input class="title-input" id="taskTitle" value="'+esc(taskDraft.title)+'" placeholder="写清楚要推动的结果"></div><div class="field"><label>下一步动作</label><textarea id="taskNext" rows="1">'+esc(taskDraft.nextAction)+'</textarea></div><section class="task-section checklist-section '+(taskChecklistCollapsed?'collapsed':'')+'" '+(taskChecklistHeight&&!taskChecklistCollapsed?'style="height:'+Math.round(taskChecklistHeight)+'px"':'')+'><div class="task-section-title"><span>检查清单</span><div class="checklist-tools"><button class="checklist-toggle" type="button" data-toggle-checklist>'+(taskChecklistCollapsed?'展开':'收起')+' · '+taskDraft.checklist.length+'</button><button class="link-btn" type="button" data-add-check>＋ 添加</button></div></div><div id="draftChecklist">'+checklistMarkup()+'</div></section><button class="checklist-resizer" id="checklistResizer" type="button" data-tip="上下拖动调整检查清单高度；双击恢复自适应" aria-label="上下拖动调整检查清单高度"></button><div class="field task-notes-field">'+obsidianLinkMarkup(taskDraft)+notesEditor+'</div></section>'+
+ '<section class="task-column task-content-column"><div class="field"><label>事项名称</label><input class="title-input" id="taskTitle" value="'+esc(taskDraft.title)+'" placeholder="写清楚要推动的结果"></div><div class="field"><label>下一步动作</label><textarea id="taskNext" rows="1">'+esc(taskDraft.nextAction)+'</textarea></div><section class="task-section checklist-section '+(taskChecklistCollapsed?'collapsed':'')+'" '+(taskChecklistHeight&&!taskChecklistCollapsed?'style="height:'+Math.round(taskChecklistHeight)+'px"':'')+'><button class="checklist-toggle checklist-dropdown-head" type="button" data-toggle-checklist aria-controls="draftChecklistContent" aria-expanded="'+(!taskChecklistCollapsed)+'">'+taskChecklistSummary()+'</button><div id="draftChecklistContent" '+(taskChecklistCollapsed?'hidden':'')+'><div id="draftChecklist">'+checklistMarkup()+'</div><button class="checklist-add-bottom" type="button" data-add-check>＋ 添加检查项</button></div></section><button class="checklist-resizer" id="checklistResizer" type="button" data-tip="上下拖动调整检查清单高度；双击恢复自适应" aria-label="上下拖动调整检查清单高度"></button><div class="field task-notes-field">'+obsidianLinkMarkup(taskDraft)+notesEditor+'</div></section>'+
  '<aside class="task-column attachment-column"><details class="task-support-disclosure" open><summary>附件与关联内容</summary><div class="task-support-content"><section class="task-section task-attachment-paste" data-attachment-paste><div class="task-section-title">附件与预览</div><button type="button" class="dropzone" aria-label="选择附件，也可将文件拖入任务详情">拖入图片或文件<br><span>＋ 选择文件</span></button><div id="taskUploadQueue" aria-live="polite"></div><div class="attachment-list">'+attachmentMarkup()+'</div><div class="preview '+(attachmentPreviewId?'has-preview':'')+'" id="attachmentPreview">'+(attachmentPreviewId?"正在加载预览……":"选择附件后在这里预览")+'</div><p class="muted" style="font-size:10px">鼠标停在此区域，Ctrl / ⌘ + V 粘贴图片。每个文件不超过 50MB。</p></section>'+
  '<section class="task-section"><div class="task-section-title" style="display:flex;align-items:center;justify-content:space-between"><span>关联任务 <span class="muted">双向关联</span></span><button class="link-btn" type="button" data-new-related-task>＋ 新建</button></div><input class="related-search" id="relatedSearch" placeholder="搜索任务名称或下一步……"><div id="relationResults"></div><div class="related-list" id="relatedList">'+relationMarkup()+'</div><p class="muted" style="font-size:10px">新建时会先保存当前事项，并自动建立双向关联；关系不参与状态和排序。</p></section><section class="task-section"><div class="task-section-title" style="display:flex;align-items:center;justify-content:space-between"><span>关键决策</span><button class="link-btn" type="button" data-new-decision data-task="'+taskDraft.id+'" '+(existing?"":"disabled")+'>＋ 记录</button></div><div class="decision-list" id="taskDecisionList">'+taskDecisionMarkup()+'</div><p class="muted" style="font-size:10px">记录会自动关联当前任务、项目与里程碑；不改变任务排序。</p></section><section class="task-section"><div class="task-section-title">周记录</div><button class="btn" style="width:100%" type="button" data-view-task-history="'+taskDraft.id+'" '+(existing?"":"disabled")+'>查看周记录 · '+(existing?taskHistoryEntries(taskDraft.id).length:0)+'</button><p class="muted" style="font-size:10px;margin-bottom:0">历史周为只读快照；当前事项仍是唯一可编辑数据源。</p></section></div></details></aside>';
  initQuillEditors($("#taskEditor"));
  renderTaskUploadQueue();refreshAttachmentThumbnails();
- enhanceHoverSelects($("#taskEditor"));
+ enhanceHoverSelects($("#taskEditor"));initTaskLayouts();
 }
 function syncOpenTaskDraftFromState(){
  if(!taskDraft||!$("#taskDialog")?.open)return;
@@ -2879,7 +3047,7 @@ function syncOpenTaskDraftFromState(){
 }
 function refreshChecklist(options={}){
  collectChecklistText();cancelAnimationFrame(checklistFocusFrame);
- let section=$(".checklist-section"),list=$("#draftChecklist"),toggle=$("[data-toggle-checklist]");if(!section||!list)return;section.classList.toggle("collapsed",taskChecklistCollapsed);section.style.height=taskChecklistHeight&&!taskChecklistCollapsed?Math.round(taskChecklistHeight)+"px":"";toggle.textContent=(taskChecklistCollapsed?"展开":"收起")+" · "+taskDraft.checklist.length;list.innerHTML=checklistMarkup();if(options.focusLast)checklistFocusFrame=requestAnimationFrame(()=>{let input=$("#draftChecklist .attachment-item:last-child [data-check-text]");input?.focus();input?.scrollIntoView({block:"nearest"})});
+ let section=$(".checklist-section"),list=$("#draftChecklist"),toggle=$("[data-toggle-checklist]");if(!section||!list)return;section.classList.toggle("collapsed",taskChecklistCollapsed);section.style.height=taskChecklistHeight&&!taskChecklistCollapsed?Math.round(taskChecklistHeight)+"px":"";toggle.innerHTML=taskChecklistSummary();toggle.setAttribute("aria-expanded",String(!taskChecklistCollapsed));$("#draftChecklistContent").hidden=taskChecklistCollapsed;list.innerHTML=checklistMarkup();if(options.focusLast)checklistFocusFrame=requestAnimationFrame(()=>{let input=$("#draftChecklist .attachment-item:last-child [data-check-text]");input?.focus();input?.scrollIntoView({block:"nearest"})});
 }
 function collectTaskDraft(){
  collectChecklistText();
@@ -3232,7 +3400,7 @@ function syncHoverSelect(select){
 function enhanceHoverSelects(root=document){
  if(!root)return;root.querySelectorAll("select:not([data-hover-select-ready])").forEach(select=>{
   select.dataset.hoverSelectReady="1";let owner=document.createElement("div");owner.className="hover-select";select.before(owner);owner.appendChild(select);
-  owner.insertAdjacentHTML("beforeend",'<button type="button" class="hover-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span></span><b aria-hidden="true">⌄</b></button><div class="hover-select-menu" role="listbox" hidden></div>');
+  owner.insertAdjacentHTML("beforeend",'<button type="button" class="hover-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span></span><svg class="select-chevron" viewBox="0 0 12 8" aria-hidden="true" focusable="false"><path d="m2 2 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="hover-select-menu" role="listbox" hidden></div>');
   syncHoverSelect(select);let trigger=owner.querySelector(".hover-select-trigger"),menu=owner.querySelector(".hover-select-menu");
   owner.addEventListener("pointerenter",event=>{if(isMouseHover(event))openHoverSelect(owner)});
   owner.addEventListener("pointerleave",event=>{if(!isMouseHover(event))return;clearTimeout(hoverSelectTimer);hoverSelectTimer=setTimeout(()=>{if(!owner.matches(":hover,:focus-within"))closeHoverSelect(owner)},80)});
@@ -3252,11 +3420,13 @@ let richDragUI=null;
 function richBlockUnits(quill){
  let lines=quill.getLines(),units=[];
  for(let i=0;i<lines.length;){let line=lines[i],index=quill.getIndex(line),format=quill.getFormat(index,1),end=i+1;
-  if(format.list)while(end<lines.length){let next=quill.getFormat(quill.getIndex(lines[end]),1);if(!next.list||(Number(next.indent)||0)<=(Number(format.indent)||0))break;end++}
+  if(format.fold)while(end<lines.length&&richFoldDepth(richFoldLineFormat(lines[end]).foldDepth)>richFoldDepth(format.foldDepth))end++;
+  else if(format.list)while(end<lines.length){let next=quill.getFormat(quill.getIndex(lines[end]),1);if(!next.list||(Number(next.indent)||0)<=(Number(format.indent)||0))break;end++}
   let nodes=lines.slice(i,end).map(item=>item.domNode),length=lines.slice(i,end).reduce((sum,item)=>sum+item.length(),0);units.push({index,length,nodes,format});i=end;
  }return units;
 }
 function richNestedUnits(quill,node){
+ let folded=richFoldNestedUnits(quill,node);if(folded)return folded;
  let lines=quill.getLines(),at=lines.findIndex(line=>line.domNode===node);if(at<0)return null;let format=quill.getFormat(quill.getIndex(lines[at]),1),indent=Number(format.indent)||0;if(!format.list||!indent)return null;
  let left=at,right=at;const fmt=i=>quill.getFormat(quill.getIndex(lines[i]),1);
  while(left>0&&fmt(left-1).list&&(Number(fmt(left-1).indent)||0)>=indent)left--;
@@ -3278,7 +3448,7 @@ function moveRichBlocks(data,slot){
  q.history.cutoff();q.updateContents(old.diff(next),'user');q.history.cutoff();q.focus({preventScroll:true});q.setSelection(index,data.count>1?Math.max(0,length-1):0,'silent');richDragSelections.set(editor,{index,length:data.count>1?Math.max(0,length-1):0});activeRichEditor=editor;updateRichToolbar(editor);
  q.getLines(index,Math.max(1,length-1)).forEach(line=>{let node=line.domNode;node.classList.add('rich-block-landed');setTimeout(()=>node.classList.remove('rich-block-landed'),450)});return true;
 }
-function richBlockRect(unit){let first=unit.nodes[0].getBoundingClientRect(),last=unit.nodes.at(-1).getBoundingClientRect();return{top:first.top,bottom:last.bottom,height:last.bottom-first.top}}
+function richBlockRect(unit){let visible=unit.nodes.filter(node=>node.getClientRects().length),first=(visible[0]||unit.nodes[0]).getBoundingClientRect(),last=(visible.at(-1)||unit.nodes[0]).getBoundingClientRect();return{top:first.top,bottom:last.bottom,height:last.bottom-first.top}}
 function initRichListDrag(editor){
  if(richDragEditors.has(editor)||!quillFor(editor)?.isEnabled())return;richDragEditors.add(editor);let q=quillFor(editor);
  q.on('selection-change',range=>{if(range)richDragSelections.set(editor,{index:range.index,length:range.length})});
@@ -3318,6 +3488,146 @@ function richDragDropPosition(){let drag=richDragUI?.drag;if(!drag?.started)retu
 }
 function richDragFinish(){let drag=richDragUI?.drag;if(!drag)return;let {data,slot,started,valid}=drag;richDragCancel();if(started&&valid)moveRichBlocks(data,slot)}
 function richDragCancel(){let ui=richDragUI;if(!ui)return;cancelAnimationFrame(ui.frame);if(ui.drag){ui.drag.data.units.forEach(unit=>unit.nodes.forEach(node=>node.classList.remove('rich-block-moving')));ui.drag.line.remove();ui.drag.preview.remove();ui.drag=null}richDragHide()}
+// Folding is a line format in the Quill document, never a hidden text embed.
+function richFoldValue(value){return /^t[\w-]{1,80}:(text|heading):(open|closed)$/.test(String(value||""))?String(value):""}
+function richFoldLineFormat(line){return{...(line?.formats()||{}),...(line?.attributes?.values()||{})}}
+function richFoldDepth(value){return Math.max(0,Math.min(8,Math.floor(Number(value)||0)))}
+function richFoldSemanticHTML(quill,html,range){
+ // Quill's semantic list renderer reconstructs LI tags and drops custom attributors.
+ let box=document.createElement("div");box.innerHTML=html;
+ let lines=(range?quill.getLines(range.index,Math.max(1,range.length)):quill.getLines()).filter(line=>richFoldLineFormat(line).list);
+ box.querySelectorAll("li").forEach((node,index)=>{let format=richFoldLineFormat(lines[index]),depth=richFoldDepth(format.foldDepth),fold=richFoldValue(format.fold);if(depth)node.dataset.richDepth=depth;if(fold)node.dataset.richFold=fold});
+ return box.innerHTML;
+}
+function registerRichFoldFormats(Parchment){
+ class Fold extends Parchment.Attributor{add(node,value){return richFoldValue(value)?super.add(node,value):false}value(node){return richFoldValue(super.value(node))}}
+ class FoldDepth extends Parchment.Attributor{add(node,value){return super.add(node,richFoldDepth(value))}value(node){return richFoldDepth(super.value(node))||undefined}}
+ Quill.register(new Fold("fold","data-rich-fold",{scope:Parchment.Scope.BLOCK}),true);
+ Quill.register(new FoldDepth("foldDepth","data-rich-depth",{scope:Parchment.Scope.BLOCK}),true);
+}
+function richFoldRefresh(quill){
+ if(quill.root.closest(".rich-editor")?.classList.contains("ime-composing"))return;
+ let stack=[];
+ for(let line of quill.getLines()){
+  let format=richFoldLineFormat(line),depth=richFoldDepth(format.foldDepth),fold=richFoldValue(format.fold),node=line.domNode;
+  while(stack.length&&stack.at(-1).depth>=depth)stack.pop();
+  node.classList.toggle("rich-fold-hidden",stack.some(item=>item.closed));node.classList.toggle("rich-fold-title",!!fold);
+  node.style.setProperty("--rich-fold-depth",depth);
+  if(fold){
+   let closed=!quill.isEnabled()&&quill.__richFoldView?.has(line)?quill.__richFoldView.get(line):fold.endsWith(":closed"),button=line.uiNode;
+   if(!button?.classList.contains("rich-fold-arrow")){
+    button=document.createElement("button");button.type="button";button.className="rich-fold-arrow";button.contentEditable="false";
+    button.addEventListener("mousedown",event=>event.preventDefault());
+    button.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" ")event.stopPropagation()});
+    button.addEventListener("click",event=>{
+     event.preventDefault();event.stopPropagation();let current=richFoldValue(richFoldLineFormat(line).fold);if(!current)return;
+     if(!quill.isEnabled()){quill.__richFoldView||=new WeakMap();quill.__richFoldView.set(line,button.getAttribute("aria-expanded")==="true");richFoldRefresh(quill);return}
+     let start=quill.getIndex(line),range=quill.getSelection();if(current.endsWith(":open")&&range&&range.index>start){let all=quill.getLines(),at=all.indexOf(line),end=at+1;while(end<all.length&&richFoldDepth(richFoldLineFormat(all[end]).foldDepth)>richFoldDepth(richFoldLineFormat(line).foldDepth))end++;let limit=end<all.length?quill.getIndex(all[end]):quill.getLength();if(range.index<limit)quill.setSelection(start,0,"silent")}
+     quill.history.cutoff();quill.formatLine(start,1,"fold",current.replace(/:(open|closed)$/,current.endsWith(":closed")?":open":":closed"),"user");quill.history.cutoff();
+    });
+    line.attachUI(button);
+   }
+   button.textContent=closed?"▸":"▾";button.setAttribute("aria-label",closed?"展开折叠内容":"收起折叠内容");button.setAttribute("aria-expanded",String(!closed));button.disabled=false;
+   stack.push({depth,closed});
+  }else if(line.uiNode?.classList.contains("rich-fold-arrow")){line.uiNode.remove();line.uiNode=null}
+ }
+}
+function insertRichFold(quill,range,kind,remove=false){
+ let allLines=quill.getLines(),lines=quill.getLines(range.index,Math.max(1,range.length)),first=lines[0],start=quill.getIndex(first),bodyStart=start+first.length(),depth=richFoldDepth(richFoldLineFormat(first).foldDepth);
+ // Include complete selected child sections, even when only their summary is selected.
+ if(range.length&&!richFoldLineFormat(first).fold){let left=allLines.indexOf(first),right=allLines.indexOf(lines.at(-1));for(let i=left;i<=right;i++){let format=richFoldLineFormat(allLines[i]);if(format.fold){let end=i+1;while(end<allLines.length&&richFoldDepth(richFoldLineFormat(allLines[end]).foldDepth)>richFoldDepth(format.foldDepth))end++;right=Math.max(right,end-1)}}lines=allLines.slice(left,right+1)}
+ if(!richFoldLineFormat(first).fold&&lines.some(line=>richFoldDepth(richFoldLineFormat(line).foldDepth)>=8)){toast("折叠最多支持 8 层嵌套");return}
+ let current=richFoldValue(richFoldLineFormat(first).fold);if(current?.includes(":"+kind+":")&&!remove)return;let Delta=Quill.import("delta"),delta=new Delta(),position=0;
+ const formatLine=(line,attrs)=>{let newline=quill.getIndex(line)+line.length()-1;delta.retain(newline-position).retain(1,attrs);position=newline+1};
+ if(current&&!current.includes(":"+kind+":")){
+  formatLine(first,{fold:current.replace(/:(text|heading):/,":"+kind+":"),header:kind==="heading"?(richFoldLineFormat(first).header||2):null});
+ }else if(current&&remove){
+  let all=quill.getLines(),at=all.indexOf(first);formatLine(first,{fold:null,header:kind==="heading"?2:null});
+  for(let i=at+1;i<all.length&&richFoldDepth(richFoldLineFormat(all[i]).foldDepth)>depth;i++)formatLine(all[i],{foldDepth:richFoldDepth(richFoldLineFormat(all[i]).foldDepth)-1||null});
+ }else if(!current){
+  formatLine(first,{fold:"t"+crypto.randomUUID()+":"+kind+":open",foldDepth:depth||null,header:kind==="heading"?(richFoldLineFormat(first).header||2):null,list:null});
+  if(lines.length>1){for(let line of lines.slice(1))formatLine(line,{foldDepth:Math.min(8,richFoldDepth(richFoldLineFormat(line).foldDepth)+1)})}
+  else delta.insert("\n",{foldDepth:depth+1});
+ }
+ quill.history.cutoff();quill.updateContents(delta,"user");quill.history.cutoff();
+ quill.setSelection(current?start:lines.length>1?start:Math.min(bodyStart,quill.getLength()-1),0,"silent");
+}
+function richFoldEnter(quill,range,context){
+ let [line]=quill.getLine(range.index),format=richFoldLineFormat(line),depth=richFoldDepth(format.foldDepth),fold=richFoldValue(format.fold);
+ if(!fold&&!depth)return true;
+ if(fold&&depth>=8){toast("已达到最大嵌套层级，请先退出一层再编辑");return false;}
+ if(!range.length&&!fold&&context.empty){
+  let attrs=format.list?(format.indent?{indent:Number(format.indent)-1||false}:{list:false,indent:false}):{foldDepth:depth-1||false};
+  if(!format.list){outdentRichFoldTail(quill,line);return false}
+  quill.history.cutoff();quill.formatLine(range.index,1,attrs,"user");quill.history.cutoff();return false;
+ }
+ let [endLine,endOffset]=quill.getLine(range.index+range.length),Delta=Quill.import("delta"),attrs={...richFoldLineFormat(endLine),fold:null,foldDepth:fold?Math.min(8,depth+1):depth,header:null},inline=quill.getFormat(range.index,0);
+ let delta=new Delta().retain(range.index).delete(range.length).insert("\n",fold?{...format,fold:fold.replace(/:closed$/,":open")}:format).retain(Math.max(0,endLine.length()-endOffset-1)).retain(1,attrs);
+ quill.history.cutoff();quill.updateContents(delta,"user");quill.history.cutoff();quill.setSelection(range.index+1,0,"silent");
+ for(let name of ["bold","underline","highlight"])if(inline[name])quill.format(name,inline[name],"silent");return false;
+}
+function richFoldBackspace(quill,range,context){
+ if(context.offset||range.length)return true;let line=quill.getLine(range.index)[0],format=richFoldLineFormat(line);
+ if(format.fold){insertRichFold(quill,range,format.fold.includes(":heading:")?"heading":"text",true);return false}
+ if(format.foldDepth&&format.list){quill.history.cutoff();quill.formatLine(range.index,1,format.indent?{indent:Number(format.indent)-1||false}:{list:false,indent:false},"user");quill.history.cutoff();return false}
+ if(!format.foldDepth){let before=quill.getLine(range.index-1)[0];return !before||!richFoldLineFormat(before).foldDepth}
+ outdentRichFoldTail(quill,line);return false;
+}
+function richFoldDelete(quill,range,context){
+ if(range.length)return true;let line=quill.getLine(range.index)[0];if(context.offset!==line.length()-1)return true;
+ let next=quill.getLine(range.index+1)[0];if(!next||next===line)return true;
+ let format=richFoldLineFormat(line),after=richFoldLineFormat(next);if(format.fold?.endsWith(":closed")){quill.history.cutoff();quill.formatLine(range.index,1,"fold",format.fold.replace(/:closed$/,":open"),"user");quill.history.cutoff();return false}
+ return !after.fold&&richFoldDepth(format.foldDepth)===richFoldDepth(after.foldDepth);
+}
+function clearQuillRichFormat(quill,range){
+ if(!quill.getLines().some(line=>richFoldLineFormat(line).fold||richFoldLineFormat(line).foldDepth)){quill.removeFormat(range.index,range.length,"user");return}
+ let Delta=Quill.import("delta"),inline=new Delta().retain(range.index).retain(range.length,{bold:null,underline:null,highlight:null,focus:null}),blocks=new Delta(),position=0;
+ for(let line of quill.getLines(range.index,Math.max(1,range.length))){let newline=quill.getIndex(line)+line.length()-1;blocks.retain(newline-position).retain(1,{header:null,list:null,indent:null});position=newline+1}
+ quill.history.cutoff();quill.updateContents(inline.compose(blocks),"user");quill.history.cutoff();
+}
+function richFoldSelectAll(quill){
+ if(!quill.getLines().some(line=>richFoldLineFormat(line).fold))return true;
+ let range=quill.getSelection();if(!range)return true;let [line]=quill.getLine(range.index),start=quill.getIndex(line),length=line.length()-1;if(richFoldLineFormat(line).fold){let lines=quill.getLines(),at=lines.indexOf(line)+1,depth=richFoldDepth(richFoldLineFormat(line).foldDepth);while(at<lines.length&&richFoldDepth(richFoldLineFormat(lines[at]).foldDepth)>depth){length+=lines[at].length();at++}}
+ if(range.index!==start||range.length!==length){quill.setSelection(start,length,"silent");return false}
+ quill.setSelection(0,Math.max(0,quill.getLength()-1),"silent");return false;
+}
+function richFoldNestedUnits(quill,node){
+ let lines=quill.getLines(),at=lines.findIndex(line=>line.domNode===node),stack=[];if(at<0)return null;
+ for(let i=0;i<=at;i++){let format=richFoldLineFormat(lines[i]),depth=richFoldDepth(format.foldDepth);while(stack.length&&stack.at(-1).depth>=depth)stack.pop();if(i===at)break;if(format.fold)stack.push({at:i,depth})}
+ let parent=stack.at(-1);if(!parent)return null;
+ let limit=parent.at+1;while(limit<lines.length&&richFoldDepth(richFoldLineFormat(lines[limit]).foldDepth)>parent.depth)limit++;
+ let units=[];for(let i=parent.at+1;i<limit;){let format=richFoldLineFormat(lines[i]),end=i+1;
+  if(format.fold)while(end<limit&&richFoldDepth(richFoldLineFormat(lines[end]).foldDepth)>richFoldDepth(format.foldDepth))end++;
+  else if(format.list)while(end<limit){let next=richFoldLineFormat(lines[end]);if(!next.list||next.fold||richFoldDepth(next.foldDepth)!==richFoldDepth(format.foldDepth)||(Number(next.indent)||0)<=(Number(format.indent)||0))break;end++}
+  let group=lines.slice(i,end);units.push({index:quill.getIndex(lines[i]),length:group.reduce((sum,line)=>sum+line.length(),0),nodes:group.map(line=>line.domNode),format});i=end;
+ }return units;
+}
+
+// Lift only the chosen block/subtree; later siblings stay in their parent.
+function outdentRichFoldTail(quill,line){
+ let all=quill.getLines(),at=all.indexOf(line),depth=richFoldDepth(richFoldLineFormat(line).foldDepth);if(!depth)return false;
+ let end=at+1;if(richFoldLineFormat(line).fold)while(end<all.length&&richFoldDepth(richFoldLineFormat(all[end]).foldDepth)>depth)end++;
+ let parent=at-1;while(parent>=0&&!(richFoldLineFormat(all[parent]).fold&&richFoldDepth(richFoldLineFormat(all[parent]).foldDepth)<depth))parent--;
+ let limit=end;if(parent>=0){let pd=richFoldDepth(richFoldLineFormat(all[parent]).foldDepth);limit=parent+1;while(limit<all.length&&richFoldDepth(richFoldLineFormat(all[limit]).foldDepth)>pd)limit++}
+ let start=quill.getIndex(line),finish=end<all.length?quill.getIndex(all[end]):quill.getLength(),target=limit<all.length?quill.getIndex(all[limit]):quill.getLength(),Delta=Quill.import("delta"),format=new Delta(),position=0;
+ for(let item of all.slice(at,end)){let n=quill.getIndex(item)+item.length()-1-start;format.retain(n-position).retain(1,{foldDepth:richFoldDepth(richFoldLineFormat(item).foldDepth)-1||null});position=n+1}
+ let part=quill.getContents(start,finish-start).compose(format),change=new Delta().retain(start).delete(finish-start).retain(Math.max(0,target-finish)).concat(part);
+ quill.history.cutoff();quill.updateContents(change,"user");quill.history.cutoff();quill.setSelection(target-(finish-start),0,"silent");return true;
+}
+function richFoldTab(quill,range,back){
+ let all=quill.getLines(),[line]=quill.getLine(range.index),at=all.indexOf(line),depth=richFoldDepth(richFoldLineFormat(line).foldDepth);
+ let format=richFoldLineFormat(line);if(format.list&&(!back||Number(format.indent)>0))return true;
+ if(back){if(!depth)return true;outdentRichFoldTail(quill,line);return false}
+ let before=at-1;while(before>=0&&richFoldDepth(richFoldLineFormat(all[before]).foldDepth)>depth)before--;
+ if(before<0||!richFoldLineFormat(all[before]).fold||richFoldDepth(richFoldLineFormat(all[before]).foldDepth)!==depth)return true;
+ let end=at+1;if(richFoldLineFormat(line).fold)while(end<all.length&&richFoldDepth(richFoldLineFormat(all[end]).foldDepth)>depth)end++;
+ if(all.slice(at,end).some(item=>richFoldDepth(richFoldLineFormat(item).foldDepth)>=8)){toast("折叠最多支持 8 层嵌套");return false}
+ let Delta=Quill.import("delta"),delta=new Delta(),position=0;
+ for(let item of all.slice(at,end)){let n=quill.getIndex(item)+item.length()-1;delta.retain(n-position).retain(1,{foldDepth:richFoldDepth(richFoldLineFormat(item).foldDepth)+1});position=n+1}
+ if(richFoldLineFormat(all[before]).fold.endsWith(":closed"))quill.formatLine(quill.getIndex(all[before]),1,"fold",richFoldLineFormat(all[before]).fold.replace(":closed",":open"),"user");
+ quill.history.cutoff();quill.updateContents(delta,"user");quill.history.cutoff();quill.setSelection(range.index,range.length,"silent");return false;
+}
+function toggleRichFoldAtSelection(quill,range){let [line]=quill.getLine(range.index);if(richFoldLineFormat(line).fold){line.uiNode?.click();return false}return true}
 function richNormalizeListStructure(root){
  let changed=true;while(changed){changed=false;
   Array.from(root.querySelectorAll("ul,ol")).reverse().forEach(list=>{if(!Array.from(list.children).some(child=>child.tagName==="LI")){list.remove();changed=true}});
@@ -3333,7 +3643,8 @@ function sanitizeRichValue(value){
   let tag=node.tagName,out=null;if(["SCRIPT","STYLE","IFRAME","OBJECT","EMBED","SVG","MATH"].includes(tag))return fragment;
   if(tag==="IMG")return richImageElement(richImageFromNode(node),node.getAttribute("width"))||fragment;
   if(tag==="SPAN"&&node.dataset.richUpload)return richUploadElement({id:node.dataset.richUpload,name:node.dataset.uploadName})||fragment;
-  if(tag==="BR")return document.createElement("br");
+  if(node.classList.contains("ql-ui"))return fragment;
+  if(tag==="BR"){let br=document.createElement("br");if(node.classList.contains("rich-soft-break"))br.className="rich-soft-break";return br}
   if(["B","STRONG"].includes(tag))out=document.createElement("strong");
   else if(tag==="U")out=document.createElement("u");
   else if(["P","H2","H3"].includes(tag)){out=document.createElement(tag.toLowerCase());let indent=(String(node.className||"").match(/(?:^|\s)ql-indent-([1-3])(?:\s|$)/)||[])[1];if(indent)out.className="ql-indent-"+indent}
@@ -3348,6 +3659,7 @@ function sanitizeRichValue(value){
    Array.from(node.childNodes).forEach(child=>inner.appendChild(clean(child)));if(!bold&&!underline)return inner;let wrapper=inner;if(bold){let strong=document.createElement("strong");strong.appendChild(wrapper);wrapper=strong}if(underline){let line=document.createElement("u");line.appendChild(wrapper);wrapper=line}return wrapper;
   }
   else out=fragment;
+  if(out.nodeType===1&&["P","H2","H3","LI","DIV"].includes(tag)){let fold=richFoldValue(node.dataset.richFold),depth=richFoldDepth(node.dataset.richDepth);if(fold)out.dataset.richFold=fold;if(depth)out.dataset.richDepth=depth}
   Array.from(node.childNodes).forEach(child=>out.appendChild(clean(child)));let highlight=Array.from(node.classList).find(name=>/^rich-highlight-(yellow|green|blue)$/.test(name));if(highlight&&out.nodeType===1&&!out.classList.contains(highlight)){let span=document.createElement("span");span.className=highlight;span.appendChild(out);return span}return out;
  };
  let cleaned=document.createElement("div");Array.from(template.content.childNodes).forEach(node=>cleaned.appendChild(clean(node)));
@@ -3355,7 +3667,7 @@ function sanitizeRichValue(value){
  cleaned.querySelectorAll("li > p,li > div").forEach(block=>richUnwrap(block));
  let canonical=document.createElement("div"),paragraph=null,flush=force=>{if(!paragraph&&force)paragraph=document.createElement("p");if(paragraph&&(paragraph.childNodes.length||force)){if(!paragraph.childNodes.length)paragraph.appendChild(document.createElement("br"));canonical.appendChild(paragraph)}paragraph=null};
  Array.from(cleaned.childNodes).forEach(node=>{if(node.nodeType===1&&["P","H2","H3","DIV","UL","OL"].includes(node.tagName)){flush();if(node.tagName==="DIV"&&!node.classList.contains("rich-divider")){let block=document.createElement("p");while(node.firstChild)block.appendChild(node.firstChild);canonical.appendChild(block)}else canonical.appendChild(node)}else if(node.nodeType===1&&node.tagName==="BR"){flush(true)}else{paragraph||(paragraph=document.createElement("p"));paragraph.appendChild(node)}});flush();richNormalizeListStructure(canonical);
- let meaningful=(canonical.textContent||"").replace(/\u00a0/g," ").trim()||canonical.querySelector(".focus-marker,.rich-divider,.rich-image,.rich-image-upload,[class*=rich-highlight-]");return meaningful?canonical.innerHTML:"";
+ let meaningful=(canonical.textContent||"").replace(/\u00a0/g," ").trim()||canonical.querySelector(".focus-marker,.rich-divider,.rich-image,.rich-image-upload,[data-rich-fold],[class*=rich-highlight-]");return meaningful?canonical.innerHTML:"";
 }
 function richDividerContext(node){let editor=node?.closest(".rich-editor"),quill=quillFor(editor),blot=quill&&typeof Quill==="function"?Quill.find(node):null;if(!editor||!quill||!blot)return null;return{editor,quill,blot,index:quill.getIndex(blot)}}
 function selectRichDivider(node){let context=richDividerContext(node);if(!context)return;$$(".rich-divider.selected").forEach(item=>item.classList.remove("selected"));node.classList.add("selected");context.quill.setSelection(context.index,1,"silent");activeRichEditor=context.editor;updateRichToolbar(context.editor)}
@@ -3372,13 +3684,15 @@ function registerQuillFormats(){
  if(quillRegistered)return;
  if(typeof Quill!=="function")throw new Error("Quill 2 未加载");
  let Inline=Quill.import("blots/inline"),BlockEmbed=Quill.import("blots/block/embed"),Clipboard=Quill.import("modules/clipboard"),Parchment=Quill.import("parchment"),QuickDone=new Parchment.ClassAttributor("quickDone","ql-quick-done",{scope:Parchment.Scope.BLOCK,whitelist:["0","1"]}),Highlight=new Parchment.ClassAttributor("highlight","rich-highlight",{scope:Parchment.Scope.INLINE,whitelist:["yellow","green","blue"]});
+ class WorkSoftBreak extends Quill.import("blots/embed"){static create(){let node=super.create();node.appendChild(document.createElement("br"));return node}static value(){return true}html(){return '<br class="rich-soft-break">'}}
+ WorkSoftBreak.blotName="softBreak";WorkSoftBreak.tagName="SPAN";WorkSoftBreak.className="rich-soft-break";Quill.register(WorkSoftBreak,true);
  class WorkFocusMarker extends Inline{static create(value){let node=super.create(value);node.setAttribute("contenteditable","false");return node}static formats(){return true}}
  class WorkDivider extends BlockEmbed{static create(value){let node=super.create(),label=cleanRichDividerLabel(value===true?"":value);node.className="rich-divider";node.dataset.label=label;node.setAttribute("contenteditable","false");let span=document.createElement("span");span.className="rich-divider-label";span.textContent=label;node.appendChild(span);return node}static value(node){let label=node.hasAttribute("data-label")?node.dataset.label:node.querySelector(".rich-divider-label")?.textContent;return cleanRichDividerLabel(label)}}
  class WorkClipboard extends Clipboard{
-  onCaptureCopy(event,isCut=false){let range=this.quill.getSelection(),wholeLine=!!range&&this.quill.getText(range).endsWith("\n");super.onCaptureCopy(event,isCut);if(wholeLine)event.clipboardData?.setData(WORK_QUILL_CLIPBOARD_TYPE,"1")}
+  onCaptureCopy(event,isCut=false){let range=this.quill.getSelection(),copyOps=range?.length?this.quill.getContents(range.index,range.length).ops:[],wholeLine=!!range&&this.quill.getText(range).endsWith("\n"),foldHTML=range?.length?richFoldSemanticHTML(this.quill,this.quill.getSemanticHTML(range.index,range.length),range):"";super.onCaptureCopy(event,isCut);if(range?.length){let ops=copyOps;if(ops.some(op=>op.insert?.softBreak))event.clipboardData?.setData("text/plain",ops.map(op=>typeof op.insert==="string"?op.insert:op.insert?.softBreak?"\n":"").join(""))}if(foldHTML)event.clipboardData?.setData("text/html",foldHTML);if(wholeLine)event.clipboardData?.setData(WORK_QUILL_CLIPBOARD_TYPE,"1")}
   onCapturePaste(event){if(!event.defaultPrevented&&this.quill.isEnabled()){let files=clipboardImageFiles(event.clipboardData);if(files.length){event.preventDefault();void pasteRichImages(this.quill,this.quill.getSelection(true),files);return}}if(event.clipboardData?.getData(WORK_QUILL_CLIPBOARD_TYPE)==="1"){event.preventDefault();let range=this.quill.getSelection(true);if(!range)return;let html=event.clipboardData.getData("text/html"),text=event.clipboardData.getData("text/plain");this.onPaste(range,{html:html?html+"<p><br></p>":"",text});return}super.onCapturePaste(event)}
  }
- WorkFocusMarker.blotName="focus";WorkFocusMarker.tagName="SPAN";WorkFocusMarker.className="focus-marker";WorkDivider.blotName="divider";WorkDivider.tagName="DIV";WorkDivider.className="rich-divider";Quill.register(WorkFocusMarker,true);Quill.register(WorkDivider,true);Quill.register(QuickDone,true);Quill.register(Highlight,true);Quill.register("modules/clipboard",WorkClipboard,true);registerRichImageFormats();quillRegistered=true;
+ WorkFocusMarker.blotName="focus";WorkFocusMarker.tagName="SPAN";WorkFocusMarker.className="focus-marker";WorkDivider.blotName="divider";WorkDivider.tagName="DIV";WorkDivider.className="rich-divider";Quill.register(WorkFocusMarker,true);Quill.register(WorkDivider,true);Quill.register(QuickDone,true);Quill.register(Highlight,true);Quill.register("modules/clipboard",WorkClipboard,true);registerRichImageFormats();registerRichFoldFormats(Parchment);quillRegistered=true;
 }
 function quillFor(editor){return editor?quillEditors.get(editor)||editor.__quill||null:null}
 function normalizeQuickNoteLines(quill){quill.getLines().forEach(line=>{let index=quill.getIndex(line),format=quill.getFormat(index,1);if(format.quickDone===undefined)quill.formatLine(index,1,"quickDone","0","silent")})}
@@ -3408,6 +3722,7 @@ function changeQuillIndent(quill,range,direction){
 function quillOutdentAtLineStart(quill,range,context){if(context.offset!==0||context.format.header)return true;if(Number(context.format.indent)){changeQuillIndent(quill,range,-1);return false}if(context.format.list){quill.history.cutoff();quill.formatLine(range.index,1,"list",false,"user");quill.history.cutoff();return false}return true}
 function quillEmptyListEnter(quill,range,context){if(Number(context.format.indent))changeQuillIndent(quill,range,-1);else{quill.history.cutoff();quill.formatLine(range.index,1,{list:false,indent:false},"user");quill.history.cutoff()}return false}
 function quillRichShortcut(quill,range,context){
+ if(context.prefix===">"){let start=range.index-1;quill.history.cutoff();quill.deleteText(start,1,"user");insertRichFold(quill,{index:start,length:0},"text");quill.history.cutoff();return false}
  let spec=richShortcutSpec(context.prefix);if(!spec||context.format.list)return true;let start=range.index-context.prefix.length;
  quill.deleteText(start,context.prefix.length,"user");
  if(spec.kind==="focus"){quill.insertText(start,"重点",{focus:true},"user");quill.insertText(start+2," ","user");quill.setSelection(start+3,0,"silent")}
@@ -3419,15 +3734,15 @@ function initQuillEditors(root=document){
  if(!root)return;registerQuillFormats();
  root.querySelectorAll(".rich-editor:not(.ql-container)").forEach(editor=>{
   let editable=editor.getAttribute("contenteditable")!=="false",placeholder=editor.dataset.placeholder||"",quick=editor.dataset.quickNote!==undefined,initial=quick?"<p><br></p>":sanitizeRichValue(editor.innerHTML)||"<p><br></p>";editor.__richImageInitial=initial;editor.innerHTML=initial;editor.removeAttribute("contenteditable");
-  let quill=new Quill(editor,{theme:null,readOnly:!editable,placeholder,formats:["bold","underline","header","highlight","list","indent","focus","quickDone","divider","image","imageUpload"],modules:{toolbar:false,uploader:{mimetypes:RICH_IMAGE_TYPES,handler(range,files){void pasteRichImages(this.quill,range,files)}},history:{delay:500,maxStack:60,userOnly:true},keyboard:{bindings:{indent:false,outdent:false,tab:false,"remove tab":false,"outdent backspace":false,"list empty enter":false,workDividerBackspace:{key:"Backspace",collapsed:true,handler(range){return protectQuillDividerBoundary(this.quill,range,-1)}},workDividerDelete:{key:"Delete",collapsed:true,handler(range){return protectQuillDividerBoundary(this.quill,range,1)}},workIndentedBackspace:{key:"Backspace",collapsed:true,format:["indent","list"],handler(range,context){return quillOutdentAtLineStart(this.quill,range,context)}},workEmptyListEnter:{key:"Enter",collapsed:true,empty:true,format:["list"],handler(range,context){return quillEmptyListEnter(this.quill,range,context)}},workListIndent:{key:"Tab",shiftKey:false,format:["list"],handler(range){changeQuillIndent(this.quill,range,1);return false}},workListOutdent:{key:"Tab",shiftKey:true,format:["list"],handler(range){changeQuillIndent(this.quill,range,-1);return false}},workCockpitShortcut:{key:" ",collapsed:true,prefix:/^(--|-|\.|\d+\.)$/,handler(range,context){return quillRichShortcut(this.quill,range,context)}}}}}});
+  let quill=new Quill(editor,{theme:null,readOnly:!editable,placeholder,formats:["softBreak","bold","underline","header","highlight","list","indent","focus","quickDone","divider","image","imageUpload","fold","foldDepth"],modules:{toolbar:false,clipboard:{matchers:[["br.rich-soft-break",()=>new (Quill.import("delta"))().insert({softBreak:true})]]},uploader:{mimetypes:RICH_IMAGE_TYPES,handler(range,files){void pasteRichImages(this.quill,range,files)}},history:{delay:500,maxStack:60,userOnly:true},keyboard:{bindings:{workSoftEnter:{key:"Enter",shiftKey:true,handler(range){let Delta=Quill.import("delta");this.quill.history.cutoff();this.quill.updateContents(new Delta().retain(range.index).delete(range.length).insert({softBreak:true}),"user");this.quill.setSelection(range.index+1,0,"silent");this.quill.history.cutoff();return false}},workToggleFold:{key:"Enter",shortKey:true,handler(range){return toggleRichFoldAtSelection(this.quill,range)}},workFoldTab:{key:"Tab",shiftKey:false,handler(range){return richFoldTab(this.quill,range,false)}},workFoldUnnest:{key:"Tab",shiftKey:true,handler(range){return richFoldTab(this.quill,range,true)}},workFoldSelectAll:{key:"a",shortKey:true,handler(){return richFoldSelectAll(this.quill)}},workFoldDelete:{key:"Delete",handler(range,context){return richFoldDelete(this.quill,range,context)}},workFoldEnter:{key:"Enter",shiftKey:false,handler(range,context){return richFoldEnter(this.quill,range,context)}},workFoldBackspace:{key:"Backspace",handler(range,context){return richFoldBackspace(this.quill,range,context)}},indent:false,outdent:false,tab:false,"remove tab":false,"outdent backspace":false,"list empty enter":false,workDividerBackspace:{key:"Backspace",collapsed:true,handler(range){return protectQuillDividerBoundary(this.quill,range,-1)}},workDividerDelete:{key:"Delete",collapsed:true,handler(range){return protectQuillDividerBoundary(this.quill,range,1)}},workIndentedBackspace:{key:"Backspace",collapsed:true,format:["indent","list"],handler(range,context){return quillOutdentAtLineStart(this.quill,range,context)}},workEmptyListEnter:{key:"Enter",collapsed:true,empty:true,format:["list"],handler(range,context){return quillEmptyListEnter(this.quill,range,context)}},workListIndent:{key:"Tab",shiftKey:false,format:["list"],handler(range){changeQuillIndent(this.quill,range,1);return false}},workListOutdent:{key:"Tab",shiftKey:true,format:["list"],handler(range){changeQuillIndent(this.quill,range,-1);return false}},workCockpitShortcut:{key:" ",collapsed:true,prefix:/^(>|--|-|\.|\d+\.)$/,handler(range,context){return quillRichShortcut(this.quill,range,context)}}}}}});
   if(quick){quill.setContents(state.quickNote?.delta||emptyQuickNote().delta,"silent");normalizeQuickNoteLines(quill);quill.keyboard.addBinding({key:13},()=>{setTimeout(()=>{let range=quill.getSelection();if(range)quill.formatLine(range.index,1,"quickDone","0","silent")},0);return true})}
-  quillEditors.set(editor,quill);editor.__quill=quill;editor.dataset.quillVersion=Quill.version||"2";quill.history.clear();initRichImages(editor,quill);updateRichEmpty(editor);updateRichToolbar(editor);if(typeof initRichListDrag==="function")initRichListDrag(editor);
+  quillEditors.set(editor,quill);editor.__quill=quill;editor.dataset.quillVersion=Quill.version||"2";quill.history.clear();initRichImages(editor,quill);richFoldRefresh(quill);updateRichEmpty(editor);updateRichToolbar(editor);if(typeof initRichListDrag==="function")initRichListDrag(editor);
   editor.addEventListener("beforeinput",event=>{if(event.isComposing||event.inputType==="insertCompositionText")editor.classList.add("ime-composing")});
   editor.addEventListener("compositionstart",()=>editor.classList.add("ime-composing"));
-  editor.addEventListener("compositionend",()=>{editor.classList.remove("ime-composing");queueMicrotask(()=>updateRichEmpty(editor))});
+  editor.addEventListener("compositionend",()=>{editor.classList.remove("ime-composing");queueMicrotask(()=>{richFoldRefresh(quill);updateRichEmpty(editor)})});
   editor.addEventListener("blur",()=>editor.classList.remove("ime-composing"));
-  quill.on("selection-change",range=>{if(range){activeRichEditor=editor;updateRichToolbar(editor)}else if(activeRichEditor===editor)queueMicrotask(()=>{if(!editor.contains(document.activeElement)&&!document.activeElement?.closest?.(".rich-toolbar,#undoButton,#redoButton")){activeRichEditor=null;renderSidebar()}})});
-  quill.on("text-change",(delta,oldDelta,source)=>{if(quick)normalizeQuickNoteLines(quill);updateRichEmpty(editor);updateRichToolbar(editor);if(source==="user")editor.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText"}));if(quick)scheduleTodayScrollability();queueMicrotask(()=>updateRichToolbar(editor))});
+  quill.on("selection-change",range=>{if(range){editor.__richLastRange={index:range.index,length:range.length};activeRichEditor=editor;updateRichToolbar(editor)}else if(activeRichEditor===editor)queueMicrotask(()=>{if(!editor.contains(document.activeElement)&&!document.activeElement?.closest?.(".rich-toolbar,#undoButton,#redoButton")){activeRichEditor=null;renderSidebar()}})});
+  quill.on("text-change",(delta,oldDelta,source)=>{richFoldRefresh(quill);if(quick)normalizeQuickNoteLines(quill);updateRichEmpty(editor);updateRichToolbar(editor);if(source==="user")editor.dispatchEvent(new InputEvent("input",{bubbles:true,inputType:"insertText"}));if(quick)scheduleTodayScrollability();queueMicrotask(()=>updateRichToolbar(editor))});
  });
 }
 function richEditorFor(owner){if(owner?.closest?.("#workJournal"))return journalToolbarEditor(owner);let host=owner?.closest?.(".editor-box,.review-field,.memo-editor-body,.quick-note-body");return host?.querySelector(".rich-editor")||null}
@@ -3441,7 +3756,7 @@ function restoreRichBookmark(editor,bookmark){
 function richState(editor){
  let state=richStates.get(editor);if(state)return state;let serialized=sanitizeRichValue(editor.innerHTML),empty=!serialized,clean=serialized||"<p><br></p>";if(clean!==editor.innerHTML)editor.innerHTML=clean;if(empty&&document.activeElement===editor)setRichCaret(editor.firstElementChild,0);state={history:[{html:editor.innerHTML,bookmark:null}],index:0,bookmark:richBookmark(editor),timer:0,silent:false};richStates.set(editor,state);updateRichEmpty(editor);return state;
 }
-function updateRichEmpty(editor){let quill=quillFor(editor),text=quill?quill.getText():editor.textContent||"";editor.dataset.empty=(text.replace(/\u200b|\u00a0/g,"").trim()||editor.querySelector("ul,ol,.focus-marker,.rich-divider,.rich-image,.rich-image-upload"))?"false":"true"}
+function updateRichEmpty(editor){let quill=quillFor(editor),text=quill?quill.getText():editor.textContent||"";editor.dataset.empty=(text.replace(/\u200b|\u00a0/g,"").trim()||editor.querySelector("ul,ol,.focus-marker,.rich-divider,.rich-image,.rich-image-upload,[data-rich-fold]"))?"false":"true"}
 function rememberRichSelection(editor){
  let direct=editor&&quillFor(editor);if(direct){if(direct.getSelection()){activeRichEditor=editor;updateRichToolbar(editor)}return}let selection=getSelection();if(!selection.rangeCount)return;let range=selection.getRangeAt(0),node=range.commonAncestorContainer.nodeType===1?range.commonAncestorContainer:range.commonAncestorContainer.parentElement,root=editor||node?.closest?.(".rich-editor");if(!root||!root.contains(range.startContainer)||!root.contains(range.endContainer))return;let quill=quillFor(root);if(quill){if(quill.getSelection()){activeRichEditor=root;updateRichToolbar(root)}return}activeRichEditor=root;let state=richState(root);state.bookmark=richBookmark(root);updateRichToolbar(root);
 }
@@ -3458,7 +3773,7 @@ function richMutate(editor,mutator,inputType="formatBlock"){
 }
 function updateRichToolbar(editor){
  let host=editor.closest("#workJournal")?(typeof VISUAL_PREVIEW_ENABLED!=="undefined"&&VISUAL_PREVIEW_ENABLED&&visualPreview.mode==="new"?editor.closest("#workJournal").querySelector(editor.dataset.journalReview?".journal-review-tools":".journal-daily-header"):editor.closest("#workJournal").querySelector(".journal-top")):editor.closest(".editor-box,.review-field,.memo-editor-body,.quick-note-body"),quill=quillFor(editor),quillRange=quill?.getSelection(),format=quillRange?quill.getFormat(quillRange):{},selection=getSelection(),node=selection.rangeCount?(selection.anchorNode?.nodeType===3?selection.anchorNode.parentElement:selection.anchorNode):null;
- host?.querySelectorAll("[data-command]").forEach(button=>{let command=button.dataset.command,heading=command==="heading2"?2:command==="heading3"?3:false,highlight=command==="highlightYellow"?"yellow":command==="highlightGreen"?"green":command==="highlightBlue"?"blue":"",active=quill?(command==="bold"?!!format.bold:command==="underline"?!!format.underline:command==="paragraph"?!format.header:heading?format.header===heading:highlight?format.highlight===highlight:command==="insertUnorderedList"?format.list==="bullet":command==="insertOrderedList"?format.list==="ordered":command==="expand"?host?.classList.contains("rich-expanded"):false):command==="bold"?!!node?.closest?.("strong,b"):command==="underline"?!!node?.closest?.("u"):command==="insertUnorderedList"?node?.closest?.("ul")?.closest?.(".rich-editor")===editor:command==="insertOrderedList"?node?.closest?.("ol")?.closest?.(".rich-editor")===editor:false,disabled=command!=="expand"&&!!quill&&!quill.isEnabled();if(quill&&quillRange&&command==="indent")disabled=disabled||!canChangeQuillIndent(quill,quillRange,1);if(quill&&quillRange&&command==="outdent")disabled=disabled||!canChangeQuillIndent(quill,quillRange,-1);button.classList.toggle("active",!!active);if(highlight)button.setAttribute("aria-pressed",active?"true":"false");button.disabled=disabled;if(command==="expand"){button.setAttribute("aria-pressed",active?"true":"false");button.setAttribute("aria-label",active?"收起阅读与编辑":"展开阅读与编辑");button.dataset.tip=active?"收起阅读与编辑（Esc）":"展开阅读与编辑";let label=active?"×":"⛶";if(button.textContent!==label)button.textContent=label}});
+ host?.querySelectorAll("[data-command]").forEach(button=>{let command=button.dataset.command,heading=command==="heading2"?2:command==="heading3"?3:false,highlight=command==="highlightYellow"?"yellow":command==="highlightGreen"?"green":command==="highlightBlue"?"blue":"",active=quill?(command==="foldText"?!!format.fold?.includes(":text:"):command==="foldHeading"?!!format.fold?.includes(":heading:"):command==="bold"?!!format.bold:command==="underline"?!!format.underline:command==="paragraph"?!format.header:heading?format.header===heading:highlight?format.highlight===highlight:command==="insertUnorderedList"?format.list==="bullet":command==="insertOrderedList"?format.list==="ordered":command==="expand"?host?.classList.contains("rich-expanded"):false):command==="bold"?!!node?.closest?.("strong,b"):command==="underline"?!!node?.closest?.("u"):command==="insertUnorderedList"?node?.closest?.("ul")?.closest?.(".rich-editor")===editor:command==="insertOrderedList"?node?.closest?.("ol")?.closest?.(".rich-editor")===editor:false,disabled=command!=="expand"&&!!quill&&!quill.isEnabled();if(quill&&quillRange&&command==="indent")disabled=disabled||!canChangeQuillIndent(quill,quillRange,1);if(quill&&quillRange&&command==="outdent")disabled=disabled||!canChangeQuillIndent(quill,quillRange,-1);button.classList.toggle("active",!!active);if(highlight||command==="foldText"||command==="foldHeading")button.setAttribute("aria-pressed",active?"true":"false");button.disabled=disabled;if(command==="unfold")button.hidden=!format.fold;if(command==="expand"){button.setAttribute("aria-pressed",active?"true":"false");button.setAttribute("aria-label",active?"收起阅读与编辑":"展开阅读与编辑");button.dataset.tip=active?"收起阅读与编辑（Esc）":"展开阅读与编辑";let label=active?"×":"⛶";if(button.textContent!==label)button.textContent=label}});
  if(activeRichEditor===editor){$("#undoButton").disabled=!richHistoryAvailable(editor,-1);$("#redoButton").disabled=!richHistoryAvailable(editor,1)}
 }
 function richSelection(editor){let selection=getSelection();if(!selection.rangeCount)return null;let range=selection.getRangeAt(0);return editor.contains(range.startContainer)&&editor.contains(range.endContainer)?range:null}
@@ -3495,12 +3810,12 @@ function richToggleList(editor,listTag){
  let node=range.startContainer.nodeType===3?range.startContainer.parentElement:range.startContainer,item=node?.closest?.("li");if(item&&editor.contains(item)){let source=item.parentElement;if(source?.tagName===listTag)return richUnlistItem(editor,item);return richRetypeListItem(editor,item,listTag)}let block=richBlock(editor,range);if(!block)return;return richParagraphToList(block,listTag);
 }
 function applyRichCommand(command,owner){
- let editor=richEditorFor(owner)||activeRichEditor,quill=quillFor(editor);if(!editor)return;if(command==="expand")return toggleRichExpanded(editor);if(quill&&!quill.isEnabled()||!quill&&editor.contentEditable==="false")return;if(quill){let range=quill.getSelection(true);if(!range)return;activeRichEditor=editor;let format=quill.getFormat(range),heading=command==="heading2"?2:command==="heading3"?3:false,highlight=command==="highlightYellow"?"yellow":command==="highlightGreen"?"green":command==="highlightBlue"?"blue":"";if(command==="divider")insertQuillDivider(quill,range.index,range.length);else if(command==="bold"||command==="underline")quill.format(command,!format[command],"user");else if(command==="paragraph"||heading){quill.history.cutoff();quill.formatLine(range.index,Math.max(1,range.length),heading?{header:heading,indent:false}:{header:false},"user");quill.history.cutoff()}else if(highlight)quill.format("highlight",format.highlight===highlight?false:highlight,"user");else if(command==="insertOrderedList"||command==="insertUnorderedList"){let value=command==="insertOrderedList"?"ordered":"bullet";quill.format("list",format.list===value?false:value,"user")}else if(command==="indent"||command==="outdent")changeQuillIndent(quill,range,command==="indent"?1:-1);else if(command==="removeFormat"&&range.length)quill.removeFormat(range.index,range.length,"user");if(command!=="divider")quill.setSelection(range.index,range.length,"silent");quill.focus({preventScroll:true});updateRichToolbar(editor);return}let state=richState(editor);activeRichEditor=editor;state.bookmark||(state.bookmark=richBookmark(editor));
+ let editor=richEditorFor(owner)||activeRichEditor,quill=quillFor(editor);if(!editor)return;if(command==="expand")return toggleRichExpanded(editor);if(quill&&!quill.isEnabled()||!quill&&editor.contentEditable==="false")return;if(quill){let range=quill.getSelection(true);if(!range)return;activeRichEditor=editor;let format=quill.getFormat(range),heading=command==="heading2"?2:command==="heading3"?3:false,highlight=command==="highlightYellow"?"yellow":command==="highlightGreen"?"green":command==="highlightBlue"?"blue":"";if(command==="unfold"){insertRichFold(quill,range,format.fold?.includes(":heading:")?"heading":"text",true);updateRichToolbar(editor);return}if(command==="foldText"||command==="foldHeading"){insertRichFold(quill,range,command==="foldHeading"?"heading":"text");quill.focus({preventScroll:true});updateRichToolbar(editor);return}else if(command==="divider")insertQuillDivider(quill,range.index,range.length);else if(command==="bold"||command==="underline")quill.format(command,!format[command],"user");else if(command==="paragraph"||heading){quill.history.cutoff();quill.formatLine(range.index,Math.max(1,range.length),heading?{header:heading,indent:false}:{header:false},"user");if(format.fold)quill.formatLine(range.index,1,"fold",format.fold.replace(/:(text|heading):/,heading?":heading:":":text:"),"user");quill.history.cutoff()}else if(highlight)quill.format("highlight",format.highlight===highlight?false:highlight,"user");else if(command==="insertOrderedList"||command==="insertUnorderedList"){let value=command==="insertOrderedList"?"ordered":"bullet";quill.format("list",format.list===value?false:value,"user")}else if(command==="indent"||command==="outdent")changeQuillIndent(quill,range,command==="indent"?1:-1);else if(command==="removeFormat"&&range.length)clearQuillRichFormat(quill,range);if(command!=="divider")quill.setSelection(range.index,range.length,"silent");quill.focus({preventScroll:true});updateRichToolbar(editor);return}let state=richState(editor);activeRichEditor=editor;state.bookmark||(state.bookmark=richBookmark(editor));
  editor.focus({preventScroll:true});if(!richSelection(editor))restoreRichBookmark(editor,state.bookmark);richMutate(editor,()=>{if(command==="bold")richToggleInline(editor,"strong");else if(command==="underline")richToggleInline(editor,"u");else if(command==="insertOrderedList")richToggleList(editor,"OL");else if(command==="insertUnorderedList")richToggleList(editor,"UL");else if(command==="divider"){let range=richSelection(editor),block=range&&richBlock(editor,range);if(block)richConvertShortcut(editor,block,range,"divider")}else if(command==="removeFormat")richClearFormat(editor)});
 }
 let expandedRichBox=null;
-function closeRichExpanded(restoreFocus=true){let box=expandedRichBox;if(!box)return false;expandedRichBox=null;box.classList.remove("rich-expanded");document.body.classList.remove("rich-expanded-open");let editor=box.querySelector(".rich-editor"),quill=quillFor(editor);if(editor){updateRichToolbar(editor);if(restoreFocus){quill?.focus({preventScroll:true});editor.focus?.({preventScroll:true})}}return true}
-function toggleRichExpanded(editor){let box=editor?.closest(".editor-box,.review-field,.memo-editor-body");if(!box)return;if(expandedRichBox===box)return closeRichExpanded();if(expandedRichBox)closeRichExpanded(false);expandedRichBox=box;box.classList.add("rich-expanded");document.body.classList.add("rich-expanded-open");updateRichToolbar(editor);requestAnimationFrame(()=>{let quill=quillFor(editor);quill?.focus({preventScroll:true});let root=quill?.root||editor;root.scrollTop=Math.max(0,root.scrollTop)})}
+function closeRichExpanded(restoreFocus=true){let box=expandedRichBox;if(!box)return false;expandedRichBox=null;box.classList.remove("rich-expanded");document.body.classList.remove("rich-expanded-open");let editor=box.querySelector(".rich-editor"),quill=quillFor(editor);if(editor){updateRichToolbar(editor);if(restoreFocus){quill?.focus({preventScroll:true});let range=quill?.getSelection()||editor.__richLastRange||editor.__richExpandRange;if(range&&quill)quill.setSelection(range.index,range.length,"silent");editor.focus?.({preventScroll:true})}}return true}
+function toggleRichExpanded(editor){let quill=quillFor(editor),selection=quill?.getSelection()||editor?.__richLastRange||quill?.selection?.savedRange;if(selection)editor.__richExpandRange={index:selection.index,length:selection.length};let box=editor?.closest(".editor-box,.review-field,.memo-editor-body");if(!box)return;if(expandedRichBox===box)return closeRichExpanded();if(expandedRichBox)closeRichExpanded(false);expandedRichBox=box;box.classList.add("rich-expanded");document.body.classList.add("rich-expanded-open");quill?.focus({preventScroll:true});if(selection&&quill)quill.setSelection(selection.index,selection.length,"silent");updateRichToolbar(editor);requestAnimationFrame(()=>{let quill=quillFor(editor);quill?.focus({preventScroll:true});let root=quill?.root||editor;root.scrollTop=Math.max(0,root.scrollTop)})}
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&expandedRichBox){event.preventDefault();event.stopImmediatePropagation();closeRichExpanded()}},true);
 function richBlock(editor,range){let node=range.startContainer.nodeType===3?range.startContainer.parentElement:range.startContainer,block=node?.closest?.("p,div,li");return block&&editor.contains(block)&&block!==editor?block:null}
 function setRichCaret(node,offset=0){let range=document.createRange(),selection=getSelection(),limit=node.nodeType===3?node.length:node.childNodes.length;range.setStart(node,Math.min(offset,limit));range.collapse(true);selection.removeAllRanges();selection.addRange(range);return range}
@@ -3568,7 +3883,7 @@ function richInput(editor){let quill=quillFor(editor);if(quill){updateRichEmpty(
 function richKeydown(event){
  let editor=event.target.closest(".rich-editor");if(!editor||quillFor(editor))return false;let key=event.key.toLowerCase();if((event.ctrlKey||event.metaKey)&&key==="z"){event.preventDefault();richApplyHistory(editor,event.shiftKey?1:-1);return true}if((event.ctrlKey||event.metaKey)&&key==="y"){event.preventDefault();richApplyHistory(editor,1);return true}if((event.ctrlKey||event.metaKey)&&(key==="b"||key==="u")){event.preventDefault();rememberRichSelection(editor);applyRichCommand(key==="b"?"bold":"underline",editor.closest(".editor-box,.review-field,.memo-editor-body,.quick-note-body")?.querySelector('[data-command="'+(key==="b"?'bold':'underline')+'"]'));return true}return richListIndent(event,editor)||richListBoundary(event,editor)||richShortcut(event)
 }
-function serializeRichEditor(editor){if(!editor)return"";let quill=quillFor(editor);if(quill)return sanitizeRichValue(quill.getSemanticHTML());richNormalizeListStructure(editor);return sanitizeRichValue(editor.innerHTML||"")}
+function serializeRichEditor(editor){if(!editor)return"";let quill=quillFor(editor);if(quill)return sanitizeRichValue(richFoldSemanticHTML(quill,quill.getSemanticHTML()));richNormalizeListStructure(editor);return sanitizeRichValue(editor.innerHTML||"")}
 const PLANNING_WIDTH_KEY="work-cockpit-planning-width-v1";
 let planningWidth=45,planningPointer=null,tableSortables=[];
 try{let saved=Number(localStorage.getItem(PLANNING_WIDTH_KEY));if(saved>=20&&saved<=70)planningWidth=saved}catch(error){}
@@ -4025,6 +4340,53 @@ document.addEventListener("click",event=>{
 new MutationObserver(()=>{if(richImageRefreshQueued)return;richImageRefreshQueued=true;queueMicrotask(()=>{richImageRefreshQueued=false;refreshRichImages()})}).observe(document.body,{subtree:true,childList:true});
 window.addEventListener("beforeunload",event=>{if([...richImageJobs.values()].some(job=>["queued","uploading"].includes(job.status))){event.preventDefault();event.returnValue=""}});
 window.addEventListener("focus",()=>{document.querySelectorAll("img.rich-image").forEach(image=>{if(image.dataset.imageState==="failed")delete image.__richImageSignature});refreshRichImages()});
+// A single double-column task editor. Layout preferences from the trial are ignored.
+let taskLayoutContext=null,taskLayoutMutation=null;
+function taskChecklistSummary(){let count=taskDraft.checklist.filter(item=>item.done).length;return'<span>检查清单</span><span class="checklist-progress">'+count+' / '+taskDraft.checklist.length+'</span><span class="checklist-chevron" aria-hidden="true">'+(taskChecklistCollapsed?'⌄':'⌃')+'</span>'}
+function taskLayoutField(id){return $("#"+id)?.closest(".field")}
+function initTaskLayouts(){
+ let root=$("#taskEditor"),modal=$("#taskDialog"),main=$(".task-content-column",root),props=$(".task-column:first-child",root),support=$(".attachment-column",root);if(!main||!props||!support)return;
+ taskLayoutMutation?.disconnect();let previous=taskLayoutContext,same=previous?.id===taskDraft.id;modal.dataset.taskLayout="d";$("#saveTaskButton").textContent="关闭";
+ let inner=document.createElement("div");inner.className="task-editor-inner";while(main.firstChild)inner.append(main.firstChild);main.append(inner);
+ taskLayoutField("taskTitle").classList.add("task-name-field");taskLayoutField("taskNext").classList.add("task-next-field");
+ let topRow=document.createElement("div"),chips=document.createElement("div"),time=document.createElement("div"),flags=document.createElement("div");topRow.className="task-v43-title-row";chips.className="task-v43-chips";time.className="task-v43-time";flags.className="task-v43-flags";inner.prepend(topRow,chips,time);topRow.append(taskLayoutField("taskTitle"));
+ for(let id of["draftStatus","draftPriority","draftProject","draftType","draftMilestone"]){let field=taskLayoutField(id);field.querySelector("label").htmlFor=id;field.querySelector(".hover-select-trigger")?.setAttribute("aria-label",field.querySelector("label").textContent);chips.append(field)}
+ let projectLink=$(".task-project-link",props);if(projectLink)chips.append(projectLink);
+ for(let id of["draftPlanDate","draftDue","draftCompleted","draftFollowup"])time.append(taskLayoutField(id));time.append(flags);
+ for(let id of["draftFocus","draftWeek"])flags.append($("#"+id).closest("label"));time.append($(".task-record-section",props));props.remove();$("#checklistResizer",inner)?.remove();
+ let focus=document.createElement("button");focus.type="button";focus.className="task-focus-toggle";focus.dataset.taskFocus="";focus.textContent="⛶ 专注编辑";$(".task-notes-field .obsidian-heading",inner).append(focus);
+ let labels={attachments:"附件",related:"关联",decisions:"决策",history:"周记录"},quick=document.createElement("nav");quick.className="task-support-shortcuts";quick.setAttribute("aria-label","事项辅助内容");quick.innerHTML=Object.entries(labels).map(([key,label])=>'<button type="button" data-task-support="'+key+'" data-task-quick aria-controls="taskSupport-'+key+'" aria-expanded="false">'+label+' <span data-task-support-count="'+key+'">0</span></button>').join("")+'<button type="button" data-task-support-toggle aria-controls="taskSupportPanel" aria-expanded="false" data-tip="辅助栏：非输入状态按 Tab 开关">辅助栏</button>';topRow.append(quick);
+ support.id="taskSupportPanel";support.setAttribute("aria-label","事项辅助栏");let content=$(".task-support-content",support),sections=Array.from(content.children);Object.keys(labels).forEach((key,index)=>{sections[index].id="taskSupport-"+key;sections[index].dataset.taskSupportSection=key;sections[index].setAttribute("role","region");sections[index].setAttribute("aria-label",labels[key])});
+ let supportScroll=document.createElement("div");supportScroll.className="task-support-scroll";supportScroll.innerHTML='<div class="task-support-heading"><strong>辅助内容</strong><button type="button" data-task-support-close aria-label="收起事项辅助栏">×</button></div>';supportScroll.append($(".checklist-section",inner),content);support.replaceChildren(supportScroll);
+ taskLayoutContext={id:taskDraft.id,root,modal,main,inner,support,supportScroll,content,panel:same?previous.panel:Array.from(taskUploads.values()).some(job=>job.taskId===taskDraft.id&&job.userId===Cloud.user?.id)?"attachments":"related",open:same?previous.open:true,scrolls:same?previous.scrolls:{}};
+ showTaskSupport(taskLayoutContext.panel,taskLayoutContext.open);refreshTaskLayoutMeta();taskLayoutMutation=new MutationObserver(refreshTaskLayoutMeta);for(let node of root.querySelectorAll(".attachment-list,#relatedList,#taskDecisionList,#taskUploadQueue"))taskLayoutMutation.observe(node,{childList:true,subtree:true});
+}
+function refreshTaskLayoutMeta(){
+ let c=taskLayoutContext;if(!c||!taskDraft||c.id!==taskDraft.id)return;let counts={attachments:taskDraft.attachments.length,related:relatedDraft.size,decisions:state.decisions.filter(item=>!item.archived&&item.sourceTaskId===taskDraft.id).length,history:taskHistoryEntries(taskDraft.id).length};c.root.querySelectorAll("[data-task-support-count]").forEach(node=>{let value=String(counts[node.dataset.taskSupportCount]);if(node.textContent!==value)node.textContent=value});
+}
+function showTaskSupport(panel,open=true,focus=false){
+ let c=taskLayoutContext;if(!c||!["attachments","related","decisions","history"].includes(panel))return;
+ if(c.open)c.scrolls[c.panel]=c.supportScroll.scrollTop;let focusedInside=c.support.contains(document.activeElement);c.panel=panel;c.open=open;c.modal.dataset.taskSupportOpen=String(open);c.support.hidden=!open;
+ c.root.querySelectorAll("[data-task-support-section]").forEach(node=>node.hidden=node.dataset.taskSupportSection!==panel);
+ c.root.querySelectorAll("[data-task-support]").forEach(button=>{let active=open&&button.dataset.taskSupport===panel;button.classList.toggle("active",active);button.setAttribute("aria-expanded",String(active))});
+ c.root.querySelector("[data-task-support-toggle]").setAttribute("aria-expanded",String(open));c.supportScroll.scrollTop=c.scrolls[panel]||0;
+ if(focus||(!open&&focusedInside))c.root.querySelector('[data-task-quick][data-task-support="'+panel+'"]').focus({preventScroll:true});
+}
+document.addEventListener("click",event=>{
+ if(event.target.closest("[data-task-focus]")){toggleRichExpanded($("#taskNotes"));return}
+ let panel=event.target.closest("[data-task-support]");if(panel){let c=taskLayoutContext;showTaskSupport(panel.dataset.taskSupport,!(c.open&&c.panel===panel.dataset.taskSupport));return}
+ if(event.target.closest("[data-task-support-close]"))showTaskSupport(taskLayoutContext.panel,false,true);
+ if(event.target.closest("[data-task-support-toggle]"))showTaskSupport(taskLayoutContext.panel,!taskLayoutContext.open);
+});
+document.addEventListener("keydown",event=>{
+ let c=taskLayoutContext;if(!$("#taskDialog")?.open||!c||Array.from(document.querySelectorAll("dialog[open]")).at(-1)?.id!=="taskDialog")return;
+ if(event.key==="Tab"&&!event.shiftKey&&!event.ctrlKey&&!event.altKey&&!event.metaKey&&!event.isComposing&&!expandedRichBox&&!activeHoverSelect&&!event.target.closest('input,textarea,select,[contenteditable="true"],[role="listbox"],[role="option"]')){event.preventDefault();event.stopImmediatePropagation();showTaskSupport(c.panel,!c.open);return}
+ if(event.key==="Escape"&&c.open&&!activeHoverSelect&&!expandedRichBox){event.preventDefault();event.stopImmediatePropagation();showTaskSupport(c.panel,false,true);return}
+ let tab=event.target.closest("[data-task-quick][data-task-support]");if(!tab||!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
+ event.preventDefault();let tabs=Array.from(tab.parentElement.querySelectorAll("[data-task-support]")),index=tabs.indexOf(tab),next=event.key==="Home"?0:event.key==="End"?tabs.length-1:(index+(event.key==="ArrowLeft"?-1:1)+tabs.length)%tabs.length;showTaskSupport(tabs[next].dataset.taskSupport,true,true);
+},true);
+
+document.addEventListener("mousedown",event=>{if(event.target.closest("[data-task-focus]"))event.preventDefault()});
 function saveRelationsNow(label){
  let existing=taskById(taskDraft.id);if(!existing)return;
  let next=Array.from(relatedDraft);
@@ -4176,7 +4538,7 @@ function hideTaskOptionsHover(){if(ui.taskOptionsOpen)return;let button=$("[data
 document.addEventListener("pointerover",event=>{if(!isMouseHover(event))return;let details=event.target.closest?.("details.multi-filter:not([data-click-only])");if(details&&!details.contains(event.relatedTarget))openHoverDetail(details);let taskOwner=event.target.closest?.("[data-hover-task-options],[data-hover-task-options-panel]");if(taskOwner&&!taskOwner.contains(event.relatedTarget))showTaskOptionsHover()});
 document.addEventListener("pointerout",event=>{if(!isMouseHover(event))return;let details=event.target.closest?.("details.multi-filter:not([data-click-only])");if(details&&!details.contains(event.relatedTarget)){let next=event.relatedTarget?.closest?.("details.multi-filter:not([data-click-only])");if(next&&next!==details){closeHoverDetail(details);openHoverDetail(next)}else{let timer=setTimeout(()=>{if(!details.matches(":hover")&&!details.matches(":focus-within"))closeHoverDetail(details)},70);hoverDetailTimers.set(details,timer)}}let taskOwner=event.target.closest?.("[data-hover-task-options],[data-hover-task-options-panel]");if(taskOwner&&!taskOwner.contains(event.relatedTarget)&&!event.relatedTarget?.closest?.("[data-hover-task-options],[data-hover-task-options-panel]")){clearTimeout(taskOptionsHoverTimer);taskOptionsHoverTimer=setTimeout(()=>{let button=$("[data-hover-task-options]"),panel=$("[data-hover-task-options-panel]");if(!button?.matches(":hover,:focus-within")&&!panel?.matches(":hover,:focus-within"))hideTaskOptionsHover()},90)}});
 document.addEventListener("selectionchange",()=>rememberRichSelection());
-document.addEventListener("pointerdown",event=>{let block=event.target.closest?.(".quick-note-editor .ql-editor p,.quick-note-editor .ql-editor li");if(!block)return;let rect=block.getBoundingClientRect();if(event.clientX<=rect.left+25){event.preventDefault();event.stopPropagation();toggleQuickNoteLine(block)}});
+document.addEventListener("pointerdown",event=>{if(event.target.closest?.(".rich-fold-arrow"))return;let block=event.target.closest?.(".quick-note-editor .ql-editor p,.quick-note-editor .ql-editor li");if(!block)return;let rect=block.getBoundingClientRect();if(event.clientX<=rect.left+25){event.preventDefault();event.stopPropagation();toggleQuickNoteLine(block)}});
 document.addEventListener("pointerdown",event=>{let command=event.target.closest("[data-command]");if(command){let editor=richEditorFor(command);if(editor){let quill=quillFor(editor);if(quill){activeRichEditor=editor;updateRichToolbar(editor)}else{richState(editor);rememberRichSelection(editor)}}event.preventDefault()}});
 document.addEventListener("focusin",event=>{let editor=event.target.closest?.(".rich-editor");if(editor){if(quillFor(editor)){activeRichEditor=editor;updateRichToolbar(editor)}else{richState(editor);rememberRichSelection(editor)}}else if(!event.target.closest?.(".rich-toolbar,#undoButton,#redoButton"))activeRichEditor=null});
 document.addEventListener("compositionstart",event=>{let editor=event.target.closest?.(".rich-editor");if(editor&&!quillFor(editor))editor.dataset.composing="1"});document.addEventListener("compositionend",event=>{let editor=event.target.closest?.(".rich-editor");if(editor&&!quillFor(editor)){editor.dataset.composing="0";setTimeout(()=>richShortcutAfterInput(editor),0)}});
@@ -4707,7 +5069,7 @@ function journalExport(format,section="days"){
  let week=journalWeek(journalUI.week),parts=[];
  for(let date of (section==="review"?JOURNAL_REVIEW_FIELDS:Object.keys(week.days).sort())){
   let editor=$(section==="review"?'[data-journal-review="'+date+'"]':'[data-journal-date="'+date+'"]'),q=quillFor(editor);if(!q||!q.getText().trim())continue;
-  let title=section==="review"?(WEEKLY_SUMMARY_LABELS[date]):journalDateLabel(date);if(format==="rich"){parts.push('<h2>'+esc(title)+'</h2>'+journalRichExport(q.getSemanticHTML()));continue}
+  let title=section==="review"?(WEEKLY_SUMMARY_LABELS[date]):journalDateLabel(date);if(format==="rich"){parts.push('<h2>'+esc(title)+'</h2>'+journalRichExport(richFoldSemanticHTML(q,q.getSemanticHTML())));continue}
   let lines=[],ops=q.getContents().ops,inline="";
   const escapeMD=text=>text.replace(/([\\`*_{}\[\]<>#!|])/g,"\\$1");let counters=[];
   for(let op of ops){if(typeof op.insert!=="string"){if(op.insert?.divider!==undefined)lines.push((op.insert.divider?String(op.insert.divider)+'\n':'')+'---');else if(op.insert?.focus)inline+='重点 ';continue}let chunks=op.insert.split("\n");for(let i=0;i<chunks.length;i++){
@@ -4732,7 +5094,7 @@ function journalCopyFallback(format,text){
  let content=dialog.querySelector('.journal-copy-content');if(format==='rich'){content.contentEditable='true';content.innerHTML=text}else{let area=document.createElement('textarea');area.readOnly=true;area.value=text;content.appendChild(area)}dialog.querySelector('button').onclick=()=>dialog.close();dialog.addEventListener('close',()=>dialog.remove());document.body.appendChild(dialog);dialog.showModal();if(format==='rich'){content.focus();let range=document.createRange();range.selectNodeContents(content);let selection=getSelection();selection.removeAllRanges();selection.addRange(range)}else{let area=content.querySelector('textarea');area.focus();area.select()}
 }
 
-function journalRichExport(html){let box=document.createElement('div');box.innerHTML=sanitizeRichValue(html);let colors={yellow:'#fff0a8',green:'#c8efcf',blue:'#cce4ff'};box.querySelectorAll('span').forEach(node=>{let color=Object.keys(colors).find(value=>node.classList.contains('rich-highlight-'+value));if(color)node.style.backgroundColor=colors[color]});box.querySelectorAll('p,h2,h3').forEach(node=>{let level=(node.className.match(/ql-indent-([1-3])/)||[])[1];if(level)node.style.marginLeft=(Number(level)*24)+'px'});return box.innerHTML}
+function journalRichExport(html){let box=document.createElement('div');box.innerHTML=sanitizeRichValue(html);let colors={yellow:'#fff0a8',green:'#c8efcf',blue:'#cce4ff'};box.querySelectorAll('span').forEach(node=>{let color=Object.keys(colors).find(value=>node.classList.contains('rich-highlight-'+value));if(color)node.style.backgroundColor=colors[color]});box.querySelectorAll('p,h2,h3').forEach(node=>{let level=(node.className.match(/ql-indent-([1-3])/)||[])[1];if(level)node.style.marginLeft=(Number(level)*24)+'px'});box.querySelectorAll("[data-rich-depth]").forEach(node=>{node.style.marginLeft=(richFoldDepth(node.dataset.richDepth)*20)+"px";node.removeAttribute("data-rich-depth")});box.querySelectorAll("[data-rich-fold]").forEach(node=>node.removeAttribute("data-rich-fold"));return box.innerHTML}
 const imageViewerState={taskId:'',attachmentId:'',resource:null,token:0,zoom:1,fit:true};
 function initAttachmentViewer(){
  if($('#imageViewer'))return;
@@ -4876,7 +5238,7 @@ function syncTaskJournalLayout(metrics){
  panel.querySelectorAll('[data-task-journal-pane]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.taskJournalPane===taskJournalPane)));
  panel.hidden=!journalUI.open||(compact&&taskJournalPane==='task');
  const support=$('.task-support-disclosure',modal),narrow=together&&!compact&&metrics?.taskWidth<1120;
- if(support&&support.dataset.compact!==String(narrow)){support.open=!narrow;support.dataset.compact=String(narrow)}
+ if(support&&!modal.dataset.taskLayout&&support.dataset.compact!==String(narrow)){support.open=!narrow;support.dataset.compact=String(narrow)}
 }
 document.addEventListener('click',event=>{
  const button=event.target.closest('[data-task-journal-pane]');if(!button)return;

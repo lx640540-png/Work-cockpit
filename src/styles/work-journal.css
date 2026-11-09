@@ -25,3 +25,6 @@
 @media(max-width:820px) and (max-height:600px){#workJournal{grid-template-rows:auto minmax(0,auto) minmax(64px,1fr) auto}}
 
 :root[data-theme="dark"] .journal-calendar-grid button.selected:not(.week-selected){color:#0d1522}
+
+/* Separate every date heading from its editable daily record. */
+#workJournal .journal-date-row{border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}

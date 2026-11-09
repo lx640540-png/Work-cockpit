@@ -160,7 +160,7 @@ test('task titles open details and drafts save automatically before backdrop or 
   assert.equal(await page.locator('#taskDialog').getAttribute('open'),'','invalid draft must remain open');
   assert.match(await page.locator('#taskAutosaveStatus').textContent(),/请先填写事项名称/);
   await page.fill('#taskTitle','恢复后的标题');
-  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');assert.equal(await page.locator('#taskDialog').getAttribute('open'),'');await page.keyboard.press('Escape');
   await page.waitForFunction(()=>!document.querySelector('#taskDialog')?.open);
   assert.equal((await stored(page)).tasks.find(task=>task.id==='auto').title,'恢复后的标题');
 
@@ -252,7 +252,7 @@ test('overview keeps notes in task details, uses waiting follow-up dates, and su
  const page=await fixture(t,[makeTask('wait',{project:'p1',status:'等待',notes:'<p>第一段记录</p><p>第二段记录，尚未收到最终确认。</p>'})],{route:'projects',projects:projectFixture});
  const before=(await stored(page)).tasks[0];await page.click('[data-overview-project="p1"] [data-quick-date="wait"]');await page.click('[data-set-task-date="'+today+'"]');
  let data=await stored(page);assert.equal(data.tasks[0].followup,today);assert.equal(data.tasks[0].planDate,before.planDate);assert.equal(data.tasks[0].notes,before.notes);assert.equal(data.tasks[0].focus,false);
- assert.equal(await page.locator('.project-overview-tasks .progress-record').count(),0);await page.locator('[data-task="wait"] [data-open-task="wait"]').click();await page.locator('#taskDialog[open]').waitFor();assert.match(await page.locator('#taskNotes .ql-editor').innerText(),/第二段记录/);await page.locator('#taskForm .modal-actions [data-close="taskDialog"]').click();
+ assert.equal(await page.locator('.project-overview-tasks .progress-record').count(),0);await page.locator('[data-task="wait"] [data-open-task="wait"]').click();await page.locator('#taskDialog[open]').waitFor();assert.match(await page.locator('#taskNotes .ql-editor').innerText(),/第二段记录/);await page.locator('#saveTaskButton').click();
  await page.locator('.inline-help summary').focus();assert.equal(await page.locator('.inline-help').getAttribute('open'),'');await page.keyboard.press('Escape');assert.equal(await page.locator('.inline-help').getAttribute('open'),null);
  await page.setViewportSize({width:390,height:844});
  const width=await page.evaluate(()=>({body:document.documentElement.scrollWidth,viewport:innerWidth,main:mainScroll.scrollWidth,client:mainScroll.clientWidth}));assert(width.body<=width.viewport+1&&width.main<=width.client+1,JSON.stringify(width));
@@ -367,7 +367,7 @@ test('iteration: complete search pages past previews and retains context after o
  await page.click('[data-search-more="task"]');assert.equal(await page.locator('[data-search-task]').count(),46);
  await page.waitForFunction(()=>!renderFrame&&!searchView.restoring);await page.locator('[data-search-task="s40"]').scrollIntoViewIfNeeded();await page.clock.runFor(60);
  const top=await page.locator('#mainScroll').evaluate(n=>n.scrollTop);assert(top>100);
- await page.click('[data-search-task="s40"]');await page.locator('#taskDialog[open]').waitFor();await page.keyboard.press('Escape');await page.clock.runFor(100);
+ await page.click('[data-search-task="s40"]');await page.locator('#taskDialog[open]').waitFor();await page.keyboard.press('Escape');await page.keyboard.press('Escape');await page.clock.runFor(100);
  assert.equal(await page.locator('#searchPageInput').inputValue(),'查找目标');assert.equal(await page.locator('[data-search-task]').count(),46);
  assert(Math.abs((await page.locator('#mainScroll').evaluate(n=>n.scrollTop))-top)<5);
  await page.fill('#searchPageInput','独特正文命中');assert.equal(await page.locator('[data-search-task]').count(),10);
@@ -467,7 +467,7 @@ test('rich text: headings highlights expanded editing and three-level indentatio
  await editor.evaluate(node=>{node.__quill.setSelection(20,0,'silent');node.__quill.focus()});await page.keyboard.press('Tab');
  const formats=await editor.evaluate(node=>{let q=node.__quill;return{heading:q.getFormat(0,1).header,highlight:q.getFormat(5,5).highlight,paragraphIndent:q.getFormat(11,1).indent,list:q.getFormat(16,7).list,child:q.getFormat(20,1)}});
  assert.equal(formats.heading,2);assert.equal(formats.highlight,'yellow');assert.equal(formats.paragraphIndent,3);assert.equal(formats.list,'ordered');assert.equal(formats.child.list,'ordered');assert.equal(formats.child.indent,1);
- await editor.evaluate(node=>{node.__quill.__expandedIdentity='same-editor';node.__quill.setSelection(node.__quill.getLength()-1,0,'silent')});await page.click('.task-notes-editor [data-command="expand"]');
+ await editor.evaluate(node=>{node.__quill.__expandedIdentity='same-editor';node.__quill.setSelection(node.__quill.getLength()-1,0,'silent')});await page.click('[data-task-focus]');
  assert.equal(await page.locator('.task-notes-editor').evaluate(node=>node.classList.contains('rich-expanded')&&document.body.classList.contains('rich-expanded-open')&&node.querySelector('.rich-editor').__quill.__expandedIdentity==='same-editor'),true,'expanded mode replaced the editor or did not lock the background');
  await editor.evaluate(node=>node.__quill.insertText(node.__quill.getLength()-1,'展开中编辑','user'));await editor.press('Escape');
  assert.equal(await page.locator('.task-notes-editor').evaluate(node=>!node.classList.contains('rich-expanded')&&!document.body.classList.contains('rich-expanded-open')),true,'Escape did not leave expanded mode');assert.equal(await page.locator('#taskDialog').getAttribute('open'),'','Escape closed task detail together with expanded mode');
@@ -539,7 +539,7 @@ test('rich text: highlighter icons retain size and selection across colors, them
  }
  for(const [width,theme] of [[1600,'light'],[760,'dark']]){
   await page.setViewportSize({width,height:1000});await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
-  if(width===760)await page.click('.task-notes-editor [data-command="expand"]');
+  if(width===760){if(await page.locator('#taskSupportPanel').isVisible())await page.click('[data-task-support-close]');await page.click('[data-task-focus]')}
   const sizes=await page.locator('.task-notes-editor .rich-highlight-button').evaluateAll(nodes=>nodes.map(n=>{const b=n.getBoundingClientRect(),s=n.querySelector('svg').getBoundingClientRect();return[b.width,b.height,s.width,s.height,s.left>=b.left&&s.right<=b.right&&s.top>=b.top&&s.bottom<=b.bottom]}));
   assert.deepEqual(sizes,Array(3).fill([29,29,18,18,true]));
   assert.equal(await page.locator('.task-notes-editor .rich-toolbar').evaluate(n=>n.scrollWidth<=n.clientWidth),true,'toolbar overflowed');

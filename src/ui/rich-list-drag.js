@@ -4,11 +4,13 @@ let richDragUI=null;
 function richBlockUnits(quill){
  let lines=quill.getLines(),units=[];
  for(let i=0;i<lines.length;){let line=lines[i],index=quill.getIndex(line),format=quill.getFormat(index,1),end=i+1;
-  if(format.list)while(end<lines.length){let next=quill.getFormat(quill.getIndex(lines[end]),1);if(!next.list||(Number(next.indent)||0)<=(Number(format.indent)||0))break;end++}
+  if(format.fold)while(end<lines.length&&richFoldDepth(richFoldLineFormat(lines[end]).foldDepth)>richFoldDepth(format.foldDepth))end++;
+  else if(format.list)while(end<lines.length){let next=quill.getFormat(quill.getIndex(lines[end]),1);if(!next.list||(Number(next.indent)||0)<=(Number(format.indent)||0))break;end++}
   let nodes=lines.slice(i,end).map(item=>item.domNode),length=lines.slice(i,end).reduce((sum,item)=>sum+item.length(),0);units.push({index,length,nodes,format});i=end;
  }return units;
 }
 function richNestedUnits(quill,node){
+ let folded=richFoldNestedUnits(quill,node);if(folded)return folded;
  let lines=quill.getLines(),at=lines.findIndex(line=>line.domNode===node);if(at<0)return null;let format=quill.getFormat(quill.getIndex(lines[at]),1),indent=Number(format.indent)||0;if(!format.list||!indent)return null;
  let left=at,right=at;const fmt=i=>quill.getFormat(quill.getIndex(lines[i]),1);
  while(left>0&&fmt(left-1).list&&(Number(fmt(left-1).indent)||0)>=indent)left--;
@@ -30,7 +32,7 @@ function moveRichBlocks(data,slot){
  q.history.cutoff();q.updateContents(old.diff(next),'user');q.history.cutoff();q.focus({preventScroll:true});q.setSelection(index,data.count>1?Math.max(0,length-1):0,'silent');richDragSelections.set(editor,{index,length:data.count>1?Math.max(0,length-1):0});activeRichEditor=editor;updateRichToolbar(editor);
  q.getLines(index,Math.max(1,length-1)).forEach(line=>{let node=line.domNode;node.classList.add('rich-block-landed');setTimeout(()=>node.classList.remove('rich-block-landed'),450)});return true;
 }
-function richBlockRect(unit){let first=unit.nodes[0].getBoundingClientRect(),last=unit.nodes.at(-1).getBoundingClientRect();return{top:first.top,bottom:last.bottom,height:last.bottom-first.top}}
+function richBlockRect(unit){let visible=unit.nodes.filter(node=>node.getClientRects().length),first=(visible[0]||unit.nodes[0]).getBoundingClientRect(),last=(visible.at(-1)||unit.nodes[0]).getBoundingClientRect();return{top:first.top,bottom:last.bottom,height:last.bottom-first.top}}
 function initRichListDrag(editor){
  if(richDragEditors.has(editor)||!quillFor(editor)?.isEnabled())return;richDragEditors.add(editor);let q=quillFor(editor);
  q.on('selection-change',range=>{if(range)richDragSelections.set(editor,{index:range.index,length:range.length})});

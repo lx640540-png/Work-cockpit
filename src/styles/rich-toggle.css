@@ -1,0 +1,11 @@
+.rich-editor.ql-container .ql-editor [data-rich-depth]{margin-left:calc(var(--rich-fold-depth, 0) * 20px)!important}
+.rich-editor.ql-container .ql-editor .rich-fold-title{position:relative;padding-left:24px!important;min-height:1.5em}
+.ql-editor .rich-fold-hidden{display:none!important}
+.ql-editor .rich-fold-arrow{position:absolute;left:0;top:0;width:22px;height:1.5em;padding:0;border:0;background:transparent;color:#64748b;cursor:pointer;font-size:inherit;line-height:inherit;pointer-events:auto!important}
+.ql-editor .rich-fold-arrow:hover{background:#e8edf3;border-radius:4px;color:#334155}
+.ql-editor .rich-fold-arrow:focus-visible{outline:2px solid #6096ce;outline-offset:1px}
+.rich-toolbar [data-command^="fold"]{white-space:nowrap;font-size:12px;padding-inline:6px}
+.rich-editor.quick-note-editor.ql-container .ql-editor :is(p,li).rich-fold-title{padding-left:56px!important}
+.quick-note-editor .ql-editor :is(p,li).rich-fold-title>.rich-fold-arrow{left:28px}
+.rich-editor[data-empty="false"] .ql-editor.ql-blank:before{display:none}
+@media(max-width:720px){.rich-editor.ql-container .ql-editor [data-rich-depth]{margin-left:calc(var(--rich-fold-depth, 0) * 12px)!important}}
