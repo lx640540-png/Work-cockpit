@@ -43,3 +43,5 @@ document.addEventListener("keydown",event=>{
  let tab=event.target.closest("[data-task-quick][data-task-support]");if(!tab||!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
  event.preventDefault();let tabs=Array.from(tab.parentElement.querySelectorAll("[data-task-support]")),index=tabs.indexOf(tab),next=event.key==="Home"?0:event.key==="End"?tabs.length-1:(index+(event.key==="ArrowLeft"?-1:1)+tabs.length)%tabs.length;showTaskSupport(tabs[next].dataset.taskSupport,true,true);
 },true);
+
+document.addEventListener("mousedown",event=>{if(event.target.closest("[data-task-focus]"))event.preventDefault()});
