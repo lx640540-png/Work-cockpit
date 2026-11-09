@@ -14,7 +14,7 @@ function syncHoverSelect(select){
 function enhanceHoverSelects(root=document){
  if(!root)return;root.querySelectorAll("select:not([data-hover-select-ready])").forEach(select=>{
   select.dataset.hoverSelectReady="1";let owner=document.createElement("div");owner.className="hover-select";select.before(owner);owner.appendChild(select);
-  owner.insertAdjacentHTML("beforeend",'<button type="button" class="hover-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span></span><b aria-hidden="true">⌄</b></button><div class="hover-select-menu" role="listbox" hidden></div>');
+  owner.insertAdjacentHTML("beforeend",'<button type="button" class="hover-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span></span><svg class="select-chevron" viewBox="0 0 12 8" aria-hidden="true" focusable="false"><path d="m2 2 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="hover-select-menu" role="listbox" hidden></div>');
   syncHoverSelect(select);let trigger=owner.querySelector(".hover-select-trigger"),menu=owner.querySelector(".hover-select-menu");
   owner.addEventListener("pointerenter",event=>{if(isMouseHover(event))openHoverSelect(owner)});
   owner.addEventListener("pointerleave",event=>{if(!isMouseHover(event))return;clearTimeout(hoverSelectTimer);hoverSelectTimer=setTimeout(()=>{if(!owner.matches(":hover,:focus-within"))closeHoverSelect(owner)},80)});

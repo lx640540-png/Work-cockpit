@@ -1,0 +1,152 @@
+#taskDialog[data-task-layout]{border-radius:13px;font-size:13px;max-height:calc(100dvh - 12px)}
+#taskDialog[data-task-layout]>#taskForm{height:100%;max-height:100%;container-type:inline-size;container-name:task-detail}
+#taskDialog[data-task-layout] #taskEditor{display:grid;position:relative;gap:0;padding:0;min-height:0;height:auto;max-height:none;overflow:hidden;align-content:stretch}
+#taskDialog[data-task-layout] #taskEditor>.task-column{grid-column:auto;grid-row:auto;height:100%;min-height:0;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:0}
+#taskDialog[data-task-layout] #taskEditor>.task-content-column{overflow-x:hidden}
+#taskDialog[data-task-layout] #taskEditor>.attachment-column{position:relative;border-left:1px solid var(--line);border-top:0;overflow:hidden;background:var(--panel)}
+#taskDialog[data-task-layout] #taskEditor>.attachment-column[hidden]{display:none!important}
+.task-editor-inner{width:100%;margin:0 auto}
+.task-support-scroll{height:100%;overflow-y:auto;overscroll-behavior:contain}
+.task-name-field{gap:6px}.task-name-field>label{font-size:12px;color:var(--muted);font-weight:400}
+.task-support-shortcuts{display:flex;gap:6px;flex-wrap:wrap}
+.task-support-shortcuts button{border:1px solid var(--line);border-radius:7px;font:inherit}
+.task-support-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:700}
+.task-support-heading button{width:30px;height:30px;border:0;background:transparent;color:var(--muted);font-size:19px;border-radius:7px}
+#taskDialog[data-task-layout] .task-support-content{overflow:visible;height:auto;min-height:0;padding:0}
+#taskDialog[data-task-layout] .task-support-content>[hidden]{display:none!important}
+.task-notes-field .obsidian-heading{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.task-notes-field .obsidian-summary{margin-left:auto;display:flex;gap:8px}
+.task-focus-toggle{font:inherit;font-size:11px;color:var(--blue);border:0;background:transparent;padding:2px 0;white-space:nowrap}
+#taskDialog[data-task-layout] .task-notes-editor:not(.rich-expanded){border:1px solid var(--line);overflow:visible;min-height:0}
+#taskDialog[data-task-layout] .task-notes-editor:not(.rich-expanded)>.rich-editor{height:auto!important;min-height:0!important;max-height:none;overflow:visible!important}
+#taskDialog[data-task-layout] .task-notes-editor:not(.rich-expanded)>.rich-editor>.ql-editor{height:auto!important;max-height:none;overflow:visible!important;overflow-wrap:anywhere}
+#taskDialog[data-task-layout] .task-notes-editor>.rich-toolbar{min-height:43px;gap:3px;flex-wrap:wrap;background:var(--panel);border-radius:10px 10px 0 0}
+#taskDialog[data-task-layout] .task-notes-editor>.rich-toolbar button{font-size:11.5px;min-width:26px;height:27px;font-weight:400;padding-inline:6px}
+#taskDialog[data-task-layout] .task-notes-editor>.rich-toolbar>.rich-expand-button{display:none}
+#taskDialog[data-task-layout] .task-notes-editor.rich-expanded>.rich-toolbar>.rich-expand-button{display:inline-flex}
+#taskDialog[data-task-layout] .modal-actions{align-items:center;gap:9px}
+#taskDialog[data-task-layout] .modal-actions>.btn{height:auto;min-height:34px;padding:9px 12px;font-size:12px;border-radius:7px}
+#taskDialog .checklist-section{padding:0!important;border:1px solid color-mix(in srgb,var(--blue) 17%,var(--line));border-radius:9px;background:var(--panel);overflow:hidden;min-height:0}
+#taskDialog .checklist-dropdown-head{width:100%;display:flex;justify-content:flex-start;align-items:center;gap:10px;min-height:40px;height:auto;padding:10px 14px;border:0;border-radius:0;background:transparent;color:var(--blue);font:inherit;font-size:12px;text-align:left;cursor:pointer}
+.checklist-progress,.checklist-chevron{color:var(--muted);font-size:11px}
+#draftChecklistContent[hidden]{display:none!important}
+#taskDialog #draftChecklist{gap:0;padding:0}
+#taskDialog #draftChecklist .checklist-item{margin:0;min-height:42px;padding:5px 12px 5px 4px;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;gap:6px}
+#taskDialog #draftChecklist .checklist-item>.checklist-text{color:var(--text)}
+#taskDialog #draftChecklist .checklist-item.is-done>.checklist-text{text-decoration:line-through;color:var(--muted)}
+.checklist-add-bottom{width:100%;border:0;border-top:1px solid var(--line);background:transparent;color:var(--blue);font:inherit;font-size:12px;text-align:left;padding:10px 14px;min-height:38px}
+.checklist-add-bottom:hover{background:var(--soft)}
+/* Single double-column editor based on the supplied v4.3 layout. */
+#taskDialog[data-task-layout=d]{--line:#e6e8ee;--soft:#f7f8fa;--blue:#2769ea;--text:#292d35;--ink:#181b22;--muted:#7a818c;--panel:#fff;width:min(1180px,calc(100vw - 32px));height:min(1000px,calc(100dvh - 32px));margin:16px auto}
+#taskDialog[data-task-layout=d] .modal-head{height:52px;min-height:52px;padding:0 14px 0 22px;gap:12px}
+#taskDialog[data-task-layout=d] .modal-head h2{font-size:16px;font-weight:600}
+#taskDialog[data-task-layout=d] .modal-actions{height:58px;padding:0 18px}
+#taskDialog[data-task-layout=d] #taskEditor{grid-template-columns:minmax(0,1fr)}
+#taskDialog[data-task-layout=d][data-task-support-open=true] #taskEditor{grid-template-columns:minmax(0,1fr) 300px}
+#taskDialog[data-task-layout=d] #taskEditor>.task-properties-column{display:none}
+#taskDialog[data-task-layout=d] #taskEditor>.task-content-column{padding:12px 22px 14px}
+#taskDialog[data-task-layout=d] .task-editor-inner{max-width:none}
+.task-v43-title-row[hidden],.task-v43-chips[hidden],.task-v43-time[hidden]{display:none!important}
+.task-v43-title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;margin-bottom:10px}
+#taskDialog[data-task-layout=d] .task-name-field{flex:1;min-width:min(260px,100%);margin:0}
+#taskDialog[data-task-layout=d] .task-name-field>label{font-size:12px;margin-bottom:2px}
+#taskDialog[data-task-layout=d] .title-input{height:40px;border:0;border-bottom:1px solid transparent;border-radius:0;padding:2px 0;font-size:20px;font-weight:600}
+#taskDialog[data-task-layout=d] .title-input:hover{border-bottom-color:var(--line)}
+#taskDialog[data-task-layout=d] .title-input:focus{border-bottom-color:#a7c4fc;box-shadow:none}
+#taskDialog[data-task-layout=d] .task-support-shortcuts{gap:6px;margin:0 0 4px}
+#taskDialog[data-task-layout=d] .task-support-shortcuts button{height:30px;min-height:30px;padding:0 10px;font-size:12px;border-radius:7px;background:#f9fafc;color:#5d6777}
+#taskDialog[data-task-layout=d] .task-support-shortcuts button.active{border-color:#c9dbff;background:#eef4ff;color:#2769ea}
+.task-v43-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+#taskDialog[data-task-layout=d] .task-v43-chips>.field{display:flex;flex-direction:row;align-items:center;gap:6px;min-width:0;max-width:100%;height:32px;padding:0 4px 0 10px;border:1px solid var(--line);border-radius:8px;background:#fbfcfe;margin:0!important}
+#taskDialog[data-task-layout=d] .task-v43-chips .field>label{font-size:12px;font-weight:400;color:var(--muted);white-space:nowrap}
+#taskDialog[data-task-layout=d] .task-v43-chips .hover-select{min-width:65px;width:auto;max-width:240px}
+#taskDialog[data-task-layout=d] .task-v43-chips .hover-select-trigger{height:30px;min-height:30px;border:0;background:transparent;padding:0 6px;gap:8px;border-radius:0;font-size:13px;font-weight:400;box-shadow:none}
+.task-v43-time{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:9px 12px;margin-bottom:10px}
+#taskDialog[data-task-layout=d] .task-v43-time>.field{width:124px;gap:4px;min-width:0;margin:0}
+#taskDialog[data-task-layout=d] .task-v43-time .field>label{font-size:11.5px;font-weight:400;color:var(--muted);line-height:1.4}
+#taskDialog[data-task-layout=d] .task-v43-time .field>label small{display:none}
+#taskDialog[data-task-layout=d] .task-v43-time input:not([type=checkbox]){height:34px;min-height:34px;width:100%;padding:0 8px;border-radius:8px;background:#fff;font-size:12px}
+.task-v43-flags{margin-left:auto;display:flex;flex-direction:column;gap:6px;font-size:12.5px;padding-bottom:3px}
+#taskDialog[data-task-layout=d] .task-v43-flags>label{display:flex;align-items:center;gap:6px;margin:0!important;font-size:12px;font-weight:400}
+#taskDialog[data-task-layout=d] .task-v43-flags input[type=checkbox]{width:15px;height:15px;accent-color:#2769ea}
+#taskDialog[data-task-layout=d] .task-record-section{padding:0;margin:0;border:0;background:none}
+#taskDialog[data-task-layout=d] .task-record-section .task-section-title{margin:0;font-size:11px}
+#taskDialog[data-task-layout=d] .task-record-section .task-section-title>span{display:none}
+#taskDialog[data-task-layout=d] .task-next-field{padding:8px 12px;border:1px solid #c9dbff;border-radius:10px;background:#eef4ff;margin:0 0 10px;gap:5px}
+#taskDialog[data-task-layout=d] .task-next-field>label{color:#2769ea;font-size:12.5px;font-weight:600}
+#taskDialog[data-task-layout=d] .task-next-field textarea{min-height:42px;padding:8px 11px;font-size:13.5px;line-height:1.5;border-color:#c8dafc;background:#fff;border-radius:8px}
+#taskDialog[data-task-layout=d] .task-notes-field{margin-top:0!important}
+#taskDialog[data-task-layout=d] .task-notes-field .obsidian-heading{margin-bottom:5px}
+#taskDialog[data-task-layout=d] .task-notes-editor{border-radius:10px}
+#taskDialog[data-task-layout=d] .task-notes-editor:not(.rich-expanded)>.rich-editor>.ql-editor{min-height:300px!important;padding:14px 18px 40px;font-size:13.5px;line-height:1.8}
+#taskDialog[data-task-layout=d] .task-notes-editor>.rich-toolbar{border-bottom:1px solid #e9ecf0;padding:5px 8px}
+#taskDialog[data-task-layout=d] .task-support-scroll{padding:14px}
+#taskDialog[data-task-layout=d] .task-support-heading{font-size:13px;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:14px}
+#taskDialog[data-task-layout=d] .task-support-content>.task-section{border:0;padding:0;background:transparent}
+#taskDialog[data-task-layout=d] .checklist-resizer{display:none}
+#taskDialog[data-task-layout] .checklist-section{border:1px solid #f0dad7;background:#fff4f3;border-radius:10px}
+#taskDialog[data-task-layout] .checklist-dropdown-head{color:#333842;background:transparent}
+#taskDialog[data-task-layout] #draftChecklist .checklist-item{background:transparent;border-top-color:#f0e4e2}
+#taskDialog[data-task-layout] #draftChecklist .checklist-item>.checklist-text{background:transparent}
+#taskDialog[data-task-layout] .checklist-add-bottom{border-top-color:#f0e4e2}
+#taskDialog[data-task-layout=d] .checklist-section{margin:0 0 14px!important}
+#taskDialog[data-task-layout=d] #draftChecklist .checklist-item{padding:7px 8px 7px 2px;min-height:42px}
+/* One soft sage green for existing and new annotations, including saved notes. */
+.rich-highlight-green{background:#dcebd9}
+.rich-highlight-button.green{--highlight-swatch:#7caa72}
+:root[data-theme=dark] .rich-highlight-green{background:#2b4027;color:#e0eddb}
+/* Document dividers use the reference's gray, independent of text color. */
+.rich-divider{opacity:1;color:var(--muted)}
+.rich-divider:before,.rich-divider:after{height:1px;background:#dfe3ea}
+.rich-divider.selected:before,.rich-divider.selected:after{height:1px;background:var(--blue)}
+.rich-tool-separator{background:#e9ecf0}
+.hover-select-trigger>b[aria-hidden]{font-size:16px;line-height:1;flex:none}
+.ql-editor .rich-fold-arrow{font-size:1.15em;width:24px}
+.checklist-chevron{font-size:14px}
+:root[data-theme=dark] #taskDialog[data-task-layout=d]{--line:#344050;--soft:#1d2735;--panel:#111c2e;--text:#dce3ec;--ink:#f1f5fa;--muted:#a4afbd}
+:root[data-theme=dark] #taskDialog[data-task-layout=d] :is(.task-v43-chips>.field,.task-v43-time input:not([type=checkbox])){background:var(--panel)}
+:root[data-theme=dark] #taskDialog[data-task-layout] .checklist-section{background:#322322;border-color:#65433f}
+:root[data-theme=dark] .rich-divider:before,:root[data-theme=dark] .rich-divider:after{background:#465365}
+@container task-detail (max-width:880px){
+ #taskDialog[data-task-layout=d] .task-v43-time>.field{width:calc(50% - 6px)}
+ #taskDialog[data-task-layout=d] .task-v43-flags{margin-left:0}
+ #taskDialog[data-task-layout=d] .modal-head{height:auto;min-height:52px;flex-wrap:wrap;padding:8px 14px}
+ #taskDialog[data-task-layout=d] #taskEditor>.task-content-column{padding:12px 15px}
+}
+@media(max-width:880px){#taskDialog[data-task-layout=d]{width:100vw;height:100dvh;max-height:100dvh;margin:0;border-radius:0}}
+:root[data-calm-today] #taskDialog[data-task-layout] .checklist-section{background:#fff4f3!important;border:1px solid #f0dad7;border-radius:10px;padding:0!important}
+#taskDialog[data-task-layout=d] .task-name-field .title-input{height:40px;padding:2px 0;border:0;border-bottom:1px solid transparent;border-radius:0;font-size:20px;background:transparent}
+#taskDialog[data-task-layout=d] .task-name-field .title-input:focus{border-bottom-color:#a7c4fc}
+#taskDialog[data-task-layout=d] .modal-head .eyebrow{display:none}
+#taskDialog[data-task-layout=d] .modal-actions>[data-close=taskDialog]{display:none}
+#taskDialog[data-task-layout=d] #deleteTaskButton{order:1}
+#taskDialog[data-task-layout=d] .modal-actions>span[style]{order:2}
+#taskDialog[data-task-layout=d] #taskAutosaveStatus{order:3}
+#taskDialog[data-task-layout=d] #saveTaskButton{order:4}
+:root[data-theme=dark][data-calm-today] #taskDialog[data-task-layout] .checklist-section{background:#322322!important;border-color:#65433f}
+
+#taskDialog[data-task-layout=d].task-journal-docked{margin:0;width:var(--task-available-width);height:calc(100dvh - 12px)}
+#taskDialog[data-task-layout=d].task-journal-compact{margin:0;height:100dvh}
+
+/* Native-select style chevron and compact fold toolbar symbols. */
+.hover-select-trigger .select-chevron{width:12px;height:8px;flex:none;display:block;pointer-events:none}
+.rich-toolbar .rich-fold-tool{display:inline-flex;align-items:center;justify-content:center;min-width:29px;width:29px;padding:0}
+.rich-fold-tool .fold-tool-icon{display:block;flex:none;pointer-events:none;width:13px;height:13px}
+.rich-fold-tool.large .fold-tool-icon{width:18px;height:18px}
+#taskDialog[data-task-layout=d] .task-v43-flags{margin-left:0;padding:0;align-self:center}
+#taskDialog[data-task-layout=d] .task-v43-time>.task-record-section{margin-left:auto;align-self:center;flex:none}
+#taskDialog[data-task-layout=d] .task-v43-time>.task-record-section .task-section-title{padding:0;border:0}
+/* Shared editor shells paint their own intact perimeter above child backgrounds. */
+.editor-box,.memo-editor-body{position:relative}
+.editor-box:after,.memo-editor-body:after{content:"";position:absolute;inset:-1px;z-index:3;pointer-events:none;border:1px solid var(--line);border-radius:inherit}
+.editor-box>.rich-toolbar,.memo-editor-body>.rich-toolbar{border-top-left-radius:inherit;border-top-right-radius:inherit}
+.editor-box>.rich-editor,.memo-editor-body>.rich-editor{border-bottom-left-radius:inherit;border-bottom-right-radius:inherit}
+.rich-toolbar [data-command=unfold][hidden]{display:none!important}
+.rich-soft-break{white-space:pre-wrap}
+/* Match keyboard focus to the app instead of the browser's black outline. */
+#taskDialog[data-task-layout] button:focus{outline:none}
+#taskDialog[data-task-layout] button:focus-visible{outline:1px solid var(--blue);outline-offset:2px;box-shadow:none}
+@container task-detail (max-width:880px){
+ #taskDialog[data-task-layout] #taskEditor{grid-template-columns:minmax(0,1fr)!important}
+ #taskDialog[data-task-layout] #taskEditor>.attachment-column{position:absolute;z-index:4;top:0;right:0;bottom:0;width:min(85%,330px);height:100%;background:var(--panel);box-shadow:-6px 0 30px #172d401a}
+}

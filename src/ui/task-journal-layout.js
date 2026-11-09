@@ -28,7 +28,7 @@ function syncTaskJournalLayout(metrics){
  panel.querySelectorAll('[data-task-journal-pane]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.taskJournalPane===taskJournalPane)));
  panel.hidden=!journalUI.open||(compact&&taskJournalPane==='task');
  const support=$('.task-support-disclosure',modal),narrow=together&&!compact&&metrics?.taskWidth<1120;
- if(support&&support.dataset.compact!==String(narrow)){support.open=!narrow;support.dataset.compact=String(narrow)}
+ if(support&&!modal.dataset.taskLayout&&support.dataset.compact!==String(narrow)){support.open=!narrow;support.dataset.compact=String(narrow)}
 }
 document.addEventListener('click',event=>{
  const button=event.target.closest('[data-task-journal-pane]');if(!button)return;
