@@ -1,0 +1,17 @@
+CREATE ROLE anon NOLOGIN;
+CREATE ROLE authenticated NOLOGIN;
+CREATE ROLE service_role NOLOGIN BYPASSRLS;
+CREATE SCHEMA auth;
+CREATE TABLE auth.users(id uuid PRIMARY KEY);
+INSERT INTO auth.users VALUES ('86825a70-186a-4f13-aaa8-e1374effc1e8'),('8a441823-f408-4c4d-9745-e9deb9cdd5c7');
+CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+GRANT USAGE ON SCHEMA auth TO authenticated,service_role;
+GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated,service_role;
+CREATE SCHEMA storage;
+CREATE TABLE storage.objects(bucket_id text,name text,metadata jsonb,updated_at timestamptz);
+GRANT USAGE ON SCHEMA storage TO service_role;
+GRANT SELECT ON storage.objects TO service_role;
+CREATE TABLE public.app_states(user_id uuid PRIMARY KEY REFERENCES auth.users(id),state jsonb NOT NULL,version bigint NOT NULL,device_id text,updated_at timestamptz DEFAULT now());
+ALTER TABLE public.app_states ENABLE ROW LEVEL SECURITY;
+GRANT SELECT,INSERT,UPDATE,DELETE ON public.app_states TO authenticated,service_role;
+CREATE POLICY own_state ON public.app_states TO authenticated USING (auth.uid()=user_id) WITH CHECK (auth.uid()=user_id);

@@ -35,7 +35,8 @@
     "styles/task-filters.css",
     "styles/rich-images.css",
     "styles/rich-toggle.css",
-    "styles/task-layouts.css"
+    "styles/task-layouts.css",
+    "styles/backups.css"
   ],
   "scripts": [
     "core/runtime.js",
@@ -45,8 +46,10 @@
     "domain/workflow.js",
     "domain/workflow-closure.js",
     "domain/rich-images.js",
+    "domain/backup-format.js",
     "core/model.js",
     "core/store.js",
+    "domain/backup-local.js",
     "domain/week.js",
     "domain/task-dates.js",
     "domain/tasks.js",
@@ -85,6 +88,7 @@
     "ui/events.js",
     "ui/drag-resize.js",
     "core/cloud.js",
+    "ui/backups.js",
     "ui/week-picker.js",
     "ui/work-journal.js",
     "ui/journal-copy.js",

@@ -46,3 +46,44 @@ jobs:
           name: browser-regression-failure
           path: artifacts/browser-regression/
           if-no-files-found: ignore
+
+  backup-database:
+    name: Backup Database Isolation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: fixture-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: fixture-only
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test migration, write guard, recovery and permissions on disposable PostgreSQL
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/backup/postgres-bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611110001_backups.sql
+          (echo 'BEGIN;'; cat tests/backup/sql-assertions.sql; echo 'ROLLBACK;') | psql -v ON_ERROR_STOP=1
+
+  backup-worker-build:
+    name: Worker Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npx --yes wrangler@4 deploy --dry-run --outdir /tmp/cockpit-worker

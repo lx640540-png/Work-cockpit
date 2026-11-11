@@ -118,7 +118,7 @@ function handleClick(event){
  if(target.dataset.restoreSnapshot)return restoreSnapshot(target.dataset.restoreSnapshot);
  if(target.dataset.clearSnapshots!==undefined)return confirmTwice("清除全部快照？","所有恢复快照都会被永久删除。",()=>commit("清空快照",draft=>draft.snapshots=[],{immediate:true,history:false}),"确认清除");
  if(target.dataset.clearTrash!==undefined)return confirmTwice("永久清空回收站？","回收站中的全部内容都会被永久删除。",()=>commit("清空回收站",draft=>draft.trash=[],{immediate:true,history:false}),"确认清空");
- if(target.dataset.clearBusiness!==undefined)return confirmTwice("一键清空业务数据？","系统会先生成安全快照，再清空事项、项目、速记、备忘录、关键决策和周计划。",()=>{createSnapshot("一键清空前的完整快照");commit("一键清空业务数据",draft=>{draft.tasks=[];draft.projects=[];draft.memos=[];draft.decisions=[];draft.quickNote=emptyQuickNote();draft.weeks={[currentWeekKey()]:emptyWeek()};draft.trash=[];draft.favorites=[];draft.order=emptyOrder()},{immediate:true})},"确认清空数据");
+ if(target.dataset.clearBusiness!==undefined)return confirmTwice("一键清空业务数据？","系统会先生成安全快照，再清空事项、项目、速记、备忘录、关键决策和周计划。",()=>{checkpointLocal("一键清空前的独立安全副本");markRestorePending();createSnapshot("一键清空前的完整快照");commit("一键清空业务数据",draft=>{draft.tasks=[];draft.projects=[];draft.memos=[];draft.decisions=[];draft.quickNote=emptyQuickNote();draft.weeks={[currentWeekKey()]:emptyWeek()};draft.trash=[];draft.favorites=[];draft.order=emptyOrder()},{immediate:true})},"确认清空数据");
  if(target.dataset.closeSearchPage!==undefined)return closeGlobalSearch();
  if(target.dataset.searchCategory)return changeSearchCategory(target.dataset.searchCategory);
  if(target.dataset.searchMore)return loadMoreSearch(target.dataset.searchMore);

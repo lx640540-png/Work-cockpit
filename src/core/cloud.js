@@ -2,7 +2,7 @@ function cloudHash(value){let text=typeof value==="string"?value:JSON.stringify(
 function deviceId(){let value=localStorage.getItem(CLOUD_DEVICE_KEY);if(!value){value=uid("device");localStorage.setItem(CLOUD_DEVICE_KEY,value)}return value}
 function hasBusinessData(value=state){let quick=(value.quickNote?.delta?.ops||[]).some(op=>String(op.insert||"").trim());return!!(Object.values(value.meta?.workJournal?.weeks||{}).some(week=>Object.values(week.days||{}).some(day=>strip(day.content))||Object.values(week.review||{}).some(text=>String(text).trim()))||value.tasks.length||value.projects.length||value.memos.length||value.decisions?.length||quick||Object.values(value.weeks||{}).some(week=>week.top?.length))}
 const Cloud={
- client:null,user:null,channel:null,version:0,rowExists:false,remoteReady:false,sessionCheck:null,device:deviceId(),lastHash:"",timer:0,pushing:false,pendingPush:false,syncEpoch:0,applying:false,pendingRemote:null,importPending:false,authMode:"login",status:"local",
+ client:null,user:null,channel:null,version:0,rowExists:false,remoteReady:false,sessionCheck:null,device:deviceId(),lastHash:"",timer:0,pushing:false,pendingPush:false,syncEpoch:0,applying:false,pendingRemote:null,importPending:typeof hasRestorePending==='function'&&hasRestorePending(),writeBlocked:false,authMode:"login",status:"local",
  config(){try{return{...DEFAULT_CLOUD_CONFIG,...JSON.parse(localStorage.getItem(CLOUD_CONFIG_KEY)||"null")}}catch(error){return DEFAULT_CLOUD_CONFIG}},
  renderAccount(){let button=$("#accountEmail"),email=this.user?.email||this.user?.user_metadata?.email||"";if(!button)return;button.hidden=!email;button.textContent=email},
  setStatus(status,label){this.status=status;let button=$("#syncButton");button.className="sync-badge "+status;button.textContent=label||({local:"本地模式",connecting:"连接中",syncing:"同步中",synced:"已同步",error:"同步失败",conflict:"待处理冲突"}[status]||status);this.renderAccount()},
@@ -33,7 +33,8 @@ const Cloud={
    let row=await this.fetchRemote();if(sessionEpoch!==this.syncEpoch||this.user?.id!==session.user.id)return false;this.remoteReady=true;let localSerialized=serializeState(),localHash=cloudHash(localSerialized),link=null;
    try{link=JSON.parse(localStorage.getItem(CLOUD_LINK_KEY)||"null")}catch(error){}
    let accountChanged=!!(link?.userId&&String(link.userId)!==String(this.user.id));
-   if(accountChanged&&hasBusinessData(state)){this.rowExists=!!row;this.version=Number(row?.version||0);this.pendingRemote=row||{state:emptyState(),version:0,device_id:"",updated_at:new Date().toISOString(),missing:true};this.setStatus("conflict","确认账号数据");this.showConflict(true)}
+   if(this.importPending){this.rowExists=!!row;this.version=Number(row?.version||0);this.setStatus("error","待确认本机恢复数据")}
+   else if(accountChanged&&hasBusinessData(state)){this.rowExists=!!row;this.version=Number(row?.version||0);this.pendingRemote=row||{state:emptyState(),version:0,device_id:"",updated_at:new Date().toISOString(),missing:true};this.setStatus("conflict","确认账号数据");this.showConflict(true)}
    else if(!row){this.rowExists=false;this.version=0;await this.push(true)}
    else{
     this.rowExists=true;this.version=Number(row.version||0);let remoteState=normalizeState(row.state),remoteSerialized=serializeState(remoteState),remoteHash=cloudHash(remoteSerialized);
@@ -67,11 +68,11 @@ const Cloud={
   localStorage.setItem(CLOUD_LINK_KEY,JSON.stringify({userId:this.user.id,version:this.version,hash:this.lastHash,deviceId:this.device,updatedAt:row.updated_at||new Date().toISOString()}));if(markSynced)this.setStatus("synced","已同步");
  },
  schedule(){
-  if(this.applying||!this.user||!this.client||this.importPending||this.pendingRemote||this.status==="conflict")return;
+  if(this.applying||!this.user||!this.client||this.importPending||this.pendingRemote||this.status==="conflict"||this.writeBlocked)return;
   this.pendingPush=true;clearTimeout(this.timer);if(!this.pushing)this.timer=setTimeout(()=>this.push(),650);this.setStatus("syncing","待同步");
  },
  async push(force=false){
-  if(this.applying||!this.user||!this.client||this.importPending||this.pendingRemote||this.status==="conflict")return false;
+  if(this.applying||!this.user||!this.client||this.importPending||this.pendingRemote||this.status==="conflict"||this.writeBlocked)return false;
   if(this.pushing){this.pendingPush=true;return false}
   if(!navigator.onLine){this.pendingPush=true;this.setStatus("syncing","离线待同步");return false}
   if(!this.remoteReady)return this.startSession({user:this.user});
@@ -101,10 +102,12 @@ const Cloud={
     this.pendingPush=this.pendingPush||cloudHash(serializeState())!==hash;
    }while(this.pendingPush&&isCurrent());
    if(!isCurrent())return false;this.setStatus("synced","已同步");return true;
-  }catch(error){if(isCurrent()){this.pendingPush=true;if(this.isAuthError(error)||error.code==="23505")this.remoteReady=false;console.error("云同步写入失败",error);this.setStatus("error",this.isAuthError(error)?"登录验证失败":"同步失败")}return false}
+  }catch(error){if(isCurrent()){this.pendingPush=true;if(this.isAuthError(error)||error.code==="23505")this.remoteReady=false;if(String(error.message||"").includes("COCKPIT_PROTECTED")){this.writeBlocked=true;this.pendingPush=false;this.setStatus("error","已拦截异常覆盖");return false}console.error("云同步写入失败",error);this.setStatus("error",this.isAuthError(error)?"登录验证失败":"同步失败")}return false}
   finally{if(isCurrent())this.pushing=false}
  },
  applyRemote(row,backup=true){
+  if(typeof BackupFormat!=="undefined"&&BackupFormat.risk(state,row.state).length&&!backup){this.pendingRemote=row;this.setStatus("conflict","云端数据异常减少");this.showConflict();return false}
+  if(typeof checkpointLocal==="function"&&hasBusinessData(state))checkpointLocal("采用云端前的独立安全副本");
   this.syncEpoch++;this.pushing=false;this.pendingPush=false;clearTimeout(this.timer);this.applying=true;
   try{
    let recovery=backup&&hasBusinessData(state)?{id:uid("snapshot"),label:"采用云端前的本机安全快照",createdAt:new Date().toISOString(),state:snapshotCore()}:null;
@@ -118,19 +121,20 @@ const Cloud={
  },
  remoteChanged(row){
   if(!row||row.device_id===this.device||Number(row.version)<=this.version)return;
+  if(this.importPending){this.pendingRemote=row;return}
   let localHash=cloudHash(serializeState());
   if(localHash===this.lastHash&&!this.pushing)this.applyRemote(row,false);
   else{this.pendingRemote=row;this.setStatus("conflict","存在冲突");this.showConflict()}
  },
- async useRemote(){if(!this.pendingRemote)return;let missing=!!this.pendingRemote.missing;this.applyRemote(this.pendingRemote,true);if(missing){this.rowExists=false;this.version=0}this.pendingRemote=null;this.importPending=false;if(cloudHash(serializeState())!==this.lastHash)this.schedule();closeDialog("conflictDialog");toast(missing?"已切换为空白云端账号，本机原数据已存入安全快照":"已采用云端版本")},
- async keepLocal(){if(this.pendingRemote){let recovery={id:uid("snapshot"),label:"覆盖云端前的云端安全快照",createdAt:new Date().toISOString(),state:snapshotCore(normalizeState(this.pendingRemote.state))};recovery.state.snapshots=[];state.snapshots.unshift(recovery);this.version=Number(this.pendingRemote.version||0);this.rowExists=!this.pendingRemote.missing}this.pendingRemote=null;this.importPending=false;this.setStatus("syncing","待同步");closeDialog("conflictDialog");saveLocal(true);await this.push(true);toast("已保留本机版本")},
+ async useRemote(){if(!this.pendingRemote)return;let missing=!!this.pendingRemote.missing;this.applyRemote(this.pendingRemote,true);if(missing){this.rowExists=false;this.version=0}this.pendingRemote=null;this.importPending=false;if(typeof clearRestorePending==="function")clearRestorePending();this.writeBlocked=false;if(cloudHash(serializeState())!==this.lastHash)this.schedule();closeDialog("conflictDialog");toast(missing?"已切换为空白云端账号，本机原数据已存入安全快照":"已采用云端版本")},
+ async keepLocal(){if(typeof BackupUI!=="undefined")return BackupUI.replaceCloud();toast("请通过数据与恢复核对版本后再替换云端")},
  renderStatus(){
-  let account=this.user?.email||this.user?.user_metadata?.email||"未登录",pending=this.importPending?'<div class="data-item"><div><b>JSON 已导入本机</b><small>云端尚未修改，请选择后续动作。</small></div><div><button class="btn" id="discardImport">恢复云端</button><button class="btn primary" id="uploadImport">替换云端</button></div></div>':"";
+  let account=this.user?.email||this.user?.user_metadata?.email||"未登录",pending=(this.importPending||this.writeBlocked)?'<div class="data-item"><div><b>等待核对本机数据</b><small>自动上传已暂停，请核对后选择恢复云端或替换云端。</small></div><div><button class="btn" id="discardImport">恢复云端</button><button class="btn primary" id="uploadImport">替换云端</button></div></div>':"";
   $("#syncDialogBody").innerHTML='<div class="data-list"><div class="data-item"><div><b>'+esc(this.user?"已登录":"本地模式")+'</b><small>'+esc(account)+' · '+esc($("#syncButton").textContent)+'</small></div><button class="btn" id="syncNow" '+(this.user?"":"disabled")+'>立即同步</button></div>'+pending+'</div><div class="page-actions" style="margin-top:16px"><button class="btn" id="showLogin">'+(this.user?"切换账号":"登录云端")+'</button>'+(this.user?'<button class="btn danger" id="logoutCloud">退出登录</button>':"")+'</div>';
   $("#syncNow")?.addEventListener("click",()=>this.push(true));$("#showLogin")?.addEventListener("click",()=>{closeDialog("syncDialog");$("#cloudGate").hidden=false});$("#logoutCloud")?.addEventListener("click",()=>this.logout());
-  $("#uploadImport")?.addEventListener("click",()=>{this.importPending=false;this.push(true);this.renderStatus()});$("#discardImport")?.addEventListener("click",async()=>{let row=await this.fetchRemote();if(row)this.applyRemote(row,true);this.importPending=false;this.renderStatus()});
+  $("#uploadImport")?.addEventListener("click",()=>BackupUI.replaceCloud());$("#discardImport")?.addEventListener("click",async()=>{let row=await this.fetchRemote();if(row){this.applyRemote(row,true);clearRestorePending();this.writeBlocked=false}this.renderStatus()});
  },
- async logout(){this.syncEpoch++;this.remoteReady=false;this.sessionCheck=null;this.pendingPush=false;this.pushing=false;if(this.client&&this.channel){await this.client.removeChannel(this.channel);this.channel=null}if(this.client)await this.client.auth.signOut();this.user=null;this.version=0;this.rowExists=false;this.lastHash="";this.pendingRemote=null;clearTimeout(this.timer);localStorage.setItem(LOCAL_MODE_KEY,"1");this.setStatus("local","本地模式");closeDialog("syncDialog")},
+ async logout(){this.syncEpoch++;this.remoteReady=false;this.sessionCheck=null;this.pendingPush=false;this.pushing=false;if(this.client&&this.channel){await this.client.removeChannel(this.channel);this.channel=null}if(this.client)await this.client.auth.signOut();this.user=null;this.writeBlocked=false;this.version=0;this.rowExists=false;this.lastHash="";this.pendingRemote=null;clearTimeout(this.timer);localStorage.setItem(LOCAL_MODE_KEY,"1");this.setStatus("local","本地模式");closeDialog("syncDialog")},
  async uploadAttachments(taskId,files){
   if(!taskById(taskId))throw Error("原事项已删除");
   if(!this.user||!this.client)throw Error("请登录云端后上传");

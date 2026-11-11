@@ -1,11 +1,7 @@
-function validateImportedData(data){
- if(!data||!Array.isArray(data.tasks)||!Array.isArray(data.projects))throw Error("缺少事项或项目数据");
- const validateList=(items,label)=>{let ids=new Set();for(let item of items){if(!item||typeof item!=="object")throw Error(label+"包含无效数据");if(item.id){let id=String(item.id);if(!/^[\p{L}\p{N}_.:-]{1,160}$/u.test(id))throw Error(label+"包含无效标识");if(ids.has(id))throw Error(label+"存在重复 ID："+id);ids.add(id)}}};
- const visit=(value,depth=0)=>{if(!value||typeof value!=="object")return;if(depth>50)throw Error("数据嵌套过深");for(let [key,item] of Object.entries(value)){if(["tasks","projects","memos","decisions","milestones","checklist","attachments"].includes(key)&&Array.isArray(item))validateList(item,key);if(item&&typeof item==="object")visit(item,depth+1)}};visit(data);return data;
-}
+function validateImportedData(data){return BackupFormat.validate(data)}
 function exportData(){
  let blob=new Blob([JSON.stringify({product:"工作台",formatVersion:8,exportedAt:new Date().toISOString(),...snapshotCore()},null,2)],{type:"application/json"}),link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download="工作台-"+todayKey()+".json";link.click();URL.revokeObjectURL(link.href);toast("JSON 已导出");
 }
 function importFile(file){
- let reader=new FileReader();reader.onload=()=>{try{let data=JSON.parse(reader.result);validateImportedData(data);confirmAction("导入这份 JSON？","当前数据会先创建安全快照，导入后不会直接覆盖云端。",()=>{let backup=createSnapshot("导入 JSON 前的安全快照"),next=normalizeState(data);next.snapshots=[backup,...next.snapshots].slice(0,12);replaceState(next,"导入 JSON");Cloud.importPending=true;toast("JSON 已导入本机；云端尚未覆盖")},"导入")}catch(error){toast("导入失败："+error.message)}};reader.readAsText(file);
+ let reader=new FileReader();reader.onload=()=>{try{let data=JSON.parse(reader.result);validateImportedData(data);confirmAction("导入这份 JSON？","当前数据会先创建安全快照，导入后不会直接覆盖云端。",()=>{try{checkpointLocal("导入 JSON 前的独立安全副本");markRestorePending();let backup=createSnapshot("导入 JSON 前的安全快照"),next=normalizeState(data);next.snapshots=[backup,...next.snapshots].slice(0,12);replaceState(next,"导入 JSON");toast("JSON 已导入本机；云端尚未覆盖")}catch(error){toast("导入未完成："+error.message)}},"导入")}catch(error){toast("导入失败："+error.message)}};reader.readAsText(file);
 }
