@@ -5,7 +5,7 @@ const Cloud={
  client:null,user:null,channel:null,version:0,rowExists:false,remoteReady:false,sessionCheck:null,device:deviceId(),lastHash:"",timer:0,pushing:false,pendingPush:false,syncEpoch:0,applying:false,pendingRemote:null,importPending:typeof hasRestorePending==='function'&&hasRestorePending(),writeBlocked:false,authMode:"login",status:"local",
  config(){try{return{...DEFAULT_CLOUD_CONFIG,...JSON.parse(localStorage.getItem(CLOUD_CONFIG_KEY)||"null")}}catch(error){return DEFAULT_CLOUD_CONFIG}},
  renderAccount(){let button=$("#accountEmail"),email=this.user?.email||this.user?.user_metadata?.email||"";if(!button)return;button.hidden=!email;button.textContent=email},
- setStatus(status,label){this.status=status;let button=$("#syncButton");button.className="sync-badge "+status;button.textContent=label||({local:"本地模式",connecting:"连接中",syncing:"同步中",synced:"已同步",error:"同步失败",conflict:"待处理冲突"}[status]||status);this.renderAccount()},
+ setStatus(status,label){this.status=status;let button=$("#syncButton");button.className="sync-badge "+status;button.textContent=label||({local:"本地模式",connecting:"连接中",syncing:"同步中",synced:"已同步",error:"同步失败",conflict:"待处理冲突"}[status]||status);this.renderAccount();if(typeof BackupUI!=="undefined")BackupUI.observe()},
  showConflict(accountChanged=false){$("#conflictDialog h2").textContent=accountChanged?"检测到云账号切换":"检测到多端同时修改";$("#conflictDialog .modal-body p").textContent=accountChanged?"为避免把上一账号的数据自动写入当前账号，请明确选择保留本机数据或采用当前账号云端数据；被替换版本会先生成恢复快照。":"自动同步已暂停。请选择保留本机或采用云端；被替换的版本会先生成恢复快照。";showDialog($("#conflictDialog"))},
  async init(){
   let config=this.config();$("#cloudUrl").value=config.url||"";$("#cloudKey").value=config.key||"";
