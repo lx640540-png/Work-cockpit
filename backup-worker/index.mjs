@@ -71,7 +71,7 @@ async function restore(env,user,id){
   if(await digest(await storageRead(env,o))!==o.sha256)throw fail('RESTORED_ATTACHMENT_CHECKSUM_MISMATCH');
  }return archive.state;
 }
-async function status(env,user){const c=await credential(env,user),runs=await db(env,'cockpit_backup_runs?user_id=eq.'+user+'&select=id,source_version,status,summary,attachment_count,error_code,created_at,verified_at,next_retry_at&order=created_at.desc&limit=80');return {configured:true,connected:!!c,lastError:c?.last_error||null,runs}}
+async function status(env,user){const c=await credential(env,user),runs=await db(env,'cockpit_backup_runs?user_id=eq.'+user+'&select=id,source_version,status,summary,attachment_count,error_code,created_at,verified_at,next_retry_at,lease_until&order=created_at.desc&limit=80');return {configured:true,connected:!!c,lastError:c?.last_error||null,runs}}
 async function createRun(env,user){
  const row=(await db(env,'app_states?user_id=eq.'+user+'&select=state,version'))[0];if(!row)throw fail('NO_CLOUD_STATE',409);F.validate(row.state);
  const hash=await digest(F.content(row.state)),summary=F.summary(row.state);
@@ -134,7 +134,7 @@ export async function handle(req,env,ctx){
   const user=await owner(req,env);
   if(path==='/api/backups/status'&&req.method==='GET')return json(await status(env,user));
   if(path==='/api/backups/connect'&&req.method==='POST')return await connect(req,env,user);
-  if(path==='/api/backups/run'&&req.method==='POST'){const run=await createRun(env,user);ctx.waitUntil(perform(env,user,run));return json({id:run.id,status:run.status},202)}
+  if(path==='/api/backups/run'&&req.method==='POST'){const run=await createRun(env,user);const work=perform(env,user,run);ctx.waitUntil(work);await work;return json({id:run.id,status:run.status},202)}
   const match=path.match(/^\/api\/backups\/(archive|restore)\/([a-f0-9-]{36})$/);
   if(match&&req.method===(match[1]==='restore'?'POST':'GET')){const state=match[1]==='restore'?await restore(env,user,match[2]):(await loadArchive(env,user,match[2])).archive.state;return json({state})}
   return json({error:'NOT_FOUND'},404);
