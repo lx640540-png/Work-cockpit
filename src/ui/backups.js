@@ -1,21 +1,42 @@
 const BackupUI={
- status:null,history:[],loading:false,error:'',account:'',timer:0,runPending:false,pollFailures:0,
+ status:null,history:[],loading:false,error:'',account:'',checkedAt:0,timer:0,runPending:false,pollFailures:0,
  active(){return this.runPending||!!this.status?.runs?.some(r=>r.status==='pending'||r.status==='running')},
- schedule(){clearTimeout(this.timer);this.timer=0;if(currentPage!=='data'||document.hidden||!Cloud.user)return;let expired=this.status?.runs?.some(r=>r.status==='running'&&r.lease_until&&Date.parse(r.lease_until)<Date.now()),delay=!this.active()||expired?60000:Math.min(30000,3000*2**Math.min(this.pollFailures,3));this.timer=setTimeout(()=>{this.timer=0;this.refresh()},delay)},
+ schedule(){clearTimeout(this.timer);this.timer=0;if(document.hidden||!Cloud.user)return;let expired=this.status?.runs?.some(r=>r.status==='running'&&r.lease_until&&Date.parse(r.lease_until)<Date.now()),delay=!this.active()||expired?60000:Math.min(30000,3000*2**Math.min(this.pollFailures,3));this.timer=setTimeout(()=>{this.timer=0;this.refresh()},delay)},
  updatePanel(){let panel=document.querySelector('#page-data .backup-panel');if(!panel)return;let open=Array.from(panel.querySelectorAll('details'),d=>d.open),focused=document.activeElement,selector=focused?.dataset?.backupAction?'[data-backup-action="'+focused.dataset.backupAction+'"]':null;panel.outerHTML=backupPanelMarkup();let next=document.querySelector('#page-data .backup-panel');next?.querySelectorAll('details').forEach((d,i)=>{if(i<open.length)d.open=open[i]});if(selector)next?.querySelector(selector)?.focus({preventScroll:true})},
- message(code){return ({BACKUP_NOT_CONFIGURED:'备份后台尚未配置，当前没有自动备份保护',GOOGLE_NOT_CONNECTED:'尚未连接 Google Drive',AUTH_REQUIRED:'请先登录云端',OWNER_NOT_ALLOWED:'此账号未启用备份',ANOMALOUS_STATE_REQUIRES_REVIEW:'数据明显减少或为空，已隔离，未替换正常备份',ATTACHMENT_OVER_20MB:'存在超过 20MB 的附件，整份备份尚未完成',UPSTREAM_401:'Google 授权失效或登录已过期，请重新连接',ARCHIVE_CHECKSUM_MISMATCH:'备份校验失败，已停止恢复',COCKPIT_CONFLICT:'云端已有新版本，请刷新后重新核对'})[code]||code||''},
+ message(code){return ({GOOGLE_RECONNECT_REQUIRED:'Google 授权已失效，请重新连接 Google Drive',GOOGLE_OFFLINE_AUTH_REQUIRED:'Google 持续授权未完成，请重新连接 Google Drive',BACKUP_NOT_CONFIGURED:'备份后台尚未配置，当前没有自动备份保护',GOOGLE_NOT_CONNECTED:'尚未连接 Google Drive',AUTH_REQUIRED:'请先登录云端',OWNER_NOT_ALLOWED:'此账号未启用备份',ANOMALOUS_STATE_REQUIRES_REVIEW:'数据明显减少或为空，已隔离，未替换正常备份',ATTACHMENT_OVER_20MB:'存在超过 20MB 的附件，整份备份尚未完成',UPSTREAM_401:'Google 授权失效或登录已过期，请重新连接',ARCHIVE_CHECKSUM_MISMATCH:'备份校验失败，已停止恢复',COCKPIT_CONFLICT:'云端已有新版本，请刷新后重新核对'})[code]||code||''},
  async api(path,method='GET'){
-  if(!Cloud.user||!Cloud.client)throw Error('请先登录云端');let user=Cloud.user.id,session=await Cloud.client.auth.getSession();if(session.error||!session.data?.session?.access_token)throw Error('登录已过期，请重新登录');
+  if(!Cloud.user||!Cloud.client?.auth?.getSession)throw Error('请先登录云端');let user=Cloud.user.id,session=await Cloud.client.auth.getSession();if(session.error||!session.data?.session?.access_token)throw Error('登录已过期，请重新登录');
   const r=await fetch('/api/backups/'+path,{method,headers:{authorization:'Bearer '+session.data.session.access_token},cache:'no-store'});if(Cloud.user?.id!==user)throw Error('账号已切换，操作已停止');let value;try{value=await r.json()}catch{throw Error('备份接口未部署，请先完成后台配置')}
   if(!r.ok)throw Error(this.message(value.error));return value;
  },
  async refresh(){if(this.loading)return;this.loading=true;this.error='';const user=Cloud.user?.id;if(this.account!==(user||'')){this.status=null;this.history=[]}this.account=user||'';try{
   if(!user)throw Error('登录后可查看云端历史与自动备份');
-  const results=await Promise.allSettled([this.api('status'),Cloud.client.from('app_state_history').select('id,version,summary,reason,created_at').eq('user_id',user).order('created_at',{ascending:false}).limit(80)]);
+  const results=await Promise.allSettled([this.api('status'),Promise.resolve().then(()=>Cloud.client.from('app_state_history').select('id,version,summary,reason,created_at').eq('user_id',user).order('created_at',{ascending:false}).limit(80))]);
   if(Cloud.user?.id!==user)return;
-  if(results[0].status==='fulfilled'){this.status=results[0].value;this.pollFailures=0}else{this.pollFailures++;this.error='状态更新失败，显示上次读取的结果：'+results[0].reason.message}
+  if(results[0].status==='fulfilled'){this.status=results[0].value;this.checkedAt=Date.now();this.pollFailures=0}else{this.pollFailures++;this.error='状态更新失败，显示上次读取的结果：'+results[0].reason.message}
   if(results[1].status==='fulfilled'&&!results[1].value.error)this.history=results[1].value.data||[];else{this.history=[];this.error+=(this.error?'；':'')+'云端历史尚不可用，请检查数据库保护是否部署'}
- }catch(error){this.error=error.message;this.pollFailures++}finally{this.loading=false;if(currentPage==='data')this.updatePanel();this.schedule()}},
+ }catch(error){this.error=error.message;this.pollFailures++}finally{this.loading=false;this.renderAlert();if(currentPage==='data')this.updatePanel();this.schedule()}},
+ warning(){
+  if(!Cloud.user||this.account!==Cloud.user.id)return '';
+  if(this.error)return this.error;
+  const s=this.status;if(!s)return '';
+  if(!s.connected)return '自动备份尚未启用：请连接 Google Drive';
+  if(s.lastError)return this.message(s.lastError);
+  const runs=s.runs||[],latest=runs[0],good=runs.find(r=>r.status==='verified');
+  if(latest?.status==='quarantined')return '数据异常减少，已隔离：请检查数据，最近正常备份仍保留';
+  if(latest?.status==='failed')return '备份失败：'+this.message(latest.error_code)+'。后台将按计划重试';
+  if(latest?.status==='running'&&Date.parse(latest.lease_until)<Date.now())return '备份可能已中断，等待后台确认或重试';
+  if(!good&&(!latest||Date.now()-Date.parse(latest.created_at)>86400000))return '尚无已校验的云盘备份，请检查备份状态';
+  if(good&&Number(Cloud.version)>Number(good.source_version)&&Date.now()-Date.parse(good.verified_at)>86400000)return '云端已有更新，超过 24 小时没有新的已校验备份，请检查';
+  return '';
+ },
+ renderAlert(){
+  let el=document.getElementById('backupHealthAlert'),text=this.warning();
+  if(!text){el?.remove();return}
+  if(!el){el=document.createElement('div');el.id='backupHealthAlert';el.className='backup-warning';el.setAttribute('role','alert');el.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:900;max-width:min(680px,90vw);padding:12px 16px;border:1px solid #e5b1a8;border-radius:12px;background:#fff2ef;box-shadow:0 4px 16px #0002';document.body.append(el)}
+  el.replaceChildren(document.createTextNode('备份提醒：'+text+' '));let b=document.createElement('button');b.className='btn';b.textContent='查看备份';b.onclick=()=>navigate('data');el.append(b);
+ },
+ observe(){this.renderAlert();if(!Cloud.user){clearTimeout(this.timer);this.timer=0;this.status=null;this.account='';return}if(this.account!==Cloud.user.id&&!this.loading)queueMicrotask(()=>this.refresh());else if(!this.timer&&!this.loading)this.schedule()},
  async connect(){try{const result=await this.api('connect','POST');location.assign(result.url)}catch(error){toast(error.message)}},
  async run(){if(this.runPending)return;try{if(Cloud.importPending||Cloud.pendingRemote||Cloud.writeBlocked||Cloud.status!=='synced')throw Error('请先核对并同步本机数据；备份仅读取已同步的云端版本');this.runPending=true;this.updatePanel();this.schedule();const r=await this.api('run','POST');toast(r.status==='quarantined'?'当前数据异常或为空，已隔离，未生成正常备份':r.status==='verified'?'此云端内容已备份':'备份执行结束，正在读取结果');}catch(error){toast(error.message)}finally{this.runPending=false;await this.refresh()}},
  async restore(kind,id){const restoreAccount=Cloud.user?.id||'';try{
@@ -51,4 +72,4 @@ function backupPanelMarkup(){
 }
 document.addEventListener('click',event=>{const a=event.target.closest('[data-backup-action]');if(a){const fn=BackupUI[a.dataset.backupAction];if(typeof fn==='function')fn.call(BackupUI)}const r=event.target.closest('[data-backup-restore]');if(r)BackupUI.restore(r.dataset.backupRestore,r.dataset.backupId)});
 
-document.addEventListener('visibilitychange',()=>{if(document.hidden)BackupUI.schedule();else if(currentPage==='data'&&Cloud.user){BackupUI.refresh()}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)BackupUI.schedule();else if(Cloud.user){BackupUI.refresh()}});

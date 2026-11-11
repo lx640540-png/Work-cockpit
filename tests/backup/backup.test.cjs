@@ -87,3 +87,9 @@ test('manual backup keeps the HTTP request open until its work finishes',async()
  let resume,observed,blocked=false;const reached=new Promise(r=>observed=r),gate=new Promise(r=>resume=r);global.fetch=async(url,options)=>{if(String(url).includes('/upload/')&&!blocked){blocked=true;observed();await gate}return fake.fetch(url,options)};
  try{let done=false,jobs=[];const response=w.handle(new Request(env.BACKUP_ORIGIN+'/api/backups/run',{method:'POST',headers:{authorization:'Bearer user',origin:env.BACKUP_ORIGIN}}),env,{waitUntil:p=>jobs.push(p)}).then(r=>{done=true;return r});await reached;assert.equal(done,false);resume();assert.equal((await response).status,202);await Promise.all(jobs);assert.equal(fake.runs[0].status,'verified')}finally{global.fetch=old}
 });
+
+test('expired Google refresh authorization produces an actionable reconnect code',async()=>{
+ const w=await import('../../backup-worker/index.mjs'),env={SUPABASE_URL:'https://database.test',SUPABASE_SERVICE_ROLE_KEY:'fake',GOOGLE_CLIENT_ID:'fake',GOOGLE_CLIENT_SECRET:'fake',BACKUP_ORIGIN:'https://cockpit.test',BACKUP_ALLOWED_USER_ID:user,BACKUP_ENCRYPTION_KEY:Buffer.alloc(32,4).toString('base64')},fake=upstream(env,{state:sample(),encrypted:await w.seal('fake',env,user)}),old=global.fetch;
+ global.fetch=(url,options)=>String(url).startsWith('https://oauth2.googleapis.com/')?Promise.resolve(Response.json({error:'invalid_grant'},{status:400})):fake.fetch(url,options);
+ try{const jobs=[];await w.handle(new Request(env.BACKUP_ORIGIN+'/api/backups/run',{method:'POST',headers:{authorization:'Bearer user',origin:env.BACKUP_ORIGIN}}),env,{waitUntil:p=>jobs.push(p)});await Promise.all(jobs);assert.equal(fake.runs[0].status,'failed');assert.equal(fake.runs[0].error_code,'GOOGLE_RECONNECT_REQUIRED');assert.equal(fake.driveFiles.size,0)}finally{global.fetch=old}
+});

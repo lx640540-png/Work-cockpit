@@ -19,3 +19,19 @@ test('an expired lease shows a truthful retry state and retains the last verifie
  const p=await fixture(t);await p.evaluate(()=>{Cloud.user={id:'fixture-user'};BackupUI.account='fixture-user';BackupUI.status={connected:true,runs:[{id:'a',status:'running',lease_until:'2026-01-01T00:00:00Z',summary:{},source_version:8,created_at:'2026-01-01T00:00:00Z'},{id:'b',status:'verified',verified_at:'2026-01-01T00:00:00Z',summary:{tasks:2},source_version:7,created_at:'2026-01-01T00:00:00Z'}]};navigate('data')});
  assert.match(await p.locator('.backup-panel').innerText(),/执行可能已中断，等待后台确认或重试/);assert.match(await p.locator('.backup-panel').innerText(),/已校验/);
 });
+
+test('backup warnings appear outside data page, recover after success and never cross accounts',async t=>{
+ const p=await fixture(t);await p.evaluate(()=>{Cloud.user={id:'fixture-user'};BackupUI.account='fixture-user';BackupUI.status={connected:true,lastError:'GOOGLE_RECONNECT_REQUIRED',runs:[]};navigate('today');BackupUI.renderAlert()});
+ assert.match(await p.locator('#backupHealthAlert').innerText(),/授权已失效/);await p.locator('#backupHealthAlert button').click();assert.equal(await p.evaluate(()=>currentPage),'data');
+ await p.evaluate(()=>{BackupUI.status={connected:true,runs:[{status:'verified',source_version:Cloud.version,verified_at:new Date().toISOString()}]};BackupUI.renderAlert()});assert.equal(await p.locator('#backupHealthAlert').count(),0);
+ await p.evaluate(()=>{BackupUI.status={connected:true,lastError:'GOOGLE_RECONNECT_REQUIRED'};Cloud.user={id:'different-account'};BackupUI.renderAlert()});assert.equal(await p.locator('#backupHealthAlert').count(),0);
+});
+test('unchanged old backup stays healthy while unprotected new cloud work warns after 24 hours',async t=>{
+ const p=await fixture(t);const result=await p.evaluate(()=>{Cloud.user={id:'fixture-user'};BackupUI.account='fixture-user';BackupUI.error='';Cloud.version=10;BackupUI.status={connected:true,runs:[{status:'verified',source_version:10,verified_at:'2020-01-01T00:00:00Z'}]};const healthy=BackupUI.warning();Cloud.version=11;return {healthy,warning:BackupUI.warning()}});assert.equal(result.healthy,'');assert.match(result.warning,/24 小时/);
+});
+if(process.env.DRILL_ARCHIVE_PATH)test('real Drive archive restores locally with preserved content and survives reload without remote access',async t=>{
+ const archive=JSON.parse(fs.readFileSync(process.env.DRILL_ARCHIVE_PATH)),p=await fixture(t);let externalWrites=0;p.on('request',r=>{if(!r.url().startsWith(origin)&&r.method()!=='GET')externalWrites++});
+ await p.locator('#importInput').setInputFiles({name:'restore-drill.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(archive.state))});await p.waitForSelector('#confirmDialog[open]');await p.evaluate(()=>{confirmCallback();closeDialog('confirmDialog')});
+ for(const reload of [false,true]){if(reload){await p.reload();await p.waitForFunction(()=>!document.documentElement.classList.contains('booting'))}const result=await p.evaluate(()=>({summary:BackupFormat.summary(state),tasks:state.tasks.map(t=>({id:String(t.id),title:t.title,nextAction:t.nextAction})),pending:Cloud.importPending}));assert(result.pending);assert.equal(result.summary.tasks,archive.state.tasks.length);assert.equal(result.summary.projects,archive.state.projects.length);assert.equal(result.summary.memos,archive.state.memos.length);assert.deepEqual(result.tasks,archive.state.tasks.map(t=>({id:String(t.id),title:t.title,nextAction:t.nextAction})));}
+ assert.equal(externalWrites,0);
+});
