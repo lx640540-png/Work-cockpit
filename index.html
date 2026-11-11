@@ -1522,54 +1522,54 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 
 #draftChecklist .checklist-item>.checklist-text:is(:focus,:focus-visible){outline:none;outline-offset:0;box-shadow:none;border:0;background:transparent}
 /* Shared geometry for ordinary, planning, grouped and read-only task rows. */
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row{display:grid;grid-template-columns:auto minmax(0,1fr) fit-content(230px);grid-template-areas:'leading main meta';column-gap:10px;row-gap:6px;align-items:center;min-width:0}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-trailing-pin{grid-template-columns:auto minmax(0,1fr) fit-content(230px) 30px;grid-template-areas:'leading main meta trailing'}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row{grid-template-columns:auto minmax(0,1fr) fit-content(220px) auto;grid-template-areas:'leading main meta history'}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row>.task-leading{grid-area:leading;align-self:center;margin:0}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row>.task-main{grid-area:main;display:block;min-width:0}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row>.task-meta{grid-area:meta;align-self:center;min-width:0;width:auto;max-width:230px;justify-content:flex-end}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row>.task-trailing{grid-area:trailing;align-self:center;justify-self:center;display:flex;align-items:center;justify-content:flex-end;gap:2px;width:30px;height:30px;min-width:0}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row>.history-row-actions{grid-area:history;flex-wrap:wrap;max-width:100%}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-row-dates{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-width:0;max-width:100%;color:var(--muted);font-size:11px;line-height:1.5}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-meta :is(.followup,.muted){flex-basis:auto;text-align:inherit}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-meta>.task-row-dates{flex:0 1 auto}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row .task-completed-date{white-space:nowrap}
+:root[data-calm-today] .workflow-task-row{display:grid;grid-template-columns:auto minmax(0,1fr) fit-content(230px);grid-template-areas:'leading main meta';column-gap:10px;row-gap:6px;align-items:center;min-width:0}
+:root[data-calm-today] .workflow-task-row.has-trailing-pin{grid-template-columns:auto minmax(0,1fr) fit-content(230px) 30px;grid-template-areas:'leading main meta trailing'}
+:root[data-calm-today] .workflow-task-row.history-row{grid-template-columns:auto minmax(0,1fr) fit-content(220px) auto;grid-template-areas:'leading main meta history'}
+:root[data-calm-today] .workflow-task-row>.task-leading{grid-area:leading;align-self:center;margin:0}
+:root[data-calm-today] .workflow-task-row>.task-main{grid-area:main;display:block;min-width:0}
+:root[data-calm-today] .workflow-task-row>.task-meta{grid-area:meta;align-self:center;min-width:0;width:auto;max-width:230px;justify-content:flex-end}
+:root[data-calm-today] .workflow-task-row>.task-trailing{grid-area:trailing;align-self:center;justify-self:center;display:flex;align-items:center;justify-content:flex-end;gap:2px;width:30px;height:30px;min-width:0}
+:root[data-calm-today] .workflow-task-row>.history-row-actions{grid-area:history;flex-wrap:wrap;max-width:100%}
+:root[data-calm-today] .workflow-task-row .task-row-dates{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-width:0;max-width:100%;color:var(--muted);font-size:11px;line-height:1.5}
+:root[data-calm-today] .workflow-task-row .task-meta :is(.followup,.muted){flex-basis:auto;text-align:inherit}
+:root[data-calm-today] .workflow-task-row .task-meta>.task-row-dates{flex:0 1 auto}
+:root[data-calm-today] .workflow-task-row .task-completed-date{white-space:nowrap}
 /* Next-action editors use the middle column, then a full row in narrow cards. */
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning{grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main'}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning.has-trailing-pin{grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing'}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning.history-row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history'}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row{position:relative;display:grid;grid-template-areas:'identity editor meta';grid-template-columns:minmax(0,1fr) minmax(0,var(--planning-editor-effective-width,min(320px,35cqi))) var(--planning-meta-width,210px);gap:12px;align-items:center;min-width:0}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.week-task-identity{grid-area:identity;min-width:0}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.task-meta{grid-area:meta;position:static;width:100%;min-width:0;max-width:100%;margin:0;justify-content:flex-end;align-self:center;flex-wrap:wrap}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.overview-next-label{grid-area:editor;width:100%;min-width:0;max-width:100%;margin:0;justify-self:start;box-sizing:border-box;opacity:var(--planning-editor-opacity,1);transition:opacity 150ms ease}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.overview-next-label:focus-within{opacity:1}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.overview-next-label>span:first-child{white-space:nowrap;overflow:hidden}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row textarea{width:100%;min-width:0;max-width:100%;max-height:120px;overflow-y:auto!important;resize:none;line-height:1.6}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row textarea:not(:focus){mask-image:linear-gradient(to right,#000 calc(100% - 20px),transparent)}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row textarea::placeholder{color:var(--muted);opacity:.8}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .planning-width-handle{top:22px;bottom:0;right:0;width:12px}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-planning>.ui-planning-row.is-editor-stacked{grid-template-columns:minmax(0,1fr);grid-template-areas:'identity' 'editor' 'meta';row-gap:6px}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row.is-editor-stacked>.overview-next-label{position:relative;width:100%;opacity:1;visibility:visible}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row.is-editor-stacked>.task-meta{justify-content:flex-start}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row.is-editor-stacked .planning-width-handle{display:none}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row .task-date-button{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:root[data-calm-today] .workflow-task-row.has-planning{grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main'}
+:root[data-calm-today] .workflow-task-row.has-planning.has-trailing-pin{grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing'}
+:root[data-calm-today] .workflow-task-row.has-planning.history-row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history'}
+:root[data-calm-today] .workflow-task-row.has-planning>.ui-planning-row{position:relative;display:grid;grid-template-areas:'identity editor meta';grid-template-columns:minmax(0,1fr) minmax(0,var(--planning-editor-effective-width,min(320px,35cqi))) var(--planning-meta-width,210px);gap:12px;align-items:center;min-width:0}
+:root[data-calm-today] .ui-planning-row>.week-task-identity{grid-area:identity;min-width:0}
+:root[data-calm-today] .ui-planning-row>.task-meta{grid-area:meta;position:static;width:100%;min-width:0;max-width:100%;margin:0;justify-content:flex-end;align-self:center;flex-wrap:wrap}
+:root[data-calm-today] .ui-planning-row>.overview-next-label{grid-area:editor;width:100%;min-width:0;max-width:100%;margin:0;justify-self:start;box-sizing:border-box;opacity:var(--planning-editor-opacity,1);transition:opacity 150ms ease}
+:root[data-calm-today] .ui-planning-row>.overview-next-label:focus-within{opacity:1}
+:root[data-calm-today] .ui-planning-row>.overview-next-label>span:first-child{white-space:nowrap;overflow:hidden}
+:root[data-calm-today] .ui-planning-row textarea{width:100%;min-width:0;max-width:100%;max-height:120px;overflow-y:auto!important;resize:none;line-height:1.6}
+:root[data-calm-today] .ui-planning-row textarea:not(:focus){mask-image:linear-gradient(to right,#000 calc(100% - 20px),transparent)}
+:root[data-calm-today] .ui-planning-row textarea::placeholder{color:var(--muted);opacity:.8}
+:root[data-calm-today] .ui-planning-row .planning-width-handle{top:22px;bottom:0;right:0;width:12px}
+:root[data-calm-today] .workflow-task-row.has-planning>.ui-planning-row.is-editor-stacked{grid-template-columns:minmax(0,1fr);grid-template-areas:'identity' 'editor' 'meta';row-gap:6px}
+:root[data-calm-today] .ui-planning-row.is-editor-stacked>.overview-next-label{position:relative;width:100%;opacity:1;visibility:visible}
+:root[data-calm-today] .ui-planning-row.is-editor-stacked>.task-meta{justify-content:flex-start}
+:root[data-calm-today] .ui-planning-row.is-editor-stacked .planning-width-handle{display:none}
+:root[data-calm-today] .ui-planning-row .task-date-button{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .planning-reveal{display:none}
 @container(max-width:560px){
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta'}
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.has-trailing-pin:not(.has-planning){grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing' 'leading meta trailing'}
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history' 'leading meta history'}
- :root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row:not(.has-planning)>.task-meta{justify-content:flex-start;max-width:none}
+ :root[data-calm-today] .workflow-task-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta'}
+ :root[data-calm-today] .workflow-task-row.has-trailing-pin:not(.has-planning){grid-template-columns:auto minmax(0,1fr) 30px;grid-template-areas:'leading main trailing' 'leading meta trailing'}
+ :root[data-calm-today] .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'leading main history' 'leading meta history'}
+ :root[data-calm-today] .workflow-task-row:not(.has-planning)>.task-meta{justify-content:flex-start;max-width:none}
 }
-@container(max-width:420px){:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta' 'leading history'}}
+@container(max-width:420px){:root[data-calm-today] .workflow-task-row.history-row:not(.has-planning){grid-template-columns:auto minmax(0,1fr);grid-template-areas:'leading main' 'leading meta' 'leading history'}}
 @media(prefers-reduced-motion:reduce){.overview-next-label{transition:none!important}}
 
 /* Context stays beside the title; removing its old row also removes its height. */
 .task-title-line{display:flex;align-items:baseline;gap:6px 10px;flex-wrap:nowrap;min-width:0}
 .task-title-line>.task-title-link{flex:0 1 auto;min-width:0}
 .task-context-source{flex:0 1 auto;min-width:3em;max-width:10em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;line-height:1.5;font-weight:400;color:var(--muted)}
-:root:is([data-calm-today],[data-visual-preview=old]) .workflow-task-row{min-height:56px;padding:8px 6px}
+:root[data-calm-today] .workflow-task-row{min-height:56px;padding:8px 6px}
 :root[data-calm-today] #page-today .workflow-task-row{min-height:var(--preview-row-height,60px);padding:8px 0}
-:root:is([data-calm-today],[data-visual-preview=old]) .ui-planning-row>.overview-next-label:has(>.visually-hidden) .planning-width-handle{top:0}
+:root[data-calm-today] .ui-planning-row>.overview-next-label:has(>.visually-hidden) .planning-width-handle{top:0}
 :root[data-calm-today] .project-overview-group .overview-next-label>textarea{min-height:42px;padding:7px 9px}
 /* Avoid a second boundary meeting the sticky topbar while scrolling. */
 :root[data-calm-today] #page-today .summary-grid{border-bottom:0}
@@ -2200,8 +2200,9 @@ function richImageFileDrop(event){
   const keep=new Set(),days=new Set();let newestGood=rows.find(r=>r.status==='verified'&&!r.quarantined);if(newestGood)keep.add(newestGood.id);
   for(const row of rows){if(row.status!=='verified')continue;const age=now-Date.parse(row.created_at),day=row.created_at.slice(0,10);if(age<48*3600000||age<30*86400000&&!days.has(day)||row.pinned)keep.add(row.id);days.add(day)}return keep;
  }
- root.BackupFormat={validate,stable,summary,risk,content,retained};if(typeof module!=='undefined'&&module.exports)module.exports=root.BackupFormat;
+ root.BackupFormat={validate,stable,summary,risk,content,retained,meaningful};if(typeof module!=='undefined'&&module.exports)module.exports=root.BackupFormat;
 })(globalThis);
+let localReadIssue=null;
 function emptyWeek(){return{actions:{},topResults:[],top:[],taskIds:[],carriedTaskIds:[],taskSnapshots:[],projectSnapshots:[],reviewDone:"",reviewMiss:"",reviewNext:"",carriedFromWeek:"",activatedAt:"",closedAt:""}}
 function emptyOrder(){return{today:[],week:[],waiting:[],inbox:[],done:[],long:[],all:[],memoActive:[],memoArchived:[],projects:[],pinToday:[],pinWaiting:[],pinInbox:[],pinWeek:[],pinLong:[],pinAll:[],todayGroup:false,weekGroup:false}}
 function emptyQuickNote(){return{delta:{ops:[{insert:"\n",attributes:{quickDone:"0"}}]},updatedAt:""}}
@@ -2283,8 +2284,8 @@ function normalizeState(raw){
  return next;
 }
 function loadLocalState(){
- let raw=null;
- try{raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")}catch(error){console.warn("新版数据读取失败",error)}
+ let raw=null,text=null;
+ try{text=localStorage.getItem(STORAGE_KEY);raw=JSON.parse(text||"null");if(text&&(!raw||typeof raw!=="object"||!Array.isArray(raw.tasks)||!Array.isArray(raw.projects)))throw Error("主数据结构无效");if(raw)BackupFormat.validate(raw)}catch(error){localReadIssue={raw:text||"",message:error.message};return emptyState()}
  if(!raw)for(let key of LEGACY_KEYS){try{raw=JSON.parse(localStorage.getItem(key)||"null")}catch(error){}if(raw)break}
  return normalizeState(raw);
 }
@@ -2308,6 +2309,7 @@ let localSavePending=false,localSaveError="";
 function retryLocalSave(){try{saveLocal(true);if(typeof journalFlush==="function")journalFlush()}catch{}}
 function showLocalSaveStatus(){let banner=$("#localSaveBanner");if(!banner){banner=document.createElement("div");banner.id="localSaveBanner";banner.setAttribute("role","status");document.body.appendChild(banner)}banner.hidden=!localSaveError;banner.textContent=localSaveError?"本地保存失败，请保留页面并重试或导出备份。":"";if(localSaveError){let retry=document.createElement("button");retry.type="button";retry.textContent="重试保存";retry.onclick=retryLocalSave;banner.appendChild(retry)}let sync=$("#syncButton"),notice=$("#localSaveNotice");if(sync&&!notice){notice=document.createElement("button");notice.id="localSaveNotice";notice.type="button";notice.className="sync-badge error";notice.title="本地保存失败；点击重试。云端状态独立显示。";notice.onclick=retryLocalSave;sync.before(notice)}if(notice){notice.hidden=!localSaveError;notice.textContent="本地保存失败"}let memo=$(".memo-status");if(memo)memo.textContent=localSaveError?"本地保存失败":localSavePending?"待保存…":"本地已保存"}
 function saveLocal(immediate=false){
+ if(typeof localReadIssue!=="undefined"&&localReadIssue)throw Error("主数据读取异常：请先通过数据与恢复明确选择恢复版本");
  clearTimeout(saveTimer);localSavePending=true;
  let write=()=>{try{state.meta.updatedAt=new Date().toISOString();localStorage.setItem(STORAGE_KEY,serializeState());localSavePending=false;localSaveError=""}catch(error){localSaveError=error.message||"本地存储不可用";throw error}finally{window.CloudSync?.schedule();showLocalSaveStatus()}};
  if(immediate)write();else{showLocalSaveStatus();saveTimer=setTimeout(()=>{try{write()}catch{}},160)}
@@ -2356,7 +2358,7 @@ function markRestorePending(){localStorage.setItem(RESTORE_PENDING_KEY,JSON.stri
 function clearRestorePending(){localStorage.removeItem(RESTORE_PENDING_KEY);if(window.CloudSync)window.CloudSync.importPending=false}
 function hasRestorePending(){try{return !!JSON.parse(localStorage.getItem(RESTORE_PENDING_KEY)||'null')}catch{return true}}
 function stageRecoveredState(value,label){
- validateImportedData(value);if(!flushPendingEdits())throw Error('当前编辑尚未保存，请先重试保存');checkpointLocal(label+'前的本机副本');markRestorePending();replaceState(value,label);toast('已恢复到本机，核对后可在同步窗口选择“替换云端”');
+ validateImportedData(value);if(!flushPendingEdits())throw Error('当前编辑尚未保存，请先重试保存');checkpointLocal(label+'前的本机副本');markRestorePending();if(typeof localReadIssue!=="undefined")localReadIssue=null;replaceState(value,label);if(typeof document!=="undefined")document.getElementById('localReadFailure')?.remove();toast('已恢复到本机，核对后可在同步窗口选择“替换云端”');
 }
 function currentWeek(){return state.weeks[selectedWeekKey]||(state.weeks[selectedWeekKey]=emptyWeek())}
 function captureWeek(key,close=false){
@@ -4012,7 +4014,7 @@ function journalShowTaskContext(){
  banner.hidden=!task;banner.textContent=task?'关联事项：'+task.title+(linked?'':' · 写入后关联'):'';
 }
 function journalAttachPendingTask(date,day){
- const context=journalPendingTask;if(!context||context.date!==date||context.week!==journalUI.week||!strip(day.content).trim())return;
+ const context=journalPendingTask;if(!context||context.date!==date||context.week!==journalUI.week||!BackupFormat.meaningful(day.content))return;
  day.taskIds=[...new Set([...(day.taskIds||[]),context.id])];journalPendingTask=null;journalShowTaskContext();
  const links=$('#workJournal [data-record-links="'+date+'"]');if(links)links.outerHTML=journalTaskLinksMarkup(date,day);
 }
@@ -4786,7 +4788,7 @@ window.addEventListener("blur",()=>{document.documentElement.removeAttribute("da
 document.addEventListener('click',event=>{const button=event.target.closest?.('[data-today-fold]');if(button){event.preventDefault();toggleTodayPanel(button.dataset.todayFold)}});
 function cloudHash(value){let text=typeof value==="string"?value:JSON.stringify(value),hash=2166136261;for(let index=0;index<text.length;index++){hash^=text.charCodeAt(index);hash=Math.imul(hash,16777619)}return(hash>>>0).toString(16).padStart(8,"0")}
 function deviceId(){let value=localStorage.getItem(CLOUD_DEVICE_KEY);if(!value){value=uid("device");localStorage.setItem(CLOUD_DEVICE_KEY,value)}return value}
-function hasBusinessData(value=state){let quick=(value.quickNote?.delta?.ops||[]).some(op=>String(op.insert||"").trim());return!!(Object.values(value.meta?.workJournal?.weeks||{}).some(week=>Object.values(week.days||{}).some(day=>strip(day.content))||Object.values(week.review||{}).some(text=>String(text).trim()))||value.tasks.length||value.projects.length||value.memos.length||value.decisions?.length||quick||Object.values(value.weeks||{}).some(week=>week.top?.length))}
+function hasBusinessData(value=state){let quick=(value.quickNote?.delta?.ops||[]).some(op=>String(op.insert||"").trim());return!!(Object.values(value.meta?.workJournal?.weeks||{}).some(week=>Object.values(week.days||{}).some(day=>BackupFormat.meaningful(day.content))||Object.values(week.review||{}).some(text=>String(text).trim()))||value.tasks.length||value.projects.length||value.memos.length||value.decisions?.length||quick||Object.values(value.weeks||{}).some(week=>week.top?.length))}
 const Cloud={
  client:null,user:null,channel:null,version:0,rowExists:false,remoteReady:false,sessionCheck:null,device:deviceId(),lastHash:"",timer:0,pushing:false,pendingPush:false,syncEpoch:0,applying:false,pendingRemote:null,importPending:typeof hasRestorePending==='function'&&hasRestorePending(),writeBlocked:false,authMode:"login",status:"local",
  config(){try{return{...DEFAULT_CLOUD_CONFIG,...JSON.parse(localStorage.getItem(CLOUD_CONFIG_KEY)||"null")}}catch(error){return DEFAULT_CLOUD_CONFIG}},
@@ -4814,6 +4816,7 @@ const Cloud={
   return check.promise;
  },
  async connectSession(session){
+  if(typeof localReadIssue!=="undefined"&&localReadIssue){this.user=session.user;this.setStatus("error","本机读取异常，自动同步已暂停");return false}
   this.syncEpoch++;this.remoteReady=false;this.pushing=false;this.pendingPush=false;clearTimeout(this.timer);this.pendingRemote=null;$("#authPassword").value="";this.user=session.user;const sessionEpoch=this.syncEpoch;localStorage.removeItem(LOCAL_MODE_KEY);$("#cloudGate").hidden=true;this.setStatus("connecting","连接中");
   try{
    let row=await this.fetchRemote();if(sessionEpoch!==this.syncEpoch||this.user?.id!==session.user.id)return false;this.remoteReady=true;let localSerialized=serializeState(),localHash=cloudHash(localSerialized),link=null;
@@ -4978,10 +4981,10 @@ const BackupUI={
  active(){return this.runPending||!!this.status?.runs?.some(r=>r.status==='pending'||r.status==='running')},
  schedule(){clearTimeout(this.timer);this.timer=0;if(document.hidden||!Cloud.user)return;let expired=this.status?.runs?.some(r=>r.status==='running'&&r.lease_until&&Date.parse(r.lease_until)<Date.now()),delay=!this.active()||expired?60000:Math.min(30000,3000*2**Math.min(this.pollFailures,3));this.timer=setTimeout(()=>{this.timer=0;this.refresh()},delay)},
  updatePanel(){let panel=document.querySelector('#page-data .backup-panel');if(!panel)return;let open=Array.from(panel.querySelectorAll('details'),d=>d.open),focused=document.activeElement,selector=focused?.dataset?.backupAction?'[data-backup-action="'+focused.dataset.backupAction+'"]':null;panel.outerHTML=backupPanelMarkup();let next=document.querySelector('#page-data .backup-panel');next?.querySelectorAll('details').forEach((d,i)=>{if(i<open.length)d.open=open[i]});if(selector)next?.querySelector(selector)?.focus({preventScroll:true})},
- message(code){return ({GOOGLE_RECONNECT_REQUIRED:'Google 授权已失效，请重新连接 Google Drive',GOOGLE_OFFLINE_AUTH_REQUIRED:'Google 持续授权未完成，请重新连接 Google Drive',BACKUP_NOT_CONFIGURED:'备份后台尚未配置，当前没有自动备份保护',GOOGLE_NOT_CONNECTED:'尚未连接 Google Drive',AUTH_REQUIRED:'请先登录云端',OWNER_NOT_ALLOWED:'此账号未启用备份',ANOMALOUS_STATE_REQUIRES_REVIEW:'数据明显减少或为空，已隔离，未替换正常备份',ATTACHMENT_OVER_20MB:'存在超过 20MB 的附件，整份备份尚未完成',UPSTREAM_401:'Google 授权失效或登录已过期，请重新连接',ARCHIVE_CHECKSUM_MISMATCH:'备份校验失败，已停止恢复',COCKPIT_CONFLICT:'云端已有新版本，请刷新后重新核对'})[code]||code||''},
- async api(path,method='GET'){
+ message(code){return ({GOOGLE_RECONNECT_REQUIRED:'Google 授权已失效，请重新连接 Google Drive',GOOGLE_OFFLINE_AUTH_REQUIRED:'Google 持续授权未完成，请重新连接 Google Drive',BACKUP_NOT_CONFIGURED:'备份后台尚未配置，当前没有自动备份保护',GOOGLE_NOT_CONNECTED:'尚未连接 Google Drive',AUTH_REQUIRED:'请先登录云端',OWNER_NOT_ALLOWED:'此账号未启用备份',ANOMALOUS_STATE_REQUIRES_REVIEW:'数据明显减少或为空，已隔离，未替换正常备份',ATTACHMENT_OVER_20MB:'存在超过 20MB 的附件，整份备份尚未完成',UPSTREAM_401:'Google 授权失效或登录已过期，请重新连接',ARCHIVE_CHECKSUM_MISMATCH:'备份校验失败，已停止恢复',EMPTY_BACKUP_NOT_ALLOWED:'空数据不能确认为正常备份，请先检查恢复来源',COCKPIT_CONFLICT:'云端已有新版本，请刷新后重新核对'})[code]||code||''},
+ async api(path,method='GET',body){
   if(!Cloud.user||!Cloud.client?.auth?.getSession)throw Error('请先登录云端');let user=Cloud.user.id,session=await Cloud.client.auth.getSession();if(session.error||!session.data?.session?.access_token)throw Error('登录已过期，请重新登录');
-  const r=await fetch('/api/backups/'+path,{method,headers:{authorization:'Bearer '+session.data.session.access_token},cache:'no-store'});if(Cloud.user?.id!==user)throw Error('账号已切换，操作已停止');let value;try{value=await r.json()}catch{throw Error('备份接口未部署，请先完成后台配置')}
+  const r=await fetch('/api/backups/'+path,{method,headers:{authorization:'Bearer '+session.data.session.access_token},cache:'no-store',...(body?{body:JSON.stringify(body),headers:{authorization:'Bearer '+session.data.session.access_token,'content-type':'application/json'}}:{})});if(Cloud.user?.id!==user)throw Error('账号已切换，操作已停止');let value;try{value=await r.json()}catch{throw Error('备份接口未部署，请先完成后台配置')}
   if(!r.ok)throw Error(this.message(value.error));return value;
  },
  async refresh(){if(this.loading)return;this.loading=true;this.error='';const user=Cloud.user?.id;if(this.account!==(user||'')){this.status=null;this.history=[]}this.account=user||'';try{
@@ -5012,6 +5015,7 @@ const BackupUI={
   el.replaceChildren(document.createTextNode('备份提醒：'+text+' '));let b=document.createElement('button');b.className='btn';b.textContent='查看备份';b.onclick=()=>navigate('data');el.append(b);
  },
  observe(){this.renderAlert();if(!Cloud.user){clearTimeout(this.timer);this.timer=0;this.status=null;this.account='';return}if(this.account!==Cloud.user.id&&!this.loading)queueMicrotask(()=>this.refresh());else if(!this.timer&&!this.loading)this.schedule()},
+ approve(id){const user=Cloud.user?.id,row=this.status?.runs?.find(x=>x.id===id),good=this.status?.runs?.find(x=>x.status==='verified');if(!row||row.status!=='quarantined')return;confirmAction('确认数据减少是正常变更？','最近正常备份：'+this.counts(good?.summary)+'；待确认版本：'+this.counts(row.summary)+'。旧正常备份仍按保留策略保存。确认只允许这一份内容进入备份，不会覆盖工作台数据。',async()=>{try{if(Cloud.user?.id!==user)throw Error('账号已切换');await this.api('approve/'+id,'POST',{confirmation:'ACCEPT_REDUCTION'});await this.refresh()}catch(error){toast(error.message)}},'确认并备份')},
  async connect(){try{const result=await this.api('connect','POST');location.assign(result.url)}catch(error){toast(error.message)}},
  async run(){if(this.runPending)return;try{if(Cloud.importPending||Cloud.pendingRemote||Cloud.writeBlocked||Cloud.status!=='synced')throw Error('请先核对并同步本机数据；备份仅读取已同步的云端版本');this.runPending=true;this.updatePanel();this.schedule();const r=await this.api('run','POST');toast(r.status==='quarantined'?'当前数据异常或为空，已隔离，未生成正常备份':r.status==='verified'?'此云端内容已备份':'备份执行结束，正在读取结果');}catch(error){toast(error.message)}finally{this.runPending=false;await this.refresh()}},
  async restore(kind,id){const restoreAccount=Cloud.user?.id||'';try{
@@ -5040,12 +5044,12 @@ function backupPanelMarkup(){
  const last=status?.runs?.find(r=>r.status==='verified');
  let label=!u?'未登录':!status?'尚未读取备份状态':!status.connected?'未连接 Google Drive':last?'最近校验成功：'+dateTime(last.verified_at):'已连接，尚无校验成功的备份';
  const actions='<button class="btn" data-backup-action="refresh">'+(BackupUI.loading?'读取中…':'刷新状态')+'</button><button class="btn" data-backup-action="connect">连接 Google Drive</button><button class="btn primary" data-backup-action="run" '+(BackupUI.runPending?'disabled':'')+'>'+(BackupUI.runPending?'备份请求处理中…':'立即备份')+'</button>';
- const items=(status?.runs||[]).map(r=>'<div class="data-item"><div><b>'+esc(r.status==='running'&&r.lease_until&&Date.parse(r.lease_until)<Date.now()?'执行可能已中断，等待后台确认或重试':({verified:'已校验',failed:'备份失败，等待重试',running:'正在备份及校验',pending:'等待备份',quarantined:'已隔离'})[r.status]||r.status)+' · '+dateTime(r.created_at)+'</b><small>'+esc(BackupUI.counts(r.summary))+' · 云端 v'+esc(r.source_version)+' · '+(r.attachment_count||0)+' 个附件</small>'+(r.error_code?'<small>'+esc(BackupUI.message(r.error_code))+'</small>':'')+'</div>'+(r.status==='verified'?'<button class="btn" data-backup-restore="drive" data-backup-id="'+esc(r.id)+'">预览并恢复</button>':'')+'</div>').join('');
+ const items=(status?.runs||[]).map(r=>'<div class="data-item"><div><b>'+esc(r.status==='running'&&r.lease_until&&Date.parse(r.lease_until)<Date.now()?'执行可能已中断，等待后台确认或重试':({verified:'已校验',failed:'备份失败，等待重试',running:'正在备份及校验',pending:'等待备份',quarantined:'已隔离'})[r.status]||r.status)+' · '+dateTime(r.created_at)+'</b><small>'+esc(BackupUI.counts(r.summary))+' · 云端 v'+esc(r.source_version)+' · '+(r.attachment_count||0)+' 个附件</small>'+(r.error_code?'<small>'+esc(BackupUI.message(r.error_code))+'</small>':'')+'</div>'+(r.status==='verified'?'<button class="btn" data-backup-restore="drive" data-backup-id="'+esc(r.id)+'">预览并恢复</button>':'')+(r.status==='quarantined'?'<button class="btn" data-backup-approve="'+esc(r.id)+'">核对正常变更</button>':'')+'</div>').join('');
  const histories=history.map(r=>'<div class="data-item"><div><b>'+dateTime(r.created_at)+' · v'+esc(r.version)+'</b><small>'+esc(BackupUI.counts(r.summary))+'</small></div><button class="btn" data-backup-restore="history" data-backup-id="'+esc(r.id)+'">预览并恢复</button></div>').join('');
  const locals=localRecoveryList().filter(r=>r.owner===recoveryOwner()).map(r=>'<div class="data-item"><div><b>'+esc(r.label)+'</b><small>'+dateTime(r.createdAt)+' · '+esc(BackupUI.counts(BackupFormat.summary(r.state)))+'</small></div><button class="btn" data-backup-restore="local" data-backup-id="'+esc(r.id)+'">预览并恢复</button></div>').join('');
  return '<article class="card feature-card backup-panel"><div class="feature-head"><h2>自动备份与独立恢复</h2><div class="page-actions">'+actions+'</div></div><p role="status">'+esc(label)+'</p>'+(valid&&BackupUI.error?'<p class="backup-warning">'+esc(BackupUI.error)+'</p>':'')+(status?.lastError?'<p class="backup-warning">'+esc(BackupUI.message(status.lastError))+'</p>':'')+'<p>每小时检查已同步云端数据；发生变化才生成版本。最近 48 小时保留小时版本，近 30 天每天保留一个版本。空数据和异常减少的版本会隔离，保留最近正常备份。</p><details open><summary>Google Drive 备份</summary><div class="data-list">'+(items||'<p>尚无可验证的 Drive 备份。连接成功不等于已完成备份。</p>')+'</div></details><details><summary>数据库独立历史</summary><div class="data-list">'+(histories||'<p>刷新后显示可恢复的历史。</p>')+'</div></details><details><summary>本机独立安全副本（最多 3 份）</summary><div class="data-list">'+(locals||'<p>高风险操作前自动保存，与主数据分开；浏览器清理仍会影响这些副本。</p>')+'</div></details></article>';
 }
-document.addEventListener('click',event=>{const a=event.target.closest('[data-backup-action]');if(a){const fn=BackupUI[a.dataset.backupAction];if(typeof fn==='function')fn.call(BackupUI)}const r=event.target.closest('[data-backup-restore]');if(r)BackupUI.restore(r.dataset.backupRestore,r.dataset.backupId)});
+document.addEventListener('click',event=>{const a=event.target.closest('[data-backup-action]');if(a){const fn=BackupUI[a.dataset.backupAction];if(typeof fn==='function')fn.call(BackupUI)}const approve=event.target.closest('[data-backup-approve]');if(approve)BackupUI.approve(approve.dataset.backupApprove);const r=event.target.closest('[data-backup-restore]');if(r)BackupUI.restore(r.dataset.backupRestore,r.dataset.backupId)});
 
 document.addEventListener('visibilitychange',()=>{if(document.hidden)BackupUI.schedule();else if(Cloud.user){BackupUI.refresh()}});
 // One calendar for the weekly workspace and the journal. Dates remain local date keys.
@@ -5133,7 +5137,7 @@ function journalReviewMarkup(){
 }
 function journalRenderReview(){let node=$(".journal-review");if(!node)return;node.outerHTML=journalReviewMarkup();initQuillEditors($("#workJournal .journal-review"));journalSyncPanes();journalUpdateReviewLinks()}
 function journalUpdateReviewLinks(){
- let week=journalWeek(journalUI.week),days=Object.keys(week.days).sort(),hasText=date=>!!strip(week.days[date].content),button=date=>'<button type="button" data-journal-action="jump" data-journal-jump="'+date+'" class="'+(date===todayKey()?'today ':'')+(hasText(date)?'has-content':'')+'" aria-label="跳转到'+journalDateLabel(date)+(hasText(date)?'，有记录':'，无记录')+'">'+dateShort(date)+(hasText(date)?'<i aria-hidden="true"></i>':'')+'</button>';
+ let week=journalWeek(journalUI.week),days=Object.keys(week.days).sort(),hasText=date=>BackupFormat.meaningful(week.days[date].content),button=date=>'<button type="button" data-journal-action="jump" data-journal-jump="'+date+'" class="'+(date===todayKey()?'today ':'')+(hasText(date)?'has-content':'')+'" aria-label="跳转到'+journalDateLabel(date)+(hasText(date)?'，有记录':'，无记录')+'">'+dateShort(date)+(hasText(date)?'<i aria-hidden="true"></i>':'')+'</button>';
  let links=$("#workJournal .journal-review-links");if(links){let recorded=days.filter(hasText);links.innerHTML=recorded.length?'<span>本周已记录：</span>'+recorded.map(button).join(''):'<span>本周尚无正文记录</span>'}
 }
 function journalScrollToDate(date){let body=$("#workJournal .journal-body"),section=[...body.querySelectorAll('.journal-day')].find(node=>node.dataset.journalSection===date);if(!section)return;body.scrollTop+=section.getBoundingClientRect().top-body.getBoundingClientRect().top-8}
@@ -5160,7 +5164,7 @@ function journalRenderCalendar(){
  box.innerHTML='<p class="journal-calendar-title">'+(weekMode?"点击一天选择所在周":"选择当前周的日期")+'</p><header><button type="button" data-journal-month="-1" aria-label="上个月">‹</button><b>'+first.getFullYear()+"年"+(first.getMonth()+1)+'月</b><button type="button" data-journal-month="1" aria-label="下个月">›</button><button type="button" data-journal-action="calendar-close" aria-label="关闭日历">×</button></header><div class="journal-calendar-grid">'+["一","二","三","四","五","六","日"].map(day=>'<small>'+day+'</small>').join('')+days+'</div>';
  $("#workJournal").appendChild(box);journalPositionCalendar();box.querySelector('.calendar-today.selected:not(:disabled),.selected:not(:disabled),[data-journal-pick]:not(:disabled)')?.focus({preventScroll:true});
 }
-async function journalClick(event){let target=event.target.closest("button");if(!target)return;if(target.dataset.journalCopy)return journalCopy(target.dataset.journalCopy);if(target.dataset.journalMonth){let month=parseDate(journalUI.calendar.month+"-01");month.setMonth(month.getMonth()+Number(target.dataset.journalMonth));journalUI.calendar.month=fmt(month).slice(0,7);return journalRenderCalendar()}if(target.dataset.journalChangeDate)return journalOpenCalendar("date",target.dataset.journalChangeDate);if(target.dataset.journalPick)return journalPick(target.dataset.journalPick);if(target.dataset.journalRemove){let date=target.dataset.journalRemove,remove=()=>{if(!journalFlush())return;let week=journalWeek(journalUI.week);commit("移除工作记录日期",()=>{delete week.days[date];week.deleted.push(date)},{immediate:true});journalRenderDays()};if(strip(journalWeek(journalUI.week).days[date].content))confirmAction("移除这一天的记录？","正文将一起移除，可通过撤回恢复。",remove,"移除");else remove();return}let action=target.dataset.journalAction;if(!action)return;if(action==="calendar-close")return journalCloseCalendar();if(action==="jump")return journalScrollToDate(target.dataset.journalJump);if(action==="review"){if($("#workJournal").classList.contains("journal-split"))return;journalUI.reviewOpen=!journalUI.reviewOpen;journalRenderReview();return}if(action==="week")return journalOpenCalendar("week");if(action==="add")return journalOpenCalendar("add");if(action==="copy"){let menu=$(".journal-copy-menu");menu.hidden=!menu.hidden;target.setAttribute("aria-expanded",String(!menu.hidden));return}if(!journalFlush())return;if(action==="expand")journalUI.expanded=!journalUI.expanded;else if(action==="pin")journalUI.pinned=!journalUI.pinned;else if(action==="close"){journalUI.open=false;journalUI.expanded=false}else if(action==="prev"||action==="next"||action==="today"){journalUI.week=action==="today"?currentWeekKey():fmt(addDays(parseDate(journalUI.week),action==="prev"?-7:7));journalUI.signature="";$(".journal-body").scrollTop=0}journalRemember();syncWorkJournal();if(action==="today")journalScrollToToday()}
+async function journalClick(event){let target=event.target.closest("button");if(!target)return;if(target.dataset.journalCopy)return journalCopy(target.dataset.journalCopy);if(target.dataset.journalMonth){let month=parseDate(journalUI.calendar.month+"-01");month.setMonth(month.getMonth()+Number(target.dataset.journalMonth));journalUI.calendar.month=fmt(month).slice(0,7);return journalRenderCalendar()}if(target.dataset.journalChangeDate)return journalOpenCalendar("date",target.dataset.journalChangeDate);if(target.dataset.journalPick)return journalPick(target.dataset.journalPick);if(target.dataset.journalRemove){let date=target.dataset.journalRemove,remove=()=>{if(!journalFlush())return;let week=journalWeek(journalUI.week);commit("移除工作记录日期",()=>{delete week.days[date];week.deleted.push(date)},{immediate:true});journalRenderDays()};if(BackupFormat.meaningful(journalWeek(journalUI.week).days[date].content))confirmAction("移除这一天的记录？","正文将一起移除，可通过撤回恢复。",remove,"移除");else remove();return}let action=target.dataset.journalAction;if(!action)return;if(action==="calendar-close")return journalCloseCalendar();if(action==="jump")return journalScrollToDate(target.dataset.journalJump);if(action==="review"){if($("#workJournal").classList.contains("journal-split"))return;journalUI.reviewOpen=!journalUI.reviewOpen;journalRenderReview();return}if(action==="week")return journalOpenCalendar("week");if(action==="add")return journalOpenCalendar("add");if(action==="copy"){let menu=$(".journal-copy-menu");menu.hidden=!menu.hidden;target.setAttribute("aria-expanded",String(!menu.hidden));return}if(!journalFlush())return;if(action==="expand")journalUI.expanded=!journalUI.expanded;else if(action==="pin")journalUI.pinned=!journalUI.pinned;else if(action==="close"){journalUI.open=false;journalUI.expanded=false}else if(action==="prev"||action==="next"||action==="today"){journalUI.week=action==="today"?currentWeekKey():fmt(addDays(parseDate(journalUI.week),action==="prev"?-7:7));journalUI.signature="";$(".journal-body").scrollTop=0}journalRemember();syncWorkJournal();if(action==="today")journalScrollToToday()}
 function journalPick(date){let data=journalUI.calendar;if(!data||!journalDateValid(date)||!journalFlush())return;if(data.mode==="week"){journalUI.week=fmt(mondayOf(parseDate(date)));journalUI.signature="";journalCloseCalendar();journalRemember();syncWorkJournal();$(".journal-body").scrollTop=0;return}if(date<journalUI.week||date>weekEnd(journalUI.week))return;let week=journalWeek(journalUI.week);if(week.days[date]){if(data.mode==="date"&&data.date!==date){toast("该日期已有记录，请选择其他日期");return}journalCloseCalendar();journalUI.active=date;journalActiveEditor()?.scrollIntoView({block:"nearest"});quillFor(journalActiveEditor())?.focus();return}commit(data.mode==="date"?"调整工作记录日期":"新增工作记录日期",()=>{week.days[date]=data.mode==="date"?week.days[data.date]:{content:"",updatedAt:new Date().toISOString()};if(data.mode==="date"){delete week.days[data.date];week.deleted.push(data.date)}week.deleted=week.deleted.filter(value=>value!==date)},{immediate:true});journalUI.active=date;journalRenderDays();journalActiveEditor()?.scrollIntoView({block:"nearest"});quillFor(journalActiveEditor())?.focus()}
 
 // Move the existing review DOM between layouts; preserve editors, selection and drafts.
@@ -5199,11 +5203,11 @@ function journalExport(format,section="days"){
  }
  let week=journalWeek(journalUI.week),parts=[];
  for(let date of (section==="review"?JOURNAL_REVIEW_FIELDS:Object.keys(week.days).sort())){
-  let editor=$(section==="review"?'[data-journal-review="'+date+'"]':'[data-journal-date="'+date+'"]'),q=quillFor(editor);if(!q||!q.getText().trim())continue;
+  let editor=$(section==="review"?'[data-journal-review="'+date+'"]':'[data-journal-date="'+date+'"]'),q=quillFor(editor);if(!q||(!q.getText().trim()&&!q.getContents().ops.some(op=>typeof op.insert==="object")))continue;
   let title=section==="review"?(WEEKLY_SUMMARY_LABELS[date]):journalDateLabel(date);if(format==="rich"){parts.push('<h2>'+esc(title)+'</h2>'+journalRichExport(richFoldSemanticHTML(q,q.getSemanticHTML())));continue}
   let lines=[],ops=q.getContents().ops,inline="";
   const escapeMD=text=>text.replace(/([\\`*_{}\[\]<>#!|])/g,"\\$1");let counters=[];
-  for(let op of ops){if(typeof op.insert!=="string"){if(op.insert?.divider!==undefined)lines.push((op.insert.divider?String(op.insert.divider)+'\n':'')+'---');else if(op.insert?.focus)inline+='重点 ';continue}let chunks=op.insert.split("\n");for(let i=0;i<chunks.length;i++){
+  for(let op of ops){if(typeof op.insert!=="string"){if(op.insert?.image){inline+="[图片："+(op.insert.image.name||"图片")+"；请使用云盘备份恢复原文件]";}else if(op.insert?.divider!==undefined)lines.push((op.insert.divider?String(op.insert.divider)+'\n':'')+'---');else if(op.insert?.focus)inline+='重点 ';continue}let chunks=op.insert.split("\n");for(let i=0;i<chunks.length;i++){
    let text=format==="markdown"?escapeMD(chunks[i]):chunks[i],attrs=op.attributes||{};
    if(text&&format==="markdown"){if(attrs.underline)text='<u>'+text+'</u>';if(attrs.bold)text='**'+text+'**';if(attrs.highlight)text='=='+text+'=='}inline+=text;
    if(i<chunks.length-1){let indent=Number(attrs.indent)||0,prefix="";if(attrs.list){if(attrs.list==="ordered"){counters.length=indent+1;counters[indent]=(counters[indent]||0)+1;prefix=counters[indent]+'. '}else{counters.length=indent;prefix='- '}prefix='  '.repeat(indent)+prefix}else{counters=[];if(format==="markdown"&&attrs.header)prefix='#'.repeat(attrs.header)+' '}
@@ -5283,7 +5287,7 @@ const VISUAL_PREVIEW_KEY="work-cockpit-visual-preview-v1";
 const VISUAL_PREVIEW_ENABLED=true;
 let visualPreview={mode:"new",frame:"full",radius:10,density:"comfortable",font:"system",scrollbars:"auto"};
 try{let saved=JSON.parse(localStorage.getItem(VISUAL_PREVIEW_KEY)||"null");if(saved)visualPreview={...visualPreview,...saved}}catch{}
-visualPreview.mode=visualPreview.mode==="old"?"old":"new";
+visualPreview.mode="new"; // Migrate old device preferences to the single supported UI.
 visualPreview.frame=visualPreview.frame==="inset"?"inset":"full";
 visualPreview.radius=Math.min(14,Math.max(6,Number(visualPreview.radius)||10));
 visualPreview.density=visualPreview.density==="compact"?"compact":"comfortable";
@@ -5328,11 +5332,11 @@ function initVisualPreview(){
  if(!VISUAL_PREVIEW_ENABLED)return;
  if($("#uiPreviewStrip"))return;
  let strip=document.createElement("section");strip.id="uiPreviewStrip";strip.className="ui-preview-strip";strip.setAttribute("aria-label","界面设置");
- strip.innerHTML='<div class="ui-preview-title"><strong>工作台</strong><small id="uiPreviewNote">项目 · 任务 · 工作记录</small></div><div class="ui-preview-controls"><button type="button" data-preview-components aria-pressed="false">组件展示</button><div class="ui-preview-modes" role="group" aria-label="界面版本"><button type="button" data-preview-mode="old" aria-pressed="false">原版</button><button type="button" data-preview-mode="new" aria-pressed="true">新版</button></div><button type="button" class="ui-preview-settings" aria-expanded="false" aria-controls="uiPreviewPanel">调整样式</button></div><div class="ui-preview-panel" id="uiPreviewPanel" hidden><label><span>页面外框</span><select id="previewFrame"><option value="full">铺满可用区域</option><option value="inset">保留少量留白</option></select></label><label><span>内容密度</span><select id="previewDensity"><option value="comfortable">舒适</option><option value="compact">紧凑</option></select></label><label><span>界面字体</span><select id="previewFont"><option value="system">系统优先</option><option value="dengxian">等线</option><option value="pingfang">苹方</option><option value="yahei">微软雅黑</option></select></label><div class="preview-font-sample" id="previewFontSample">工作记录与样机验证 Aa 123</div><p id="previewFontNote" role="status"></p><label><span>滚动条</span><select id="previewScrollbars"><option value="auto">操作时显示</option><option value="always">始终显示</option></select></label><label><span>卡片圆角</span><input id="previewRadius" type="range" min="6" max="14" step="1"><output id="previewRadiusValue" for="previewRadius">10</output></label><p>外观设置保存在当前设备；切换样式不会重载页面。</p><button type="button" class="ui-preview-reset">恢复默认样式</button></div>';
+ strip.innerHTML='<div class="ui-preview-title"><strong>工作台</strong><small id="uiPreviewNote">项目 · 任务 · 工作记录</small></div><div class="ui-preview-controls"><button type="button" data-preview-components aria-pressed="false">组件展示</button><button type="button" class="ui-preview-settings" aria-expanded="false" aria-controls="uiPreviewPanel">调整样式</button></div><div class="ui-preview-panel" id="uiPreviewPanel" hidden><label><span>页面外框</span><select id="previewFrame"><option value="full">铺满可用区域</option><option value="inset">保留少量留白</option></select></label><label><span>内容密度</span><select id="previewDensity"><option value="comfortable">舒适</option><option value="compact">紧凑</option></select></label><label><span>界面字体</span><select id="previewFont"><option value="system">系统优先</option><option value="dengxian">等线</option><option value="pingfang">苹方</option><option value="yahei">微软雅黑</option></select></label><div class="preview-font-sample" id="previewFontSample">工作记录与样机验证 Aa 123</div><p id="previewFontNote" role="status"></p><label><span>滚动条</span><select id="previewScrollbars"><option value="auto">操作时显示</option><option value="always">始终显示</option></select></label><label><span>卡片圆角</span><input id="previewRadius" type="range" min="6" max="14" step="1"><output id="previewRadiusValue" for="previewRadius">10</output></label><p>外观设置保存在当前设备；切换样式不会重载页面。</p><button type="button" class="ui-preview-reset">恢复默认样式</button></div>';
  document.body.prepend(strip);
  const syncControls=()=>{$("#previewFont").value=visualPreview.font||"system";$("#previewScrollbars").value=visualPreview.scrollbars||"auto";$("#previewFrame").value=visualPreview.frame;$("#previewDensity").value=visualPreview.density;$("#previewRadius").value=String(visualPreview.radius)};syncControls();
  strip.addEventListener("mousedown",event=>{if(event.target.closest("[data-preview-mode]"))event.preventDefault()});
- strip.addEventListener("click",event=>{let button=event.target.closest("button");if(!button)return;if(button.hasAttribute("data-preview-components")){toggleComponentPreview()}else if(button.dataset.previewMode){visualPreview.mode=button.dataset.previewMode;rememberVisualPreview()}else if(button.matches(".ui-preview-settings")){let panel=$("#uiPreviewPanel");panel.hidden=!panel.hidden;button.setAttribute("aria-expanded",String(!panel.hidden))}else if(button.matches(".ui-preview-reset")){visualPreview={mode:"new",frame:"full",radius:10,density:"comfortable",font:"system",scrollbars:"auto"};syncControls();rememberVisualPreview()}});
+ strip.addEventListener("click",event=>{let button=event.target.closest("button");if(!button)return;if(button.hasAttribute("data-preview-components")){toggleComponentPreview()}else if(button.matches(".ui-preview-settings")){let panel=$("#uiPreviewPanel");panel.hidden=!panel.hidden;button.setAttribute("aria-expanded",String(!panel.hidden))}else if(button.matches(".ui-preview-reset")){visualPreview={mode:"new",frame:"full",radius:10,density:"comfortable",font:"system",scrollbars:"auto"};syncControls();rememberVisualPreview()}});
  strip.addEventListener("input",event=>{let target=event.target;if(target.id==="previewFont")visualPreview.font=target.value;else if(target.id==="previewScrollbars")visualPreview.scrollbars=target.value;else if(target.id==="previewRadius")visualPreview.radius=Number(target.value);else if(target.id==="previewFrame")visualPreview.frame=target.value;else if(target.id==="previewDensity")visualPreview.density=target.value;else return;rememberVisualPreview()});
  document.addEventListener("pointerdown",event=>{if(!strip.contains(event.target)){$("#uiPreviewPanel").hidden=true;$(".ui-preview-settings",strip).setAttribute("aria-expanded","false")}});
  strip.addEventListener("keydown",event=>{if(event.key==="Escape"){$("#uiPreviewPanel").hidden=true;$(".ui-preview-settings",strip).setAttribute("aria-expanded","false");$(".ui-preview-settings",strip).focus();event.stopPropagation()}});
@@ -5536,6 +5540,7 @@ async function boot(){
  applyTheme(localStorage.getItem(THEME_KEY)||"system",false);
  restoreWorkspacePreferences();
  renderApp();
+ if(localReadIssue){const banner=document.createElement("div");banner.id="localReadFailure";banner.className="backup-warning";banner.setAttribute("role","alert");banner.textContent="本机主数据读取异常，原文仍保留，自动保存和同步已暂停。请在数据与恢复中选择明确的恢复来源。 ";let download=document.createElement("button");download.className="btn";download.textContent="下载异常原文";download.onclick=()=>{let a=document.createElement("a"),url=URL.createObjectURL(new Blob([localReadIssue.raw],{type:"text/plain"}));a.href=url;a.download="工作台-异常原文.txt";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};banner.append(download);document.body.prepend(banner);navigate("data");return;}
  window.WorkbenchLoader?.setMessage("正在检查登录与同步状态");
  await Cloud.init();
  refreshScheduledTasks();

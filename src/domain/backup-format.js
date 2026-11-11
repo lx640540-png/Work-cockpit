@@ -32,5 +32,5 @@
   const keep=new Set(),days=new Set();let newestGood=rows.find(r=>r.status==='verified'&&!r.quarantined);if(newestGood)keep.add(newestGood.id);
   for(const row of rows){if(row.status!=='verified')continue;const age=now-Date.parse(row.created_at),day=row.created_at.slice(0,10);if(age<48*3600000||age<30*86400000&&!days.has(day)||row.pinned)keep.add(row.id);days.add(day)}return keep;
  }
- root.BackupFormat={validate,stable,summary,risk,content,retained};if(typeof module!=='undefined'&&module.exports)module.exports=root.BackupFormat;
+ root.BackupFormat={validate,stable,summary,risk,content,retained,meaningful};if(typeof module!=='undefined'&&module.exports)module.exports=root.BackupFormat;
 })(globalThis);

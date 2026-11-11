@@ -14,5 +14,5 @@ function markRestorePending(){localStorage.setItem(RESTORE_PENDING_KEY,JSON.stri
 function clearRestorePending(){localStorage.removeItem(RESTORE_PENDING_KEY);if(window.CloudSync)window.CloudSync.importPending=false}
 function hasRestorePending(){try{return !!JSON.parse(localStorage.getItem(RESTORE_PENDING_KEY)||'null')}catch{return true}}
 function stageRecoveredState(value,label){
- validateImportedData(value);if(!flushPendingEdits())throw Error('当前编辑尚未保存，请先重试保存');checkpointLocal(label+'前的本机副本');markRestorePending();replaceState(value,label);toast('已恢复到本机，核对后可在同步窗口选择“替换云端”');
+ validateImportedData(value);if(!flushPendingEdits())throw Error('当前编辑尚未保存，请先重试保存');checkpointLocal(label+'前的本机副本');markRestorePending();if(typeof localReadIssue!=="undefined")localReadIssue=null;replaceState(value,label);if(typeof document!=="undefined")document.getElementById('localReadFailure')?.remove();toast('已恢复到本机，核对后可在同步窗口选择“替换云端”');
 }

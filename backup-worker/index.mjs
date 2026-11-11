@@ -34,9 +34,14 @@ export async function decode(bytes){const plain=await limited(new Response(new B
 function storageHeaders(env){return {apikey:env.SUPABASE_SERVICE_ROLE_KEY,authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY}}
 const storagePath=o=>encodeURIComponent(o.bucket)+'/'+o.path.split('/').map(encodeURIComponent).join('/');
 async function storageRead(env,o){return limited(await request(env.SUPABASE_URL+'/storage/v1/object/'+storagePath(o),{headers:storageHeaders(env)}),MAX_FILE)}
-async function attachmentBackup(env,user,token,parent){
+export function referencedPaths(state){
+ const paths=new Set();function visit(v){if(typeof v==='string'){for(const m of v.matchAll(/data-rich-image-path=["']([^"']+)["']/g))paths.add(m[1].replaceAll('&amp;','&'))}else if(v&&typeof v==='object'){if(typeof v.path==='string'&&v.path.includes('/'))paths.add(v.path);for(const x of Object.values(v))visit(x)}}visit(state);return paths;
+}
+async function attachmentBackup(env,user,token,parent,state){
  const objects=await db(env,'rpc/cockpit_backup_objects','POST',{p_owner:user}),result=[];
+ const referenced=referencedPaths(state);
  for(const o of objects){
+  if(!referenced.has(o.name))continue;
   if(Number(o.metadata?.size)>MAX_FILE)throw fail('ATTACHMENT_OVER_20MB');
   const object={bucket:o.bucket_id,path:o.name};if(!object.path.startsWith(user+'/'))throw fail('INVALID_ATTACHMENT_OWNER');
   const bytes=await storageRead(env,object),hash=await digest(bytes);
@@ -94,7 +99,7 @@ export async function perform(env,user,run){
  const filter='cockpit_backup_runs?id=eq.'+run.id+'&lease_token=eq.'+lease;
  try{
   const c=await credential(env,user),token=await access(env,user,c),parent=await folder(token,user,c,env);
-  const objects=run.archive_payload?.objects||await attachmentBackup(env,user,token,parent);
+  const objects=run.archive_payload?.objects||await attachmentBackup(env,user,token,parent,run.source_state);
   const archive=run.archive_payload||{format:'cockpit-backup-v1',userId:user,sourceVersion:run.source_version,createdAt:run.created_at,state:run.source_state,objects};validateArchive(archive,user);
   // A retry verifies the frozen object manifest again, even if the JSON upload already succeeded.
   if(run.archive_payload)for(const object of objects)if(await digest(await media(token,object.fileId))!==object.sha256)throw fail('ATTACHMENT_CHECKSUM_MISMATCH');
@@ -135,6 +140,15 @@ export async function handle(req,env,ctx){
   if(path==='/api/backups/status'&&req.method==='GET')return json(await status(env,user));
   if(path==='/api/backups/connect'&&req.method==='POST')return await connect(req,env,user);
   if(path==='/api/backups/run'&&req.method==='POST'){const run=await createRun(env,user);const work=perform(env,user,run);ctx.waitUntil(work);await work;return json({id:run.id,status:run.status},202)}
+  const approval=path.match(/^\/api\/backups\/approve\/([a-f0-9-]{36})$/);
+  if(approval&&req.method==='POST'){
+   const body=await req.json();if(body.confirmation!=='ACCEPT_REDUCTION')throw fail('CONFIRMATION_REQUIRED',400);
+   const row=(await db(env,'cockpit_backup_runs?id=eq.'+approval[1]+'&user_id=eq.'+user+'&status=eq.quarantined&select=*'))[0];if(!row)throw fail('BACKUP_NOT_FOUND',404);
+   const current=(await db(env,'app_states?user_id=eq.'+user+'&select=state,version'))[0];if(!current||await digest(F.content(current.state))!==row.content_hash)throw fail('COCKPIT_CONFLICT',409);
+   if(!Object.values(F.summary(row.source_state)).some(Boolean))throw fail('EMPTY_BACKUP_NOT_ALLOWED',409);
+   const changed=await db(env,'cockpit_backup_runs?id=eq.'+row.id+'&user_id=eq.'+user+'&status=eq.quarantined','PATCH',{status:'pending',error_code:null,next_retry_at:null});if(!changed.length)throw fail('COCKPIT_CONFLICT',409);
+   const work=perform(env,user,changed[0]);ctx.waitUntil(work);await work;return json({accepted:true},202);
+  }
   const match=path.match(/^\/api\/backups\/(archive|restore)\/([a-f0-9-]{36})$/);
   if(match&&req.method===(match[1]==='restore'?'POST':'GET')){const state=match[1]==='restore'?await restore(env,user,match[2]):(await loadArchive(env,user,match[2])).archive.state;return json({state})}
   return json({error:'NOT_FOUND'},404);

@@ -32,7 +32,7 @@ function journalShowTaskContext(){
  banner.hidden=!task;banner.textContent=task?'关联事项：'+task.title+(linked?'':' · 写入后关联'):'';
 }
 function journalAttachPendingTask(date,day){
- const context=journalPendingTask;if(!context||context.date!==date||context.week!==journalUI.week||!strip(day.content).trim())return;
+ const context=journalPendingTask;if(!context||context.date!==date||context.week!==journalUI.week||!BackupFormat.meaningful(day.content))return;
  day.taskIds=[...new Set([...(day.taskIds||[]),context.id])];journalPendingTask=null;journalShowTaskContext();
  const links=$('#workJournal [data-record-links="'+date+'"]');if(links)links.outerHTML=journalTaskLinksMarkup(date,day);
 }

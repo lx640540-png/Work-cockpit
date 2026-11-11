@@ -1,3 +1,4 @@
+let localReadIssue=null;
 function emptyWeek(){return{actions:{},topResults:[],top:[],taskIds:[],carriedTaskIds:[],taskSnapshots:[],projectSnapshots:[],reviewDone:"",reviewMiss:"",reviewNext:"",carriedFromWeek:"",activatedAt:"",closedAt:""}}
 function emptyOrder(){return{today:[],week:[],waiting:[],inbox:[],done:[],long:[],all:[],memoActive:[],memoArchived:[],projects:[],pinToday:[],pinWaiting:[],pinInbox:[],pinWeek:[],pinLong:[],pinAll:[],todayGroup:false,weekGroup:false}}
 function emptyQuickNote(){return{delta:{ops:[{insert:"\n",attributes:{quickDone:"0"}}]},updatedAt:""}}
@@ -79,8 +80,8 @@ function normalizeState(raw){
  return next;
 }
 function loadLocalState(){
- let raw=null;
- try{raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")}catch(error){console.warn("新版数据读取失败",error)}
+ let raw=null,text=null;
+ try{text=localStorage.getItem(STORAGE_KEY);raw=JSON.parse(text||"null");if(text&&(!raw||typeof raw!=="object"||!Array.isArray(raw.tasks)||!Array.isArray(raw.projects)))throw Error("主数据结构无效");if(raw)BackupFormat.validate(raw)}catch(error){localReadIssue={raw:text||"",message:error.message};return emptyState()}
  if(!raw)for(let key of LEGACY_KEYS){try{raw=JSON.parse(localStorage.getItem(key)||"null")}catch(error){}if(raw)break}
  return normalizeState(raw);
 }

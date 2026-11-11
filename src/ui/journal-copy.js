@@ -8,11 +8,11 @@ function journalExport(format,section="days"){
  }
  let week=journalWeek(journalUI.week),parts=[];
  for(let date of (section==="review"?JOURNAL_REVIEW_FIELDS:Object.keys(week.days).sort())){
-  let editor=$(section==="review"?'[data-journal-review="'+date+'"]':'[data-journal-date="'+date+'"]'),q=quillFor(editor);if(!q||!q.getText().trim())continue;
+  let editor=$(section==="review"?'[data-journal-review="'+date+'"]':'[data-journal-date="'+date+'"]'),q=quillFor(editor);if(!q||(!q.getText().trim()&&!q.getContents().ops.some(op=>typeof op.insert==="object")))continue;
   let title=section==="review"?(WEEKLY_SUMMARY_LABELS[date]):journalDateLabel(date);if(format==="rich"){parts.push('<h2>'+esc(title)+'</h2>'+journalRichExport(richFoldSemanticHTML(q,q.getSemanticHTML())));continue}
   let lines=[],ops=q.getContents().ops,inline="";
   const escapeMD=text=>text.replace(/([\\`*_{}\[\]<>#!|])/g,"\\$1");let counters=[];
-  for(let op of ops){if(typeof op.insert!=="string"){if(op.insert?.divider!==undefined)lines.push((op.insert.divider?String(op.insert.divider)+'\n':'')+'---');else if(op.insert?.focus)inline+='重点 ';continue}let chunks=op.insert.split("\n");for(let i=0;i<chunks.length;i++){
+  for(let op of ops){if(typeof op.insert!=="string"){if(op.insert?.image){inline+="[图片："+(op.insert.image.name||"图片")+"；请使用云盘备份恢复原文件]";}else if(op.insert?.divider!==undefined)lines.push((op.insert.divider?String(op.insert.divider)+'\n':'')+'---');else if(op.insert?.focus)inline+='重点 ';continue}let chunks=op.insert.split("\n");for(let i=0;i<chunks.length;i++){
    let text=format==="markdown"?escapeMD(chunks[i]):chunks[i],attrs=op.attributes||{};
    if(text&&format==="markdown"){if(attrs.underline)text='<u>'+text+'</u>';if(attrs.bold)text='**'+text+'**';if(attrs.highlight)text='=='+text+'=='}inline+=text;
    if(i<chunks.length-1){let indent=Number(attrs.indent)||0,prefix="";if(attrs.list){if(attrs.list==="ordered"){counters.length=indent+1;counters[indent]=(counters[indent]||0)+1;prefix=counters[indent]+'. '}else{counters.length=indent;prefix='- '}prefix='  '.repeat(indent)+prefix}else{counters=[];if(format==="markdown"&&attrs.header)prefix='#'.repeat(attrs.header)+' '}
