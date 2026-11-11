@@ -4980,13 +4980,13 @@ const BackupUI={
  updatePanel(){let panel=document.querySelector('#page-data .backup-panel');if(!panel)return;let open=Array.from(panel.querySelectorAll('details'),d=>d.open),focused=document.activeElement,selector=focused?.dataset?.backupAction?'[data-backup-action="'+focused.dataset.backupAction+'"]':null;panel.outerHTML=backupPanelMarkup();let next=document.querySelector('#page-data .backup-panel');next?.querySelectorAll('details').forEach((d,i)=>{if(i<open.length)d.open=open[i]});if(selector)next?.querySelector(selector)?.focus({preventScroll:true})},
  message(code){return ({GOOGLE_RECONNECT_REQUIRED:'Google 授权已失效，请重新连接 Google Drive',GOOGLE_OFFLINE_AUTH_REQUIRED:'Google 持续授权未完成，请重新连接 Google Drive',BACKUP_NOT_CONFIGURED:'备份后台尚未配置，当前没有自动备份保护',GOOGLE_NOT_CONNECTED:'尚未连接 Google Drive',AUTH_REQUIRED:'请先登录云端',OWNER_NOT_ALLOWED:'此账号未启用备份',ANOMALOUS_STATE_REQUIRES_REVIEW:'数据明显减少或为空，已隔离，未替换正常备份',ATTACHMENT_OVER_20MB:'存在超过 20MB 的附件，整份备份尚未完成',UPSTREAM_401:'Google 授权失效或登录已过期，请重新连接',ARCHIVE_CHECKSUM_MISMATCH:'备份校验失败，已停止恢复',COCKPIT_CONFLICT:'云端已有新版本，请刷新后重新核对'})[code]||code||''},
  async api(path,method='GET'){
-  if(!Cloud.user||!Cloud.client)throw Error('请先登录云端');let user=Cloud.user.id,session=await Cloud.client.auth.getSession();if(session.error||!session.data?.session?.access_token)throw Error('登录已过期，请重新登录');
+  if(!Cloud.user||!Cloud.client?.auth?.getSession)throw Error('请先登录云端');let user=Cloud.user.id,session=await Cloud.client.auth.getSession();if(session.error||!session.data?.session?.access_token)throw Error('登录已过期，请重新登录');
   const r=await fetch('/api/backups/'+path,{method,headers:{authorization:'Bearer '+session.data.session.access_token},cache:'no-store'});if(Cloud.user?.id!==user)throw Error('账号已切换，操作已停止');let value;try{value=await r.json()}catch{throw Error('备份接口未部署，请先完成后台配置')}
   if(!r.ok)throw Error(this.message(value.error));return value;
  },
  async refresh(){if(this.loading)return;this.loading=true;this.error='';const user=Cloud.user?.id;if(this.account!==(user||'')){this.status=null;this.history=[]}this.account=user||'';try{
   if(!user)throw Error('登录后可查看云端历史与自动备份');
-  const results=await Promise.allSettled([this.api('status'),Cloud.client.from('app_state_history').select('id,version,summary,reason,created_at').eq('user_id',user).order('created_at',{ascending:false}).limit(80)]);
+  const results=await Promise.allSettled([this.api('status'),Promise.resolve().then(()=>Cloud.client.from('app_state_history').select('id,version,summary,reason,created_at').eq('user_id',user).order('created_at',{ascending:false}).limit(80))]);
   if(Cloud.user?.id!==user)return;
   if(results[0].status==='fulfilled'){this.status=results[0].value;this.checkedAt=Date.now();this.pollFailures=0}else{this.pollFailures++;this.error='状态更新失败，显示上次读取的结果：'+results[0].reason.message}
   if(results[1].status==='fulfilled'&&!results[1].value.error)this.history=results[1].value.data||[];else{this.history=[];this.error+=(this.error?'；':'')+'云端历史尚不可用，请检查数据库保护是否部署'}
