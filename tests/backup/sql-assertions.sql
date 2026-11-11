@@ -15,7 +15,7 @@ DO $$ BEGIN
  EXCEPTION WHEN raise_exception THEN IF SQLERRM NOT LIKE 'COCKPIT_VERSION:%' THEN RAISE; END IF; END;
 END $$;
 DO $$ DECLARE data jsonb; BEGIN
- data:=cockpit_private.backup_summary('{"tasks":[],"projects":[],"meta":{"workJournal":{"weeks":{"w":{"review":{"done":"<p>Review</p>"},"days":{"d":{"content":"<img src=x>"}}}}}},"weeks":{"w":{"top":["Plan"]}},"quickNote":{"delta":{"ops":[{"insert":"\\n"}]}}}');
+ data:=cockpit_private.backup_summary('{"tasks":[],"projects":[],"meta":{"workJournal":{"weeks":{"w":{"review":{"done":"<p>Review</p>"},"days":{"d":{"content":"<img src=x>"}}}}}},"weeks":{"w":{"top":["Plan"]}},"quickNote":{"delta":{"ops":[{"insert":"\n"}]}}}');
  IF (data->>'journalDays')::int<>2 OR (data->>'weekPlans')::int<>1 OR (data->>'quickNote')::int<>0 THEN RAISE EXCEPTION 'Review/image/plan/blank-note summary mismatch: %',data;END IF;
 END $$;
 SET LOCAL ROLE authenticated;
