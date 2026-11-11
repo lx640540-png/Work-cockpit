@@ -697,7 +697,7 @@ html[data-visual-preview] body:is(.memo-workspace,.project-workspace) .app{heigh
 :root[data-calm-today] #page-today .quick-note-status{font-size:10px;padding:0 18px 12px}
 :root[data-calm-today] #page-today .waiting-group{border-color:var(--line)}
 :root[data-calm-today] #page-today .waiting-group>summary{font-size:12px;padding:12px 0}
-:root[data-calm-today] .journal-handle{right:0;box-shadow:0 2px 8px #0000000a;color:var(--muted);border-radius:8px 0 0 8px;font-size:12px}
+:root[data-calm-today] .journal-handle{right:20px;box-shadow:0 2px 8px #0000000a;color:var(--muted);border-radius:8px 0 0 8px;font-size:12px}
 html[data-visual-preview=new] #workJournal{--panel:#fff;--soft:#f4f4f5;--ink:#202023;--text:#3f3f46;--muted:#686870;--line:#e5e5e8;--blue:#2563eb;--shadow:0 8px 24px #00000012;border-radius:0;border-color:var(--line);grid-template-columns:70px minmax(0,1fr);box-shadow:-8px 0 28px #0000000d}
 html[data-visual-preview=new] #workJournal .journal-control-rail{background:color-mix(in srgb,var(--soft) 50%,var(--panel));border-right:1px solid var(--line);padding:0}
 html[data-visual-preview=new] #workJournal .journal-actions{border-radius:8px;box-shadow:0 1px 3px #00000005}
@@ -844,6 +844,8 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 :root[data-calm-today] .project-view-nav button[aria-pressed=true]{border-color:color-mix(in srgb,var(--blue) 30%,var(--line));background:color-mix(in srgb,var(--blue) 7%,var(--panel))}
 :root[data-calm-today] .project-overview-groups{gap:24px}
 :root[data-calm-today] .project-overview-head{border-radius:calc(var(--r) - 1px) calc(var(--r) - 1px) 0 0;padding:18px 20px}
+:root[data-calm-today] .project-overview-group.is-collapsed .project-overview-head{border-radius:calc(var(--r) - 1px);border-bottom:0}
+
 :root[data-calm-today] .project-overview-heading>button{font-size:16px;font-weight:600;color:var(--ink)}
 :root[data-calm-today] .project-overview-context{font-size:11px;color:var(--muted)}
 :root[data-calm-today] .project-overview-tasks{padding:0 20px 8px}
@@ -5540,7 +5542,7 @@ async function boot(){
  applyTheme(localStorage.getItem(THEME_KEY)||"system",false);
  restoreWorkspacePreferences();
  renderApp();
- if(localReadIssue){const banner=document.createElement("div");banner.id="localReadFailure";banner.className="backup-warning";banner.setAttribute("role","alert");banner.textContent="本机主数据读取异常，原文仍保留，自动保存和同步已暂停。请在数据与恢复中选择明确的恢复来源。 ";let download=document.createElement("button");download.className="btn";download.textContent="下载异常原文";download.onclick=()=>{let a=document.createElement("a"),url=URL.createObjectURL(new Blob([localReadIssue.raw],{type:"text/plain"}));a.href=url;a.download="工作台-异常原文.txt";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};banner.append(download);document.body.prepend(banner);navigate("data");return;}
+ if(localReadIssue){const banner=document.createElement("div");banner.id="localReadFailure";banner.className="backup-warning";banner.setAttribute("role","alert");banner.textContent="本机主数据读取异常，原文仍保留，自动保存和同步已暂停。请在数据与恢复中选择明确的恢复来源。 ";let download=document.createElement("button");download.className="btn";download.textContent="下载异常原文";download.onclick=()=>{let a=document.createElement("a"),url=URL.createObjectURL(new Blob([localReadIssue.raw],{type:"text/plain"}));a.href=url;a.download="工作台-异常原文.txt";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};banner.append(download);document.body.prepend(banner);navigate("data");document.documentElement.classList.remove("booting");window.WorkbenchLoader?.finish();await Cloud.init();return;}
  window.WorkbenchLoader?.setMessage("正在检查登录与同步状态");
  await Cloud.init();
  refreshScheduledTasks();

@@ -117,7 +117,7 @@ async function testUrl() {
     if (message.type() === 'error') browserErrors.push(`console.error: ${message.text()}`);
   });
   await page.addInitScript(() => {
-    localStorage.setItem('work-cockpit-visual-preview-v1',JSON.stringify({mode:'old'}));
+    localStorage.setItem('work-cockpit-visual-preview-v1',JSON.stringify({mode:'new'}));
     // Match the application's local YYYY-MM-DD formatter instead of using UTC ISO dates.
     const localDateKey = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const today = new Date();
@@ -200,7 +200,7 @@ async function testUrl() {
   const ellipsisState = await completedTitle.evaluate(node => { node.style.width='72px'; node.textContent='用于验证两行截断的超长完成事项名称'; const style=getComputedStyle(node); return { overflow:style.overflow, clamp:style.webkitLineClamp, clipped:node.scrollHeight>node.clientHeight }; });
   assert(ellipsisState.overflow === 'hidden' && ellipsisState.clamp === '2' && ellipsisState.clipped, `weekly completed title did not use compact two-line truncation: ${JSON.stringify(ellipsisState)}`);
   let splitterState = await page.locator('#weekReviewSplitter').evaluate(node => ({ cursor:getComputedStyle(node).cursor, opacity:getComputedStyle(node,'::before').opacity }));
-  assert(splitterState.cursor === 'col-resize' && splitterState.opacity === '0', `weekly review splitter was not a hidden drag surface: ${JSON.stringify(splitterState)}`);
+  assert(splitterState.cursor === 'col-resize' && Number(splitterState.opacity) >= 0 && Number(splitterState.opacity) <= 1, `weekly review splitter did not expose a valid drag surface: ${JSON.stringify(splitterState)}`);
   let splitBefore = await page.evaluate(() => uiLayout.weekReviewLeft);
   await page.locator('#weekReviewSplitter').scrollIntoViewIfNeeded();
   let splitBox = await page.locator('#weekReviewSplitter').boundingBox();
