@@ -157,7 +157,7 @@ document.addEventListener("beforeinput",event=>{let editor=event.target.closest?
 $("#confirmAccept").addEventListener("click",()=>{let callback=confirmCallback;confirmCallback=null;closeDialog("confirmDialog");if(typeof callback==="function")callback()});
 $("#taskForm").addEventListener("submit",event=>{event.preventDefault();saveTaskDraft()});
 $("#taskForm").addEventListener("keydown",event=>{
- if(event.key!=="Enter"||event.isComposing||event.keyCode===229||event.target.closest(".rich-editor")||event.target.closest("button"))return;
+ if(event.key!=="Enter"||event.isComposing||event.keyCode===229||event.target.closest(".rich-editor")||event.target.matches("[data-check-text]")||event.target.closest("button"))return;
  event.preventDefault();event.stopPropagation();saveTaskDraft();
 });
 $("#projectForm").addEventListener("submit",event=>{event.preventDefault();saveProjectDraft()});

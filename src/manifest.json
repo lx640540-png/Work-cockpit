@@ -36,7 +36,8 @@
     "styles/rich-images.css",
     "styles/rich-toggle.css",
     "styles/task-layouts.css",
-    "styles/backups.css"
+    "styles/backups.css",
+    "styles/trial-improvements.css"
   ],
   "scripts": [
     "core/runtime.js",
@@ -98,6 +99,7 @@
     "ui/task-journal-layout.js",
     "ui/component-preview.js",
     "ui/appearance-controls.js",
+    "ui/trial-improvements.js",
     "boot.js"
   ]
 }

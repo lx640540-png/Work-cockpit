@@ -21,7 +21,7 @@ function hardwareMilestoneTemplate(){
 function normalizeProject(raw,index){
  let milestones=Array.isArray(raw?.milestones)?raw.milestones.map(normalizeMilestone):[];
  let currentSeen=false;milestones.forEach(milestone=>{if(milestone.status!=="当前阶段")return;if(currentSeen)milestone.status="未开始";else currentSeen=true});
- return{id:String(raw?.id||uid("project")),name:String(raw?.name||"未命名项目"),code:String(raw?.code||""),description:String(raw?.description||""),archived:!!raw?.archived,createdAt:raw?.createdAt||new Date().toISOString(),updatedAt:raw?.updatedAt||new Date().toISOString(),milestones};
+ return{id:String(raw?.id||uid("project")),name:String(raw?.name||"未命名项目"),code:String(raw?.code||""),description:String(raw?.description||""),overviewHtml:sanitizeRichValue(normalizeRich(raw?.overviewHtml||"")),archived:!!raw?.archived,createdAt:raw?.createdAt||new Date().toISOString(),updatedAt:raw?.updatedAt||new Date().toISOString(),milestones};
 }
 function normalizeChecklistItem(item){
  let done=!!item?.done,raw=String(item?.completedAt||""),date=/^\d{4}-\d{2}-\d{2}T/.test(raw)?new Date(raw):null;

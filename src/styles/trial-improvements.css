@@ -1,0 +1,16 @@
+/* Trial geometry belongs here; production retains its stable layout. */
+#taskDialog[data-task-layout=d]{height:min(820px,calc(100dvh - 40px));width:min(1320px,calc(100vw - 40px));margin:20px auto}
+#taskDialog[data-task-layout=d] .task-notes-editor:not(.rich-expanded)>.rich-editor>.ql-editor{min-height:160px!important;padding-bottom:20px;font-size:14px}
+#taskDialog[data-task-layout=d] #draftChecklist .checklist-item{grid-template-columns:18px 16px minmax(0,1fr) 26px;align-items:start;padding:8px 9px 8px 4px}
+#taskDialog #draftChecklist .checklist-item>textarea.checklist-text{grid-column:3;grid-row:1;width:100%;min-height:28px;height:auto;resize:none;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;line-height:22px;padding:3px 2px}
+#taskDialog #draftChecklist .checklist-item>.icon-btn{grid-column:4;grid-row:1}
+#taskDialog #draftChecklist .checklist-time{grid-column:3;grid-row:2;padding:0;height:22px;justify-self:start}
+#taskDialog #draftChecklist .checklist-item>.drag-handle,#taskDialog #draftChecklist .checklist-item>input[type=checkbox]{align-self:start;margin-top:6px}
+#taskDialog #draftChecklist .checklist-time-editor{grid-column:1/-1}
+.project-overview-document{padding:16px 0;border-bottom:1px solid var(--line);margin-bottom:12px;color:var(--text);font-size:14px;line-height:1.75}
+.project-overview-document header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.project-overview-document h3{font-size:15px;margin:0}.project-overview-reading{max-height:142px;overflow:hidden;overflow-wrap:anywhere}.project-overview-reading.expanded{max-height:none}.project-overview-reading p{margin:4px 0}.project-overview-document .ql-editor{min-height:140px;max-height:none;overflow:visible}.project-overview-document .rich-editor{height:auto;overflow:visible}
+.project-recent>div{display:flex;flex-direction:column;gap:0}.project-recent .task-row{width:100%}.project-recent>div>.link-btn{align-self:flex-start;margin-top:8px}
+#workJournal .journal-day{border:0;border-radius:0;padding:12px 0 18px;margin:0 0 12px;box-shadow:none;background:transparent}#workJournal .journal-date-row{padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--line)}#workJournal .journal-day .ql-editor{min-height:74px;height:auto;max-height:none;overflow:visible;padding-inline:0}#workJournal .journal-day .rich-editor{height:auto!important;overflow:visible!important}#workJournal .journal-body{padding-inline:24px}#workJournal .journal-week-nav{flex-wrap:wrap;gap:6px}#workJournal .journal-week-nav>[data-trial-journal-mode]{color:var(--blue);border:1px solid var(--line);border-radius:6px;padding:4px 8px}#workJournal:not(.journal-split) .journal-review{display:none}#workJournal.journal-split .journal-review{display:block}
+@media(max-width:880px){#taskDialog[data-task-layout=d]{margin:0;width:100vw;height:100dvh;border-radius:0}#workJournal .journal-body{padding-inline:14px}}
+
+#workJournal[data-review-mode=true]:not(.journal-split) .journal-body>.journal-day,#workJournal[data-review-mode=true]:not(.journal-split) .journal-add{display:none}#workJournal[data-review-mode=true]:not(.journal-split) .journal-body>.journal-review{display:block}#workJournal[data-review-mode=true]:not(.journal-split) .journal-review-content{display:block}
