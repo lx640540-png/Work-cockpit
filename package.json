@@ -5,8 +5,8 @@
   "description": "Regression test environment for the Work Cockpit single-page application",
   "scripts": {
     "test": "npm run test:static && npm run test:browser",
-    "test:static": "npm run check:build && node qa-regression.js index.html && node qa-reliability.js && node qa-structure.js && node qa-cloud-startup.js && node --test qa-journal.js && node --test qa-workflow-data.js && node --test qa-project-details.js && node --test qa-week-comparison.js && node --test qa-today-panels.js && node --test qa-checklist-project.js && node --test qa-task-journal.js && node --test qa-workflow-closure.js && node --test qa-next-filters.js && node --test qa-images.js",
-    "test:browser": "node --test qa-boot-loader-browser.js qa-browser.js qa-workflow-browser.js qa-journal-browser.js qa-fixes-browser.js qa-ui-layout-browser.js qa-iteration-browser.js qa-workflow-closure-browser.js qa-next-filters-browser.js qa-images-browser.js qa-task-editor-browser.js",
+    "test:static": "npm run check:build && node qa-regression.js index.html && node qa-reliability.js && node qa-structure.js && node qa-cloud-startup.js && node --test qa-journal.js && node --test qa-workflow-data.js && node --test qa-project-details.js && node --test qa-week-comparison.js && node --test qa-today-panels.js && node --test qa-checklist-project.js && node --test qa-task-journal.js && node --test qa-workflow-closure.js && node --test qa-next-filters.js && node --test qa-images.js && node --test tests/backup/*.test.cjs",
+    "test:browser": "node --test qa-boot-loader-browser.js qa-browser.js qa-workflow-browser.js qa-journal-browser.js qa-fixes-browser.js qa-ui-layout-browser.js qa-iteration-browser.js qa-workflow-closure-browser.js qa-next-filters-browser.js qa-images-browser.js qa-task-editor-browser.js qa-backups-browser.js",
     "setup:cloud": "playwright install chromium",
     "build": "node scripts/build.js",
     "check:build": "node scripts/build.js --check",

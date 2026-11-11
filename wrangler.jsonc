@@ -3,6 +3,21 @@
   "name": "work-cockpit",
   "compatibility_date": "2026-08-26",
   "assets": {
-    "directory": "./"
+    "directory": "./",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/backups/*"
+    ]
+  },
+  "main": "backup-worker/index.mjs",
+  "triggers": {
+    "crons": [
+      "17 * * * *"
+    ]
+  },
+  "vars": {
+    "SUPABASE_URL": "https://nzujelkdbfmtgakrpvjy.supabase.co",
+    "BACKUP_ORIGIN": "https://work-cockpit.lx640540.workers.dev",
+    "BACKUP_ALLOWED_USER_ID": "86825a70-186a-4f13-aaa8-e1374effc1e8"
   }
 }

@@ -24,3 +24,9 @@ qa-journal.js
 qa-ui-layout-browser.js
 
 qa-*.js
+
+backup-worker
+supabase
+tests
+.dev.vars*
+.env*
