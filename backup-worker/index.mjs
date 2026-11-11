@@ -96,10 +96,16 @@ export async function perform(env,user,run){
   const c=await credential(env,user),token=await access(env,user,c),parent=await folder(token,user,c,env);
   const objects=run.archive_payload?.objects||await attachmentBackup(env,user,token,parent);
   const archive=run.archive_payload||{format:'cockpit-backup-v1',userId:user,sourceVersion:run.source_version,createdAt:run.created_at,state:run.source_state,objects};validateArchive(archive,user);
-  const bytes=await compress(archive),hash=await digest(bytes);if(bytes.length>MAX_ARCHIVE)throw fail('ARCHIVE_TOO_LARGE');
-  let id=run.drive_file_id||await newId(token);await db(env,filter,'PATCH',{drive_file_id:id,archive_hash:hash,archive_payload:archive});
-  await upload(token,id,'工作台-'+run.created_at.replace(/[:.]/g,'-')+'-v'+run.source_version+'.json.gz',bytes,parent,{kind:'snapshot',cockpitOwner:user,sha256:hash,sourceVersion:String(run.source_version)});
-  const saved=validateArchive(await decode(await media(token,id,MAX_ARCHIVE)),user);if(F.stable(saved.state)!==F.stable(run.source_state)||F.stable(saved.objects)!==F.stable(objects))throw fail('RESTORE_DRILL_MISMATCH');
+  // A retry verifies the frozen object manifest again, even if the JSON upload already succeeded.
+  if(run.archive_payload)for(const object of objects)if(await digest(await media(token,object.fileId))!==object.sha256)throw fail('ATTACHMENT_CHECKSUM_MISMATCH');
+  let id=run.drive_file_id||await newId(token),bytes,hash,existing=false;
+  if(run.drive_file_id&&run.archive_hash){try{bytes=await media(token,id,MAX_ARCHIVE);existing=true}catch(error){if(error.code!=='UPSTREAM_404')throw error}}
+  if(existing){hash=await digest(bytes);if(hash!==run.archive_hash)throw fail('ARCHIVE_CHECKSUM_MISMATCH')}
+  else {bytes=await compress(archive);hash=await digest(bytes)}
+  if(bytes.length>MAX_ARCHIVE)throw fail('ARCHIVE_TOO_LARGE');
+  await db(env,filter,'PATCH',{drive_file_id:id,archive_hash:hash,archive_payload:archive});
+  if(!existing){await upload(token,id,'工作台-'+run.created_at.replace(/[:.]/g,'-')+'-v'+run.source_version+'.json.gz',bytes,parent,{kind:'snapshot',cockpitOwner:user,sha256:hash,sourceVersion:String(run.source_version)});bytes=await media(token,id,MAX_ARCHIVE)}
+  const saved=validateArchive(await decode(bytes),user);if(F.stable(saved)!==F.stable(archive))throw fail('RESTORE_DRILL_MISMATCH');
   const updated=await db(env,filter,'PATCH',{status:'verified',verified_at:new Date().toISOString(),attachment_count:objects.length,lease_until:null,lease_token:null,error_code:null});if(!updated.length)throw fail('BACKUP_LEASE_EXPIRED');
   await db(env,'cockpit_backup_credentials?user_id=eq.'+user,'PATCH',{last_error:null});
   try{await cleanup(env,user,token,run.id)}catch{ /* Verified backups survive retention failure. Retry cleanup after next success. */ }
@@ -117,8 +123,7 @@ async function callback(req,env){
  if(u.searchParams.get('error')||!u.searchParams.get('code'))throw fail('GOOGLE_AUTH_CANCELLED',400);
  const r=await request('https://oauth2.googleapis.com/token',{method:'POST',body:new URLSearchParams({code:u.searchParams.get('code'),client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,redirect_uri:env.BACKUP_ORIGIN+'/api/backups/oauth/callback',grant_type:'authorization_code'})});const token=await r.json();
  if(!token.refresh_token||!token.scope?.split(' ').includes('https://www.googleapis.com/auth/drive.file'))throw fail('GOOGLE_OFFLINE_AUTH_REQUIRED',400);
- const existing=await credential(env,row.user_id);
- await db(env,'cockpit_backup_credentials?on_conflict=user_id','POST',{user_id:row.user_id,encrypted_token:await seal(token.refresh_token,env,row.user_id),folder_id:existing?.folder_id||null,last_error:null},{prefer:'resolution=merge-duplicates,return=representation'});
+ await db(env,'cockpit_backup_credentials?on_conflict=user_id','POST',{user_id:row.user_id,encrypted_token:await seal(token.refresh_token,env,row.user_id),folder_id:null,last_error:null},{prefer:'resolution=merge-duplicates,return=representation'});
  return new Response(null,{status:303,headers:{location:env.BACKUP_ORIGIN+'/#data','cache-control':'no-store','referrer-policy':'no-referrer'}});
 }
 export async function handle(req,env,ctx){
@@ -136,4 +141,6 @@ export async function handle(req,env,ctx){
  }catch(error){return json({error:error.code||'BACKUP_REQUEST_FAILED'},error.status||500)}
 }
 export default {fetch:handle,async scheduled(event,env,ctx){config(env);const user=env.BACKUP_ALLOWED_USER_ID;if(!await credential(env,user))return;
- const pending=(await db(env,'cockpit_backup_runs?user_id=eq.'+user+'&status=in.(failed,running,pending)&or=(next_retry_at.is.null,next_retry_at.lte.'+encodeURIComponent(new Date().toISOString())+')&order=created_at.asc&limit=1'))[0];const run=pending||await createRun(env,user);ctx.waitUntil(perform(env,user,run));}};
+ // Capture the newest cloud state before retrying an older failed version.
+ const current=await createRun(env,user),ready=r=>r&&['pending','failed','running'].includes(r.status)&&(!r.next_retry_at||Date.parse(r.next_retry_at)<=Date.now());
+ const pending=ready(current)?current:(await db(env,'cockpit_backup_runs?user_id=eq.'+user+'&status=in.(failed,running,pending)&or=(next_retry_at.is.null,next_retry_at.lte.'+encodeURIComponent(new Date().toISOString())+')&order=created_at.asc&limit=1'))[0];ctx.waitUntil(perform(env,user,pending));}};

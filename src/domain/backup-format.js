@@ -19,11 +19,12 @@
   }visit(value);return value;
  }
  function stable(value){if(Array.isArray(value))return '['+value.map(stable).join(',')+']';if(value&&typeof value==='object')return '{'+Object.keys(value).sort().filter(k=>value[k]!==undefined).map(k=>JSON.stringify(k)+':'+stable(value[k])).join(',')+'}';return JSON.stringify(value)}
- function meaningful(value){if(/<img\b|data-rich-image|work-divider/.test(String(value||'')))return true;return String(value||'').replace(/<[^>]*>/g,'').replace(/&(?:nbsp|#160);/g,' ').trim().length>0}
+ function meaningful(value){if(/<img\b|data-rich-image|work-divider/i.test(String(value||'')))return true;return String(value||'').replace(/<[^>]*>/g,'').replace(/&(?:nbsp|#160);/g,' ').trim().length>0}
  function summary(value){
   let journalDays=0;for(const week of Object.values(value?.meta?.workJournal?.weeks||{})){for(const day of Object.values(week.days||{}))if(meaningful(day.content))journalDays++;if(Object.values(week.review||{}).some(meaningful))journalDays++}
+  let weekPlans=Object.values(value?.weeks||{}).reduce((n,w)=>n+(w.top||[]).filter(meaningful).length,0);
   let quickNote=(value?.quickNote?.delta?.ops||[]).some(op=>typeof op.insert==='object'||meaningful(op.insert));
-  return {tasks:value?.tasks?.length||0,projects:value?.projects?.length||0,memos:value?.memos?.length||0,decisions:value?.decisions?.length||0,journalDays,quickNote:Number(quickNote)};
+  return {tasks:value?.tasks?.length||0,projects:value?.projects?.length||0,memos:value?.memos?.length||0,decisions:value?.decisions?.length||0,journalDays,weekPlans,quickNote:Number(quickNote)};
  }
  function risk(before,after){const a=summary(before),b=summary(after);return Object.keys(a).filter(k=>a[k]>0&&(b[k]===0||(a[k]>=10&&b[k]<a[k]/2)))}
  function content(value){let v=JSON.parse(JSON.stringify(value));delete v.snapshots;delete v.recoveryInfo;if(v.meta)delete v.meta.updatedAt;return stable(v)}

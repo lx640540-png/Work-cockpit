@@ -14,11 +14,19 @@ DO $$ BEGIN
  BEGIN UPDATE public.app_states SET version=99; RAISE EXCEPTION 'Missing CAS protection';
  EXCEPTION WHEN raise_exception THEN IF SQLERRM NOT LIKE 'COCKPIT_VERSION:%' THEN RAISE; END IF; END;
 END $$;
+DO $$ DECLARE data jsonb; BEGIN
+ data:=cockpit_private.backup_summary('{"tasks":[],"projects":[],"meta":{"workJournal":{"weeks":{"w":{"review":{"done":"<p>Review</p>"},"days":{"d":{"content":"<img src=x>"}}}}}},"weeks":{"w":{"top":["Plan"]}},"quickNote":{"delta":{"ops":[{"insert":"\\n"}]}}}');
+ IF (data->>'journalDays')::int<>2 OR (data->>'weekPlans')::int<>1 OR (data->>'quickNote')::int<>0 THEN RAISE EXCEPTION 'Review/image/plan/blank-note summary mismatch: %',data;END IF;
+END $$;
 SET LOCAL ROLE authenticated;
 SELECT * FROM public.cockpit_replace_state('{"tasks":[],"projects":[],"memos":[],"decisions":[]}',2,'fixture','REPLACE','86825a70-186a-4f13-aaa8-e1374effc1e8');
 DO $$ BEGIN
  IF (SELECT count(*) FROM public.app_state_history)<>2 THEN RAISE EXCEPTION 'Replacement lost its old version'; END IF;
  IF (SELECT version FROM public.app_states)<>3 THEN RAISE EXCEPTION 'Replacement did not advance version'; END IF;
+ BEGIN PERFORM public.cockpit_replace_state('{"tasks":[],"projects":[]}',3,'fixture',NULL,'86825a70-186a-4f13-aaa8-e1374effc1e8');RAISE EXCEPTION 'Null confirmation accepted';
+ EXCEPTION WHEN raise_exception THEN IF SQLERRM<>'Explicit owner confirmation required' THEN RAISE; END IF; END;
+ BEGIN PERFORM public.cockpit_replace_state('{"tasks":[],"projects":[]}',3,'fixture','REPLACE','8a441823-f408-4c4d-9745-e9deb9cdd5c7');RAISE EXCEPTION 'Different owner accepted';
+ EXCEPTION WHEN raise_exception THEN IF SQLERRM<>'Explicit owner confirmation required' THEN RAISE; END IF; END;
  BEGIN PERFORM public.cockpit_replace_state('{"tasks":[],"projects":[]}',2,'fixture','REPLACE','86825a70-186a-4f13-aaa8-e1374effc1e8');RAISE EXCEPTION 'Stale replace accepted';
  EXCEPTION WHEN raise_exception THEN IF SQLERRM NOT LIKE 'COCKPIT_CONFLICT:%' THEN RAISE; END IF; END;
  BEGIN UPDATE public.app_state_history SET state='{}'; RAISE EXCEPTION 'History is writable'; EXCEPTION WHEN insufficient_privilege THEN NULL; END;

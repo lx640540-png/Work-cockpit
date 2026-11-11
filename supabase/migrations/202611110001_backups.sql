@@ -43,12 +43,20 @@ GRANT ALL ON public.cockpit_backup_credentials,public.cockpit_backup_oauth,publi
 GRANT SELECT ON public.cockpit_backup_runs TO authenticated;
 DROP POLICY IF EXISTS backup_runs_owner_read ON public.cockpit_backup_runs;
 CREATE POLICY backup_runs_owner_read ON public.cockpit_backup_runs FOR SELECT TO authenticated USING ((SELECT auth.uid())=user_id);
+CREATE OR REPLACE FUNCTION cockpit_private.backup_meaningful(v text) RETURNS boolean LANGUAGE sql IMMUTABLE SET search_path='' AS $$
+ SELECT coalesce(v,'') ~* '<img\y|data-rich-image|work-divider' OR length(regexp_replace(coalesce(v,''),'<[^>]*>|&nbsp;|&#160;|[[:space:]]','','gi'))>0
+$$;
 CREATE OR REPLACE FUNCTION cockpit_private.backup_summary(s jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE SET search_path='' AS $$
  SELECT jsonb_build_object('tasks',jsonb_array_length(coalesce(s->'tasks','[]')),'projects',jsonb_array_length(coalesce(s->'projects','[]')),
  'memos',jsonb_array_length(coalesce(s->'memos','[]')),'decisions',jsonb_array_length(coalesce(s->'decisions','[]')),
  'journalDays',(SELECT count(*) FROM jsonb_each(coalesce(s#>'{meta,workJournal,weeks}','{}')) w,
- LATERAL jsonb_each(coalesce(w.value->'days','{}')) d WHERE length(trim(regexp_replace(coalesce(d.value->>'content',''),'<[^>]*>|&nbsp;','','g')))>0),
- 'quickNote',CASE WHEN coalesce(s#>>'{quickNote,delta,ops}','[]') NOT IN ('[]','[{"insert": "\n"}]') THEN 1 ELSE 0 END)
+ LATERAL jsonb_each(coalesce(w.value->'days','{}')) d WHERE cockpit_private.backup_meaningful(d.value->>'content'))
+ +(SELECT count(*) FROM jsonb_each(coalesce(s#>'{meta,workJournal,weeks}','{}')) w WHERE EXISTS
+ (SELECT 1 FROM jsonb_each(coalesce(w.value->'review','{}')) r WHERE cockpit_private.backup_meaningful(r.value#>>'{}'))),
+ 'weekPlans',(SELECT count(*) FROM jsonb_each(coalesce(s->'weeks','{}')) w,
+ LATERAL jsonb_array_elements_text(coalesce(w.value->'top','[]')) t(value) WHERE cockpit_private.backup_meaningful(t.value)),
+ 'quickNote',CASE WHEN EXISTS(SELECT 1 FROM jsonb_array_elements(coalesce(s#>'{quickNote,delta,ops}','[]')) q
+ WHERE jsonb_typeof(q->'insert')='object' OR cockpit_private.backup_meaningful(q->>'insert')) THEN 1 ELSE 0 END)
 $$;
 CREATE OR REPLACE FUNCTION cockpit_private.capture_state(p_owner uuid,p_state jsonb,p_version bigint,p_reason text) RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$

@@ -12,7 +12,7 @@ test('independent checkpoint failure prevents import mutation and pending gate s
 test('encrypted Google tokens are bound to their owner and cannot be read with a different key',async()=>{const {seal,unseal}=await import('../../backup-worker/index.mjs');const env={BACKUP_ENCRYPTION_KEY:Buffer.alloc(32,1).toString('base64')};const value=await seal('fake-refresh-token',env,user);assert(!value.includes('fake-refresh-token'));assert.equal(await unseal(value,env,user),'fake-refresh-token');await assert.rejects(unseal(value,env,'different'));await assert.rejects(unseal(value,{BACKUP_ENCRYPTION_KEY:Buffer.alloc(32,2).toString('base64')},user))});
 
 function upstream(env,fixture){
- const runs=[],driveFiles=new Map(),storage=new Map([[user+'/t1/a.png',Buffer.from([137,80,78,71,0,1,2,3])]]);let sequence=0,badUpload=false;
+ const runs=[],driveFiles=new Map(),storage=new Map([[user+'/t1/a.png',Buffer.from([137,80,78,71,0,1,2,3])]]);let sequence=0,badUpload=false,interruptManifest=false;
  const credential={user_id:user,encrypted_token:fixture.encrypted,folder_id:'folder'};
  const response=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'content-type':'application/json'}});
  const fetch=async(url,options={})=>{
@@ -25,7 +25,7 @@ function upstream(env,fixture){
    if(table==='rpc/cockpit_backup_prune_history')return response(null);
    if(table==='rpc/cockpit_backup_claim')return response(true);
    if(table==='rpc/cockpit_backup_objects')return response([...storage].map(([name,bytes])=>({bucket_id:'task-attachments',name,metadata:{size:bytes.length,mimetype:'image/png'}})));
-   if(table==='app_states')return response([{state:copy(fixture.state),version:4}]);
+   if(table==='app_states')return response([{state:copy(fixture.state),version:fixture.version||4}]);
    if(table==='cockpit_backup_runs'){
     const filtered=runs.filter(r=>(!u.searchParams.get('id')||r.id===u.searchParams.get('id').slice(3))&&(!u.searchParams.get('content_hash')||r.content_hash===u.searchParams.get('content_hash').slice(3))&&(!u.searchParams.get('status')||u.searchParams.get('status')!=='eq.verified'||r.status==='verified'));
     if(method==='POST'){const r={...body,created_at:'2026-11-11T12:00:00.000Z',attempts:0};runs.unshift(r);return response([r])}
@@ -38,14 +38,14 @@ function upstream(env,fixture){
   if(u.hostname==='www.googleapis.com'){
    if(u.pathname.includes('/files/generateIds'))return response({ids:['drive'+(++sequence)]});
    if(u.pathname.startsWith('/upload/')){
-    if(badUpload)return response({},503);const bytes=Buffer.from(await options.body.arrayBuffer()),boundary=options.headers['content-type'].split('boundary=')[1],head=Buffer.from('\r\n\r\n');const metaStart=bytes.indexOf(head)+head.length,metaEnd=bytes.indexOf(Buffer.from('\r\n--'+boundary),metaStart);const metadata=JSON.parse(bytes.subarray(metaStart,metaEnd).toString());const start=bytes.indexOf(head,metaEnd)+head.length,end=bytes.indexOf(Buffer.from('\r\n--'+boundary+'--'),start);if(driveFiles.has(metadata.id))return response({},409);driveFiles.set(metadata.id,{...metadata,bytes:bytes.subarray(start,end)});return response({id:metadata.id});
+    if(badUpload)return response({},503);const bytes=Buffer.from(await options.body.arrayBuffer()),boundary=options.headers['content-type'].split('boundary=')[1],head=Buffer.from('\r\n\r\n');const metaStart=bytes.indexOf(head)+head.length,metaEnd=bytes.indexOf(Buffer.from('\r\n--'+boundary),metaStart);const metadata=JSON.parse(bytes.subarray(metaStart,metaEnd).toString());const start=bytes.indexOf(head,metaEnd)+head.length,end=bytes.indexOf(Buffer.from('\r\n--'+boundary+'--'),start);if(driveFiles.has(metadata.id))return response({},409);driveFiles.set(metadata.id,{...metadata,bytes:bytes.subarray(start,end)});if(interruptManifest&&metadata.appProperties?.kind==='snapshot'){interruptManifest=false;return response({},503)}return response({id:metadata.id});
    }
    if(u.pathname.endsWith('/files')){const q=u.searchParams.get('q')||'',sha=q.match(/key='sha256' and value='([^']+)'/);return response({files:[...driveFiles.values()].filter(f=>sha&&f.appProperties?.sha256===sha[1]).map(f=>({id:f.id}))})}
    const id=u.pathname.split('/files/')[1];if(id==='folder')return response({id});const file=driveFiles.get(id);if(file&&u.searchParams.get('alt')==='media')return new Response(file.bytes);if(file)return response({id});return response({},404);
   }
   throw Error('Unexpected fake upstream: '+method+' '+u.pathname);
  };
- return {fetch,runs,driveFiles,storage,breakUploads:value=>badUpload=value};
+ return {fetch,runs,driveFiles,storage,breakUploads:value=>badUpload=value,interruptManifest:()=>interruptManifest=true};
 }
 
 test('complete backup and restore drill preserves titles, ordering, historical weeks, journal markup and original attachment bytes',async()=>{
@@ -67,3 +67,18 @@ test('partial Drive failure never marks success; a retry completes without repla
  }finally{global.fetch=old}
 });
 test('empty cloud state is quarantined and is never uploaded as a successful backup',async()=>{const w=await import('../../backup-worker/index.mjs'),env={SUPABASE_URL:'https://database.test',SUPABASE_SERVICE_ROLE_KEY:'fake',GOOGLE_CLIENT_ID:'fake',GOOGLE_CLIENT_SECRET:'fake',BACKUP_ORIGIN:'https://cockpit.test',BACKUP_ALLOWED_USER_ID:user,BACKUP_ENCRYPTION_KEY:Buffer.alloc(32,4).toString('base64')},fake=upstream(env,{state:{tasks:[],projects:[],memos:[],decisions:[]}}),old=global.fetch;global.fetch=fake.fetch;try{const jobs=[],r=await w.handle(new Request(env.BACKUP_ORIGIN+'/api/backups/run',{method:'POST',headers:{authorization:'Bearer user',origin:env.BACKUP_ORIGIN}}),env,{waitUntil:p=>jobs.push(p)});assert.equal(r.status,202);await Promise.all(jobs);assert.equal(fake.runs[0].status,'quarantined');assert.equal(fake.driveFiles.size,0)}finally{global.fetch=old}});
+
+test('review-only, image-only and weekly-plan-only work are all meaningful and protected',()=>{
+ const empty={tasks:[],projects:[]};const review={...empty,meta:{workJournal:{weeks:{}}}};
+ review.meta.workJournal.weeks.w={review:{done:'<p>复盘</p>'},days:{d:{content:'<img data-rich-image-path="u/x">'}}};
+ const plan={...empty,weeks:{w:{top:['完成本周验证']}}};
+ assert.equal(F.summary(review).journalDays,2);assert.deepEqual(F.risk(review,empty),['journalDays']);assert.equal(F.summary(plan).weekPlans,1);assert.deepEqual(F.risk(plan,empty),['weekPlans']);
+});
+test('retry rechecks frozen attachments after an interrupted manifest response and rejects missing/corrupt bytes',async()=>{
+ const w=await import('../../backup-worker/index.mjs'),env={SUPABASE_URL:'https://database.test',SUPABASE_SERVICE_ROLE_KEY:'fake',GOOGLE_CLIENT_ID:'fake',GOOGLE_CLIENT_SECRET:'fake',BACKUP_ORIGIN:'https://cockpit.test',BACKUP_ALLOWED_USER_ID:user,BACKUP_ENCRYPTION_KEY:Buffer.alloc(32,4).toString('base64')},fixture={state:sample(),encrypted:await w.seal('fake',env,user)},fake=upstream(env,fixture),old=global.fetch;global.fetch=fake.fetch;
+ try{const jobs=[];fake.interruptManifest();await w.handle(new Request(env.BACKUP_ORIGIN+'/api/backups/run',{method:'POST',headers:{authorization:'Bearer user',origin:env.BACKUP_ORIGIN}}),env,{waitUntil:p=>jobs.push(p)});await Promise.all(jobs);const run=fake.runs[0];assert.equal(run.status,'failed');assert(run.archive_payload&&fake.driveFiles.has(run.drive_file_id));const image=fake.driveFiles.get(run.archive_payload.objects[0].fileId),original=Buffer.from(image.bytes);image.bytes=Buffer.from('corrupted');await w.perform(env,user,run);assert.equal(run.status,'failed');assert.equal(run.error_code,'ATTACHMENT_CHECKSUM_MISMATCH');image.bytes=original;await w.perform(env,user,run);assert.equal(run.status,'verified');assert.equal(fake.driveFiles.size,2)}finally{global.fetch=old}
+});
+test('scheduled backup protects a new cloud revision before an older failed job',async()=>{
+ const w=await import('../../backup-worker/index.mjs'),env={SUPABASE_URL:'https://database.test',SUPABASE_SERVICE_ROLE_KEY:'fake',GOOGLE_CLIENT_ID:'fake',GOOGLE_CLIENT_SECRET:'fake',BACKUP_ORIGIN:'https://cockpit.test',BACKUP_ALLOWED_USER_ID:user,BACKUP_ENCRYPTION_KEY:Buffer.alloc(32,4).toString('base64')},fixture={state:sample(),version:8,encrypted:await w.seal('fake',env,user)},fake=upstream(env,fixture),old=global.fetch;global.fetch=fake.fetch;
+ try{const previous={id:crypto.randomUUID(),user_id:user,source_version:3,content_hash:'old-failed-hash',status:'failed',created_at:'2026-11-10T00:00:00Z'};fake.runs.push(previous);const jobs=[];await w.default.scheduled({},env,{waitUntil:p=>jobs.push(p)});await Promise.all(jobs);assert.equal(fake.runs[0].source_version,8);assert.equal(fake.runs[0].status,'verified');assert.equal(previous.status,'failed')}finally{global.fetch=old}
+});
