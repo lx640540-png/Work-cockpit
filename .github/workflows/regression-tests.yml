@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   regression:
-    name: Static and Browser Tests
+    name: Trial Interface and Backup Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
