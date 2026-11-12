@@ -71,8 +71,10 @@ function todayWaiting(){return openTasks().filter(task=>task.status==="等待")}
 function inboxTasks(){return openTasks().filter(task=>task.inbox)}
 function weekTasks(){return openTasks().filter(task=>task.week)}
 function longTasks(){return openTasks().filter(task=>task.type==="长期跟进")}
-ensureCurrentWeek();captureCurrentWeek();
-localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshotCore()));
+if(typeof localReadIssue==="undefined"||!localReadIssue){
+ ensureCurrentWeek();captureCurrentWeek();
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshotCore()));
+}
 function setTaskStatus(item,value,draft,options={}){
  let previousStatus=item.status;item.status=value;
  item.inbox=value==="待处理";
