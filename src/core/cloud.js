@@ -1,6 +1,6 @@
 function cloudHash(value){let text=typeof value==="string"?value:JSON.stringify(value),hash=2166136261;for(let index=0;index<text.length;index++){hash^=text.charCodeAt(index);hash=Math.imul(hash,16777619)}return(hash>>>0).toString(16).padStart(8,"0")}
 function deviceId(){let value=localStorage.getItem(CLOUD_DEVICE_KEY);if(!value){value=uid("device");localStorage.setItem(CLOUD_DEVICE_KEY,value)}return value}
-function hasBusinessData(value=state){let quick=(value.quickNote?.delta?.ops||[]).some(op=>String(op.insert||"").trim());return!!(Object.values(value.meta?.workJournal?.weeks||{}).some(week=>Object.values(week.days||{}).some(day=>strip(day.content))||Object.values(week.review||{}).some(text=>String(text).trim()))||value.tasks.length||value.projects.length||value.memos.length||value.decisions?.length||quick||Object.values(value.weeks||{}).some(week=>week.top?.length))}
+function hasBusinessData(value=state){let quick=(value.quickNote?.delta?.ops||[]).some(op=>String(op.insert||"").trim());return!!(Object.values(value.meta?.workJournal?.weeks||{}).some(week=>Object.values(week.days||{}).some(day=>BackupFormat.meaningful(day.content))||Object.values(week.review||{}).some(text=>String(text).trim()))||value.tasks.length||value.projects.length||value.memos.length||value.decisions?.length||quick||Object.values(value.weeks||{}).some(week=>week.top?.length))}
 const Cloud={
  client:null,user:null,channel:null,version:0,rowExists:false,remoteReady:false,sessionCheck:null,device:deviceId(),lastHash:"",timer:0,pushing:false,pendingPush:false,syncEpoch:0,applying:false,pendingRemote:null,importPending:typeof hasRestorePending==='function'&&hasRestorePending(),writeBlocked:false,authMode:"login",status:"local",
  config(){try{return{...DEFAULT_CLOUD_CONFIG,...JSON.parse(localStorage.getItem(CLOUD_CONFIG_KEY)||"null")}}catch(error){return DEFAULT_CLOUD_CONFIG}},
@@ -28,6 +28,7 @@ const Cloud={
   return check.promise;
  },
  async connectSession(session){
+  if(typeof localReadIssue!=="undefined"&&localReadIssue){this.user=session.user;this.setStatus("error","本机读取异常，自动同步已暂停");return false}
   this.syncEpoch++;this.remoteReady=false;this.pushing=false;this.pendingPush=false;clearTimeout(this.timer);this.pendingRemote=null;$("#authPassword").value="";this.user=session.user;const sessionEpoch=this.syncEpoch;localStorage.removeItem(LOCAL_MODE_KEY);$("#cloudGate").hidden=true;this.setStatus("connecting","连接中");
   try{
    let row=await this.fetchRemote();if(sessionEpoch!==this.syncEpoch||this.user?.id!==session.user.id)return false;this.remoteReady=true;let localSerialized=serializeState(),localHash=cloudHash(localSerialized),link=null;
