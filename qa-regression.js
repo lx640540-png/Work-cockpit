@@ -51,7 +51,7 @@ const contracts = [
   [functionSource('renderTaskEditor').includes('id="taskNext"') && functionSource('renderTaskEditor').includes('class="task-section checklist-section ') && functionSource('renderTaskEditor').includes('class="field task-notes-field"'), 'checklist and notes remain below the next action'],
   [html.includes('function sanitizeRichValue(') && functionSource('serializeRichEditor').includes('quill.getSemanticHTML()') && html.includes('formats:["softBreak","bold","underline","header","highlight","list","indent","focus","quickDone","divider","image","imageUpload","fold","foldDepth"]'), 'sanitized Quill serialization pipeline'],
   [html.includes('data-action="new-task" data-inbox="1" data-tip="快速记入收件箱；快捷键 N">＋ 快速记录') && !html.includes('<button class="btn primary" data-action="new-task">＋ 新增事项</button></div></header>') && html.includes('event.key.toLowerCase()==="n"') && !html.includes('data-action="quick-memo">＋ 先记下来'), 'single global quick capture opens inbox task'],
-  [html.includes('.top-delete{width:28px') && html.includes('.overview-row>div:first-child small{display:block;margin-top:6px'), 'Top 3 delete and project overview spacing'],
+  [html.includes('.top-delete{width:28px') && html.includes('.overview-row>div:first-child small{margin-top:6px'), 'Top 3 delete and project overview spacing'],
   [html.includes('<strong>工作台</strong>') && !html.includes('工作驾驶舱'), 'workbench brand rename'],
   [html.includes('class="task-column task-content-column"') && html.includes('id="taskNext" rows="1"'), 'compact task content and one-line next action'],
   [html.includes('#draftChecklist{display:grid') && html.includes('overflow:visible') && !html.includes('#draftChecklist{max-height:'), 'checklist has no internal scroll'],
