@@ -39,11 +39,11 @@ function projectTaskMatchesAttention(task,filter,today=todayKey()){
  return true;
 }
 function projectBriefData(project,tasks){
- const members=tasks.filter(task=>task.project===project.id&&!task.archived),open=members.filter(task=>!isDone(task)),current=project.milestones.find(item=>item.status==='当前阶段')||null;
+ const members=tasks.filter(task=>task.project===project.id&&!task.archived),open=members.filter(task=>!isDone(task)),current=project.milestones.find(item=>item.isCurrent??item.status==="当前阶段")||null;
  const waiting=open.filter(task=>task.status==='等待').sort((a,b)=>(a.followup||'9999').localeCompare(b.followup||'9999')||taskPriority(a)-taskPriority(b));
  const overdue=open.filter(task=>task.due&&task.due<todayKey()).sort((a,b)=>a.due.localeCompare(b.due)||taskPriority(a)-taskPriority(b));
  const attention=[...new Map([...overdue,...waiting].map(task=>[task.id,task])).values()];
  const next=open.filter(task=>task.status==='进行中'&&(task.nextAction||"").trim()).sort((a,b)=>Number(b.focus)-Number(a.focus)||taskPriority(a)-taskPriority(b)||(a.planDate||'9999').localeCompare(b.planDate||'9999'));
  const recent=members.filter(isDone).sort((a,b)=>(b.completed||'').localeCompare(a.completed||'')||String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
- return{current,blocked:project.milestones.find(item=>item.status==='阻塞')||null,blockedStages:project.milestones.filter(item=>item.status==='阻塞'),stagesDone:project.milestones.length>0&&project.milestones.every(item=>item.status==='已完成'),waiting,overdue,attention,next,recent,missingNext:open.filter(task=>task.status==='进行中'&&!(task.nextAction||"").trim()),open};
+ return{current,blocked:project.milestones.find(item=>item.status==='阻塞')||null,blockedStages:project.milestones.filter(item=>item.status==='阻塞'),stagesDone:project.milestones.length>0&&project.milestones.every(item=>(item.stageStatus?["已通过","已跳过"].includes(item.stageStatus):item.status==="已完成")),waiting,overdue,attention,next,recent,missingNext:open.filter(task=>task.status==='进行中'&&!(task.nextAction||"").trim()),open};
 }

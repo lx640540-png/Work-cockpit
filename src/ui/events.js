@@ -151,7 +151,7 @@ document.addEventListener("pointerout",event=>{if(!isMouseHover(event))return;le
 document.addEventListener("selectionchange",()=>rememberRichSelection());
 document.addEventListener("pointerdown",event=>{if(event.target.closest?.(".rich-fold-arrow"))return;let block=event.target.closest?.(".quick-note-editor .ql-editor p,.quick-note-editor .ql-editor li");if(!block)return;let rect=block.getBoundingClientRect();if(event.clientX<=rect.left+25){event.preventDefault();event.stopPropagation();toggleQuickNoteLine(block)}});
 document.addEventListener("pointerdown",event=>{let command=event.target.closest("[data-command]");if(command){let editor=richEditorFor(command);if(editor){let quill=quillFor(editor);if(quill){activeRichEditor=editor;updateRichToolbar(editor)}else{richState(editor);rememberRichSelection(editor)}}event.preventDefault()}});
-document.addEventListener("focusin",event=>{let editor=event.target.closest?.(".rich-editor");if(editor){if(quillFor(editor)){activeRichEditor=editor;updateRichToolbar(editor)}else{richState(editor);rememberRichSelection(editor)}}else if(!event.target.closest?.(".rich-toolbar,#undoButton,#redoButton"))activeRichEditor=null});
+document.addEventListener("focusin",event=>{let editor=event.target.closest?.(".rich-editor");if(!event.target.closest?.(".rich-toolbar"))clearRichDividerSelection(editor);if(editor){if(quillFor(editor)){activeRichEditor=editor;updateRichToolbar(editor)}else{richState(editor);rememberRichSelection(editor)}}else if(!event.target.closest?.(".rich-toolbar,#undoButton,#redoButton"))activeRichEditor=null});
 document.addEventListener("compositionstart",event=>{let editor=event.target.closest?.(".rich-editor");if(editor&&!quillFor(editor))editor.dataset.composing="1"});document.addEventListener("compositionend",event=>{let editor=event.target.closest?.(".rich-editor");if(editor&&!quillFor(editor)){editor.dataset.composing="0";setTimeout(()=>richShortcutAfterInput(editor),0)}});
 document.addEventListener("beforeinput",event=>{let editor=event.target.closest?.(".rich-editor");if(!editor||quillFor(editor))return;if(event.inputType==="historyUndo"||event.inputType==="historyRedo"){event.preventDefault();richApplyHistory(editor,event.inputType==="historyUndo"?-1:1)}});
 $("#confirmAccept").addEventListener("click",()=>{let callback=confirmCallback;confirmCallback=null;closeDialog("confirmDialog");if(typeof callback==="function")callback()});
@@ -217,7 +217,7 @@ document.addEventListener("change",event=>{
  if(target.closest?.("#taskEditor")&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
 });
 document.addEventListener("keydown",event=>{
- let divider=document.querySelector(".rich-divider.selected");if(divider&&!event.target.isContentEditable&&(event.key==="Delete"||event.key==="Backspace")){let context=richDividerContext(divider);if(context){event.preventDefault();context.quill.deleteText(context.index,1,"user");context.quill.setSelection(Math.max(0,context.index-1),0,"silent");return}}
+ if(handleRichDividerKeydown(event))return;
  if(richKeydown(event))return;
  if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==="k"){event.preventDefault();$("#globalSearch").focus();return}
  let textEditing=!!event.target.closest?.("input,textarea,select,[contenteditable=true],.hover-select");

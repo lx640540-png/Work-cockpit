@@ -18,20 +18,14 @@ function openProject(id,options={}){
  renderProjectEditor();showDialog($("#projectDialog"));$("#projectMaintenance").open=false;
 }
 function projectSettingsTabs(){
- let tabs=[["basic","基本信息"],["milestones","里程碑"],["records","关联记录"]];
+ let tabs=[["basic","基本信息"],["milestones","阶段与验收"],["records","关联记录"]];
  return '<nav class="project-settings-tabs" role="tablist" aria-label="项目设置分区">'+tabs.map(([key,label])=>'<button type="button" id="projectSettingsTab-'+key+'" role="tab" data-project-settings-tab="'+key+'" aria-selected="'+(projectSettingsTab===key)+'" aria-controls="projectSettingsPanel-'+key+'" tabindex="'+(projectSettingsTab===key?0:-1)+'">'+label+'</button>').join('')+'</nav>';
 }
 function projectBasicMarkup(){
  let template=projectDraftIsNew?'<div class="field full"><label for="projectTemplate">里程碑模板</label><select id="projectTemplate"><option value="hardware" '+(projectTemplateMode==="hardware"?"selected":"")+'>智能硬件标准流程</option><option value="blank" '+(projectTemplateMode==="blank"?"selected":"")+'>空白项目</option></select><small class="field-hint">默认生成需求冻结、方案设计、EVT、DVT / 认证、小批量试产和量产，可逐项修改。</small></div>':'';
  return '<section class="project-basic"><div class="project-settings-section-head"><h3>基本信息</h3><p>说明项目是什么，以及希望交付的结果。</p></div><div class="form-grid"><div class="field"><label for="projectName">项目名称</label><input id="projectName" name="projectTitle" autocomplete="off" value="'+esc(projectDraft.name)+'" placeholder="例如：激光靶系统" required></div><div class="field"><label for="projectCode">项目编号 <small>可选</small></label><input id="projectCode" name="projectCode" autocomplete="off" value="'+esc(projectDraft.code)+'" placeholder="例如：95-1"></div><div class="field full"><label for="projectDescription">项目说明 <small>可选</small></label><textarea id="projectDescription" rows="5" placeholder="项目目标、范围和必要背景">'+esc(projectDraft.description)+'</textarea></div>'+template+'</div></section>';
 }
-function projectMilestonesMarkup(){
- let nav=projectDraft.milestones.map((item,index)=>'<button class="milestone-nav '+(index===projectMilestoneIndex?"active":"")+'" type="button" data-select-mile="'+index+'" aria-pressed="'+(index===projectMilestoneIndex)+'"><span class="milestone-index">'+(index+1)+'</span><span><b>'+esc(item.name||"未命名里程碑")+'</b><small>'+esc(item.status)+' · '+dateShort(item.due)+'</small></span><span aria-hidden="true">›</span></button>').join("");
- let item=projectDraft.milestones[projectMilestoneIndex],linked=item?state.tasks.filter(task=>!task.archived&&task.project===projectDraft.id&&task.milestone===item.id).length:0;
- let detail=item?'<section class="milestone-detail"><div class="milestone-detail-head"><div><p class="eyebrow">阶段 '+(projectMilestoneIndex+1)+' / '+projectDraft.milestones.length+'</p><h3>阶段内容与验收</h3></div><button class="link-btn milestone-remove" type="button" data-remove-current-mile>删除阶段</button></div><div class="form-grid"><div class="field"><label for="milestoneName">里程碑名称</label><input id="milestoneName" name="milestoneTitle" autocomplete="off" value="'+esc(item.name)+'"></div><div class="field"><label for="milestoneDue">目标日期 <small>可选</small></label><input id="milestoneDue" type="date" value="'+esc(item.due)+'"></div><div class="field full"><label id="milestoneStatusLabel">阶段状态</label><div class="status-choice" role="group" aria-labelledby="milestoneStatusLabel">'+["未开始","当前阶段","阻塞","已完成"].map(value=>'<button type="button" data-mile-state="'+value+'" aria-pressed="'+(item.status===value)+'" class="'+(item.status===value?"active":"")+'">'+value+'</button>').join("")+'</div><p class="field-hint">设为“当前阶段”后，会显示在项目详情顶部；同一项目只保留一个当前阶段。</p></div><div class="field full"><label for="milestoneCriteria">验收条件</label><textarea id="milestoneCriteria" rows="5" placeholder="明确本阶段何时才算完成">'+esc(item.criteria)+'</textarea></div></div><div class="milestone-linked-summary"><span>关联事项 '+linked+' 项</span><button type="button" class="link-btn" data-project-settings-tab="records">查看关联记录 →</button></div></section>':'<section class="milestone-detail"><div class="empty"><p>还没有里程碑</p><button type="button" class="btn" data-add-mile>＋ 新增里程碑</button></div></section>';
- let sidebar='<aside class="milestone-sidebar"><div class="milestone-sidebar-head"><b>项目里程碑</b><button class="btn" type="button" data-add-mile>＋ 新增</button></div><div class="milestone-list">'+(nav||'<p class="muted">按实际阶段添加即可。</p>')+'</div></aside>';
- return '<div class="project-workspace">'+sidebar+detail+'</div>';
-}
+function projectMilestonesMarkup(){return trialStageMarkup()}
 function projectRecordsMarkup(){
  let item=projectDraft.milestones[projectMilestoneIndex],linkedTasks=state.tasks.filter(task=>!task.archived&&task.project===projectDraft.id&&(item?task.milestone===item.id:!task.milestone));
  let taskRows=linkedTasks.map(task=>'<article class="milestone-task-row"><button class="milestone-task-link" type="button" data-open-task="'+esc(task.id)+'">'+esc(task.title)+'</button><p>'+esc(task.nextAction||"尚未填写下一步动作")+'</p><div class="milestone-task-meta"><span class="pill status-'+esc(task.status)+'">'+esc(task.status)+'</span><span class="pill priority-'+esc(task.priority)+'">'+esc(task.priority)+'</span><time>'+(isDone(task)?"完成 "+dateShort(task.completed):task.due?"截止 "+dateShort(task.due):"未设截止日期")+'</time></div></article>').join("");
@@ -61,6 +55,7 @@ function collectProjectDraft(){
  if(!projectDraft)return;
  let name=$("#projectName"),code=$("#projectCode"),description=$("#projectDescription");
  if(name)projectDraft.name=name.value.trim();if(code)projectDraft.code=code.value.trim();if(description)projectDraft.description=description.value;
+ collectTrialStageDraft();
  let item=projectDraft.milestones[projectMilestoneIndex];if(item){let mileName=$("#milestoneName"),due=$("#milestoneDue"),criteria=$("#milestoneCriteria");if(mileName)item.name=mileName.value.trim();if(due)item.due=due.value;if(criteria)item.criteria=criteria.value}projectDraft.updatedAt=new Date().toISOString();
 }
 function syncProjectDirtyStatus(){
@@ -70,6 +65,7 @@ function saveProjectDraft(){
  collectProjectDraft();
  if(!projectDraft.name){projectSettingsTab="basic";renderProjectEditor();$("#projectName").focus();toast("请填写项目名称");return false}
  let unnamed=projectDraft.milestones.findIndex(item=>!item.name.trim());if(unnamed>=0){projectSettingsTab="milestones";projectMilestoneIndex=unnamed;renderProjectEditor();$("#milestoneName").focus();toast("请填写里程碑名称");return false}
+ if(!validateTrialStageEvidence())return false;
  let existing=projectById(projectDraft.id),saved=normalizeProject(projectDraft),validMilestones=new Set(saved.milestones.map(item=>item.id));
  projectDraft=clone(saved);commit(existing?"编辑项目":"新增项目",draft=>{let index=draft.projects.findIndex(item=>item.id===saved.id);if(index>=0)draft.projects[index]=clone(saved);else{draft.projects.push(clone(saved));draft.order.projects.push(saved.id)}draft.tasks.forEach(task=>{if(task.project===saved.id&&task.milestone&&!validMilestones.has(task.milestone)){task.milestone="";task.updatedAt=new Date().toISOString()}});draft.decisions.forEach(decision=>{if(decision.project===saved.id&&decision.milestone&&!validMilestones.has(decision.milestone)){decision.milestone="";decision.updatedAt=new Date().toISOString()}})},{immediate:true});
  selectedProjectId=saved.id;closeDialog("projectDialog");renderNow();toast("项目已保存");return true;

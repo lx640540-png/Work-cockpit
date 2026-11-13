@@ -35,9 +35,11 @@
     "styles/task-filters.css",
     "styles/rich-images.css",
     "styles/rich-toggle.css",
+    "styles/rich-divider.css",
     "styles/task-layouts.css",
     "styles/backups.css",
-    "styles/trial-improvements.css"
+    "styles/trial-improvements.css",
+    "styles/trial-planning.css"
   ],
   "scripts": [
     "core/runtime.js",
@@ -48,6 +50,7 @@
     "domain/workflow-closure.js",
     "domain/rich-images.js",
     "domain/backup-format.js",
+    "domain/trial-planning.js",
     "core/model.js",
     "core/store.js",
     "domain/backup-local.js",
@@ -79,6 +82,7 @@
     "ui/rich-list-drag.js",
     "ui/rich-toggle.js",
     "ui/rich-editor.js",
+    "ui/rich-divider.js",
     "ui/planning-resize.js",
     "ui/task-dates.js",
     "ui/workflow.js",
@@ -100,6 +104,7 @@
     "ui/component-preview.js",
     "ui/appearance-controls.js",
     "ui/trial-improvements.js",
+    "ui/trial-planning.js",
     "boot.js"
   ]
 }
