@@ -1,0 +1,8 @@
+/* One owner for document dividers; empty labels leave a continuous line. */
+.rich-divider{display:flex;align-items:center;gap:0;width:100%;min-height:36px;margin:3px 0;padding:8px 0;color:var(--muted);cursor:pointer;user-select:none;--divider-line:#dfe3ea}
+.rich-divider:before,.rich-divider:after{content:"";height:1px;flex:1;min-width:0;background:var(--divider-line)}
+.rich-divider-label{max-width:65%;margin-inline:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+.rich-divider-label:empty{display:none}
+.rich-divider.selected{--divider-line:var(--blue);border-radius:8px;background:color-mix(in srgb,var(--blue) 6%,transparent);outline:1px solid color-mix(in srgb,var(--blue) 28%,transparent)}
+.rich-divider-label[contenteditable="true"]{display:block;min-width:min(120px,65%);max-width:min(75%,520px);padding:2px 6px;border-radius:6px;background:var(--soft);outline:1px solid var(--blue);cursor:text;user-select:text;white-space:pre-wrap;overflow-wrap:anywhere}
+:root[data-theme=dark] .rich-divider:not(.selected){--divider-line:#465365}

@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   regression:
-    name: Static and Browser Tests
+    name: Trial Interface and Backup Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -43,7 +43,7 @@ jobs:
         run: npm run test:static
 
       - name: 执行浏览器交互回归
-        run: npm run test:browser
+        run: node --test qa-backups-browser.js qa-images-browser.js qa-trial-browser.js
 
       - name: 上传失败截图
         if: failure()

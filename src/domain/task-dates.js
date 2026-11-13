@@ -10,12 +10,13 @@ function taskDateFlags(task,today=todayKey()){
   followup:open&&task.status==="等待"&&!!task.followup&&task.followup<today,
   due:open&&!!task.due&&task.due<today};
 }
-function setTaskDate(id,field,value){
+function setTaskDate(id,field,value,options={}){
  let task=taskById(id);if(!task||task.archived||isDone(task)||!["planDate","followup","due"].includes(field))return false;
  if(!validTaskDate(value)){toast("请选择有效日期");return false}
  updateTask(id,"调整"+({planDate:"计划日期",followup:"跟进日期",due:"截止日期"}[field]),item=>{
   let previous={...item};item[field]=value;
   if(field==="planDate"&&!value)item.focus=false;
+  if(options.keepWeek)item.week=true;
   reconcileTaskEdit(item,previous);
  });return true;
 }

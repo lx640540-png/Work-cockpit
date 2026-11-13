@@ -5,7 +5,7 @@ function emptyQuickNote(){return{delta:{ops:[{insert:"\n",attributes:{quickDone:
 function normalizeQuickNote(raw){let source=raw&&typeof raw==="object"?raw:{},delta=source.delta&&Array.isArray(source.delta.ops)?clone(source.delta):emptyQuickNote().delta;delta.ops=delta.ops.flatMap(op=>{if(op.insert?.image!==undefined){let image=normalizeRichImage(op.insert.image);if(!image)return[];let attributes={...(op.attributes||{})},width=richImageWidth(attributes.width);delete attributes.height;delete attributes.width;if(width)attributes.width=width;return[{...op,insert:{image},attributes}]}if(op.insert?.imageUpload&&!/^[\w-]{1,100}$/.test(String(op.insert.imageUpload.id||"")))return[];return[op]});return{delta:delta.ops.length?delta:emptyQuickNote().delta,updatedAt:String(source.updatedAt||"")}}
 function emptyState(){return{version:8,tasks:[],projects:[],memos:[],decisions:[],weeks:{},trash:[],snapshots:[],favorites:[],quickNote:emptyQuickNote(),order:emptyOrder(),meta:{createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),activeWeekKey:""}}}
 function normalizeMilestone(raw,index){
- return{id:String(raw?.id||uid("milestone")),name:String(raw?.name||"里程碑 "+(index+1)),due:String(raw?.due||raw?.date||""),status:["未开始","当前阶段","阻塞","已完成"].includes(raw?.status)?raw.status:"未开始",criteria:String(raw?.criteria||raw?.doneCriteria||"")};
+ return{id:String(raw?.id||uid("milestone")),name:String(raw?.name||"里程碑 "+(index+1)),due:String(raw?.due||raw?.date||""),status:["未开始","当前阶段","阻塞","已完成"].includes(raw?.status)?raw.status:"未开始",criteria:String(raw?.criteria||raw?.doneCriteria||""),...normalizeTrialStage(raw)};
 }
 function hardwareMilestoneTemplate(){
  let stages=[
@@ -20,8 +20,8 @@ function hardwareMilestoneTemplate(){
 }
 function normalizeProject(raw,index){
  let milestones=Array.isArray(raw?.milestones)?raw.milestones.map(normalizeMilestone):[];
- let currentSeen=false;milestones.forEach(milestone=>{if(milestone.status!=="当前阶段")return;if(currentSeen)milestone.status="未开始";else currentSeen=true});
- return{id:String(raw?.id||uid("project")),name:String(raw?.name||"未命名项目"),code:String(raw?.code||""),description:String(raw?.description||""),archived:!!raw?.archived,createdAt:raw?.createdAt||new Date().toISOString(),updatedAt:raw?.updatedAt||new Date().toISOString(),milestones};
+ let currentSeen=false;milestones.forEach(milestone=>{if(!milestone.isCurrent)return;if(currentSeen){milestone.isCurrent=false;milestone.status=milestone.stageStatus==="已通过"?"已完成":"未开始"}else currentSeen=true});
+ return{id:String(raw?.id||uid("project")),name:String(raw?.name||"未命名项目"),code:String(raw?.code||""),description:String(raw?.description||""),overviewHtml:sanitizeRichValue(normalizeRich(raw?.overviewHtml||"")),archived:!!raw?.archived,createdAt:raw?.createdAt||new Date().toISOString(),updatedAt:raw?.updatedAt||new Date().toISOString(),milestones};
 }
 function normalizeChecklistItem(item){
  let done=!!item?.done,raw=String(item?.completedAt||""),date=/^\d{4}-\d{2}-\d{2}T/.test(raw)?new Date(raw):null;

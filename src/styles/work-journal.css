@@ -27,4 +27,4 @@
 :root[data-theme="dark"] .journal-calendar-grid button.selected:not(.week-selected){color:#0d1522}
 
 /* Separate every date heading from its editable daily record. */
-#workJournal .journal-date-row{border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}
+#workJournal .journal-date-row{}
