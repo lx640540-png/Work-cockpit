@@ -13,7 +13,7 @@
 .week-next-details p{margin:6px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
 .week-outcomes.is-empty{display:block;min-height:0;padding:0 18px 10px}
 .week-outcomes.is-empty p{margin:0;font-size:12px}
-:root[data-calm-today] #page-week .week-comparison-table{display:table;width:100%;min-width:570px;table-layout:fixed}
+:root[data-calm-today] #page-week .week-comparison-table{display:table;width:100%;min-width:570px;}
 :root[data-calm-today] #page-week .week-comparison-table thead{display:table-header-group}
 :root[data-calm-today] #page-week .week-comparison-table tbody{display:table-row-group;width:auto}
 :root[data-calm-today] #page-week .week-comparison-table tr{display:table-row;width:auto;padding:0}

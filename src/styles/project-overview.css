@@ -2,7 +2,7 @@
 
 
 
-.project-list-name{min-width:0;font-size:17px;line-height:1.4;overflow-wrap:anywhere}
+.project-list-name{min-width:0;overflow-wrap:anywhere}
 .project-completion{display:grid;justify-items:end;gap:2px;white-space:nowrap}
 .project-completion strong{font-size:14px;font-variant-numeric:tabular-nums}
 .project-completion small{color:var(--muted);font-size:10px}
@@ -24,7 +24,7 @@
 :root[data-calm-today] #projectShell[data-view=detail]>.project-view-body>.project-detail-page{grid-row:2;height:100%;min-height:0}
 :root[data-calm-today] #projectShell .project-master-detail{height:100%;min-height:0}
 :root[data-calm-today] .project-overview-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 12px;padding:12px 18px}
-:root[data-calm-today] .project-overview-context{grid-column:1/-1;margin:0;font-size:11px;gap:8px}
+:root[data-calm-today] .project-overview-context{grid-column:1/-1;margin:0;gap:8px}
 :root[data-calm-today] .project-overview-context>.link-btn{padding:0;margin-left:auto;font-size:11px}
 :root[data-calm-today] .project-overview-stats{align-self:center;gap:5px}
 :root[data-calm-today] .project-health-note{color:var(--orange)}

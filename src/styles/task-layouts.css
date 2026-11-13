@@ -96,9 +96,9 @@
 .rich-highlight-button.green{--highlight-swatch:#7caa72}
 :root[data-theme=dark] .rich-highlight-green{background:#2b4027;color:#e0eddb}
 /* Document dividers use the reference's gray, independent of text color. */
-.rich-divider{opacity:1;color:var(--muted)}
-.rich-divider:before,.rich-divider:after{height:1px;background:#dfe3ea}
-.rich-divider.selected:before,.rich-divider.selected:after{height:1px;background:var(--blue)}
+
+
+
 .rich-tool-separator{background:#e9ecf0}
 .hover-select-trigger>b[aria-hidden]{font-size:16px;line-height:1;flex:none}
 .ql-editor .rich-fold-arrow{font-size:1.15em;width:24px}
@@ -106,7 +106,7 @@
 :root[data-theme=dark] #taskDialog[data-task-layout=d]{--line:#344050;--soft:#1d2735;--panel:#111c2e;--text:#dce3ec;--ink:#f1f5fa;--muted:#a4afbd}
 :root[data-theme=dark] #taskDialog[data-task-layout=d] :is(.task-v43-chips>.field,.task-v43-time input:not([type=checkbox])){background:var(--panel)}
 :root[data-theme=dark] #taskDialog[data-task-layout] .checklist-section{background:#322322;border-color:#65433f}
-:root[data-theme=dark] .rich-divider:before,:root[data-theme=dark] .rich-divider:after{background:#465365}
+
 @container task-detail (max-width:880px){
  #taskDialog[data-task-layout=d] .task-v43-time>.field{width:calc(50% - 6px)}
  #taskDialog[data-task-layout=d] .task-v43-flags{margin-left:0}
