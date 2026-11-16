@@ -1,47 +1,53 @@
-// A single double-column task editor. Layout preferences from the trial are ignored.
-let taskLayoutContext=null,taskLayoutMutation=null;
-function taskChecklistSummary(){let count=taskDraft.checklist.filter(item=>item.done).length;return'<span>检查清单</span><span class="checklist-progress">'+count+' / '+taskDraft.checklist.length+'</span><span class="checklist-chevron" aria-hidden="true">'+(taskChecklistCollapsed?'⌄':'⌃')+'</span>'}
+// Task workspace: v5's 1180px dialog / 310px side column, with shared scrolling.
+const TASK_WORKSPACE_LAYOUT_KEY="work-cockpit-task-workspace-v5";
+let taskLayoutContext=null,taskLayoutMutation=null,taskLayoutResizeObserver=null;
+function taskWorkspaceDefaults(){return{width:1180,sideWidth:310,collapsed:false}}
+function readTaskWorkspaceLayout(){try{let raw=JSON.parse(localStorage.getItem(TASK_WORKSPACE_LAYOUT_KEY)||"null"),base=taskWorkspaceDefaults();return{width:Number.isFinite(raw?.width)?Math.max(720,Math.min(3200,raw.width)):base.width,sideWidth:Number.isFinite(raw?.sideWidth)?Math.max(240,Math.min(1600,raw.sideWidth)):base.sideWidth,collapsed:!!raw?.collapsed}}catch{return taskWorkspaceDefaults()}}
+let taskWorkspaceLayout=readTaskWorkspaceLayout();
+function saveTaskWorkspaceLayout(){try{localStorage.setItem(TASK_WORKSPACE_LAYOUT_KEY,JSON.stringify(taskWorkspaceLayout))}catch{}}
+function taskWorkspaceMetrics(viewportWidth,width=1180,sideWidth=310){let compact=viewportWidth<=880,available=Math.max(1,viewportWidth-(compact?0:32)),dialogWidth=Math.min(available,Math.max(720,width));return{width:dialogWidth,sideWidth:Math.max(240,Math.min(Math.max(240,dialogWidth-430),sideWidth)),compact,stacked:dialogWidth<=900}}
+function taskChecklistSummary(){let count=taskDraft.checklist.filter(item=>item.done).length;return'<span>执行清单</span><span class="checklist-progress">'+count+' / '+taskDraft.checklist.length+'</span><span class="checklist-chevron" aria-hidden="true">'+(taskChecklistCollapsed?'▶':'▼')+'</span>'}
 function taskLayoutField(id){return $("#"+id)?.closest(".field")}
+function syncTaskWorkspaceGeometry(){
+ let c=taskLayoutContext;if(!c||!c.modal.isConnected)return;let metrics=taskWorkspaceMetrics(innerWidth,taskWorkspaceLayout.width,taskWorkspaceLayout.sideWidth);c.modal.style.setProperty('--task-dialog-width',metrics.width+'px');
+ let actual=c.root.clientWidth||metrics.width;c.sideBody.hidden=taskWorkspaceLayout.collapsed&&actual>900;let side=Math.max(240,Math.min(Math.max(240,actual-430),taskWorkspaceLayout.sideWidth));c.root.style.setProperty('--task-side-width',side+'px');
+ c.splitter.setAttribute('aria-valuemin','240');c.splitter.setAttribute('aria-valuemax',String(Math.max(240,actual-430)));c.splitter.setAttribute('aria-valuenow',String(Math.round(side)));c.splitter.setAttribute('aria-disabled',String(actual<=900||taskWorkspaceLayout.collapsed));
+ for(let handle of c.modal.querySelectorAll('[data-task-dialog-width]')){handle.setAttribute('aria-valuemin',String(Math.min(720,innerWidth-32)));handle.setAttribute('aria-valuemax',String(Math.max(1,innerWidth-32)));handle.setAttribute('aria-valuenow',String(Math.round(c.modal.getBoundingClientRect().width||metrics.width)));handle.setAttribute('aria-disabled',String(metrics.compact||c.modal.classList.contains('task-journal-docked')))}
+ cancelAnimationFrame(c.checklistFrame);c.checklistFrame=requestAnimationFrame(resizeTaskChecklist);
+}
+function setTaskSideCollapsed(value,persist=true){
+ let c=taskLayoutContext;if(!c)return;taskWorkspaceLayout.collapsed=!!value;c.modal.dataset.taskSideCollapsed=String(!!value);c.sideBody.hidden=!!value;c.toggle.setAttribute('aria-expanded',String(!value));c.toggle.setAttribute('aria-label',value?'展开左侧事项信息':'收起左侧事项信息');c.toggle.textContent=value?'›':'‹';if(value&&c.sideBody.contains(document.activeElement))c.toggle.focus({preventScroll:true});syncTaskWorkspaceGeometry();if(persist)saveTaskWorkspaceLayout();if(!value)requestAnimationFrame(resizeTaskChecklist);
+}
+function initTaskDialogWidthHandles(modal){
+ if(modal.querySelector('[data-task-dialog-width]'))return;
+ for(let side of ['left','right']){let handle=document.createElement('button');handle.type='button';handle.className='task-dialog-width-handle';handle.dataset.taskDialogWidth=side;handle.setAttribute('role','separator');handle.setAttribute('aria-orientation','vertical');handle.setAttribute('aria-label',side==='left'?'从左侧调整弹窗宽度':'从右侧调整弹窗宽度');handle.title='拖动调整弹窗宽度；左右方向键微调；双击恢复';modal.append(handle);
+  bindUiSplitter(handle,{read:()=>modal.getBoundingClientRect().width,min:()=>Math.min(720,innerWidth-32),max:()=>Math.max(1,innerWidth-32),step:side==='left'?-24:24,reset:1180,position:event=>Math.abs(event.clientX-innerWidth/2)*2,write:value=>{taskWorkspaceLayout.width=value;syncTaskWorkspaceGeometry()},commit:saveTaskWorkspaceLayout});
+ }
+}
 function initTaskLayouts(){
- let root=$("#taskEditor"),modal=$("#taskDialog"),main=$(".task-content-column",root),props=$(".task-column:first-child",root),support=$(".attachment-column",root);if(!main||!props||!support)return;
- taskLayoutMutation?.disconnect();let previous=taskLayoutContext,same=previous?.id===taskDraft.id;modal.dataset.taskLayout="d";$("#saveTaskButton").textContent="关闭";
- let inner=document.createElement("div");inner.className="task-editor-inner";while(main.firstChild)inner.append(main.firstChild);main.append(inner);
- taskLayoutField("taskTitle").classList.add("task-name-field");taskLayoutField("taskNext").classList.add("task-next-field");
- let topRow=document.createElement("div"),chips=document.createElement("div"),time=document.createElement("div"),flags=document.createElement("div");topRow.className="task-v43-title-row";chips.className="task-v43-chips";time.className="task-v43-time";flags.className="task-v43-flags";inner.prepend(topRow,chips,time);topRow.append(taskLayoutField("taskTitle"));
- for(let id of["draftStatus","draftPriority","draftProject","draftType","draftMilestone"]){let field=taskLayoutField(id);field.querySelector("label").htmlFor=id;field.querySelector(".hover-select-trigger")?.setAttribute("aria-label",field.querySelector("label").textContent);chips.append(field)}
- let projectLink=$(".task-project-link",props);if(projectLink)chips.append(projectLink);
- for(let id of["draftPlanDate","draftDue","draftCompleted","draftFollowup"])time.append(taskLayoutField(id));time.append(flags);
- for(let id of["draftFocus","draftWeek"])flags.append($("#"+id).closest("label"));time.append($(".task-record-section",props));props.remove();$("#checklistResizer",inner)?.remove();
- let focus=document.createElement("button");focus.type="button";focus.className="task-focus-toggle";focus.dataset.taskFocus="";focus.textContent="⛶ 专注编辑";$(".task-notes-field .obsidian-heading",inner).append(focus);
- let labels={attachments:"附件",related:"关联",decisions:"决策",history:"周记录"},quick=document.createElement("nav");quick.className="task-support-shortcuts";quick.setAttribute("aria-label","事项辅助内容");quick.innerHTML=Object.entries(labels).map(([key,label])=>'<button type="button" data-task-support="'+key+'" data-task-quick aria-controls="taskSupport-'+key+'" aria-expanded="false">'+label+' <span data-task-support-count="'+key+'">0</span></button>').join("")+'<button type="button" data-task-support-toggle aria-controls="taskSupportPanel" aria-expanded="false" data-tip="辅助栏：非输入状态按 Tab 开关">辅助栏</button>';topRow.append(quick);
- support.id="taskSupportPanel";support.setAttribute("aria-label","事项辅助栏");let content=$(".task-support-content",support),sections=Array.from(content.children);Object.keys(labels).forEach((key,index)=>{sections[index].id="taskSupport-"+key;sections[index].dataset.taskSupportSection=key;sections[index].setAttribute("role","region");sections[index].setAttribute("aria-label",labels[key])});
- let supportScroll=document.createElement("div");supportScroll.className="task-support-scroll";supportScroll.innerHTML='<div class="task-support-heading"><strong>辅助内容</strong><button type="button" data-task-support-close aria-label="收起事项辅助栏">×</button></div>';supportScroll.append($(".checklist-section",inner),content);support.replaceChildren(supportScroll);
- taskLayoutContext={id:taskDraft.id,root,modal,main,inner,support,supportScroll,content,panel:same?previous.panel:Array.from(taskUploads.values()).some(job=>job.taskId===taskDraft.id&&job.userId===Cloud.user?.id)?"attachments":"related",open:same?previous.open:true,scrolls:same?previous.scrolls:{}};
- showTaskSupport(taskLayoutContext.panel,taskLayoutContext.open);refreshTaskLayoutMeta();taskLayoutMutation=new MutationObserver(refreshTaskLayoutMeta);for(let node of root.querySelectorAll(".attachment-list,#relatedList,#taskDecisionList,#taskUploadQueue"))taskLayoutMutation.observe(node,{childList:true,subtree:true});
+ let root=$('#taskEditor'),modal=$('#taskDialog'),form=$('#taskForm'),main=$('.task-content-column',root),props=$('.task-column:first-child',root),support=$('.attachment-column',root);if(!main||!props||!support)return;
+ taskLayoutMutation?.disconnect();taskLayoutResizeObserver?.disconnect();$('#taskLayoutHeader',form)?.remove();let previous=taskLayoutContext,same=previous?.id===taskDraft.id,openGroups=same?[...previous.support.querySelectorAll('details[open]')].map(node=>node.dataset.taskGroup):[];
+ modal.dataset.taskLayout='d';modal.dataset.taskWorkspace='v5';$('#saveTaskButton').textContent='关闭';
+ const title=taskLayoutField('taskTitle'),next=taskLayoutField('taskNext'),notes=$('.task-notes-field',main),checklist=$('.checklist-section',main),content=$('.task-support-content',support),sections=[...content.children];title.classList.add('task-name-field');next.classList.add('task-next-field');title.querySelector('label').htmlFor='taskTitle';next.querySelector('label').htmlFor='taskNext';$('#taskNext').setAttribute('rows','2');
+ let header=document.createElement('div');header.id='taskLayoutHeader';header.className='task-workspace-header';header.append(title,next);root.before(header);
+ let side=document.createElement('aside');side.className='task-column task-workspace-side';side.setAttribute('aria-label','事项信息');side.innerHTML='<div class="task-side-heading"><strong>事项信息</strong><span class="task-side-rail">事项信息</span><button type="button" data-task-side-toggle aria-controls="taskSideBody" aria-expanded="true" aria-label="收起左侧事项信息">‹</button></div>';
+ let sideBody=document.createElement('div');sideBody.id='taskSideBody';sideBody.className='task-side-body';side.append(sideBody);let grid=document.createElement('div');grid.className='task-workspace-fields';
+ for(let id of ['draftStatus','draftPriority','draftType','draftPlanDate','draftDue','draftCompleted','draftFollowup']){let field=taskLayoutField(id);field.querySelector('label').htmlFor=id;field.querySelector('.hover-select-trigger')?.setAttribute('aria-label',field.querySelector('label').textContent);if(id==='draftType')field.classList.add('task-field-full');grid.append(field)}sideBody.append(grid);
+ let flags=document.createElement('div');flags.className='task-workspace-flags';for(let id of ['draftFocus','draftWeek']){let label=$('#'+id).closest('label');label.removeAttribute('style');flags.append(label)}sideBody.append(flags);let record=$('.task-record-section',props);sideBody.append(record);
+ checklist.style.removeProperty('height');$('.checklist-add-bottom',checklist).textContent='＋ 添加步骤';
+ let records=document.createElement('div');records.id='taskSupportPanel';records.className='task-support-scroll task-left-records';let makeGroup=(key,label,nodes,count)=>{let group=document.createElement('details');group.className='task-left-group';group.dataset.taskGroup=key;group.innerHTML='<summary>'+label+(count?'<span data-task-support-count="'+key+'">0</span>':'<span class="task-project-summary">'+esc(projectById(taskDraft.project)?.name||'通用事项')+'</span>')+'</summary>';let body=document.createElement('div');body.className='task-left-group-body';if(count){body.id='taskSupport-'+key;body.dataset.taskSupportSection=key;body.setAttribute('role','region');body.setAttribute('aria-label',label)}nodes.forEach(node=>body.append(node));group.append(body);group.open=openGroups.includes(key);records.append(group);return group};
+ for(let id of ['draftProject','draftMilestone'])taskLayoutField(id).querySelector('label').htmlFor=id;let projectLink=$('.task-project-link',props);makeGroup('project','项目与里程碑',[taskLayoutField('draftProject'),taskLayoutField('draftMilestone'),projectLink].filter(Boolean),false);
+ for(let [index,key,label] of [[0,'attachments','附件与预览'],[1,'related','相关事项'],[2,'decisions','关键决策'],[3,'history','周记录']])makeGroup(key,label,[sections[index]],true);sideBody.append(records);
+ let focus=document.createElement('button');focus.type='button';focus.className='task-focus-toggle';focus.dataset.taskFocus='';focus.textContent='⛶ 专注编辑';$('.obsidian-heading',notes).append(focus);
+ let inner=document.createElement('div');inner.className='task-editor-inner';inner.append(checklist,notes);main.replaceChildren(inner);main.classList.add('task-notes-column');
+ let splitter=document.createElement('button');splitter.type='button';splitter.id='taskColumnSplitter';splitter.className='task-column-splitter';splitter.setAttribute('role','separator');splitter.setAttribute('aria-orientation','vertical');splitter.setAttribute('aria-label','调整事项信息与备注宽度');splitter.title='拖动调整两栏宽度；左右方向键微调；双击恢复';
+ root.replaceChildren(side,splitter,main);taskLayoutContext={id:taskDraft.id,root,modal,main,inner,support:records,supportScroll:records,content:records,side,sideBody,toggle:$('[data-task-side-toggle]',side),splitter,panel:'related',open:true};
+ bindUiSplitter(splitter,{read:()=>parseFloat(root.style.getPropertyValue('--task-side-width'))||310,min:240,max:()=>Math.max(240,root.clientWidth-430),step:16,reset:310,position:event=>event.clientX-root.getBoundingClientRect().left,write:value=>{taskWorkspaceLayout.sideWidth=value;syncTaskWorkspaceGeometry()},commit:saveTaskWorkspaceLayout});
+ initTaskDialogWidthHandles(modal);setTaskSideCollapsed(taskWorkspaceLayout.collapsed,false);refreshTaskLayoutMeta();taskLayoutMutation=new MutationObserver(refreshTaskLayoutMeta);for(let node of root.querySelectorAll('.attachment-list,#relatedList,#taskDecisionList,#taskUploadQueue'))taskLayoutMutation.observe(node,{childList:true,subtree:true});taskLayoutResizeObserver=new ResizeObserver(syncTaskWorkspaceGeometry);taskLayoutResizeObserver.observe(form);requestAnimationFrame(()=>{syncTaskWorkspaceGeometry();resizeTaskChecklist()});
+ if([...taskUploads.values()].some(job=>job.taskId===taskDraft.id&&job.userId===Cloud.user?.id))showTaskSupport('attachments',true);
 }
-function refreshTaskLayoutMeta(){
- let c=taskLayoutContext;if(!c||!taskDraft||c.id!==taskDraft.id)return;let counts={attachments:taskDraft.attachments.length,related:relatedDraft.size,decisions:state.decisions.filter(item=>!item.archived&&item.sourceTaskId===taskDraft.id).length,history:taskHistoryEntries(taskDraft.id).length};c.root.querySelectorAll("[data-task-support-count]").forEach(node=>{let value=String(counts[node.dataset.taskSupportCount]);if(node.textContent!==value)node.textContent=value});
-}
-function showTaskSupport(panel,open=true,focus=false){
- let c=taskLayoutContext;if(!c||!["attachments","related","decisions","history"].includes(panel))return;
- if(c.open)c.scrolls[c.panel]=c.supportScroll.scrollTop;let focusedInside=c.support.contains(document.activeElement);c.panel=panel;c.open=open;c.modal.dataset.taskSupportOpen=String(open);c.support.hidden=!open;
- c.root.querySelectorAll("[data-task-support-section]").forEach(node=>node.hidden=node.dataset.taskSupportSection!==panel);
- c.root.querySelectorAll("[data-task-support]").forEach(button=>{let active=open&&button.dataset.taskSupport===panel;button.classList.toggle("active",active);button.setAttribute("aria-expanded",String(active))});
- c.root.querySelector("[data-task-support-toggle]").setAttribute("aria-expanded",String(open));c.supportScroll.scrollTop=c.scrolls[panel]||0;
- if(focus||(!open&&focusedInside))c.root.querySelector('[data-task-quick][data-task-support="'+panel+'"]').focus({preventScroll:true});
-}
-document.addEventListener("click",event=>{
- if(event.target.closest("[data-task-focus]")){toggleRichExpanded($("#taskNotes"));return}
- let panel=event.target.closest("[data-task-support]");if(panel){let c=taskLayoutContext;showTaskSupport(panel.dataset.taskSupport,!(c.open&&c.panel===panel.dataset.taskSupport));return}
- if(event.target.closest("[data-task-support-close]"))showTaskSupport(taskLayoutContext.panel,false,true);
- if(event.target.closest("[data-task-support-toggle]"))showTaskSupport(taskLayoutContext.panel,!taskLayoutContext.open);
-});
-document.addEventListener("keydown",event=>{
- let c=taskLayoutContext;if(!$("#taskDialog")?.open||!c||Array.from(document.querySelectorAll("dialog[open]")).at(-1)?.id!=="taskDialog")return;
- if(event.key==="Tab"&&!event.shiftKey&&!event.ctrlKey&&!event.altKey&&!event.metaKey&&!event.isComposing&&!expandedRichBox&&!activeHoverSelect&&!event.target.closest('input,textarea,select,[contenteditable="true"],[role="listbox"],[role="option"]')){event.preventDefault();event.stopImmediatePropagation();showTaskSupport(c.panel,!c.open);return}
- if(event.key==="Escape"&&c.open&&!activeHoverSelect&&!expandedRichBox){event.preventDefault();event.stopImmediatePropagation();showTaskSupport(c.panel,false,true);return}
- let tab=event.target.closest("[data-task-quick][data-task-support]");if(!tab||!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
- event.preventDefault();let tabs=Array.from(tab.parentElement.querySelectorAll("[data-task-support]")),index=tabs.indexOf(tab),next=event.key==="Home"?0:event.key==="End"?tabs.length-1:(index+(event.key==="ArrowLeft"?-1:1)+tabs.length)%tabs.length;showTaskSupport(tabs[next].dataset.taskSupport,true,true);
-},true);
-
-document.addEventListener("mousedown",event=>{if(event.target.closest("[data-task-focus]"))event.preventDefault()});
+function refreshTaskLayoutMeta(){let c=taskLayoutContext;if(!c||!taskDraft||c.id!==taskDraft.id)return;let summary=c.support.querySelector('.task-project-summary'),name=projectById($('#draftProject')?.value)?.name||'通用事项';if(summary&&summary.textContent!==name)summary.textContent=name;let counts={attachments:taskDraft.attachments.length,related:relatedDraft.size,decisions:state.decisions.filter(item=>!item.archived&&item.sourceTaskId===taskDraft.id).length,history:taskHistoryEntries(taskDraft.id).length};c.root.querySelectorAll('[data-task-support-count]').forEach(node=>{let value=String(counts[node.dataset.taskSupportCount]);if(node.textContent!==value)node.textContent=value})}
+function showTaskSupport(panel,open=true,focus=false){let c=taskLayoutContext;if(!c?.support.isConnected||!['attachments','related','decisions','history'].includes(panel))return;let group=c.support.querySelector('[data-task-group="'+panel+'"]');if(!group)return;if(open)setTaskSideCollapsed(false);group.open=open;c.panel=panel;if(focus){group.querySelector('summary').focus({preventScroll:true});group.scrollIntoView({block:'nearest'})}}
+document.addEventListener('click',event=>{if(event.target.closest('[data-task-focus]')){toggleRichExpanded($('#taskNotes'));return}if(event.target.closest('[data-task-side-toggle]'))setTaskSideCollapsed(!taskWorkspaceLayout.collapsed)});
+document.addEventListener('mousedown',event=>{if(event.target.closest('[data-task-focus]'))event.preventDefault()});
+window.addEventListener('resize',syncTaskWorkspaceGeometry);

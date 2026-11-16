@@ -786,7 +786,7 @@ async function testUrl() {
   await page.keyboard.press('Backspace');
   assert(await notesHost.locator('.rich-divider').count() === 1, 'backspace on the adjacent empty line deleted the divider');
   await notesHost.evaluate(node => { node.__quill.setContents({ops:[{insert:'需要保留的富文本备注',attributes:{bold:true}},{insert:'\n'}]},'silent'); });
-  if(!await page.locator('[data-new-related-task]').isVisible())await page.click('[data-task-support="related"]');
+  if(!await page.locator('[data-new-related-task]').isVisible())await page.click('[data-task-group="related"] summary');
   await page.click('[data-new-related-task]');
   await page.waitForFunction(() => document.querySelector('#taskDialog')?.open && taskDraft?.title === '新的关联事项');
   const relatedCreation = await page.evaluate(() => { const child=taskDraft,parent=taskById('t1'),savedChild=taskById(child.id);return { childId:child.id, parentLinks:parent.relatedTaskIds, childLinks:savedChild.relatedTaskIds, parentNotes:parent.notes, project:savedChild.project, milestone:savedChild.milestone }; });
@@ -795,7 +795,7 @@ async function testUrl() {
   await page.click('#saveTaskButton');
   await page.waitForSelector('#page-tasks.active [data-open-task="t1"]');
   await page.click('#page-tasks.active [data-open-task="t1"]');
-  await page.click('[data-task-support="decisions"]');
+  await page.click('[data-task-group="decisions"] summary');
   await page.click('[data-new-decision]');
   assert(await page.locator('#decisionDialog[open] .decision-rich-box .ql-container').count() === 2, 'key decision fields did not initialize as rich-text editors');
   assert(await page.locator('#decisionDialog[open] [data-rich-height-resizer]').count() === 2, 'key decision rich editors do not expose the shared bottom-edge resize area');

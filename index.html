@@ -924,7 +924,7 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 :root[data-calm-today] .modal-head{padding:18px 22px;border-color:var(--line)}
 :root[data-calm-today] .modal-head h2{font-size:19px;font-weight:600}
 :root[data-calm-today] .modal-actions{background:var(--panel);border-color:var(--line)}
-:root[data-calm-today] .task-modal .task-section{border:0;border-top:1px solid var(--line);border-radius:0;padding:14px 0;background:transparent!important}
+:root[data-calm-today] .task-modal:not([data-task-workspace=v5]) .task-section{border:0;border-top:1px solid var(--line);border-radius:0;padding:14px 0;background:transparent!important}
 :root[data-calm-today] .task-modal .task-section-title{font-size:12px;font-weight:600;color:var(--ink)}
 :root[data-calm-today] .task-modal .title-input{font-size:22px;font-weight:600;background:transparent;border-color:var(--line);color:var(--ink)}
 :root[data-calm-today] .field label{font-size:12px;font-weight:500;color:var(--text)}
@@ -1693,160 +1693,102 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 .rich-divider.selected{--divider-line:var(--blue);border-radius:8px;background:color-mix(in srgb,var(--blue) 6%,transparent);outline:1px solid color-mix(in srgb,var(--blue) 28%,transparent)}
 .rich-divider-label[contenteditable="true"]{display:block;min-width:min(120px,65%);max-width:min(75%,520px);padding:2px 6px;border-radius:6px;background:var(--soft);outline:1px solid var(--blue);cursor:text;user-select:text;white-space:pre-wrap;overflow-wrap:anywhere}
 :root[data-theme=dark] .rich-divider:not(.selected){--divider-line:#465365}
-#taskDialog[data-task-layout]{border-radius:13px;font-size:13px;max-height:calc(100dvh - 12px)}
-#taskDialog[data-task-layout]>#taskForm{height:100%;max-height:100%;container-type:inline-size;container-name:task-detail}
-#taskDialog[data-task-layout] #taskEditor{display:grid;position:relative;gap:0;padding:0;min-height:0;height:auto;max-height:none;overflow:hidden;align-content:stretch}
-#taskDialog[data-task-layout] #taskEditor>.task-column{grid-column:auto;grid-row:auto;height:100%;min-height:0;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:0}
-#taskDialog[data-task-layout] #taskEditor>.task-content-column{overflow-x:hidden}
-#taskDialog[data-task-layout] #taskEditor>.attachment-column{position:relative;border-left:1px solid var(--line);border-top:0;overflow:hidden;background:var(--panel)}
-#taskDialog[data-task-layout] #taskEditor>.attachment-column[hidden]{display:none!important}
-.task-editor-inner{width:100%;margin:0 auto}
-.task-support-scroll{height:100%;overflow-y:auto;overscroll-behavior:contain}
-.task-name-field{gap:6px}.task-name-field>label{font-size:12px;color:var(--muted);font-weight:400}
-.task-support-shortcuts{display:flex;gap:6px;flex-wrap:wrap}
-.task-support-shortcuts button{border:1px solid var(--line);border-radius:7px;font:inherit}
-.task-support-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:700}
-.task-support-heading button{width:30px;height:30px;border:0;background:transparent;color:var(--muted);font-size:19px;border-radius:7px}
-#taskDialog[data-task-layout] .task-support-content{overflow:visible;height:auto;min-height:0;padding:0}
-#taskDialog[data-task-layout] .task-support-content>[hidden]{display:none!important}
-.task-notes-field .obsidian-heading{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
-.task-notes-field .obsidian-summary{margin-left:auto;display:flex;gap:8px}
-.task-focus-toggle{font:inherit;font-size:11px;color:var(--blue);border:0;background:transparent;padding:2px 0;white-space:nowrap}
-#taskDialog[data-task-layout] .task-notes-editor:not(.rich-expanded){border:1px solid var(--line);overflow:visible;min-height:0}
-#taskDialog[data-task-layout] .task-notes-editor:not(.rich-expanded)>.rich-editor{height:auto!important;min-height:0!important;max-height:none;overflow:visible!important}
-#taskDialog[data-task-layout] .task-notes-editor:not(.rich-expanded)>.rich-editor>.ql-editor{height:auto!important;max-height:none;overflow:visible!important;overflow-wrap:anywhere}
-#taskDialog[data-task-layout] .task-notes-editor>.rich-toolbar{min-height:43px;gap:3px;flex-wrap:wrap;background:var(--panel);border-radius:10px 10px 0 0}
-#taskDialog[data-task-layout] .task-notes-editor>.rich-toolbar button{font-size:11.5px;min-width:26px;height:27px;font-weight:400;padding-inline:6px}
-#taskDialog[data-task-layout] .task-notes-editor>.rich-toolbar>.rich-expand-button{display:none}
-#taskDialog[data-task-layout] .task-notes-editor.rich-expanded>.rich-toolbar>.rich-expand-button{display:inline-flex}
-#taskDialog[data-task-layout] .modal-actions{align-items:center;gap:9px}
-#taskDialog[data-task-layout] .modal-actions>.btn{height:auto;min-height:34px;padding:9px 12px;font-size:12px;border-radius:7px}
-#taskDialog .checklist-section{padding:0!important;border:1px solid color-mix(in srgb,var(--blue) 17%,var(--line));border-radius:9px;background:var(--panel);overflow:hidden;min-height:0}
-#taskDialog .checklist-dropdown-head{width:100%;display:flex;justify-content:flex-start;align-items:center;gap:10px;min-height:40px;height:auto;padding:10px 14px;border:0;border-radius:0;background:transparent;color:var(--blue);font:inherit;font-size:12px;text-align:left;cursor:pointer}
-.checklist-progress,.checklist-chevron{color:var(--muted);font-size:11px}
+/* Task v5 workspace. Geometry and form styles have a single owner here. */
+#taskDialog[data-task-workspace=v5]{--line:#e6e8ee;--soft:#f7f8fa;--blue:#2769ea;--text:#292d35;--ink:#181b22;--muted:#7a818c;--panel:#fff;position:fixed;inset:16px 0 auto;width:min(var(--task-dialog-width,1180px),calc(100vw - 32px));height:calc(100dvh - 32px);max-height:calc(100dvh - 32px);margin:0 auto;padding:0;border-radius:13px;overflow:hidden;font-size:13px}
+#taskDialog[data-task-workspace=v5]>#taskForm{width:100%;height:100%;max-height:100%;display:grid;grid-template-rows:48px auto minmax(0,1fr) 56px;container-type:inline-size;container-name:task-detail;overflow:hidden}
+#taskDialog[data-task-workspace=v5] .modal-head{height:48px;min-height:48px;padding:0 12px 0 22px;border-bottom:1px solid var(--line)}
+#taskDialog[data-task-workspace=v5] .modal-head h2{font-size:16px;font-weight:600}
+#taskDialog[data-task-workspace=v5] .modal-head .eyebrow{display:none}
+#taskDialog[data-task-workspace=v5] .task-workspace-header{display:grid;gap:8px;min-width:0;padding:8px 22px 10px;border-bottom:1px solid var(--line)}
+#taskDialog[data-task-workspace=v5] .task-name-field{margin:0;gap:0;min-width:0}
+#taskDialog[data-task-workspace=v5] .task-name-field>label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#taskDialog[data-task-workspace=v5] .title-input{width:100%;min-width:0;height:40px;padding:2px 0;border:0;border-bottom:1px solid transparent;border-radius:0;background:transparent;font-size:20px;font-weight:600}
+#taskDialog[data-task-workspace=v5] .title-input:hover{border-bottom-color:var(--line)}
+#taskDialog[data-task-workspace=v5] .title-input:focus{border-bottom-color:#a7c4fc;box-shadow:none}
+#taskDialog[data-task-workspace=v5] .task-next-field{display:grid;gap:5px;margin:0;padding:6px 8px 6px 12px;border:1px solid #c9dbff;border-radius:10px;background:#eef4ff}
+#taskDialog[data-task-workspace=v5] .task-next-field>label{font-size:12.5px;font-weight:600;color:var(--blue)}
+#taskDialog[data-task-workspace=v5] .task-next-field textarea{width:100%;min-width:0;min-height:42px;height:52px;max-height:120px;resize:vertical;padding:7px 10px;font:inherit;line-height:1.6;border:1px solid #c9dbff;border-radius:8px;background:var(--panel)}
+#taskDialog[data-task-workspace=v5] #taskEditor{display:grid;grid-template-columns:var(--task-side-width,310px) 10px minmax(0,1fr);grid-template-rows:minmax(max-content,1fr);align-content:stretch;align-items:stretch;gap:0;min-height:0;height:auto;max-height:none;padding:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable}
+#taskDialog[data-task-workspace=v5] #taskEditor>.task-column{grid-column:auto;grid-row:auto;position:static;width:auto;min-width:0;min-height:0;height:auto;max-height:none;overflow:visible;padding:0;border:0;background:transparent;box-shadow:none}
+#taskDialog[data-task-workspace=v5] #taskEditor>.task-workspace-side{background:#fcfcfd}
+.task-side-heading{height:42px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--line)}
+.task-side-heading strong{font-size:13px;font-weight:600}.task-side-heading button{width:28px;height:28px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--muted);font-size:20px}.task-side-heading button:hover{background:var(--soft);color:var(--text)}.task-side-rail{display:none}
+#taskDialog[data-task-workspace=v5] .task-side-body{padding:14px 16px 18px;min-width:0}
+#taskDialog[data-task-workspace=v5] .task-side-body[hidden]{display:none}
+#taskDialog[data-task-workspace=v5] .task-workspace-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#taskDialog[data-task-workspace=v5] .task-workspace-fields>.task-field-full{grid-column:1/-1}
+#taskDialog[data-task-workspace=v5] .task-side-body .field{min-width:0;margin:0!important;gap:4px}
+#taskDialog[data-task-workspace=v5] .task-side-body .field>label{font-size:12px;line-height:1.4;font-weight:400;color:var(--muted)}
+#taskDialog[data-task-workspace=v5] .task-side-body .field>label small{display:none}
+#taskDialog[data-task-workspace=v5] .task-side-body input:not([type=checkbox]),#taskDialog[data-task-workspace=v5] .task-side-body select,#taskDialog[data-task-workspace=v5] .task-side-body .hover-select-trigger{min-width:0;width:100%;height:34px;min-height:34px;padding:0 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);font-size:12px;font-weight:400;box-shadow:none}
+#taskDialog[data-task-workspace=v5] .task-side-body .hover-select{min-width:0;width:100%;max-width:100%}
+#taskDialog[data-task-workspace=v5] .task-side-body .hover-select>select{width:1px;height:1px}
+#taskDialog[data-task-workspace=v5] .task-workspace-flags{display:grid;gap:8px;margin:12px 0;font-size:12.5px}
+#taskDialog[data-task-workspace=v5] .task-workspace-flags label{display:flex;align-items:center;gap:8px;margin:0;cursor:pointer}
+#taskDialog[data-task-workspace=v5] .task-workspace-flags input[type=checkbox]{width:15px;height:15px;margin:0;accent-color:var(--blue)}
+#taskDialog[data-task-workspace=v5] .task-record-section{margin:0 0 12px;padding:0;border:0;background:none}
+#taskDialog[data-task-workspace=v5] .task-record-section .task-section-title{padding:0;margin:0;border:0;justify-content:flex-end}
+#taskDialog[data-task-workspace=v5] .task-record-section .task-section-title>span{display:none}
+#taskDialog[data-task-workspace=v5] .checklist-section{flex:none;container-type:inline-size;margin:0 0 12px!important;padding:0!important;min-height:0;height:auto;overflow:visible;border:1px solid #f0dad7;border-radius:10px;background:#fff4f3}
+#taskDialog[data-task-workspace=v5] .checklist-dropdown-head{display:flex;align-items:center;gap:8px;width:100%;min-height:38px;height:auto;padding:9px 12px;border:0;border-radius:10px 10px 0 0;background:none;color:var(--text);text-align:left;font:inherit;font-size:12.5px;font-weight:600}
+.checklist-progress{font-size:11px;font-weight:400;color:var(--muted)}.checklist-chevron{margin-left:auto;font-size:11px;color:var(--muted)}
 #draftChecklistContent[hidden]{display:none!important}
-#taskDialog #draftChecklist{gap:0;padding:0}
-#taskDialog #draftChecklist .checklist-item{margin:0;min-height:42px;padding:5px 12px 5px 4px;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;gap:6px}
-#taskDialog #draftChecklist .checklist-item>.checklist-text{color:var(--text)}
-#taskDialog #draftChecklist .checklist-item.is-done>.checklist-text{text-decoration:line-through;color:var(--muted)}
-.checklist-add-bottom{width:100%;border:0;border-top:1px solid var(--line);background:transparent;color:var(--blue);font:inherit;font-size:12px;text-align:left;padding:10px 14px;min-height:38px}
-.checklist-add-bottom:hover{background:var(--soft)}
-/* Single double-column editor based on the supplied v4.3 layout. */
-#taskDialog[data-task-layout=d]{--line:#e6e8ee;--soft:#f7f8fa;--blue:#2769ea;--text:#292d35;--ink:#181b22;--muted:#7a818c;--panel:#fff;width:min(1180px,calc(100vw - 32px));height:min(1000px,calc(100dvh - 32px));margin:16px auto}
-#taskDialog[data-task-layout=d] .modal-head{height:52px;min-height:52px;padding:0 14px 0 22px;gap:12px}
-#taskDialog[data-task-layout=d] .modal-head h2{font-size:16px;font-weight:600}
-#taskDialog[data-task-layout=d] .modal-actions{height:58px;padding:0 18px}
-#taskDialog[data-task-layout=d] #taskEditor{grid-template-columns:minmax(0,1fr)}
-#taskDialog[data-task-layout=d][data-task-support-open=true] #taskEditor{grid-template-columns:minmax(0,1fr) 300px}
-#taskDialog[data-task-layout=d] #taskEditor>.task-properties-column{display:none}
-#taskDialog[data-task-layout=d] #taskEditor>.task-content-column{padding:12px 22px 14px}
-#taskDialog[data-task-layout=d] .task-editor-inner{max-width:none}
-.task-v43-title-row[hidden],.task-v43-chips[hidden],.task-v43-time[hidden]{display:none!important}
-.task-v43-title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;margin-bottom:10px}
-#taskDialog[data-task-layout=d] .task-name-field{flex:1;min-width:min(260px,100%);margin:0}
-#taskDialog[data-task-layout=d] .task-name-field>label{font-size:12px;margin-bottom:2px}
-#taskDialog[data-task-layout=d] .title-input{height:40px;border:0;border-bottom:1px solid transparent;border-radius:0;padding:2px 0;font-size:20px;font-weight:600}
-#taskDialog[data-task-layout=d] .title-input:hover{border-bottom-color:var(--line)}
-#taskDialog[data-task-layout=d] .title-input:focus{border-bottom-color:#a7c4fc;box-shadow:none}
-#taskDialog[data-task-layout=d] .task-support-shortcuts{gap:6px;margin:0 0 4px}
-#taskDialog[data-task-layout=d] .task-support-shortcuts button{height:30px;min-height:30px;padding:0 10px;font-size:12px;border-radius:7px;background:#f9fafc;color:#5d6777}
-#taskDialog[data-task-layout=d] .task-support-shortcuts button.active{border-color:#c9dbff;background:#eef4ff;color:#2769ea}
-.task-v43-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-#taskDialog[data-task-layout=d] .task-v43-chips>.field{display:flex;flex-direction:row;align-items:center;gap:6px;min-width:0;max-width:100%;height:32px;padding:0 4px 0 10px;border:1px solid var(--line);border-radius:8px;background:#fbfcfe;margin:0!important}
-#taskDialog[data-task-layout=d] .task-v43-chips .field>label{font-size:12px;font-weight:400;color:var(--muted);white-space:nowrap}
-#taskDialog[data-task-layout=d] .task-v43-chips .hover-select{min-width:65px;width:auto;max-width:240px}
-#taskDialog[data-task-layout=d] .task-v43-chips .hover-select-trigger{height:30px;min-height:30px;border:0;background:transparent;padding:0 6px;gap:8px;border-radius:0;font-size:13px;font-weight:400;box-shadow:none}
-.task-v43-time{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:9px 12px;margin-bottom:10px}
-#taskDialog[data-task-layout=d] .task-v43-time>.field{width:124px;gap:4px;min-width:0;margin:0}
-#taskDialog[data-task-layout=d] .task-v43-time .field>label{font-size:11.5px;font-weight:400;color:var(--muted);line-height:1.4}
-#taskDialog[data-task-layout=d] .task-v43-time .field>label small{display:none}
-#taskDialog[data-task-layout=d] .task-v43-time input:not([type=checkbox]){height:34px;min-height:34px;width:100%;padding:0 8px;border-radius:8px;background:#fff;font-size:12px}
-.task-v43-flags{margin-left:auto;display:flex;flex-direction:column;gap:6px;font-size:12.5px;padding-bottom:3px}
-#taskDialog[data-task-layout=d] .task-v43-flags>label{display:flex;align-items:center;gap:6px;margin:0!important;font-size:12px;font-weight:400}
-#taskDialog[data-task-layout=d] .task-v43-flags input[type=checkbox]{width:15px;height:15px;accent-color:#2769ea}
-#taskDialog[data-task-layout=d] .task-record-section{padding:0;margin:0;border:0;background:none}
-#taskDialog[data-task-layout=d] .task-record-section .task-section-title{margin:0;font-size:11px}
-#taskDialog[data-task-layout=d] .task-record-section .task-section-title>span{display:none}
-#taskDialog[data-task-layout=d] .task-next-field{padding:8px 12px;border:1px solid #c9dbff;border-radius:10px;background:#eef4ff;margin:0 0 10px;gap:5px}
-#taskDialog[data-task-layout=d] .task-next-field>label{color:#2769ea;font-size:12.5px;font-weight:600}
-#taskDialog[data-task-layout=d] .task-next-field textarea{min-height:42px;padding:8px 11px;font-size:13.5px;line-height:1.5;border-color:#c8dafc;background:#fff;border-radius:8px}
-#taskDialog[data-task-layout=d] .task-notes-field{margin-top:0!important}
-#taskDialog[data-task-layout=d] .task-notes-field .obsidian-heading{margin-bottom:5px}
-#taskDialog[data-task-layout=d] .task-notes-editor{border-radius:10px}
-#taskDialog[data-task-layout=d] .task-notes-editor:not(.rich-expanded)>.rich-editor>.ql-editor{min-height:300px!important;padding:14px 18px 40px;font-size:13.5px;line-height:1.8}
-#taskDialog[data-task-layout=d] .task-notes-editor>.rich-toolbar{border-bottom:1px solid #e9ecf0;padding:5px 8px}
-#taskDialog[data-task-layout=d] .task-support-scroll{padding:14px}
-#taskDialog[data-task-layout=d] .task-support-heading{font-size:13px;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:14px}
-#taskDialog[data-task-layout=d] .task-support-content>.task-section{border:0;padding:0;background:transparent}
-#taskDialog[data-task-layout=d] .checklist-resizer{display:none}
-#taskDialog[data-task-layout] .checklist-section{border:1px solid #f0dad7;background:#fff4f3;border-radius:10px}
-#taskDialog[data-task-layout] .checklist-dropdown-head{color:#333842;background:transparent}
-#taskDialog[data-task-layout] #draftChecklist .checklist-item{background:transparent;border-top-color:#f0e4e2}
-#taskDialog[data-task-layout] #draftChecklist .checklist-item>.checklist-text{background:transparent}
-#taskDialog[data-task-layout] .checklist-add-bottom{border-top-color:#f0e4e2}
-#taskDialog[data-task-layout=d] .checklist-section{margin:0 0 14px!important}
-#taskDialog[data-task-layout=d] #draftChecklist .checklist-item{padding:7px 8px 7px 2px;min-height:42px}
-/* One soft sage green for existing and new annotations, including saved notes. */
-.rich-highlight-green{background:#dcebd9}
-.rich-highlight-button.green{--highlight-swatch:#7caa72}
-:root[data-theme=dark] .rich-highlight-green{background:#2b4027;color:#e0eddb}
-/* Document dividers use the reference's gray, independent of text color. */
-
-
-
-.rich-tool-separator{background:#e9ecf0}
-.hover-select-trigger>b[aria-hidden]{font-size:16px;line-height:1;flex:none}
-.ql-editor .rich-fold-arrow{font-size:1.15em;width:24px}
-.checklist-chevron{font-size:14px}
-:root[data-theme=dark] #taskDialog[data-task-layout=d]{--line:#344050;--soft:#1d2735;--panel:#111c2e;--text:#dce3ec;--ink:#f1f5fa;--muted:#a4afbd}
-:root[data-theme=dark] #taskDialog[data-task-layout=d] :is(.task-v43-chips>.field,.task-v43-time input:not([type=checkbox])){background:var(--panel)}
-:root[data-theme=dark] #taskDialog[data-task-layout] .checklist-section{background:#322322;border-color:#65433f}
-
-@container task-detail (max-width:880px){
- #taskDialog[data-task-layout=d] .task-v43-time>.field{width:calc(50% - 6px)}
- #taskDialog[data-task-layout=d] .task-v43-flags{margin-left:0}
- #taskDialog[data-task-layout=d] .modal-head{height:auto;min-height:52px;flex-wrap:wrap;padding:8px 14px}
- #taskDialog[data-task-layout=d] #taskEditor>.task-content-column{padding:12px 15px}
-}
-@media(max-width:880px){#taskDialog[data-task-layout=d]{width:100vw;height:100dvh;max-height:100dvh;margin:0;border-radius:0}}
-:root[data-calm-today] #taskDialog[data-task-layout] .checklist-section{background:#fff4f3!important;border:1px solid #f0dad7;border-radius:10px;padding:0!important}
-#taskDialog[data-task-layout=d] .task-name-field .title-input{height:40px;padding:2px 0;border:0;border-bottom:1px solid transparent;border-radius:0;font-size:20px;background:transparent}
-#taskDialog[data-task-layout=d] .task-name-field .title-input:focus{border-bottom-color:#a7c4fc}
-#taskDialog[data-task-layout=d] .modal-head .eyebrow{display:none}
-#taskDialog[data-task-layout=d] .modal-actions>[data-close=taskDialog]{display:none}
-#taskDialog[data-task-layout=d] #deleteTaskButton{order:1}
-#taskDialog[data-task-layout=d] .modal-actions>span[style]{order:2}
-#taskDialog[data-task-layout=d] #taskAutosaveStatus{order:3}
-#taskDialog[data-task-layout=d] #saveTaskButton{order:4}
-:root[data-theme=dark][data-calm-today] #taskDialog[data-task-layout] .checklist-section{background:#322322!important;border-color:#65433f}
-
-#taskDialog[data-task-layout=d].task-journal-docked{margin:0;width:var(--task-available-width);height:calc(100dvh - 12px)}
-#taskDialog[data-task-layout=d].task-journal-compact{margin:0;height:100dvh}
-
-/* Native-select style chevron and compact fold toolbar symbols. */
-.hover-select-trigger .select-chevron{width:12px;height:8px;flex:none;display:block;pointer-events:none}
-.rich-toolbar .rich-fold-tool{display:inline-flex;align-items:center;justify-content:center;min-width:29px;width:29px;padding:0}
-.rich-fold-tool .fold-tool-icon{display:block;flex:none;pointer-events:none;width:13px;height:13px}
-.rich-fold-tool.large .fold-tool-icon{width:18px;height:18px}
-#taskDialog[data-task-layout=d] .task-v43-flags{margin-left:0;padding:0;align-self:center}
-#taskDialog[data-task-layout=d] .task-v43-time>.task-record-section{margin-left:auto;align-self:center;flex:none}
-#taskDialog[data-task-layout=d] .task-v43-time>.task-record-section .task-section-title{padding:0;border:0}
-/* Shared editor shells paint their own intact perimeter above child backgrounds. */
-.editor-box,.memo-editor-body{position:relative}
-.editor-box:after,.memo-editor-body:after{content:"";position:absolute;inset:-1px;z-index:3;pointer-events:none;border:1px solid var(--line);border-radius:inherit}
-.editor-box>.rich-toolbar,.memo-editor-body>.rich-toolbar{border-top-left-radius:inherit;border-top-right-radius:inherit}
-.editor-box>.rich-editor,.memo-editor-body>.rich-editor{border-bottom-left-radius:inherit;border-bottom-right-radius:inherit}
-.rich-toolbar [data-command=unfold][hidden]{display:none!important}
-.rich-soft-break{white-space:pre-wrap}
-/* Match keyboard focus to the app instead of the browser's black outline. */
-#taskDialog[data-task-layout] button:focus{outline:none}
-#taskDialog[data-task-layout] button:focus-visible{outline:1px solid var(--blue);outline-offset:2px;box-shadow:none}
-@container task-detail (max-width:880px){
- #taskDialog[data-task-layout] #taskEditor{grid-template-columns:minmax(0,1fr)!important}
- #taskDialog[data-task-layout] #taskEditor>.attachment-column{position:absolute;z-index:4;top:0;right:0;bottom:0;width:min(85%,330px);height:100%;background:var(--panel);box-shadow:-6px 0 30px #172d401a}
-}
-
-#taskDialog[data-task-layout] .task-notes-editor>.rich-toolbar .rich-highlight-button{padding:0;width:29px;min-width:29px;height:29px}
+#taskDialog[data-task-workspace=v5] #draftChecklist{display:grid;gap:0;padding:0;max-height:none;overflow:visible}
+#taskDialog[data-task-workspace=v5] #draftChecklist .checklist-item{display:grid;grid-template-columns:16px 15px minmax(0,1fr) 22px;align-items:start;min-width:0;min-height:40px;gap:6px;padding:7px 8px 7px 4px;margin:0;border:0;border-top:1px solid #f0e4e2;border-radius:0;background:transparent}
+#taskDialog[data-task-workspace=v5] #draftChecklist .checklist-item>.drag-handle{grid-column:1;grid-row:1;width:16px;height:28px;min-width:0;margin:0;padding:0;align-self:start;opacity:0}
+#taskDialog[data-task-workspace=v5] #draftChecklist .checklist-item:is(:hover,:focus-within)>.drag-handle{opacity:1}
+#taskDialog[data-task-workspace=v5] #draftChecklist .checklist-item>input[type=checkbox]{grid-column:2;grid-row:1;width:15px;height:15px;margin:6px 0 0;align-self:start}
+#taskDialog[data-task-workspace=v5] #draftChecklist .checklist-item>.checklist-text{grid-column:3;grid-row:1;width:100%;min-width:0;min-height:28px;height:auto;resize:none;overflow:hidden;padding:3px 0;margin:0;border:0;border-radius:0;background:transparent;color:var(--text);font:inherit;font-size:12.5px;line-height:22px;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:none}
+#taskDialog[data-task-workspace=v5] #draftChecklist .checklist-item.is-done>.checklist-text{text-decoration:line-through;color:var(--muted)}
+#taskDialog[data-task-workspace=v5] #draftChecklist .checklist-item>.icon-btn{grid-column:4;grid-row:1;width:22px;height:28px;margin:0;padding:0;align-self:start}
+#taskDialog[data-task-workspace=v5] #draftChecklist .checklist-time{grid-column:3;grid-row:2;height:auto;min-height:18px;padding:0;justify-self:start;font-size:10px}
+#taskDialog[data-task-workspace=v5] #draftChecklist .checklist-time-editor{grid-column:1/-1;grid-row:3}
+#taskDialog[data-task-workspace=v5] .checklist-add-bottom{display:block;width:100%;min-height:34px;padding:8px 12px;border:0;border-top:1px solid #f0e4e2;border-radius:0 0 10px 10px;background:transparent;color:var(--blue);text-align:left;font:inherit;font-size:12px}
+#taskDialog[data-task-workspace=v5] .task-support-scroll{height:auto;max-height:none;overflow:visible;padding:0}
+.task-left-records{border-top:1px solid var(--line)}.task-left-group{border-bottom:1px solid var(--line)}.task-left-group>summary{display:flex;align-items:center;gap:8px;padding:10px 2px;list-style:none;font-size:12.5px;font-weight:600;cursor:pointer;min-width:0}.task-left-group>summary::-webkit-details-marker{display:none}.task-left-group>summary:before{content:'▸';color:var(--muted);width:10px;flex:none}.task-left-group[open]>summary:before{transform:rotate(90deg)}.task-left-group>summary>span{margin-left:auto;min-width:0;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:11px;font-weight:400}.task-left-group-body{padding:2px 2px 14px;min-width:0}.task-left-group-body>.field+.field{margin-top:10px!important}
+#taskDialog[data-task-workspace=v5] .task-left-group-body>.task-section{border:0;padding:0;margin:0;background:none}
+#taskDialog[data-task-workspace=v5] .task-left-group-body .preview:not(.has-preview){display:none}
+#taskDialog[data-task-workspace=v5] .task-notes-column{display:flex;padding:14px 22px 16px!important}
+#taskDialog[data-task-workspace=v5] .task-editor-inner{display:flex;flex-direction:column;flex:1;min-width:0;width:100%;max-width:none;margin:0}
+#taskDialog[data-task-workspace=v5] .task-notes-field{display:flex;flex-direction:column;flex:1;min-height:0;margin:0!important}
+#taskDialog[data-task-workspace=v5] .obsidian-heading{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+#taskDialog[data-task-workspace=v5] .obsidian-heading>label{font-size:12.5px;font-weight:600;color:var(--text)}
+#taskDialog[data-task-workspace=v5] .obsidian-summary{display:flex;gap:8px;margin-left:auto}
+.task-focus-toggle{border:0;background:transparent;color:var(--blue);font:inherit;font-size:12px;white-space:nowrap;padding:2px 0}
+#taskDialog[data-task-workspace=v5] .task-notes-editor:not(.rich-expanded){display:flex;flex-direction:column;flex:1;min-height:280px;border:1px solid var(--line);border-radius:10px;overflow:visible}
+#taskDialog[data-task-workspace=v5] .task-notes-editor>.rich-toolbar{min-height:40px;gap:2px;flex-shrink:0;flex-wrap:wrap;padding:5px 8px;border-bottom:1px solid var(--line);background:var(--panel);border-radius:10px 10px 0 0}
+#taskDialog[data-task-workspace=v5] .task-notes-editor>.rich-toolbar button{height:27px;min-width:27px;padding-inline:6px;font-size:12px;font-weight:400}
+#taskDialog[data-task-workspace=v5] .task-notes-editor:not(.rich-expanded)>.rich-toolbar>.rich-expand-button{display:none}
+#taskDialog[data-task-workspace=v5] .task-notes-editor:not(.rich-expanded)>.rich-editor{display:flex;flex-direction:column;flex:1;height:auto!important;min-height:0!important;max-height:none;overflow:visible!important}
+#taskDialog[data-task-workspace=v5] .task-notes-editor:not(.rich-expanded)>.rich-editor>.ql-editor{flex:1;height:auto!important;min-height:280px!important;max-height:none;overflow:visible!important;overflow-wrap:anywhere;padding:14px 18px 24px;font-size:13.5px;line-height:1.8}
+#taskDialog[data-task-workspace=v5] .task-notes-editor .ql-editor :is(img,video){max-width:100%;height:auto}
+#taskDialog[data-task-workspace=v5] .task-notes-editor .ql-editor :is(p,li,pre){overflow-wrap:anywhere;white-space:pre-wrap}
+#taskDialog[data-task-workspace=v5] .task-column-splitter{position:relative;align-self:stretch;width:10px;min-width:0;min-height:100%;padding:0;border:0;border-radius:0;background:transparent;cursor:col-resize;touch-action:none}
+.task-column-splitter:before{content:'';position:absolute;inset:0 auto 0 50%;width:1px;background:var(--line)}.task-column-splitter:after{content:'⋮';position:absolute;top:min(50%,360px);left:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:8px;height:26px;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--muted);font-size:12px}.task-column-splitter:is(:hover,:focus-visible,.resizing):before{background:var(--blue)}
+#taskDialog[data-task-workspace=v5] .task-dialog-width-handle{position:absolute;z-index:8;top:50%;transform:translateY(-50%);width:10px;height:60px;min-height:0;padding:0;border:0;border-radius:4px;background:transparent;cursor:ew-resize;touch-action:none;color:var(--muted)}.task-dialog-width-handle[data-task-dialog-width=left]{left:0}.task-dialog-width-handle[data-task-dialog-width=right]{right:0}.task-dialog-width-handle:before{content:'⋮';font-size:16px}.task-dialog-width-handle:is(:hover,:focus-visible,.resizing){background:var(--soft);color:var(--blue)}
+#taskDialog[data-task-workspace=v5][data-task-side-collapsed=true] #taskEditor{grid-template-columns:44px 0 minmax(0,1fr)}
+#taskDialog[data-task-workspace=v5][data-task-side-collapsed=true] .task-side-heading{height:auto;flex-direction:column;padding:10px 0;gap:12px;border:0}
+#taskDialog[data-task-workspace=v5][data-task-side-collapsed=true] .task-side-heading>strong{display:none}
+#taskDialog[data-task-workspace=v5][data-task-side-collapsed=true] .task-side-rail{display:block;writing-mode:vertical-rl;letter-spacing:.1em;color:var(--muted);font-size:12px}
+#taskDialog[data-task-workspace=v5][data-task-side-collapsed=true] .task-column-splitter{visibility:hidden}
+#taskDialog[data-task-workspace=v5] .modal-actions{height:56px;padding:0 18px;gap:12px;align-items:center;border-top:1px solid var(--line)}
+#taskDialog[data-task-workspace=v5] .modal-actions>.btn{height:34px;min-height:34px;padding:0 14px;border-radius:7px;font-size:12.5px}
+#taskDialog[data-task-workspace=v5] .modal-actions>[data-close=taskDialog]{display:none}
+#taskDialog[data-task-workspace=v5] #deleteTaskButton{order:1}#taskDialog[data-task-workspace=v5] .modal-actions>span[style]{order:2}#taskDialog[data-task-workspace=v5] #taskAutosaveStatus{order:3}#taskDialog[data-task-workspace=v5] #saveTaskButton{order:4}
+#taskDialog[data-task-workspace=v5] button:focus{outline:none}#taskDialog[data-task-workspace=v5] button:focus-visible{outline:1px solid var(--blue);outline-offset:2px;box-shadow:none}
+#taskDialog[data-task-workspace=v5].task-journal-docked{inset:6px auto 6px 8px;margin:0;width:var(--task-available-width);max-width:var(--task-available-width);height:calc(100dvh - 12px);max-height:calc(100dvh - 12px)}
+#taskDialog[data-task-workspace=v5].task-journal-docked [data-task-dialog-width]{display:none}
+:root[data-theme=dark] #taskDialog[data-task-workspace=v5]{--line:#344050;--soft:#1d2735;--panel:#111c2e;--text:#dce3ec;--ink:#f1f5fa;--muted:#a4afbd}
+:root[data-theme=dark] #taskDialog[data-task-workspace=v5] #taskEditor>.task-workspace-side{background:var(--panel)}
+:root[data-theme=dark] #taskDialog[data-task-workspace=v5] .task-next-field{background:#172b47;border-color:#34527a}
+:root[data-theme=dark] #taskDialog[data-task-workspace=v5] .checklist-section{background:#322322;border-color:#65433f}
+@container task-detail (max-width:900px){#taskDialog[data-task-workspace=v5] #taskEditor,#taskDialog[data-task-workspace=v5][data-task-side-collapsed=true] #taskEditor{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-auto-rows:max-content;align-content:start}#taskDialog[data-task-workspace=v5] .task-column-splitter,#taskDialog[data-task-workspace=v5] .task-side-heading button{display:none}#taskDialog[data-task-workspace=v5] .task-side-heading>strong{display:block}#taskDialog[data-task-workspace=v5] .task-side-rail{display:none!important}#taskDialog[data-task-workspace=v5] .task-side-body[hidden]{display:block}#taskDialog[data-task-workspace=v5] .task-notes-column{border-top:1px solid var(--line)!important;padding:14px 16px!important}}
+@media(max-width:880px){#taskDialog[data-task-workspace=v5]{inset:0;margin:0;width:100vw;height:100dvh;max-height:100dvh;border-radius:0}#taskDialog[data-task-workspace=v5] .task-workspace-header{padding:6px 14px 8px}#taskDialog[data-task-workspace=v5] .title-input{font-size:18px}#taskDialog[data-task-workspace=v5] .task-dialog-width-handle{display:none}}
+/* Shared rich-editor chrome retained from the established component system. */
+.rich-highlight-green{background:#dcebd9}.rich-highlight-button.green{--highlight-swatch:#7caa72}:root[data-theme=dark] .rich-highlight-green{background:#2b4027;color:#e0eddb}
+.rich-tool-separator{background:#e9ecf0}.hover-select-trigger>b[aria-hidden]{font-size:16px;line-height:1;flex:none}.ql-editor .rich-fold-arrow{font-size:1.15em;width:24px}
+.hover-select-trigger .select-chevron{width:12px;height:8px;flex:none;display:block;pointer-events:none}.rich-toolbar .rich-fold-tool{display:inline-flex;align-items:center;justify-content:center;min-width:29px;width:29px;padding:0}.rich-fold-tool .fold-tool-icon{display:block;flex:none;pointer-events:none;width:13px;height:13px}.rich-fold-tool.large .fold-tool-icon{width:18px;height:18px}
+.editor-box,.memo-editor-body{position:relative}.editor-box:after,.memo-editor-body:after{content:'';position:absolute;inset:-1px;z-index:3;pointer-events:none;border:1px solid var(--line);border-radius:inherit}.editor-box>.rich-toolbar,.memo-editor-body>.rich-toolbar{border-top-left-radius:inherit;border-top-right-radius:inherit}.editor-box>.rich-editor,.memo-editor-body>.rich-editor{border-bottom-left-radius:inherit;border-bottom-right-radius:inherit}.rich-toolbar [data-command=unfold][hidden]{display:none!important}.rich-soft-break{white-space:pre-wrap}
 .backup-panel{margin-bottom:20px}.backup-panel details{border-top:1px solid var(--border,#e2e8f0);padding:12px 0}.backup-panel summary{cursor:pointer;font-weight:600}.backup-panel .data-item{gap:12px;flex-wrap:wrap}.backup-panel small{display:block;overflow-wrap:anywhere}.backup-panel .feature-head{gap:12px;flex-wrap:wrap}.backup-panel .page-actions{flex-wrap:wrap}.backup-warning{color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px}
 </style>
 </head>
@@ -3049,10 +2991,10 @@ function checklistLocalTime(value){let date=new Date(value);return value&&Number
 function checklistFullTime(value){let date=new Date(value);return value&&Number.isFinite(date.getTime())?fmt(date)+" "+String(date.getHours()).padStart(2,"0")+":"+String(date.getMinutes()).padStart(2,"0"):"时间未记录"}
 function checklistMarkup(){
  return taskDraft.checklist.map((item,index)=>{
-  let editing=item.done&&checklistTimeEditingId===item.id,time=item.done?'<button class="checklist-time" type="button" data-edit-check-time="'+esc(item.id)+'" aria-label="查看或修改检查项完成时间：'+esc(item.text)+'" aria-expanded="'+editing+'" title="'+esc(checklistFullTime(item.completedAt))+'">'+esc(checklistTimeLabel(item))+'</button>':'';
+  let editing=item.done&&checklistTimeEditingId===item.id,time=item.done?'<button class="checklist-time" type="button" data-edit-check-time="'+esc(item.id)+'" aria-label="查看或修改执行步骤完成时间：'+esc(item.text)+'" aria-expanded="'+editing+'" title="'+esc(checklistFullTime(item.completedAt))+'">'+esc(checklistTimeLabel(item))+'</button>':'';
   let edit=editing?'<div class="checklist-time-editor"><p>完成时间 · '+esc(checklistFullTime(item.completedAt))+'</p><label for="checklistCompletedAt">修改完成时间</label><input id="checklistCompletedAt" type="datetime-local" step="60" value="'+esc(checklistLocalTime(item.completedAt))+'"><div><button class="btn" type="button" data-cancel-check-time>取消</button><button class="btn" type="button" data-save-check-time="'+esc(item.id)+'">保存时间</button></div></div>':'';
-  return '<div class="attachment-item checklist-item '+(item.done?'is-done':'')+'" data-check-drop="'+index+'"><button class="drag-handle" type="button" draggable="true" data-check-drag="'+index+'" aria-label="拖动调整检查项顺序">⠿</button><input type="checkbox" data-check-done="'+index+'" aria-label="完成检查项：'+esc(item.text)+'" '+(item.done?'checked':'')+'><input class="checklist-text" type="text" data-check-text="'+index+'" data-check-id="'+esc(item.id)+'" aria-label="检查项内容" value="'+esc(item.text)+'" placeholder="检查项">'+time+'<button class="icon-btn" type="button" data-remove-check="'+index+'" aria-label="删除检查项">×</button>'+edit+'</div>';
- }).join("")||'<div class="muted" style="font-size:11px">暂无检查项</div>';
+  return '<div class="attachment-item checklist-item '+(item.done?'is-done':'')+'" data-check-drop="'+index+'"><button class="drag-handle" type="button" draggable="true" data-check-drag="'+index+'" aria-label="拖动调整执行步骤顺序">⠿</button><input type="checkbox" data-check-done="'+index+'" aria-label="完成执行步骤：'+esc(item.text)+'" '+(item.done?'checked':'')+'><textarea class="checklist-text" rows="1" data-check-text="'+index+'" data-check-id="'+esc(item.id)+'" aria-label="执行步骤内容" placeholder="执行步骤">'+esc(item.text)+'</textarea>'+time+'<button class="icon-btn" type="button" data-remove-check="'+index+'" aria-label="删除执行步骤">×</button>'+edit+'</div>';
+ }).join("")||'<div class="muted" style="font-size:11px">暂无执行步骤</div>';
 }
 function saveChecklistTime(id){
  let item=taskDraft?.checklist.find(item=>item.id===id),input=$("#checklistCompletedAt");if(!item?.done||!input)return;
@@ -3117,7 +3059,7 @@ function syncOpenTaskDraftFromState(){
 }
 function refreshChecklist(options={}){
  collectChecklistText();cancelAnimationFrame(checklistFocusFrame);
- let section=$(".checklist-section"),list=$("#draftChecklist"),toggle=$("[data-toggle-checklist]");if(!section||!list)return;section.classList.toggle("collapsed",taskChecklistCollapsed);section.style.height=taskChecklistHeight&&!taskChecklistCollapsed?Math.round(taskChecklistHeight)+"px":"";toggle.innerHTML=taskChecklistSummary();toggle.setAttribute("aria-expanded",String(!taskChecklistCollapsed));$("#draftChecklistContent").hidden=taskChecklistCollapsed;list.innerHTML=checklistMarkup();if(options.focusLast)checklistFocusFrame=requestAnimationFrame(()=>{let input=$("#draftChecklist .attachment-item:last-child [data-check-text]");input?.focus();input?.scrollIntoView({block:"nearest"})});
+ let section=$(".checklist-section"),list=$("#draftChecklist"),toggle=$("[data-toggle-checklist]");if(!section||!list)return;section.classList.toggle("collapsed",taskChecklistCollapsed);section.style.height=taskChecklistHeight&&!taskChecklistCollapsed?Math.round(taskChecklistHeight)+"px":"";toggle.innerHTML=taskChecklistSummary();toggle.setAttribute("aria-expanded",String(!taskChecklistCollapsed));$("#draftChecklistContent").hidden=taskChecklistCollapsed;list.innerHTML=checklistMarkup();requestAnimationFrame(resizeTaskChecklist);if(options.focusLast)checklistFocusFrame=requestAnimationFrame(()=>{let input=$("#draftChecklist .attachment-item:last-child [data-check-text]");input?.focus();input?.scrollIntoView({block:"nearest"})});
 }
 function collectTaskDraft(){
  collectChecklistText();
@@ -3199,6 +3141,14 @@ function obsidianName(value){let url=validObsidianUri(value);return url?(url.sea
 function obsidianSummary(value){let valid=validObsidianUri(value);return (valid?'<button class="link-btn" type="button" data-open-obsidian title="'+esc(value)+'">'+esc(obsidianName(value))+' ↗</button>':'')+'<button class="link-btn" type="button" data-edit-obsidian>'+(valid?'更换':'关联 OB 笔记')+'</button>'+(value?'<button class="link-btn" type="button" data-clear-obsidian>移除</button>':'')}
 function obsidianLinkMarkup(task){return '<div class="obsidian-heading"><label>备注与关键结论</label><div class="obsidian-summary" id="obsidianSummary">'+obsidianSummary(task.obsidianUri)+'</div></div><div class="obsidian-editor" id="obsidianEditor" hidden><input id="taskObsidianUri" aria-label="Obsidian 笔记链接" value="'+esc(task.obsidianUri)+'" placeholder="obsidian://open?vault=…&amp;file=…"><small>在 Obsidian 笔记菜单中复制 Obsidian 链接。多台电脑使用相同库名和相对路径；改名或移动笔记后请更换链接。仅打开笔记，不同步正文。</small><button class="btn" type="button" data-save-obsidian>保存关联</button></div>'}
 function refreshObsidianLink(){let summary=$('#obsidianSummary');if(summary)summary.innerHTML=obsidianSummary($('#taskObsidianUri')?.value||'')}
+
+// The checklist uses natural row height and shares the task body scroll.
+function resizeTaskChecklist(){document.querySelectorAll('#draftChecklist textarea').forEach(el=>{if(!el.getClientRects().length)return;el.style.height='auto';el.style.height=Math.max(28,el.scrollHeight)+'px'})}
+document.addEventListener('input',event=>{if(event.target.matches('#draftChecklist textarea'))resizeTaskChecklist()});
+document.addEventListener('keydown',event=>{
+ if(!event.target.matches('#draftChecklist textarea')||event.key!=='Enter'||event.shiftKey||event.ctrlKey||event.metaKey||event.altKey||event.isComposing||event.keyCode===229)return;
+ event.preventDefault();event.stopImmediatePropagation();collectChecklistText();const index=taskDraft.checklist.findIndex(item=>item.id===event.target.dataset.checkId);taskDraft.checklist.splice(index<0?taskDraft.checklist.length:index+1,0,normalizeChecklistItem({text:''}));refreshChecklist();requestAnimationFrame(()=>document.querySelectorAll('#draftChecklist textarea')[index+1]?.focus());scheduleTaskAutosave();
+},true);
 function decisionProjectOptions(selected){return'<option value="">暂不关联项目</option>'+state.projects.filter(project=>!project.archived||project.id===selected).map(project=>'<option value="'+esc(project.id)+'" '+(selected===project.id?"selected":"")+'>'+esc(project.name)+(project.archived?'（已归档）':'')+'</option>').join("")}
 function decisionSourceOptions(selected){return'<option value="">不关联来源任务</option>'+state.tasks.filter(task=>!task.archived).map(task=>'<option value="'+esc(task.id)+'" '+(selected===task.id?"selected":"")+'>'+esc(task.title)+'</option>').join("")}
 function openDecision(id,prefill={}){
@@ -4420,53 +4370,59 @@ document.addEventListener("click",event=>{
 new MutationObserver(()=>{if(richImageRefreshQueued)return;richImageRefreshQueued=true;queueMicrotask(()=>{richImageRefreshQueued=false;refreshRichImages()})}).observe(document.body,{subtree:true,childList:true});
 window.addEventListener("beforeunload",event=>{if([...richImageJobs.values()].some(job=>["queued","uploading"].includes(job.status))){event.preventDefault();event.returnValue=""}});
 window.addEventListener("focus",()=>{document.querySelectorAll("img.rich-image").forEach(image=>{if(image.dataset.imageState==="failed")delete image.__richImageSignature});refreshRichImages()});
-// A single double-column task editor. Layout preferences from the trial are ignored.
-let taskLayoutContext=null,taskLayoutMutation=null;
-function taskChecklistSummary(){let count=taskDraft.checklist.filter(item=>item.done).length;return'<span>检查清单</span><span class="checklist-progress">'+count+' / '+taskDraft.checklist.length+'</span><span class="checklist-chevron" aria-hidden="true">'+(taskChecklistCollapsed?'⌄':'⌃')+'</span>'}
+// Task workspace: v5's 1180px dialog / 310px side column, with shared scrolling.
+const TASK_WORKSPACE_LAYOUT_KEY="work-cockpit-task-workspace-v5";
+let taskLayoutContext=null,taskLayoutMutation=null,taskLayoutResizeObserver=null;
+function taskWorkspaceDefaults(){return{width:1180,sideWidth:310,collapsed:false}}
+function readTaskWorkspaceLayout(){try{let raw=JSON.parse(localStorage.getItem(TASK_WORKSPACE_LAYOUT_KEY)||"null"),base=taskWorkspaceDefaults();return{width:Number.isFinite(raw?.width)?Math.max(720,Math.min(3200,raw.width)):base.width,sideWidth:Number.isFinite(raw?.sideWidth)?Math.max(240,Math.min(1600,raw.sideWidth)):base.sideWidth,collapsed:!!raw?.collapsed}}catch{return taskWorkspaceDefaults()}}
+let taskWorkspaceLayout=readTaskWorkspaceLayout();
+function saveTaskWorkspaceLayout(){try{localStorage.setItem(TASK_WORKSPACE_LAYOUT_KEY,JSON.stringify(taskWorkspaceLayout))}catch{}}
+function taskWorkspaceMetrics(viewportWidth,width=1180,sideWidth=310){let compact=viewportWidth<=880,available=Math.max(1,viewportWidth-(compact?0:32)),dialogWidth=Math.min(available,Math.max(720,width));return{width:dialogWidth,sideWidth:Math.max(240,Math.min(Math.max(240,dialogWidth-430),sideWidth)),compact,stacked:dialogWidth<=900}}
+function taskChecklistSummary(){let count=taskDraft.checklist.filter(item=>item.done).length;return'<span>执行清单</span><span class="checklist-progress">'+count+' / '+taskDraft.checklist.length+'</span><span class="checklist-chevron" aria-hidden="true">'+(taskChecklistCollapsed?'▶':'▼')+'</span>'}
 function taskLayoutField(id){return $("#"+id)?.closest(".field")}
+function syncTaskWorkspaceGeometry(){
+ let c=taskLayoutContext;if(!c||!c.modal.isConnected)return;let metrics=taskWorkspaceMetrics(innerWidth,taskWorkspaceLayout.width,taskWorkspaceLayout.sideWidth);c.modal.style.setProperty('--task-dialog-width',metrics.width+'px');
+ let actual=c.root.clientWidth||metrics.width;c.sideBody.hidden=taskWorkspaceLayout.collapsed&&actual>900;let side=Math.max(240,Math.min(Math.max(240,actual-430),taskWorkspaceLayout.sideWidth));c.root.style.setProperty('--task-side-width',side+'px');
+ c.splitter.setAttribute('aria-valuemin','240');c.splitter.setAttribute('aria-valuemax',String(Math.max(240,actual-430)));c.splitter.setAttribute('aria-valuenow',String(Math.round(side)));c.splitter.setAttribute('aria-disabled',String(actual<=900||taskWorkspaceLayout.collapsed));
+ for(let handle of c.modal.querySelectorAll('[data-task-dialog-width]')){handle.setAttribute('aria-valuemin',String(Math.min(720,innerWidth-32)));handle.setAttribute('aria-valuemax',String(Math.max(1,innerWidth-32)));handle.setAttribute('aria-valuenow',String(Math.round(c.modal.getBoundingClientRect().width||metrics.width)));handle.setAttribute('aria-disabled',String(metrics.compact||c.modal.classList.contains('task-journal-docked')))}
+ cancelAnimationFrame(c.checklistFrame);c.checklistFrame=requestAnimationFrame(resizeTaskChecklist);
+}
+function setTaskSideCollapsed(value,persist=true){
+ let c=taskLayoutContext;if(!c)return;taskWorkspaceLayout.collapsed=!!value;c.modal.dataset.taskSideCollapsed=String(!!value);c.sideBody.hidden=!!value;c.toggle.setAttribute('aria-expanded',String(!value));c.toggle.setAttribute('aria-label',value?'展开左侧事项信息':'收起左侧事项信息');c.toggle.textContent=value?'›':'‹';if(value&&c.sideBody.contains(document.activeElement))c.toggle.focus({preventScroll:true});syncTaskWorkspaceGeometry();if(persist)saveTaskWorkspaceLayout();if(!value)requestAnimationFrame(resizeTaskChecklist);
+}
+function initTaskDialogWidthHandles(modal){
+ if(modal.querySelector('[data-task-dialog-width]'))return;
+ for(let side of ['left','right']){let handle=document.createElement('button');handle.type='button';handle.className='task-dialog-width-handle';handle.dataset.taskDialogWidth=side;handle.setAttribute('role','separator');handle.setAttribute('aria-orientation','vertical');handle.setAttribute('aria-label',side==='left'?'从左侧调整弹窗宽度':'从右侧调整弹窗宽度');handle.title='拖动调整弹窗宽度；左右方向键微调；双击恢复';modal.append(handle);
+  bindUiSplitter(handle,{read:()=>modal.getBoundingClientRect().width,min:()=>Math.min(720,innerWidth-32),max:()=>Math.max(1,innerWidth-32),step:side==='left'?-24:24,reset:1180,position:event=>Math.abs(event.clientX-innerWidth/2)*2,write:value=>{taskWorkspaceLayout.width=value;syncTaskWorkspaceGeometry()},commit:saveTaskWorkspaceLayout});
+ }
+}
 function initTaskLayouts(){
- let root=$("#taskEditor"),modal=$("#taskDialog"),main=$(".task-content-column",root),props=$(".task-column:first-child",root),support=$(".attachment-column",root);if(!main||!props||!support)return;
- taskLayoutMutation?.disconnect();let previous=taskLayoutContext,same=previous?.id===taskDraft.id;modal.dataset.taskLayout="d";$("#saveTaskButton").textContent="关闭";
- let inner=document.createElement("div");inner.className="task-editor-inner";while(main.firstChild)inner.append(main.firstChild);main.append(inner);
- taskLayoutField("taskTitle").classList.add("task-name-field");taskLayoutField("taskNext").classList.add("task-next-field");
- let topRow=document.createElement("div"),chips=document.createElement("div"),time=document.createElement("div"),flags=document.createElement("div");topRow.className="task-v43-title-row";chips.className="task-v43-chips";time.className="task-v43-time";flags.className="task-v43-flags";inner.prepend(topRow,chips,time);topRow.append(taskLayoutField("taskTitle"));
- for(let id of["draftStatus","draftPriority","draftProject","draftType","draftMilestone"]){let field=taskLayoutField(id);field.querySelector("label").htmlFor=id;field.querySelector(".hover-select-trigger")?.setAttribute("aria-label",field.querySelector("label").textContent);chips.append(field)}
- let projectLink=$(".task-project-link",props);if(projectLink)chips.append(projectLink);
- for(let id of["draftPlanDate","draftDue","draftCompleted","draftFollowup"])time.append(taskLayoutField(id));time.append(flags);
- for(let id of["draftFocus","draftWeek"])flags.append($("#"+id).closest("label"));time.append($(".task-record-section",props));props.remove();$("#checklistResizer",inner)?.remove();
- let focus=document.createElement("button");focus.type="button";focus.className="task-focus-toggle";focus.dataset.taskFocus="";focus.textContent="⛶ 专注编辑";$(".task-notes-field .obsidian-heading",inner).append(focus);
- let labels={attachments:"附件",related:"关联",decisions:"决策",history:"周记录"},quick=document.createElement("nav");quick.className="task-support-shortcuts";quick.setAttribute("aria-label","事项辅助内容");quick.innerHTML=Object.entries(labels).map(([key,label])=>'<button type="button" data-task-support="'+key+'" data-task-quick aria-controls="taskSupport-'+key+'" aria-expanded="false">'+label+' <span data-task-support-count="'+key+'">0</span></button>').join("")+'<button type="button" data-task-support-toggle aria-controls="taskSupportPanel" aria-expanded="false" data-tip="辅助栏：非输入状态按 Tab 开关">辅助栏</button>';topRow.append(quick);
- support.id="taskSupportPanel";support.setAttribute("aria-label","事项辅助栏");let content=$(".task-support-content",support),sections=Array.from(content.children);Object.keys(labels).forEach((key,index)=>{sections[index].id="taskSupport-"+key;sections[index].dataset.taskSupportSection=key;sections[index].setAttribute("role","region");sections[index].setAttribute("aria-label",labels[key])});
- let supportScroll=document.createElement("div");supportScroll.className="task-support-scroll";supportScroll.innerHTML='<div class="task-support-heading"><strong>辅助内容</strong><button type="button" data-task-support-close aria-label="收起事项辅助栏">×</button></div>';supportScroll.append($(".checklist-section",inner),content);support.replaceChildren(supportScroll);
- taskLayoutContext={id:taskDraft.id,root,modal,main,inner,support,supportScroll,content,panel:same?previous.panel:Array.from(taskUploads.values()).some(job=>job.taskId===taskDraft.id&&job.userId===Cloud.user?.id)?"attachments":"related",open:same?previous.open:true,scrolls:same?previous.scrolls:{}};
- showTaskSupport(taskLayoutContext.panel,taskLayoutContext.open);refreshTaskLayoutMeta();taskLayoutMutation=new MutationObserver(refreshTaskLayoutMeta);for(let node of root.querySelectorAll(".attachment-list,#relatedList,#taskDecisionList,#taskUploadQueue"))taskLayoutMutation.observe(node,{childList:true,subtree:true});
+ let root=$('#taskEditor'),modal=$('#taskDialog'),form=$('#taskForm'),main=$('.task-content-column',root),props=$('.task-column:first-child',root),support=$('.attachment-column',root);if(!main||!props||!support)return;
+ taskLayoutMutation?.disconnect();taskLayoutResizeObserver?.disconnect();$('#taskLayoutHeader',form)?.remove();let previous=taskLayoutContext,same=previous?.id===taskDraft.id,openGroups=same?[...previous.support.querySelectorAll('details[open]')].map(node=>node.dataset.taskGroup):[];
+ modal.dataset.taskLayout='d';modal.dataset.taskWorkspace='v5';$('#saveTaskButton').textContent='关闭';
+ const title=taskLayoutField('taskTitle'),next=taskLayoutField('taskNext'),notes=$('.task-notes-field',main),checklist=$('.checklist-section',main),content=$('.task-support-content',support),sections=[...content.children];title.classList.add('task-name-field');next.classList.add('task-next-field');title.querySelector('label').htmlFor='taskTitle';next.querySelector('label').htmlFor='taskNext';$('#taskNext').setAttribute('rows','2');
+ let header=document.createElement('div');header.id='taskLayoutHeader';header.className='task-workspace-header';header.append(title,next);root.before(header);
+ let side=document.createElement('aside');side.className='task-column task-workspace-side';side.setAttribute('aria-label','事项信息');side.innerHTML='<div class="task-side-heading"><strong>事项信息</strong><span class="task-side-rail">事项信息</span><button type="button" data-task-side-toggle aria-controls="taskSideBody" aria-expanded="true" aria-label="收起左侧事项信息">‹</button></div>';
+ let sideBody=document.createElement('div');sideBody.id='taskSideBody';sideBody.className='task-side-body';side.append(sideBody);let grid=document.createElement('div');grid.className='task-workspace-fields';
+ for(let id of ['draftStatus','draftPriority','draftType','draftPlanDate','draftDue','draftCompleted','draftFollowup']){let field=taskLayoutField(id);field.querySelector('label').htmlFor=id;field.querySelector('.hover-select-trigger')?.setAttribute('aria-label',field.querySelector('label').textContent);if(id==='draftType')field.classList.add('task-field-full');grid.append(field)}sideBody.append(grid);
+ let flags=document.createElement('div');flags.className='task-workspace-flags';for(let id of ['draftFocus','draftWeek']){let label=$('#'+id).closest('label');label.removeAttribute('style');flags.append(label)}sideBody.append(flags);let record=$('.task-record-section',props);sideBody.append(record);
+ checklist.style.removeProperty('height');$('.checklist-add-bottom',checklist).textContent='＋ 添加步骤';
+ let records=document.createElement('div');records.id='taskSupportPanel';records.className='task-support-scroll task-left-records';let makeGroup=(key,label,nodes,count)=>{let group=document.createElement('details');group.className='task-left-group';group.dataset.taskGroup=key;group.innerHTML='<summary>'+label+(count?'<span data-task-support-count="'+key+'">0</span>':'<span class="task-project-summary">'+esc(projectById(taskDraft.project)?.name||'通用事项')+'</span>')+'</summary>';let body=document.createElement('div');body.className='task-left-group-body';if(count){body.id='taskSupport-'+key;body.dataset.taskSupportSection=key;body.setAttribute('role','region');body.setAttribute('aria-label',label)}nodes.forEach(node=>body.append(node));group.append(body);group.open=openGroups.includes(key);records.append(group);return group};
+ for(let id of ['draftProject','draftMilestone'])taskLayoutField(id).querySelector('label').htmlFor=id;let projectLink=$('.task-project-link',props);makeGroup('project','项目与里程碑',[taskLayoutField('draftProject'),taskLayoutField('draftMilestone'),projectLink].filter(Boolean),false);
+ for(let [index,key,label] of [[0,'attachments','附件与预览'],[1,'related','相关事项'],[2,'decisions','关键决策'],[3,'history','周记录']])makeGroup(key,label,[sections[index]],true);sideBody.append(records);
+ let focus=document.createElement('button');focus.type='button';focus.className='task-focus-toggle';focus.dataset.taskFocus='';focus.textContent='⛶ 专注编辑';$('.obsidian-heading',notes).append(focus);
+ let inner=document.createElement('div');inner.className='task-editor-inner';inner.append(checklist,notes);main.replaceChildren(inner);main.classList.add('task-notes-column');
+ let splitter=document.createElement('button');splitter.type='button';splitter.id='taskColumnSplitter';splitter.className='task-column-splitter';splitter.setAttribute('role','separator');splitter.setAttribute('aria-orientation','vertical');splitter.setAttribute('aria-label','调整事项信息与备注宽度');splitter.title='拖动调整两栏宽度；左右方向键微调；双击恢复';
+ root.replaceChildren(side,splitter,main);taskLayoutContext={id:taskDraft.id,root,modal,main,inner,support:records,supportScroll:records,content:records,side,sideBody,toggle:$('[data-task-side-toggle]',side),splitter,panel:'related',open:true};
+ bindUiSplitter(splitter,{read:()=>parseFloat(root.style.getPropertyValue('--task-side-width'))||310,min:240,max:()=>Math.max(240,root.clientWidth-430),step:16,reset:310,position:event=>event.clientX-root.getBoundingClientRect().left,write:value=>{taskWorkspaceLayout.sideWidth=value;syncTaskWorkspaceGeometry()},commit:saveTaskWorkspaceLayout});
+ initTaskDialogWidthHandles(modal);setTaskSideCollapsed(taskWorkspaceLayout.collapsed,false);refreshTaskLayoutMeta();taskLayoutMutation=new MutationObserver(refreshTaskLayoutMeta);for(let node of root.querySelectorAll('.attachment-list,#relatedList,#taskDecisionList,#taskUploadQueue'))taskLayoutMutation.observe(node,{childList:true,subtree:true});taskLayoutResizeObserver=new ResizeObserver(syncTaskWorkspaceGeometry);taskLayoutResizeObserver.observe(form);requestAnimationFrame(()=>{syncTaskWorkspaceGeometry();resizeTaskChecklist()});
+ if([...taskUploads.values()].some(job=>job.taskId===taskDraft.id&&job.userId===Cloud.user?.id))showTaskSupport('attachments',true);
 }
-function refreshTaskLayoutMeta(){
- let c=taskLayoutContext;if(!c||!taskDraft||c.id!==taskDraft.id)return;let counts={attachments:taskDraft.attachments.length,related:relatedDraft.size,decisions:state.decisions.filter(item=>!item.archived&&item.sourceTaskId===taskDraft.id).length,history:taskHistoryEntries(taskDraft.id).length};c.root.querySelectorAll("[data-task-support-count]").forEach(node=>{let value=String(counts[node.dataset.taskSupportCount]);if(node.textContent!==value)node.textContent=value});
-}
-function showTaskSupport(panel,open=true,focus=false){
- let c=taskLayoutContext;if(!c||!["attachments","related","decisions","history"].includes(panel))return;
- if(c.open)c.scrolls[c.panel]=c.supportScroll.scrollTop;let focusedInside=c.support.contains(document.activeElement);c.panel=panel;c.open=open;c.modal.dataset.taskSupportOpen=String(open);c.support.hidden=!open;
- c.root.querySelectorAll("[data-task-support-section]").forEach(node=>node.hidden=node.dataset.taskSupportSection!==panel);
- c.root.querySelectorAll("[data-task-support]").forEach(button=>{let active=open&&button.dataset.taskSupport===panel;button.classList.toggle("active",active);button.setAttribute("aria-expanded",String(active))});
- c.root.querySelector("[data-task-support-toggle]").setAttribute("aria-expanded",String(open));c.supportScroll.scrollTop=c.scrolls[panel]||0;
- if(focus||(!open&&focusedInside))c.root.querySelector('[data-task-quick][data-task-support="'+panel+'"]').focus({preventScroll:true});
-}
-document.addEventListener("click",event=>{
- if(event.target.closest("[data-task-focus]")){toggleRichExpanded($("#taskNotes"));return}
- let panel=event.target.closest("[data-task-support]");if(panel){let c=taskLayoutContext;showTaskSupport(panel.dataset.taskSupport,!(c.open&&c.panel===panel.dataset.taskSupport));return}
- if(event.target.closest("[data-task-support-close]"))showTaskSupport(taskLayoutContext.panel,false,true);
- if(event.target.closest("[data-task-support-toggle]"))showTaskSupport(taskLayoutContext.panel,!taskLayoutContext.open);
-});
-document.addEventListener("keydown",event=>{
- let c=taskLayoutContext;if(!$("#taskDialog")?.open||!c||Array.from(document.querySelectorAll("dialog[open]")).at(-1)?.id!=="taskDialog")return;
- if(event.key==="Tab"&&!event.shiftKey&&!event.ctrlKey&&!event.altKey&&!event.metaKey&&!event.isComposing&&!expandedRichBox&&!activeHoverSelect&&!event.target.closest('input,textarea,select,[contenteditable="true"],[role="listbox"],[role="option"]')){event.preventDefault();event.stopImmediatePropagation();showTaskSupport(c.panel,!c.open);return}
- if(event.key==="Escape"&&c.open&&!activeHoverSelect&&!expandedRichBox){event.preventDefault();event.stopImmediatePropagation();showTaskSupport(c.panel,false,true);return}
- let tab=event.target.closest("[data-task-quick][data-task-support]");if(!tab||!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
- event.preventDefault();let tabs=Array.from(tab.parentElement.querySelectorAll("[data-task-support]")),index=tabs.indexOf(tab),next=event.key==="Home"?0:event.key==="End"?tabs.length-1:(index+(event.key==="ArrowLeft"?-1:1)+tabs.length)%tabs.length;showTaskSupport(tabs[next].dataset.taskSupport,true,true);
-},true);
-
-document.addEventListener("mousedown",event=>{if(event.target.closest("[data-task-focus]"))event.preventDefault()});
+function refreshTaskLayoutMeta(){let c=taskLayoutContext;if(!c||!taskDraft||c.id!==taskDraft.id)return;let summary=c.support.querySelector('.task-project-summary'),name=projectById($('#draftProject')?.value)?.name||'通用事项';if(summary&&summary.textContent!==name)summary.textContent=name;let counts={attachments:taskDraft.attachments.length,related:relatedDraft.size,decisions:state.decisions.filter(item=>!item.archived&&item.sourceTaskId===taskDraft.id).length,history:taskHistoryEntries(taskDraft.id).length};c.root.querySelectorAll('[data-task-support-count]').forEach(node=>{let value=String(counts[node.dataset.taskSupportCount]);if(node.textContent!==value)node.textContent=value})}
+function showTaskSupport(panel,open=true,focus=false){let c=taskLayoutContext;if(!c?.support.isConnected||!['attachments','related','decisions','history'].includes(panel))return;let group=c.support.querySelector('[data-task-group="'+panel+'"]');if(!group)return;if(open)setTaskSideCollapsed(false);group.open=open;c.panel=panel;if(focus){group.querySelector('summary').focus({preventScroll:true});group.scrollIntoView({block:'nearest'})}}
+document.addEventListener('click',event=>{if(event.target.closest('[data-task-focus]')){toggleRichExpanded($('#taskNotes'));return}if(event.target.closest('[data-task-side-toggle]'))setTaskSideCollapsed(!taskWorkspaceLayout.collapsed)});
+document.addEventListener('mousedown',event=>{if(event.target.closest('[data-task-focus]'))event.preventDefault()});
+window.addEventListener('resize',syncTaskWorkspaceGeometry);
 function saveRelationsNow(label){
  let existing=taskById(taskDraft.id);if(!existing)return;
  let next=Array.from(relatedDraft);
@@ -4654,7 +4610,7 @@ document.addEventListener("input",event=>{
  else if(target.id==="relatedSearch")$("#relationResults").innerHTML=relationResults(target.value);
  else if(target.dataset.checkText!==undefined)taskDraft.checklist[Number(target.dataset.checkText)].text=target.value;
  else if((target.id==="globalSearch"||target.id==="searchPageInput")&&!event.isComposing&&target.dataset.composing!=="1")updateGlobalSearch(target.value,target.id)
- if(target.closest?.("#taskEditor")&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
+ if((target.closest?.("#taskEditor")||target.matches?.("#taskTitle,#taskNext"))&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
 });
 document.addEventListener("compositionstart",event=>{if(event.target.matches?.("#globalSearch,#searchPageInput"))event.target.dataset.composing="1"});
 document.addEventListener("compositionend",event=>{if(event.target.matches?.("#globalSearch,#searchPageInput")){event.target.dataset.composing="0";let source=event.target;requestAnimationFrame(()=>updateGlobalSearch(source.value,source.id))}});
@@ -4670,7 +4626,7 @@ document.addEventListener("change",event=>{
  else if(target.id==="weekPicker"){selectedWeekKey=weekKeyFromInput(target.value);ui.showAllWeekDone=false;requestRender()}
  else if(target.dataset.memoProject!==undefined){let memo=memoById(selectedMemoId);if(memo)commit("修改备忘录关联项目",draft=>{let item=draft.memos.find(value=>value.id===memo.id);item.project=target.value;item.updatedAt=new Date().toISOString()},{immediate:true})}
  else if(target.id==="projectTemplate"){changeProjectTemplate(target.value)}
- else if(target.id==="draftProject"){taskDraft.project=target.value;taskDraft.milestone="";$("#draftMilestone").innerHTML=milestoneOptions(taskDraft.project,"");syncHoverSelect($("#draftMilestone"));let jump=$("[data-go-task-project]");if(jump)jump.disabled=!taskDraft.project}
+ else if(target.id==="draftProject"){taskDraft.project=target.value;taskDraft.milestone="";$("#draftMilestone").innerHTML=milestoneOptions(taskDraft.project,"");syncHoverSelect($("#draftMilestone"));let jump=$("[data-go-task-project]");if(jump)jump.disabled=!taskDraft.project;refreshTaskLayoutMeta()}
  else if(target.id==="draftStatus"){taskDraft.status=target.value;syncTaskCompletedField()}
  else if(target.id==="draftFocus"){
   if(target.checked){if(taskDraft.archived||["已完成"].includes($("#draftStatus").value)){target.checked=false;return toast("请先恢复事项，再加入今日")}$("#draftWeek").checked=true;$("#draftStatus").value="进行中";syncHoverSelect($("#draftStatus"));syncTaskCompletedField()}
@@ -4683,7 +4639,7 @@ document.addEventListener("change",event=>{
  else if(target.dataset.checkDone!==undefined){setChecklistDone(taskDraft.checklist[Number(target.dataset.checkDone)],target.checked);checklistTimeEditingId="";refreshChecklist();$('[data-check-done="'+target.dataset.checkDone+'"]')?.focus({preventScroll:true});scheduleTaskAutosave()}
  else if(target.id==="attachmentInput"){let files=Array.from(target.files||[]);target.value="";if(files.length)void uploadTaskFiles(files)}
  else if(target.id==="importInput"){let file=target.files?.[0];target.value="";if(file)importFile(file)}
- if(target.closest?.("#taskEditor")&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
+ if((target.closest?.("#taskEditor")||target.matches?.("#taskTitle,#taskNext"))&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
 });
 document.addEventListener("keydown",event=>{
  if(handleRichDividerKeydown(event))return;

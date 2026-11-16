@@ -181,7 +181,7 @@
 :root[data-calm-today] .modal-head{padding:18px 22px;border-color:var(--line)}
 :root[data-calm-today] .modal-head h2{font-size:19px;font-weight:600}
 :root[data-calm-today] .modal-actions{background:var(--panel);border-color:var(--line)}
-:root[data-calm-today] .task-modal .task-section{border:0;border-top:1px solid var(--line);border-radius:0;padding:14px 0;background:transparent!important}
+:root[data-calm-today] .task-modal:not([data-task-workspace=v5]) .task-section{border:0;border-top:1px solid var(--line);border-radius:0;padding:14px 0;background:transparent!important}
 :root[data-calm-today] .task-modal .task-section-title{font-size:12px;font-weight:600;color:var(--ink)}
 :root[data-calm-today] .task-modal .title-input{font-size:22px;font-weight:600;background:transparent;border-color:var(--line);color:var(--ink)}
 :root[data-calm-today] .field label{font-size:12px;font-weight:500;color:var(--text)}
