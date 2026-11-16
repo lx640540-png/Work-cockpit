@@ -216,8 +216,9 @@ document.addEventListener("change",event=>{
  else if(target.id==="importInput"){let file=target.files?.[0];target.value="";if(file)importFile(file)}
  if((target.closest?.("#taskEditor")||target.matches?.("#taskTitle,#taskNext"))&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
 });
+// Resolve an explicitly selected divider before Quill mutates the selection.
+document.addEventListener("keydown",handleRichDividerKeydown,true);
 document.addEventListener("keydown",event=>{
- if(handleRichDividerKeydown(event))return;
  if(richKeydown(event))return;
  if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==="k"){event.preventDefault();$("#globalSearch").focus();return}
  let textEditing=!!event.target.closest?.("input,textarea,select,[contenteditable=true],.hover-select");

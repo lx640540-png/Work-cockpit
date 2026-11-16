@@ -1,6 +1,6 @@
 // Shared document divider behavior and portable export.
 function richDividerContext(node){let editor=node?.closest(".rich-editor"),quill=quillFor(editor),blot=quill&&typeof Quill==="function"?Quill.find(node):null;if(!editor||!quill||!blot)return null;return{editor,quill,blot,index:quill.getIndex(blot)}}
-function selectRichDivider(node){let context=richDividerContext(node);if(!context)return;$$(".rich-divider.selected").forEach(item=>item.classList.remove("selected"));node.classList.add("selected");context.quill.setSelection(context.index,1,"silent");activeRichEditor=context.editor;updateRichToolbar(context.editor)}
+function selectRichDivider(node){let context=richDividerContext(node);if(!context||!context.quill.isEnabled())return;$$(".rich-divider.selected").forEach(item=>item.classList.remove("selected"));node.classList.add("selected");context.quill.focus({preventScroll:true});context.quill.setSelection(context.index,1,"silent");activeRichEditor=context.editor;updateRichToolbar(context.editor)}
 function cleanRichDividerLabel(value){return String(value||"").replace(/\u00a0/g," ").replace(/\s+/g," ").trim().slice(0,120)}
 function dividerLabelRange(label){let selection=getSelection();if(!selection.rangeCount)return null;let range=selection.getRangeAt(0);return label.contains(range.startContainer)&&label.contains(range.endContainer)?range:null}
 function pasteIntoRichDividerLabel(label,text){let range=dividerLabelRange(label);if(!range){range=document.createRange();range.selectNodeContents(label);range.collapse(false)}let selected=range.toString().length,current=label.textContent||"",room=Math.max(0,120-(current.length-selected)),value=String(text||"").replace(/\r?\n+/g," ").replace(/\s+/g," ").slice(0,room);range.deleteContents();let node=document.createTextNode(value);range.insertNode(node);range.setStartAfter(node);range.collapse(true);let selection=getSelection();selection.removeAllRanges();selection.addRange(range)}
@@ -15,8 +15,11 @@ function clearRichDividerSelection(owner){document.querySelectorAll(".rich-divid
 function handleRichDividerKeydown(event){
  if(event.isComposing||event.keyCode===229||!["Delete","Backspace"].includes(event.key)||event.target.closest?.("input,textarea,select,.rich-divider-label[contenteditable=true]"))return false;
  let editor=event.target.closest?.(".rich-editor"),divider=editor?.querySelector(".rich-divider.selected"),context=divider&&richDividerContext(divider);if(!context||!context.quill.isEnabled())return false;
- let range=context.quill.getSelection();if(!range||range.index!==context.index||range.length!==1)return false;
- event.preventDefault();context.quill.deleteText(context.index,1,"user");context.quill.setSelection(Math.max(0,context.index-1),0,"silent");return true;
+ let range=context.quill.getSelection();if(!range||range.index!==context.index)return false;
+ // Quill clamps native selections to getLength()-1. A terminal BlockEmbed
+ // therefore reports length 0 even after an explicit click selected this node.
+ let terminal=range.length===0&&context.index===context.quill.getLength()-1&&divider===context.quill.root.lastElementChild;if(range.length!==1&&!terminal)return false;
+ event.preventDefault();event.stopImmediatePropagation();context.quill.history.cutoff();context.quill.deleteText(context.index,1,"user");context.quill.setSelection(Math.min(context.index,Math.max(0,context.quill.getLength()-1)),0,"silent");context.quill.history.cutoff();return true;
 }
 function exportRichDividers(box){
  box.querySelectorAll(".rich-divider").forEach(node=>{let block=document.createElement("div"),label=cleanRichDividerLabel(node.dataset.label||node.textContent||"");if(label){let title=document.createElement("p");title.textContent=label;title.style.textAlign="center";block.appendChild(title)}let line=document.createElement("hr");line.setAttribute("style","border:0;border-top:1px solid #dfe3ea;margin:12px 0;");block.appendChild(line);node.replaceWith(block)});
