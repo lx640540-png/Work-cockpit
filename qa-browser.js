@@ -847,6 +847,7 @@ async function testUrl() {
   await page.fill('#projectTaskSearch', '');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects [data-project-task]').length > 1);
   await page.click('#page-projects.active [data-open-task="t1"]');
+  await page.locator('[data-task-group=project] summary').click();
   await page.waitForSelector('#taskDialog[open] [data-go-task-project]:not([disabled])');
   await page.click('[data-go-task-project]');
   await page.waitForSelector('#page-projects.active [data-project-task="t1"].project-task-target');

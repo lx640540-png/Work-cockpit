@@ -63,6 +63,7 @@
 #taskDialog[data-task-workspace=v5] .task-notes-editor:not(.rich-expanded){display:flex;flex-direction:column;flex:1;min-height:280px;border:1px solid var(--line);border-radius:10px;overflow:visible}
 #taskDialog[data-task-workspace=v5] .task-notes-editor>.rich-toolbar{min-height:40px;gap:2px;flex-shrink:0;flex-wrap:wrap;padding:5px 8px;border-bottom:1px solid var(--line);background:var(--panel);border-radius:10px 10px 0 0}
 #taskDialog[data-task-workspace=v5] .task-notes-editor>.rich-toolbar button:not(.rich-highlight-button){height:27px;min-width:27px;padding-inline:6px;font-size:12px;font-weight:400}
+#taskDialog[data-task-workspace=v5] .task-notes-editor>.rich-toolbar .rich-highlight-button{height:29px}
 #taskDialog[data-task-workspace=v5] .task-notes-editor:not(.rich-expanded)>.rich-toolbar>.rich-expand-button{display:none}
 #taskDialog[data-task-workspace=v5] .task-notes-editor:not(.rich-expanded)>.rich-editor{display:flex;flex-direction:column;flex:1;height:auto!important;min-height:0!important;max-height:none;overflow:visible!important}
 #taskDialog[data-task-workspace=v5] .task-notes-editor:not(.rich-expanded)>.rich-editor>.ql-editor{flex:1;height:auto!important;min-height:280px!important;max-height:none;overflow:visible!important;overflow-wrap:anywhere;padding:14px 18px 24px;font-size:13.5px;line-height:1.8}
