@@ -5,11 +5,15 @@ test('deletion never steals Backspace from an external input or textarea',()=>{
  for(const tag of ['input','textarea','select']){let event={key:'Backspace',target:{closest:selector=>selector.startsWith('input,')?{tagName:tag}:null},preventDefault:()=>deleted++};assert.equal(c.handleRichDividerKeydown(event),false)}assert.equal(deleted,0);
 });
 test('deletion requires the owning editor and an exact selected divider range',()=>{
- let deleted=0,prevented=0,range={index:4,length:1},node={},editor={querySelector:()=>node};const c=context();
- c.richDividerContext=()=>({index:4,quill:{isEnabled:()=>true,getSelection:()=>range,deleteText:(index,count,source)=>{assert.equal(index,4);assert.equal(count,1);assert.equal(source,'user');deleted++},setSelection:()=>{}}});
- let event={key:'Delete',target:{closest:s=>s==='.rich-editor'?editor:null},preventDefault:()=>prevented++};assert.equal(c.handleRichDividerKeydown(event),true);assert.equal(deleted,1);range={index:2,length:3};assert.equal(c.handleRichDividerKeydown(event),false);assert.equal(prevented,1);
+ let deleted=0,prevented=0,stopped=0,cutoffs=0,range={index:4,length:1},node={},editor={querySelector:()=>node};const c=context();
+ c.richDividerContext=()=>({index:4,quill:{isEnabled:()=>true,getSelection:()=>range,deleteText:(index,count,source)=>{assert.equal(index,4);assert.equal(count,1);assert.equal(source,'user');deleted++},setSelection:()=>{},getLength:()=>20,history:{cutoff(){cutoffs++}}}});
+ let event={key:'Delete',target:{closest:s=>s==='.rich-editor'?editor:null},preventDefault:()=>prevented++,stopImmediatePropagation:()=>stopped++};assert.equal(c.handleRichDividerKeydown(event),true);assert.equal(deleted,1);assert.equal(stopped,1);assert.equal(cutoffs,2);range={index:2,length:3};assert.equal(c.handleRichDividerKeydown(event),false);assert.equal(prevented,1);
 });
 test('Chinese composition never enters the divider deletion command',()=>{let c=context();assert.equal(c.handleRichDividerKeydown({key:'Backspace',isComposing:true}),false);assert.equal(c.handleRichDividerKeydown({key:'Delete',keyCode:229}),false)});
 test('CSS cleanup keeps distinct values and distinct media contexts',()=>{
  const {audit}=require('./scripts/audit-css');let files=[{name:'one',text:'.a{color:red;width:10px}@media(max-width:500px){.a{color:red}}.a{color:blue}'},{name:'two',text:'.a{color:red}'}];let removed=audit(files);assert.equal(removed.length,1);assert.match(files[0].text,/width:10px/);assert.match(files[0].text,/color:blue/);assert.match(files[0].text,/@media\(max-width:500px\)\{.a\{color:red/);
+});
+
+test('explicit terminal divider selection can delete Quill clamped range without admitting other collapsed ranges',()=>{
+ let node={},range={index:4,length:0},deleted=0,quill={isEnabled:()=>true,getSelection:()=>range,getLength:()=>5,root:{lastElementChild:node},history:{cutoff(){}},deleteText:()=>deleted++,setSelection(){}};const c=context();c.richDividerContext=()=>({index:4,quill});const editor={querySelector:()=>node},event={key:'Backspace',target:{closest:s=>s==='.rich-editor'?editor:null},preventDefault(){},stopImmediatePropagation(){}};assert.equal(c.handleRichDividerKeydown(event),true);assert.equal(deleted,1);quill.root.lastElementChild={};assert.equal(c.handleRichDividerKeydown(event),false);range={index:3,length:0};assert.equal(c.handleRichDividerKeydown(event),false);quill.isEnabled=()=>false;assert.equal(c.handleRichDividerKeydown(event),false);assert.equal(deleted,1);
 });
