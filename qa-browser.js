@@ -761,11 +761,11 @@ async function testUrl() {
   await page.locator('#draftPriority').locator('xpath=..').locator('[data-hover-select-option]').filter({ hasText:'P2' }).click();
   assert(await page.locator('#draftPriority').inputValue() === 'P2', 'task-detail hover dropdown did not update the native field value');
   assert(await page.locator('[data-toggle-task-notes]').count() === 0 && await page.locator('#taskNotes .ql-editor').isVisible(), 'task notes did not stay expanded in the restored editor layout');
-  assert(await page.locator('.attachment-column .checklist-section').count() === 1, 'checklist is not in the auxiliary column');
+  assert(await page.locator('.task-notes-column .checklist-section').count() === 1, 'checklist is not above the note editor');
   const notesHost = page.locator('#taskNotes');
   assert(await page.locator('.task-notes-editor [data-rich-height-resizer]').count() === 0, 'task notes retained a fixed-height resize handle');
   await notesHost.evaluate(node=>node.__quill.setText(Array.from({length:75},(_,i)=>'长备注 '+i).join('\n'),'silent'));
-  const noteFlow=await notesHost.evaluate(node=>{let q=node.querySelector('.ql-editor'),main=node.closest('.task-content-column');return{height:q.clientHeight,overflow:getComputedStyle(q).overflowY,mainScroll:main.scrollHeight>main.clientHeight}});
+  const noteFlow=await notesHost.evaluate(node=>{let q=node.querySelector('.ql-editor'),main=node.closest('#taskEditor');return{height:q.clientHeight,overflow:getComputedStyle(q).overflowY,mainScroll:main.scrollHeight>main.clientHeight}});
   assert(noteFlow.height>1000&&noteFlow.overflow==='visible'&&noteFlow.mainScroll,'long task notes do not grow in the main scroll surface: '+JSON.stringify(noteFlow));
   let richLayout;
   await notesHost.evaluate(node => { const quill=node.__quill;quill.setContents({ops:[{insert:'第一项'},{insert:'\n',attributes:{list:'ordered'}},{insert:'第二项'},{insert:'\n',attributes:{list:'ordered'}}]},'silent');quill.setSelection(1,0,'user');quill.focus(); });

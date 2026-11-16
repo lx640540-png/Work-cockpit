@@ -160,7 +160,7 @@ test('task titles open details and drafts save automatically before backdrop or 
   assert.equal(await page.locator('#taskDialog').getAttribute('open'),'','invalid draft must remain open');
   assert.match(await page.locator('#taskAutosaveStatus').textContent(),/请先填写事项名称/);
   await page.fill('#taskTitle','恢复后的标题');
-  await page.keyboard.press('Escape');assert.equal(await page.locator('#taskDialog').getAttribute('open'),'');await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
   await page.waitForFunction(()=>!document.querySelector('#taskDialog')?.open);
   assert.equal((await stored(page)).tasks.find(task=>task.id==='auto').title,'恢复后的标题');
 
@@ -367,7 +367,7 @@ test('iteration: complete search pages past previews and retains context after o
  await page.click('[data-search-more="task"]');assert.equal(await page.locator('[data-search-task]').count(),46);
  await page.waitForFunction(()=>!renderFrame&&!searchView.restoring);await page.locator('[data-search-task="s40"]').scrollIntoViewIfNeeded();await page.clock.runFor(60);
  const top=await page.locator('#mainScroll').evaluate(n=>n.scrollTop);assert(top>100);
- await page.click('[data-search-task="s40"]');await page.locator('#taskDialog[open]').waitFor();await page.keyboard.press('Escape');await page.keyboard.press('Escape');await page.clock.runFor(100);
+ await page.click('[data-search-task="s40"]');await page.locator('#taskDialog[open]').waitFor();await page.keyboard.press('Escape');await page.clock.runFor(100);
  assert.equal(await page.locator('#searchPageInput').inputValue(),'查找目标');assert.equal(await page.locator('[data-search-task]').count(),46);
  assert(Math.abs((await page.locator('#mainScroll').evaluate(n=>n.scrollTop))-top)<5);
  await page.fill('#searchPageInput','独特正文命中');assert.equal(await page.locator('[data-search-task]').count(),10);
@@ -432,7 +432,7 @@ test('iteration: new task next action stays blank without placeholders across cr
  await page.click('#page-tasks [data-action="new-task"]');assert.equal(await page.locator('#taskNext').inputValue(),'');assert.equal(await page.locator('#taskNext').getAttribute('placeholder'),null);
  await page.fill('#taskTitle','新建空下一步');await save(page);
  let task=(await stored(page)).tasks.find(x=>x.title==='新建空下一步');assert.equal(task.nextAction,'');
- await edit(page,'source');assert.equal(await page.locator('#taskNext').inputValue(),'保留已有内容');await page.click('[data-new-related-task]');assert.equal(await page.locator('#taskNext').inputValue(),'');await page.keyboard.press('Escape');
+ await edit(page,'source');assert.equal(await page.locator('#taskNext').inputValue(),'保留已有内容');await page.locator('[data-task-group=related] summary').click();await page.click('[data-new-related-task]');assert.equal(await page.locator('#taskNext').inputValue(),'');await page.keyboard.press('Escape');
  await page.reload();task=(await stored(page)).tasks.find(x=>x.title==='新建空下一步');assert.equal(task.nextAction,'');
 });
 
