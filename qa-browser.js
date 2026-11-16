@@ -761,11 +761,11 @@ async function testUrl() {
   await page.locator('#draftPriority').locator('xpath=..').locator('[data-hover-select-option]').filter({ hasText:'P2' }).click();
   assert(await page.locator('#draftPriority').inputValue() === 'P2', 'task-detail hover dropdown did not update the native field value');
   assert(await page.locator('[data-toggle-task-notes]').count() === 0 && await page.locator('#taskNotes .ql-editor').isVisible(), 'task notes did not stay expanded in the restored editor layout');
-  assert(await page.locator('.attachment-column .checklist-section').count() === 1, 'checklist is not in the auxiliary column');
+  assert(await page.locator('.task-notes-column .checklist-section').count() === 1, 'checklist is not above the note editor');
   const notesHost = page.locator('#taskNotes');
   assert(await page.locator('.task-notes-editor [data-rich-height-resizer]').count() === 0, 'task notes retained a fixed-height resize handle');
   await notesHost.evaluate(node=>node.__quill.setText(Array.from({length:75},(_,i)=>'长备注 '+i).join('\n'),'silent'));
-  const noteFlow=await notesHost.evaluate(node=>{let q=node.querySelector('.ql-editor'),main=node.closest('.task-content-column');return{height:q.clientHeight,overflow:getComputedStyle(q).overflowY,mainScroll:main.scrollHeight>main.clientHeight}});
+  const noteFlow=await notesHost.evaluate(node=>{let q=node.querySelector('.ql-editor'),main=node.closest('#taskEditor');return{height:q.clientHeight,overflow:getComputedStyle(q).overflowY,mainScroll:main.scrollHeight>main.clientHeight}});
   assert(noteFlow.height>1000&&noteFlow.overflow==='visible'&&noteFlow.mainScroll,'long task notes do not grow in the main scroll surface: '+JSON.stringify(noteFlow));
   let richLayout;
   await notesHost.evaluate(node => { const quill=node.__quill;quill.setContents({ops:[{insert:'第一项'},{insert:'\n',attributes:{list:'ordered'}},{insert:'第二项'},{insert:'\n',attributes:{list:'ordered'}}]},'silent');quill.setSelection(1,0,'user');quill.focus(); });
@@ -786,7 +786,7 @@ async function testUrl() {
   await page.keyboard.press('Backspace');
   assert(await notesHost.locator('.rich-divider').count() === 1, 'backspace on the adjacent empty line deleted the divider');
   await notesHost.evaluate(node => { node.__quill.setContents({ops:[{insert:'需要保留的富文本备注',attributes:{bold:true}},{insert:'\n'}]},'silent'); });
-  if(!await page.locator('[data-new-related-task]').isVisible())await page.click('[data-task-support="related"]');
+  if(!await page.locator('[data-new-related-task]').isVisible())await page.click('[data-task-group="related"] summary');
   await page.click('[data-new-related-task]');
   await page.waitForFunction(() => document.querySelector('#taskDialog')?.open && taskDraft?.title === '新的关联事项');
   const relatedCreation = await page.evaluate(() => { const child=taskDraft,parent=taskById('t1'),savedChild=taskById(child.id);return { childId:child.id, parentLinks:parent.relatedTaskIds, childLinks:savedChild.relatedTaskIds, parentNotes:parent.notes, project:savedChild.project, milestone:savedChild.milestone }; });
@@ -795,7 +795,7 @@ async function testUrl() {
   await page.click('#saveTaskButton');
   await page.waitForSelector('#page-tasks.active [data-open-task="t1"]');
   await page.click('#page-tasks.active [data-open-task="t1"]');
-  await page.click('[data-task-support="decisions"]');
+  await page.click('[data-task-group="decisions"] summary');
   await page.click('[data-new-decision]');
   assert(await page.locator('#decisionDialog[open] .decision-rich-box .ql-container').count() === 2, 'key decision fields did not initialize as rich-text editors');
   assert(await page.locator('#decisionDialog[open] [data-rich-height-resizer]').count() === 2, 'key decision rich editors do not expose the shared bottom-edge resize area');
@@ -847,6 +847,7 @@ async function testUrl() {
   await page.fill('#projectTaskSearch', '');
   await page.waitForFunction(() => document.querySelectorAll('#page-projects [data-project-task]').length > 1);
   await page.click('#page-projects.active [data-open-task="t1"]');
+  await page.locator('[data-task-group=project] summary').click();
   await page.waitForSelector('#taskDialog[open] [data-go-task-project]:not([disabled])');
   await page.click('[data-go-task-project]');
   await page.waitForSelector('#page-projects.active [data-project-task="t1"].project-task-target');

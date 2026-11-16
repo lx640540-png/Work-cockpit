@@ -157,7 +157,7 @@ document.addEventListener("beforeinput",event=>{let editor=event.target.closest?
 $("#confirmAccept").addEventListener("click",()=>{let callback=confirmCallback;confirmCallback=null;closeDialog("confirmDialog");if(typeof callback==="function")callback()});
 $("#taskForm").addEventListener("submit",event=>{event.preventDefault();saveTaskDraft()});
 $("#taskForm").addEventListener("keydown",event=>{
- if(event.key!=="Enter"||event.isComposing||event.keyCode===229||event.target.closest(".rich-editor")||event.target.closest("button"))return;
+ if(event.key!=="Enter"||event.isComposing||event.keyCode===229||event.target.closest(".rich-editor")||event.target.matches("textarea")||event.target.closest("button,summary"))return;
  event.preventDefault();event.stopPropagation();saveTaskDraft();
 });
 $("#projectForm").addEventListener("submit",event=>{event.preventDefault();saveProjectDraft()});
@@ -185,7 +185,7 @@ document.addEventListener("input",event=>{
  else if(target.id==="relatedSearch")$("#relationResults").innerHTML=relationResults(target.value);
  else if(target.dataset.checkText!==undefined)taskDraft.checklist[Number(target.dataset.checkText)].text=target.value;
  else if((target.id==="globalSearch"||target.id==="searchPageInput")&&!event.isComposing&&target.dataset.composing!=="1")updateGlobalSearch(target.value,target.id)
- if(target.closest?.("#taskEditor")&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
+ if((target.closest?.("#taskEditor")||target.matches?.("#taskTitle,#taskNext"))&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
 });
 document.addEventListener("compositionstart",event=>{if(event.target.matches?.("#globalSearch,#searchPageInput"))event.target.dataset.composing="1"});
 document.addEventListener("compositionend",event=>{if(event.target.matches?.("#globalSearch,#searchPageInput")){event.target.dataset.composing="0";let source=event.target;requestAnimationFrame(()=>updateGlobalSearch(source.value,source.id))}});
@@ -201,7 +201,7 @@ document.addEventListener("change",event=>{
  else if(target.id==="weekPicker"){selectedWeekKey=weekKeyFromInput(target.value);ui.showAllWeekDone=false;requestRender()}
  else if(target.dataset.memoProject!==undefined){let memo=memoById(selectedMemoId);if(memo)commit("修改备忘录关联项目",draft=>{let item=draft.memos.find(value=>value.id===memo.id);item.project=target.value;item.updatedAt=new Date().toISOString()},{immediate:true})}
  else if(target.id==="projectTemplate"){changeProjectTemplate(target.value)}
- else if(target.id==="draftProject"){taskDraft.project=target.value;taskDraft.milestone="";$("#draftMilestone").innerHTML=milestoneOptions(taskDraft.project,"");syncHoverSelect($("#draftMilestone"));let jump=$("[data-go-task-project]");if(jump)jump.disabled=!taskDraft.project}
+ else if(target.id==="draftProject"){taskDraft.project=target.value;taskDraft.milestone="";$("#draftMilestone").innerHTML=milestoneOptions(taskDraft.project,"");syncHoverSelect($("#draftMilestone"));let jump=$("[data-go-task-project]");if(jump)jump.disabled=!taskDraft.project;refreshTaskLayoutMeta()}
  else if(target.id==="draftStatus"){taskDraft.status=target.value;syncTaskCompletedField()}
  else if(target.id==="draftFocus"){
   if(target.checked){if(taskDraft.archived||["已完成"].includes($("#draftStatus").value)){target.checked=false;return toast("请先恢复事项，再加入今日")}$("#draftWeek").checked=true;$("#draftStatus").value="进行中";syncHoverSelect($("#draftStatus"));syncTaskCompletedField()}
@@ -214,7 +214,7 @@ document.addEventListener("change",event=>{
  else if(target.dataset.checkDone!==undefined){setChecklistDone(taskDraft.checklist[Number(target.dataset.checkDone)],target.checked);checklistTimeEditingId="";refreshChecklist();$('[data-check-done="'+target.dataset.checkDone+'"]')?.focus({preventScroll:true});scheduleTaskAutosave()}
  else if(target.id==="attachmentInput"){let files=Array.from(target.files||[]);target.value="";if(files.length)void uploadTaskFiles(files)}
  else if(target.id==="importInput"){let file=target.files?.[0];target.value="";if(file)importFile(file)}
- if(target.closest?.("#taskEditor")&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
+ if((target.closest?.("#taskEditor")||target.matches?.("#taskTitle,#taskNext"))&&target.id!=="relatedSearch"&&target.id!=="attachmentInput")scheduleTaskAutosave();
 });
 document.addEventListener("keydown",event=>{
  if(handleRichDividerKeydown(event))return;
