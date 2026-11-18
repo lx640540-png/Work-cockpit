@@ -83,7 +83,7 @@ function handleClick(event){
  if(target.dataset.toggleMemoMulti!==undefined){ui.memoMultiSelect=!ui.memoMultiSelect;ui.selectedMemos.clear();return requestRender()}
  if(target.dataset.toggleMemoSelect){let id=target.dataset.toggleMemoSelect;ui.selectedMemos.has(id)?ui.selectedMemos.delete(id):ui.selectedMemos.add(id);return requestRender()}
  if(target.dataset.memoBulkDelete!==undefined){let ids=Array.from(ui.selectedMemos);if(!ids.length)return;return confirmAction("删除选中的 "+ids.length+" 条备忘录？","这些备忘录会进入回收站，可在“数据与恢复”页面恢复。",()=>{moveMemosToTrash(ids,"批量删除备忘录");ui.selectedMemos.clear();ui.memoMultiSelect=false;toast("已将 "+ids.length+" 条备忘录移入回收站")},"删除所选")}
- if(target.dataset.selectMemo){ui.memoPane="editor";selectedMemoId=target.dataset.selectMemo;return requestRender()}
+ if(target.dataset.selectMemo){ui.memoPane="editor";if(selectedMemoId===target.dataset.selectMemo)return syncMemoPane();selectedMemoId=target.dataset.selectMemo;return requestRender()}
  if(target.dataset.togglePin){let id=target.dataset.togglePin;return commit("切换备忘录置顶",draft=>{let memo=draft.memos.find(item=>item.id===id);memo.pinned=!memo.pinned;memo.updatedAt=new Date().toISOString()},{immediate:true})}
  if(target.dataset.toggleMemoArchive){let id=target.dataset.toggleMemoArchive;return commit("归档备忘录",draft=>{let memo=draft.memos.find(item=>item.id===id);memo.archived=!memo.archived;memo.updatedAt=new Date().toISOString()},{immediate:true})}
  if(target.dataset.deleteMemo)return deleteMemo(target.dataset.deleteMemo);
