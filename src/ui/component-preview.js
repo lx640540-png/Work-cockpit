@@ -1,5 +1,5 @@
 // Preview-only integration. Showcase examples never enter synchronized business data.
-let componentPreview={open:false,page:null,focus:null},journalShortcutReturn=null;
+let componentPreview={open:false,page:null,focus:null};
 const scopedPlanningCards=new WeakMap();
 let scopedPlanningPrefs={};try{scopedPlanningPrefs=JSON.parse(localStorage.getItem('work-cockpit-planning-columns-v2')||'{}')}catch{}
 let planningRowsObserver=null;const observedPlanningRows=new Set();
@@ -24,38 +24,6 @@ function initScopedPlanningResize(root=document){
   }
   if(main){if(!observedPlanningRows.has(main)){observedPlanningRows.add(main);planningRowsObserver.observe(main)}syncPlanningRow(main)}
  });
-}
-function journalMountAboveModal(){
- let panel=$('#workJournal');if(!panel)return;if(!journalUI.open){syncTaskJournalLayout();return;}
- if($('#workflowDialog')?.open){if(panel.parentElement!==document.body)document.body.appendChild(panel);return;}
- let modal=[...document.querySelectorAll('dialog[open]')].filter(node=>!panel.contains(node)&&!node.matches('.journal-copy-dialog')).at(-1),host=expandedRichBox&&(!modal||modal.contains(expandedRichBox))?expandedRichBox:modal||document.body;
- if(panel.parentElement!==host){let active=panel.contains(document.activeElement)?document.activeElement:null;host.appendChild(panel);active?.focus({preventScroll:true})}journalLayout();
-}
-function toggleJournalShortcut(){
- initWorkJournal();let panel=$('#workJournal');
- if(journalUI.open){
-  let active=document.activeElement;if(panel.contains(active))active.blur();
-  if(!journalFlush())return;
-  journalCloseCalendar();journalUI.open=false;journalRemember();syncWorkJournal();if(panel.parentElement!==document.body)document.body.appendChild(panel);
-  if(journalShortcutReturn?.isConnected)journalShortcutReturn.focus({preventScroll:true});journalShortcutReturn=null;
- }else{
-  journalShortcutReturn=document.activeElement;journalUI.open=true;syncWorkJournal();journalMountAboveModal();
- }
-}
-window.addEventListener('keydown',event=>{
- if(!VISUAL_PREVIEW_ENABLED)return;
- // Physical key, intentionally valid in all editable fields and during composition.
- if(event.code==='Backquote'){
-  event.preventDefault();event.stopImmediatePropagation();if(event.repeat)return;toggleJournalShortcut();return;
- }
- if(event.altKey&&!event.ctrlKey&&!event.metaKey&&!event.isComposing&&['Digit1','Digit2','Digit3'].includes(event.code)){
-  let editor=event.target.closest?.('.rich-editor');if(!editor||!quillFor(editor)?.isEnabled())return;
-  event.preventDefault();event.stopImmediatePropagation();applyRichCommand({Digit1:'heading2',Digit2:'heading3',Digit3:'paragraph'}[event.code],editor);
- }
-},true);
-if(VISUAL_PREVIEW_ENABLED){
- new MutationObserver(()=>{if(journalUI.open)journalMountAboveModal();else syncTaskJournalLayout()}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['open']});
- document.addEventListener('focusin',event=>{let editor=event.target.closest?.('#workJournal [data-journal-review]');if(editor)journalUI.lastReview=editor.dataset.journalReview});
 }
 function componentPreviewMarkup(){
  let sample={...state.tasks[0],id:'component-example',title:'核对样机供电与测试条件，补充复测结论',nextAction:'记录测试条件与验证结果',project:state.projects[0]?.id||'',status:'进行中',priority:'P1',type:'任务',focus:false,week:true,planDate:todayKey(),due:'',completed:''};

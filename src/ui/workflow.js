@@ -12,32 +12,16 @@ function openJournalForWeek(key,expanded=true){
  if(!journalFlush())return false;
  journalUI.open=true;journalUI.expanded=expanded;journalUI.week=key;journalUI.reviewOpen=true;journalUI.signature='';syncWorkJournal();journalMountAboveModal();return true;
 }
-let journalPendingTask=null;
 function openTaskRecord(id){
  if(taskDraft?.id===id&&$('#taskDialog')?.open&&!persistTaskDraft())return;
  const task=taskById(id);if(!task)return;
  if(!journalFlush())return;
  taskJournalPane='journal';
  if(!openJournalForWeek(currentWeekKey(),false))return;
- const date=todayKey(),week=journalWeek(journalUI.week);
- journalPendingTask={id,date,week:journalUI.week};
- if(!week.days[date]){week.days[date]={content:'',updatedAt:''};week.deleted=week.deleted.filter(value=>value!==date);journalRenderDays()}
- journalUI.active=date;journalUI.activeReview='';journalShowTaskContext();journalScrollToDate(date);quillFor(journalActiveEditor())?.focus();
-}
-function journalShowTaskContext(){
- const heading=$('#workJournal .journal-top');if(!heading)return;
- let banner=heading.querySelector('.journal-task-context');if(!banner){banner=document.createElement('div');banner.className='journal-task-context';heading.appendChild(banner)}
- const context=journalPendingTask,task=context&&context.week===journalUI.week?taskById(context.id):null;
- const linked=task&&(journalWeek(context.week).days[context.date]?.taskIds||[]).includes(context.id);
- banner.hidden=!task;banner.textContent=task?'关联事项：'+task.title+(linked?'':' · 写入后关联'):'';
-}
-function journalAttachPendingTask(date,day){
- const context=journalPendingTask;if(!context||context.date!==date||context.week!==journalUI.week||!BackupFormat.meaningful(day.content))return;
- day.taskIds=[...new Set([...(day.taskIds||[]),context.id])];journalPendingTask=null;journalShowTaskContext();
- const links=$('#workJournal [data-record-links="'+date+'"]');if(links)links.outerHTML=journalTaskLinksMarkup(date,day);
+ const date=todayKey();if(linkTaskToJournal(id,date)){journalUI.active=date;journalUI.activeReview='';journalScrollToDate(date);const q=quillFor(journalActiveEditor());q?.focus();q?.setSelection(Math.max(0,q.getLength()-1),0,'silent');}
 }
 function journalTaskLinksMarkup(date,day){
- const chips=(day.taskIds||[]).map(id=>{const task=taskById(id);return '<span class="journal-task-chip"><button type="button" data-open-task="'+esc(id)+'" '+(!task?'disabled':'')+'>'+esc(task?.title||'事项已删除')+'</button><button type="button" data-unlink-record-task="'+esc(id)+'" data-record-date="'+date+'" aria-label="解除关联'+esc(task?.title||'事项')+'">×</button></span>'}).join('');
+ const chips=(day.taskIds||[]).map(id=>{const task=taskById(id);return '<span class="journal-task-chip"><button type="button" data-open-task="'+esc(id)+'" '+(!task?'disabled':'')+'>'+esc(task?.title||'事项已删除')+(task?'<span class="journal-linked-status">'+esc(journalTaskStatusLabel(task.status))+'</span><small class="journal-linked-project">'+esc(projectName(task.project))+'</small>':'')+'</button><button type="button" data-unlink-record-task="'+esc(id)+'" data-record-date="'+date+'" aria-label="解除关联'+esc(task?.title||'事项')+'">×</button></span>'}).join('');
  return '<div class="journal-task-links" data-record-links="'+date+'">'+chips+'<button type="button" class="link-btn" data-link-record-date="'+date+'">＋ 关联事项</button><button type="button" class="link-btn" data-curate-record-date="'+date+'" '+(weekMode(journalUI.week)!=='current'?'disabled':'')+'>整理到周复盘</button></div>';
 }
 function workflowDialog(title,description,body,action){
@@ -49,13 +33,13 @@ function workflowDialog(title,description,body,action){
 function openRecordTaskPicker(date){
  if(!journalFlush())return;
  const day=journalWeek(journalUI.week).days[date];if(!day)return;
- workflowDialog('关联现有事项',journalDateLabel(date)+' · 只建立链接，不复制任务','<label class="workflow-search">查找事项<input type="search" data-record-task-search autocomplete="off" placeholder="输入任务或项目名称"></label><div class="workflow-task-choices"></div>','保存关联');
+ workflowDialog('关联现有事项',journalDateLabel(date)+' · 只建立链接，不复制任务','<label class="workflow-search">查找事项<input type="search" data-record-task-search autocomplete="off" placeholder="输入任务或项目名称"></label><label class="record-waiting-filter"><input type="checkbox" data-record-include-waiting>包含等待</label><div class="workflow-task-choices"></div>','保存关联');
  workflowDialogContext={kind:'links',week:journalUI.week,date,selected:new Set(day.taskIds||[])};renderRecordTaskChoices('');$('#workflowDialog [data-record-task-search]')?.focus();
 }
 function renderRecordTaskChoices(query){
  const context=workflowDialogContext;if(context?.kind!=='links')return;
- const items=state.tasks.filter(task=>!task.archived&&(!query||taskSearchMatch(task,query).score>0));
- $('#workflowDialog .workflow-task-choices').innerHTML=items.length?items.map(task=>'<label class="workflow-record-choice"><input type="checkbox" data-record-task-choice="'+esc(task.id)+'" '+(context.selected.has(task.id)?'checked':'')+'><span><b>'+esc(task.title)+'</b><small>'+esc(projectName(task.project))+' · '+esc(task.status)+'</small></span></label>').join(''):'<div class="empty">没有匹配的事项。</div>';
+ const items=recordTaskCandidates(state.tasks,query,!!$('#workflowDialog [data-record-include-waiting]')?.checked);
+ $('#workflowDialog .workflow-task-choices').innerHTML=items.length?items.map(task=>'<label class="workflow-record-choice"><input type="checkbox" data-record-task-choice="'+esc(task.id)+'" '+(context.selected.has(task.id)?'checked':'')+'><span><b>'+esc(task.title)+'</b><small>'+esc(projectName(task.project))+' · '+esc(journalTaskStatusLabel(task.status))+'</small></span></label>').join(''):'<div class="empty">没有匹配的事项。</div>';
 }
 function recordCurationBlocks(key,date=''){
  const week=journalWeek(key),result=[];
@@ -77,8 +61,9 @@ function openRecordCuration(key,date=''){
 function confirmWorkflowDialog(){
  const context=workflowDialogContext;if(!context)return;if(context.kind==='planning')return confirmPlanningReview();
  if(context.kind==='links'){
+
   if(!journalFlush())return;
-  commit('修改工作记录关联事项',()=>{const day=journalWeek(context.week).days[context.date];if(day)day.taskIds=[...context.selected]},{immediate:true});
+  try{commit('修改工作记录关联事项',()=>{const day=journalWeek(context.week).days[context.date];if(day){day.taskIds=[...context.selected];for(const excerpt of day.taskExcerpts||[])excerpt.taskIds=excerpt.taskIds.filter(id=>context.selected.has(id))}},{immediate:true});}catch{journalUI.dirty=true;journalUI.error=true;journalStatus();return toast('关联保存失败，请重试')}
   $('#workflowDialog').close();journalUI.signature='';syncWorkJournal();toast('关联已保存');return;
  }
  if(context.kind==='curation'){
@@ -144,12 +129,13 @@ document.addEventListener('compositionstart',event=>{if(event.target.matches?.('
 document.addEventListener('compositionend',event=>{if(event.target.matches?.('#taskSearch,#projectTaskSearch,#memoSearch')){event.target.dataset.composing='0';scheduleWorkspaceSearch(event.target)}});
 document.addEventListener('input',event=>{if(event.target.matches?.('[data-record-task-search]')&&!event.isComposing)renderRecordTaskChoices(event.target.value)});
 document.addEventListener('compositionend',event=>{if(event.target.matches?.('[data-record-task-search]'))renderRecordTaskChoices(event.target.value)});
-document.addEventListener('change',event=>{const id=event.target.dataset.recordTaskChoice;if(id&&workflowDialogContext?.kind==='links'){event.target.checked?workflowDialogContext.selected.add(id):workflowDialogContext.selected.delete(id)}});
+document.addEventListener('change',event=>{if(event.target.matches('[data-record-include-waiting]'))renderRecordTaskChoices($('#workflowDialog [data-record-task-search]')?.value||'');const id=event.target.dataset.recordTaskChoice;if(id&&workflowDialogContext?.kind==='links'){event.target.checked?workflowDialogContext.selected.add(id):workflowDialogContext.selected.delete(id)}});
 document.addEventListener('submit',event=>{
  const form=event.target;
  if(form.matches('[data-quick-capture]')){event.preventDefault();const input=form.elements.captureTitle,title=input.value.trim();if(!title)return;commit('快速记录到收件箱',draft=>{const task=normalizeTask({id:uid('task'),title,status:'待处理',priority:'P2'});draft.tasks.unshift(task);draft.order.inbox.unshift(task.id)},{immediate:true});toast('已存入临时收件箱');requestAnimationFrame(()=>$('#quickCaptureTitle')?.focus({preventScroll:true}));}
 });
 function handleWorkflowClick(target){
+ if(handleJournalEnhancementClick(target))return true;
  if(target.dataset.projectBriefFilter){filterProjectFromBrief(target.dataset.projectBriefFilter);return true}
  if(target.dataset.editProjectStage){openProject(target.dataset.editProjectStage,{tab:'milestones',milestoneId:target.dataset.stageId});return true}
  if(target.dataset.openTask&&target.closest('.journal-task-chip')){if(!journalFlush())return true;if(!journalUI.pinned){journalUI.open=false;syncWorkJournal()}}
@@ -158,6 +144,6 @@ function handleWorkflowClick(target){
  if(target.dataset.curateRecordDate){openRecordCuration(journalUI.week,target.dataset.curateRecordDate);return true}
  if(target.dataset.curateWeek){openRecordCuration(target.dataset.curateWeek);return true}
  if(target.dataset.openWeekJournal){openJournalForWeek(target.dataset.openWeekJournal);return true}
- if(target.dataset.unlinkRecordTask){const id=target.dataset.unlinkRecordTask,date=target.dataset.recordDate;if(!journalFlush())return true;commit('解除工作记录关联',()=>{const day=journalWeek(journalUI.week).days[date];if(day)day.taskIds=(day.taskIds||[]).filter(value=>value!==id)},{immediate:true});return true}
+ if(target.dataset.unlinkRecordTask){const id=target.dataset.unlinkRecordTask,date=target.dataset.recordDate;if(!journalFlush())return true;commit('解除工作记录关联',()=>{const day=journalWeek(journalUI.week).days[date];if(day){day.taskIds=(day.taskIds||[]).filter(value=>value!==id);for(const excerpt of day.taskExcerpts||[])excerpt.taskIds=excerpt.taskIds.filter(value=>value!==id)}},{immediate:true});return true}
  return false;
 }
