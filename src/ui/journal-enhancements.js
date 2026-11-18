@@ -111,7 +111,7 @@ document.addEventListener('dragstart',event=>{
  const id=button?.dataset.journalTaskDrag||all.dataset.task;
  if(button&&(!persistTaskDraft()||!taskById(id))){event.preventDefault();return}
  if(!journalTaskDragBegin(id)){event.preventDefault();return}
- event.dataTransfer.effectAllowed='copyMove';event.dataTransfer.setData('application/x-cockpit-task',id);event.dataTransfer.setData('text/plain',id);
+ event.dataTransfer.effectAllowed='all';event.dataTransfer.setData('application/x-cockpit-task',id);event.dataTransfer.setData('text/plain',id);
  if(button){event.stopImmediatePropagation();journalDragReveal()}
 },true);
 document.addEventListener('dragover',event=>{if(!journalTaskDrag)return;const day=journalDragPoint(event);if(day||event.target.closest?.('#workJournal,#journalHandle')){event.preventDefault();event.stopImmediatePropagation();if(event.dataTransfer)event.dataTransfer.dropEffect='link'}},true);
@@ -144,7 +144,7 @@ function captureJournalPassage(date){
  journalSelectedPassage=range?.length?{week:journalUI.week,date,text:q.getText(range.index,range.length).trim()}:null;return journalSelectedPassage;
 }
 function openJournalPassage(date){
- if(!journalSelectedPassage||journalSelectedPassage.date!==date||journalSelectedPassage.week!==journalUI.week)captureJournalPassage(date);
+ captureJournalPassage(date);
  const passage=journalSelectedPassage;if(!passage?.text)return toast('请先选中当天记录中的文字');if(!journalFlush())return;
  const ids=journalWeek(journalUI.week).days[date]?.taskIds||[];
  workflowDialog('整理选中记录',date+' · 保留原文和来源','<blockquote class="journal-passage-preview">'+esc(passage.text)+'</blockquote><label>操作<select id="journalPassageAction"><option value="link">关联到事项</option><option value="checklist">加入任务清单</option><option value="task">新建事项</option></select></label><label id="journalPassageTaskField">事项<select id="journalPassageTask">'+recordTaskCandidates(state.tasks,'',true).map(task=>'<option value="'+esc(task.id)+'" '+(ids.includes(task.id)?'selected':'')+'>'+esc(task.title)+'</option>').join('')+'</select></label>','确认');
@@ -156,12 +156,12 @@ function confirmJournalPassage(){
  if(action!=='task'&&!id)return toast('请选择事项');if(!journalFlush())return;
  if(taskDraft&&$('#taskDialog')?.open&&!persistTaskDraft())return;
  const day=state.meta.workJournal.weeks[passage.week]?.days[passage.date];if(!day)return toast('来源记录已移除，请重新选择');
- const duplicate=(day.taskExcerpts||[]).some(item=>item.text===passage.text&&item.action===action&&(action==='task'||item.targetId===id));if(duplicate)return toast('这段记录已执行过该操作');
+ const duplicate=(day.taskExcerpts||[]).some(item=>item.text===passage.text&&item.action===action&&(action==='task'?!!taskById(item.targetId):item.targetId===id&&(action==='link'?item.taskIds.includes(id):taskById(id)?.checklist.some(step=>step.text===passage.text))));if(duplicate)return toast('这段记录已执行过该操作');
  try{commit('整理工作记录段落',draft=>{
   const live=draft.meta.workJournal.weeks[passage.week].days[passage.date];
   if(action==='task'){const task=normalizeTask({id:uid('task'),title:passage.text.split('\n')[0].slice(0,500),status:'待处理',priority:'P2',notes:'<p>'+esc(passage.text).replace(/\n/g,'<br>')+'</p><p>来源：工作记录 '+passage.date+'</p>'});draft.tasks.unshift(task);draft.order.inbox.unshift(task.id);id=task.id}
   if(action==='checklist'){const task=draft.tasks.find(task=>task.id===id);if(!task||task.archived||isDone(task))throw Error('事项状态已变化');task.checklist.push(normalizeChecklistItem({text:passage.text}));task.updatedAt=new Date().toISOString()}
-  live.taskIds=[...new Set([...(live.taskIds||[]),id])];live.taskExcerpts||=[];live.taskExcerpts.push({id:uid('excerpt'),text:passage.text,taskIds:[id],createdAt:new Date().toISOString(),action,targetId:id});
+  live.updatedAt=new Date().toISOString();live.taskIds=[...new Set([...(live.taskIds||[]),id])];live.taskExcerpts||=[];live.taskExcerpts.push({id:uid('excerpt'),text:passage.text,taskIds:[id],createdAt:new Date().toISOString(),action,targetId:id});
  },{immediate:true});}catch{toast('保存失败，请重试；原始记录保留');return}
  if(taskDraft&&$('#taskDialog')?.open)syncOpenTaskDraftFromState();$('#workflowDialog').close();refreshJournalLinks(passage.date);journalSelectedPassage=null;toast('已整理；原始记录保留，可撤回');
 }
