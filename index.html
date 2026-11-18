@@ -1791,6 +1791,19 @@ html[data-visual-preview=new][data-preview-frame=inset] body:is(.memo-workspace,
 .hover-select-trigger .select-chevron{width:12px;height:8px;flex:none;display:block;pointer-events:none}.rich-toolbar .rich-fold-tool{display:inline-flex;align-items:center;justify-content:center;min-width:29px;width:29px;padding:0}.rich-fold-tool .fold-tool-icon{display:block;flex:none;pointer-events:none;width:13px;height:13px}.rich-fold-tool.large .fold-tool-icon{width:18px;height:18px}
 .editor-box,.memo-editor-body{position:relative}.editor-box:after,.memo-editor-body:after{content:'';position:absolute;inset:-1px;z-index:3;pointer-events:none;border:1px solid var(--line);border-radius:inherit}.editor-box>.rich-toolbar,.memo-editor-body>.rich-toolbar{border-top-left-radius:inherit;border-top-right-radius:inherit}.editor-box>.rich-editor,.memo-editor-body>.rich-editor{border-bottom-left-radius:inherit;border-bottom-right-radius:inherit}.rich-toolbar [data-command=unfold][hidden]{display:none!important}.rich-soft-break{white-space:pre-wrap}
 .backup-panel{margin-bottom:20px}.backup-panel details{border-top:1px solid var(--border,#e2e8f0);padding:12px 0}.backup-panel summary{cursor:pointer;font-weight:600}.backup-panel .data-item{gap:12px;flex-wrap:wrap}.backup-panel small{display:block;overflow-wrap:anywhere}.backup-panel .feature-head{gap:12px;flex-wrap:wrap}.backup-panel .page-actions{flex-wrap:wrap}.backup-warning{color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px}
+/* Shared journal affordances; use actual container width for linked task rows. */
+.task-checklist-remaining{display:inline-flex;align-items:center;flex:0 0 auto;gap:3px;padding:2px 6px;border:1px solid var(--line);border-radius:5px;color:var(--muted);font-size:11px;line-height:1.4;white-space:nowrap}
+.task-title-line{flex-wrap:wrap}
+.task-journal-drag{display:flex;align-items:center;gap:8px;width:100%;padding:10px 8px;border:1px dashed #a9bce4;border-radius:7px;background:#f5f8ff;color:var(--blue);text-align:left;cursor:grab;touch-action:pan-y}
+.task-journal-drag>span:nth-child(2){flex:1;min-width:0}.task-journal-drag small{display:block;margin-top:4px;color:var(--muted);font-size:10px}.task-journal-drag:active{cursor:grabbing}
+.task-record-timeline{margin-bottom:12px}.task-record-timeline summary{cursor:pointer;display:flex;justify-content:space-between;gap:8px;font-size:12px}.task-record-timeline>button{display:grid;gap:4px;width:100%;border:0;border-bottom:1px solid var(--line);padding:9px 0;background:transparent;text-align:left}.task-record-timeline>button time{font-size:11px;color:var(--blue)}.task-record-timeline>button span{font-size:11px;line-height:1.6;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.task-record-timeline small{font-size:10px;color:var(--muted)}
+.journal-day{position:relative}.journal-day.journal-drop-target{outline:2px solid #729bff;outline-offset:-2px;background:#f4f7ff}.journal-day.journal-drop-target:after{content:'松开，关联到此日期';position:absolute;right:12px;top:8px;background:#2563eb;color:white;padding:5px 9px;border-radius:5px;font-size:12px;pointer-events:none;z-index:3}
+#workJournal .journal-task-links{container-type:inline-size;display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;min-width:0}#workJournal .journal-task-chip{display:flex;max-width:100%;min-width:0;align-items:center;gap:4px}#workJournal .journal-task-chip>button:first-child{min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;line-height:1.6}#workJournal .journal-task-chip>button:last-child{flex:0 0 auto}.journal-linked-status{color:var(--muted);font-size:10px;margin-left:6px;white-space:nowrap}.journal-linked-project{color:var(--muted);font-size:10px;display:block}
+@container(max-width:430px){#workJournal .journal-task-chip{flex-basis:100%}}
+.record-waiting-filter{display:flex;align-items:center;gap:6px;margin:10px 0;font-size:12px}.journal-selection-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 0;color:var(--muted);font-size:10px}.journal-passage-preview{margin:0 0 14px;padding:10px 12px;border-left:3px solid #8baeff;background:#f5f8ff;white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto}#workflowDialog:has(#journalPassageAction) label{display:grid;gap:6px;margin:12px 0}#workflowDialog:has(#journalPassageAction) select{max-width:100%;min-width:0;padding:8px;border:1px solid var(--line);border-radius:6px}
+:root[data-visual-preview] body.memo-workspace .memo-layout:not(.memo-columns-compact){grid-template-columns:minmax(0,var(--memo-list-width,300px)) 12px minmax(0,1fr);gap:0 10px}.memo-column-splitter{width:12px;min-width:0;height:100%;padding:0;align-self:stretch;border:0;background:transparent;position:relative;cursor:col-resize;touch-action:none}.memo-column-splitter:before{content:'';position:absolute;top:0;bottom:0;left:5px;width:1px;background:var(--line)}.memo-column-splitter:hover:before,.memo-column-splitter:focus-visible:before,.memo-column-splitter.resizing:before{width:3px;background:#7ea2f5}.memo-column-splitter[hidden]{display:none}
+:root[data-visual-preview] body.memo-workspace .memo-layout.memo-columns-compact{grid-template-columns:minmax(0,1fr);gap:0}
+@media(min-width:821px){body.memo-workspace #page-memos.active:has(.memo-columns-compact){grid-template-rows:auto auto minmax(0,1fr)}#page-memos:has(.memo-columns-compact) .memo-mobile-tabs{display:flex}#page-memos[data-pane=list] .memo-columns-compact .memo-editor-card,#page-memos[data-pane=editor] .memo-columns-compact .memo-list-card{display:none}}
 </style>
 </head>
 <body>
@@ -2002,12 +2015,14 @@ function journalDateValid(value){return /^\d{4}-\d{2}-\d{2}$/.test(value)&&fmt(p
 function journalWorkday(date){let calendar=WORK_JOURNAL_CALENDARS[date.slice(0,4)],short=date.slice(5);if(calendar?.workdays.includes(short))return true;if(calendar?.holidays.some(([start,end])=>short>=start&&short<=end))return false;let day=parseDate(date).getDay();return day!==0&&day!==6}
 const JOURNAL_REVIEW_FIELDS=['achievements','issues','next'];
 function normalizeJournalReview(value){return Object.fromEntries(JOURNAL_REVIEW_FIELDS.map(field=>[field,String(value?.[field]||'')]))}
-function normalizeWorkJournal(raw){let weeks={};Object.entries(raw?.weeks||{}).forEach(([key,value])=>{if(!journalDateValid(key)||fmt(mondayOf(parseDate(key)))!==key)return;let days={};Object.entries(value?.days||{}).forEach(([date,item])=>{if(journalDateValid(date)&&date>=key&&date<=weekEnd(key))days[date]={content:sanitizeRichValue(normalizeRich(item?.content||"")),updatedAt:String(item?.updatedAt||""),taskIds:Array.isArray(item?.taskIds)?[...new Set(item.taskIds.map(String))]:[]}});weeks[key]={days,deleted:Array.isArray(value?.deleted)?[...new Set(value.deleted.filter(date=>journalDateValid(date)&&date>=key&&date<=weekEnd(key)))]:[],review:normalizeJournalReview(value?.review),...(value?.reviewRich?{reviewRich:normalizeJournalReviewRich(value.reviewRich)}:{})}});return{weeks}}
+function normalizeWorkJournal(raw){let weeks={};Object.entries(raw?.weeks||{}).forEach(([key,value])=>{if(!journalDateValid(key)||fmt(mondayOf(parseDate(key)))!==key)return;let days={};Object.entries(value?.days||{}).forEach(([date,item])=>{if(journalDateValid(date)&&date>=key&&date<=weekEnd(key))days[date]={content:sanitizeRichValue(normalizeRich(item?.content||"")),updatedAt:String(item?.updatedAt||""),taskIds:Array.isArray(item?.taskIds)?[...new Set(item.taskIds.map(String))]:[],...(Array.isArray(item?.taskExcerpts)?{taskExcerpts:normalizeJournalExcerpts(item.taskExcerpts)}:{})}});weeks[key]={days,deleted:Array.isArray(value?.deleted)?[...new Set(value.deleted.filter(date=>journalDateValid(date)&&date>=key&&date<=weekEnd(key)))]:[],review:normalizeJournalReview(value?.review),...(value?.reviewRich?{reviewRich:normalizeJournalReviewRich(value.reviewRich)}:{})}});return{weeks}}
 function journalWeek(key){let journal=state.meta.workJournal||(state.meta.workJournal={weeks:{}}),week=journal.weeks[key];if(!week){week=journal.weeks[key]={days:{},deleted:[],review:normalizeJournalReview()};for(let i=0;i<7;i++){let date=fmt(addDays(parseDate(key),i));if(journalWorkday(date))week.days[date]={content:"",updatedAt:""}}}if(typeof linkWeeklySummaries==='function')linkWeeklySummaries(state,[key]);return week}
 function journalDateLabel(date){let value=parseDate(date);return(value.getMonth()+1)+"月"+value.getDate()+"日 星期"+"日一二三四五六"[value.getDay()]}
 
 function normalizeJournalReviewRich(value){return Object.fromEntries(JOURNAL_REVIEW_FIELDS.filter(field=>Object.hasOwn(value||{},field)).map(field=>[field,sanitizeRichValue(normalizeRich(String(value[field]||"")))]))}
 function journalReviewHTML(week,field){return Object.hasOwn(week.reviewRich||{},field)?sanitizeRichValue(week.reviewRich[field]):String(week.review?.[field]||"").split("\n").map(line=>"<p>"+(esc(line)||"<br>")+"</p>").join("")}
+
+function normalizeJournalExcerpts(items){return items.filter(item=>item&&typeof item.text==='string'&&item.text.trim()).map(item=>({id:String(item.id||uid('excerpt')),text:item.text,taskIds:[...new Set((Array.isArray(item.taskIds)?item.taskIds:[]).map(String))],createdAt:String(item.createdAt||''),...(item.action?{action:String(item.action),targetId:String(item.targetId||'')}:{})}))}
 // Both weekly entry points edit state.weeks; the journal copy is a compatibility mirror.
 const WEEKLY_SUMMARY_LABELS={achievements:'实际成果',issues:'未完成 / 原因',next:'下周继续关注'};
 const WEEKLY_SUMMARY_FIELDS={achievements:'reviewDone',issues:'reviewMiss',next:'reviewNext'};
@@ -2581,7 +2596,7 @@ function taskRow(task,options={}){
  if(planning)next='<label class="overview-next-label"><span class="'+(options.compactPlanning?'visually-hidden':'')+'">下一步</span><textarea rows="1" placeholder="下一步做什么…" data-overview-next="'+esc(task.id)+'" aria-label="'+esc(task.title)+'的下一步" '+(readonly||isDone(task)||task.archived?'readonly':'')+'>'+esc(task.nextAction)+'</textarea></label>';
  let source=[!options.projectContext&&project?.name?project.name:'',milestone?.name||''].filter(Boolean).join(' · ');
  let projectLine=(task.type==='长期跟进'?'<span class="task-type-tag">长期跟进</span>':'')+(options.showNotes?overviewProgress(task):'');
- primaryLink='<div class="task-title-line">'+primaryLink+(source?'<span class="task-context-source" title="'+esc(source)+'">'+esc(source)+'</span>':'')+'</div>';
+ primaryLink='<div class="task-title-line">'+primaryLink+taskChecklistBadge(task)+(source?'<span class="task-context-source" title="'+esc(source)+'">'+esc(source)+'</span>':'')+'</div>';
  let warningHTML=options.compactDates?(taskDateFlags(task).due?'<span class="date-warning deadline">截止逾期 '+dateShort(task.due)+'</span>':''):taskDateWarnings(task);
  let dates=isDone(task)?'<span class="task-date-label task-completed-date">完成 '+dateShort(task.completed)+'</span>':taskDateButton(task,readonly)+warningHTML+(task.due&&!(options.compactDates&&taskDateFlags(task).due)?'<span class="muted task-deadline">截止 '+dateShort(task.due)+'</span>':"");
  dates='<span class="task-row-dates">'+dates+'</span>';
@@ -2611,8 +2626,9 @@ function initTaskSortables(root){
  root.querySelectorAll(".drop-card").forEach(card=>{
   let scope=card.dataset.dropZone;if(!TASK_CARD_TRANSITIONS[scope]?.accept)return;
   let outer=card.querySelector(":scope > .items"),containers=outer?Array.from(outer.querySelectorAll("[data-sort-segment]")):[];
-  containers.filter(Boolean).forEach(container=>taskSortables.push(new Sortable(container,{group:"work-cockpit-tasks",draggable:".task-row",handle:".drag-handle",forceFallback:true,fallbackOnBody:true,fallbackTolerance:4,animation:150,ghostClass:"dragging",chosenClass:"sortable-chosen",dragClass:"sortable-drag",scroll:true,scrollSensitivity:64,scrollSpeed:18,emptyInsertThreshold:28,onMove(event,originalEvent){let row=event.dragged,targetCard=event.to.closest(".drop-card"),related=event.related,intent=sortableRowIntent(row,targetCard,related?.classList?.contains("task-row")?related:null,originalEvent)||sortableTaskIntent(row,targetCard,originalEvent);if(row&&intent)row._taskDropIntent=intent;root.querySelectorAll(".drop-card").forEach(card=>card.classList.toggle("drag-target",card===targetCard));if(!related?.classList?.contains("task-row")||!originalEvent)return true;let rect=related.getBoundingClientRect();return originalEvent.clientY<rect.top+rect.height/2?-1:1},onStart(event){document.documentElement.dataset.taskDragging="true";let row=event.item,scope=row.dataset.dropScope;activeSortableTask=row;row.dataset.fromScope=scope;row.dataset.wasPinned=isPinned(row.dataset.task,scope)?"1":"0";row._taskCardSnapshot=taskCardSnapshot(root);row._taskDropIntent=null;row._taskReleaseIntent=null;root.querySelectorAll(".drop-card[data-drop-zone]").forEach(card=>card.classList.add("drag-target"))},onEnd(event){
+  containers.filter(Boolean).forEach(container=>taskSortables.push(new Sortable(container,{group:"work-cockpit-tasks",draggable:".task-row",handle:".drag-handle",forceFallback:true,fallbackOnBody:true,fallbackTolerance:4,animation:150,ghostClass:"dragging",chosenClass:"sortable-chosen",dragClass:"sortable-drag",scroll:true,scrollSensitivity:64,scrollSpeed:18,emptyInsertThreshold:28,onMove(event,originalEvent){let row=event.dragged,targetCard=event.to.closest(".drop-card"),related=event.related,intent=sortableRowIntent(row,targetCard,related?.classList?.contains("task-row")?related:null,originalEvent)||sortableTaskIntent(row,targetCard,originalEvent);if(row&&intent)row._taskDropIntent=intent;root.querySelectorAll(".drop-card").forEach(card=>card.classList.toggle("drag-target",card===targetCard));if(!related?.classList?.contains("task-row")||!originalEvent)return true;let rect=related.getBoundingClientRect();return originalEvent.clientY<rect.top+rect.height/2?-1:1},onStart(event){document.documentElement.dataset.taskDragging="true";let row=event.item,scope=row.dataset.dropScope;activeSortableTask=row;journalTaskDragBegin(row.dataset.task,row);row.dataset.fromScope=scope;row.dataset.wasPinned=isPinned(row.dataset.task,scope)?"1":"0";row._taskCardSnapshot=taskCardSnapshot(root);row._taskDropIntent=null;row._taskReleaseIntent=null;root.querySelectorAll(".drop-card[data-drop-zone]").forEach(card=>card.classList.add("drag-target"))},onEnd(event){
    // Sortable removes its placeholder before onEnd; use the last visible insertion intent before those row coordinates shift.
+   if(event.item._journalDropHandled){journalTaskDragEnd();cleanupDrag();requestRender();return;}journalTaskDragEnd();
    let release=event.originalEvent,releaseRow=Number.isFinite(release?.clientX)&&Number.isFinite(release?.clientY)?document.elementsFromPoint(release.clientX,release.clientY).map(node=>node.closest?.('.task-row[data-task]')).find(node=>node&&node!==event.item&&!node.classList.contains('sortable-fallback')):null;
    let releaseIntent=releaseRow?sortableRowIntent(event.item,releaseRow.closest('.drop-card'),releaseRow,release):null;
    let row=event.item,id=row.dataset.task,fromScope=row.dataset.fromScope||row.dataset.dropScope,intent=row._taskReleaseIntent||row._taskDropIntent||releaseIntent,toScope=intent?.toScope||row.closest(".drop-card")?.dataset.dropZone,toCard=toScope?root.querySelector('.drop-card[data-drop-zone="'+toScope+'"]'):null;activeSortableTask=null;if(!id||!toScope)return requestRender();
@@ -2850,8 +2866,8 @@ function renderMemos(){
  let memo=memoById(selectedMemoId),projectOptions='<option value="">暂不关联</option>'+state.projects.filter(project=>!project.archived||project.id===memo?.project).map(project=>'<option value="'+esc(project.id)+'" '+(memo?.project===project.id?"selected":"")+'>'+esc(project.name)+(project.archived?'（已归档）':'')+'</option>').join("");
  let editor=memo?'<article class="card memo-editor-card"><div class="memo-editor-head"><input class="memo-title" data-memo-title value="'+esc(memo.title)+'"><div class="memo-actions"><button class="btn" data-toggle-memo-archive="'+esc(memo.id)+'">'+(memo.archived?"恢复":"归档")+'</button><button class="btn danger" data-delete-memo="'+esc(memo.id)+'">删除</button></div></div><div class="memo-editor-meta"><span>关联项目</span><select class="control" data-memo-project>'+projectOptions+'</select><button class="btn primary" data-memo-to-task="'+esc(memo.id)+'">一键转为事项</button></div><div class="memo-editor-body">'+toolbar()+'<div class="rich-editor" data-memo-content contenteditable="true" data-placeholder="记录灵感、观察与问题……">'+memo.content+'</div></div><div class="memo-status">修改会自动保存到当前浏览器'+(Cloud.user?"，并同步至云端":"")+'</div></article>':'<article class="card memo-editor-card"><div class="empty">选择或新建一条备忘录。</div></article>';
  let count=ui.selectedMemos.size,bulk=ui.memoMultiSelect?'<div class="memo-bulk-bar"><span>已选择 '+count+' 条备忘录</span><button class="btn danger" type="button" data-memo-bulk-delete '+(count?"":"disabled")+'>删除所选</button><button class="btn" type="button" data-toggle-memo-multi>退出多选</button></div>':'<div class="memo-bulk-bar" hidden></div>';
- $("#page-memos").innerHTML=pageHead("QUICK NOTES","备忘录","记录暂时没有明确行动要求的信息；需要推进时可转为事项。",'<button class="btn primary" data-action="new-memo">＋ 新建备忘录</button>')+'<div class="memo-mobile-tabs"><button class="btn" data-memo-pane="list">备忘录列表</button><button class="btn" data-memo-pane="editor">正文</button></div><div class="memo-layout"><article class="card memo-list-card"><div class="memo-search"><input id="memoSearch" value="'+esc(query)+'" placeholder="搜索备忘录……"></div><div class="memo-tabs"><button class="memo-tab '+(!memoArchived?"active":"")+'" data-memo-tab="active">进行中</button><button class="memo-tab '+(memoArchived?"active":"")+'" data-memo-tab="archived">已归档</button><button class="btn memo-multi-toggle" type="button" data-toggle-memo-multi>'+(ui.memoMultiSelect?"退出多选":"多选")+'</button></div>'+bulk+'<div class="memo-list">'+(list||'<div class="empty">这里还没有备忘录。</div>')+'</div></article>'+editor+'</div>';
- memoRenderSignature=memoViewSignature();syncMemoPane();
+ $("#page-memos").innerHTML=pageHead("QUICK NOTES","备忘录","记录暂时没有明确行动要求的信息；需要推进时可转为事项。",'<button class="btn primary" data-action="new-memo">＋ 新建备忘录</button>')+'<div class="memo-mobile-tabs"><button class="btn" data-memo-pane="list">备忘录列表</button><button class="btn" data-memo-pane="editor">正文</button></div><div class="memo-layout"><article class="card memo-list-card"><div class="memo-search"><input id="memoSearch" value="'+esc(query)+'" placeholder="搜索备忘录……"></div><div class="memo-tabs"><button class="memo-tab '+(!memoArchived?"active":"")+'" data-memo-tab="active">全部</button><button class="memo-tab '+(memoArchived?"active":"")+'" data-memo-tab="archived">已归档</button><button class="btn memo-multi-toggle" type="button" data-toggle-memo-multi>'+(ui.memoMultiSelect?"退出多选":"多选")+'</button></div>'+bulk+'<div class="memo-list">'+(list||'<div class="empty">这里还没有备忘录。</div>')+'</div></article><button type="button" class="memo-column-splitter ui-splitter" role="separator" aria-orientation="vertical" aria-label="调整备忘录列表与正文宽度" title="拖动调整宽度；方向键微调；双击恢复"></button>'+editor+'</div>';
+ memoRenderSignature=memoViewSignature();syncMemoPane();initMemoColumnSplitter();
 }
 
 
@@ -2994,7 +3010,7 @@ function checklistMarkup(){
  return taskDraft.checklist.map((item,index)=>{
   let editing=item.done&&checklistTimeEditingId===item.id,time=item.done?'<button class="checklist-time" type="button" data-edit-check-time="'+esc(item.id)+'" aria-label="查看或修改执行步骤完成时间：'+esc(item.text)+'" aria-expanded="'+editing+'" title="'+esc(checklistFullTime(item.completedAt))+'">'+esc(checklistTimeLabel(item))+'</button>':'';
   let edit=editing?'<div class="checklist-time-editor"><p>完成时间 · '+esc(checklistFullTime(item.completedAt))+'</p><label for="checklistCompletedAt">修改完成时间</label><input id="checklistCompletedAt" type="datetime-local" step="60" value="'+esc(checklistLocalTime(item.completedAt))+'"><div><button class="btn" type="button" data-cancel-check-time>取消</button><button class="btn" type="button" data-save-check-time="'+esc(item.id)+'">保存时间</button></div></div>':'';
-  return '<div class="attachment-item checklist-item '+(item.done?'is-done':'')+'" data-check-drop="'+index+'"><button class="drag-handle" type="button" draggable="true" data-check-drag="'+index+'" aria-label="拖动调整执行步骤顺序">⠿</button><input type="checkbox" data-check-done="'+index+'" aria-label="完成执行步骤：'+esc(item.text)+'" '+(item.done?'checked':'')+'><textarea class="checklist-text" rows="1" data-check-text="'+index+'" data-check-id="'+esc(item.id)+'" aria-label="执行步骤内容" placeholder="执行步骤">'+esc(item.text)+'</textarea>'+time+'<button class="icon-btn" type="button" data-remove-check="'+index+'" aria-label="删除执行步骤">×</button>'+edit+'</div>';
+  return '<div class="attachment-item checklist-item '+(item.done?'is-done':'')+'" data-check-drop="'+index+'"><button class="drag-handle" type="button" draggable="true" data-check-drag="'+index+'" aria-label="拖动调整执行步骤顺序">⠿</button><input type="checkbox" data-check-done="'+index+'" aria-label="完成执行步骤：'+esc(item.text)+'" '+(item.done?'checked':'')+'><textarea class="checklist-text" rows="1" data-check-text="'+index+'" data-check-id="'+esc(item.id)+'" aria-label="任务步骤内容" placeholder="执行步骤">'+esc(item.text)+'</textarea>'+time+'<button class="icon-btn" type="button" data-remove-check="'+index+'" aria-label="删除任务步骤">×</button>'+edit+'</div>';
  }).join("")||'<div class="muted" style="font-size:11px">暂无执行步骤</div>';
 }
 function saveChecklistTime(id){
@@ -3024,7 +3040,7 @@ function taskHistoryEntries(taskId){
 function historyWeekLabel(key){let start=parseDate(key);return isoWeekYear(start)+" 年第 "+isoWeekNumber(start)+" 周"}
 function taskHistoryDetail(task,entry,current=false){
  let week=entry?.week,project=current?projectById(task.project):week?.projectSnapshots.find(item=>item.id===task.project)||projectById(task.project),milestone=milestoneOf(task,project),checklist=(task.checklist||[]).map(item=>'<div><span>'+(item.done?'✓':'○')+'</span><span>'+esc(item.text||'未命名检查项')+'</span>'+(item.done?'<small class="history-check-time">'+esc(checklistFullTime(item.completedAt))+'</small>':'')+'</div>').join("")||'<div class="muted">没有检查项</div>',attachments=(task.attachments||[]).map(item=>'<span class="pill">'+esc(item.name)+'</span>').join("")||'<span class="muted">没有附件记录</span>';
- return'<div class="history-banner">'+(current?'当前事项 · 可返回任务详情继续编辑':historyWeekLabel(entry.weekKey)+'结束时的只读快照；不会随当前事项变化')+'</div><h3 class="history-title">'+esc(task.title)+'</h3><div class="history-meta"><span class="pill status-'+esc(task.status)+'">'+esc(task.status)+'</span><span class="pill priority-'+esc(task.priority)+'">'+esc(task.priority)+'</span><span class="pill">'+esc(task.type)+'</span></div><div class="history-grid"><div class="history-field"><small>所属项目</small><b>'+esc(project?.name||'通用事项')+'</b></div><div class="history-field"><small>所属里程碑</small><b>'+esc(milestone?.name||'未关联里程碑')+'</b></div><div class="history-field"><small>计划日期</small><b>'+dateShort(task.planDate)+'</b></div><div class="history-field"><small>完成日期</small><b>'+dateShort(task.completed)+'</b></div></div><section class="history-section"><h3>下一步动作</h3><div>'+esc(task.nextAction||'暂无下一步')+'</div></section><section class="history-section"><h3>备注与关键结论</h3><div class="history-notes">'+(task.notes||'<span class="muted">暂无备注</span>')+'</div></section><section class="history-section"><h3>检查清单</h3><div class="history-checklist">'+checklist+'</div></section><section class="history-section"><h3>附件记录</h3><div class="history-meta">'+attachments+'</div></section>';
+ return'<div class="history-banner">'+(current?'当前事项 · 可返回任务详情继续编辑':historyWeekLabel(entry.weekKey)+'结束时的只读快照；不会随当前事项变化')+'</div><h3 class="history-title">'+esc(task.title)+'</h3><div class="history-meta"><span class="pill status-'+esc(task.status)+'">'+esc(task.status)+'</span><span class="pill priority-'+esc(task.priority)+'">'+esc(task.priority)+'</span><span class="pill">'+esc(task.type)+'</span></div><div class="history-grid"><div class="history-field"><small>所属项目</small><b>'+esc(project?.name||'通用事项')+'</b></div><div class="history-field"><small>所属里程碑</small><b>'+esc(milestone?.name||'未关联里程碑')+'</b></div><div class="history-field"><small>计划日期</small><b>'+dateShort(task.planDate)+'</b></div><div class="history-field"><small>完成日期</small><b>'+dateShort(task.completed)+'</b></div></div><section class="history-section"><h3>下一步动作</h3><div>'+esc(task.nextAction||'暂无下一步')+'</div></section><section class="history-section"><h3>备注与关键结论</h3><div class="history-notes">'+(task.notes||'<span class="muted">暂无备注</span>')+'</div></section><section class="history-section"><h3>任务清单</h3><div class="history-checklist">'+checklist+'</div></section><section class="history-section"><h3>附件记录</h3><div class="history-meta">'+attachments+'</div></section>';
 }
 function renderTaskHistory(){
  let current=taskById(historyTaskId),entries=taskHistoryEntries(historyTaskId);if(historySelection==="current"&&!current)historySelection=entries[0]?.weekKey||"";if(historySelection!=="current"&&!entries.some(item=>item.weekKey===historySelection))historySelection=current?"current":entries[0]?.weekKey||"";
@@ -3045,8 +3061,8 @@ function renderTaskEditor(){
  let notesEditor='<div class="editor-box task-notes-editor">'+toolbar()+'<div class="rich-editor" id="taskNotes" contenteditable="true" data-placeholder="补充背景、判断和结果……">'+taskDraft.notes+'</div></div>';
  $("#taskEditor").innerHTML='<aside class="task-column"><section class="task-section"><div class="task-section-title">任务属性</div><div class="form-grid"><div class="field"><label>类型</label><select id="draftType">'+taskTypes.map(value=>'<option '+(taskDraft.type===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>状态</label><select id="draftStatus">'+statuses.map(value=>'<option '+(taskDraft.status===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>优先级</label><select id="draftPriority">'+priorities.map(value=>'<option '+(taskDraft.priority===value?"selected":"")+'>'+value+'</option>').join("")+'</select></div><div class="field"><label>计划日期 <small>准备哪天做</small></label><input id="draftPlanDate" type="date" value="'+esc(taskDraft.planDate)+'"></div><div class="field"><label>截止日期 <small>最晚何时完成</small></label><input id="draftDue" type="date" value="'+esc(taskDraft.due)+'"></div><div class="field"><label>完成日期</label><input id="draftCompleted" type="date" value="'+esc(taskDraft.completed)+'" '+(taskDraft.status==="已完成"?"":"disabled")+'></div><div class="field"><label>跟进日期 <small>等待时何时再问</small></label><input id="draftFollowup" type="date" value="'+esc(taskDraft.followup)+'"></div></div><label style="display:flex;gap:8px;margin-top:11px"><input id="draftFocus" type="checkbox" '+(taskDraft.focus?"checked":"")+'> 加入今日行动</label><label style="display:flex;gap:8px;margin-top:7px"><input id="draftWeek" type="checkbox" '+(taskDraft.week?"checked":"")+'> 加入本周行动</label></section>'+
  '<section class="task-section"><div class="task-section-title task-project-section-title"><span>项目关系</span><button class="link-btn task-project-link" type="button" data-go-task-project '+(taskDraft.project?'':'disabled')+'>进入项目 ↗</button></div><div class="field"><label>所属项目</label><select id="draftProject">'+projectOptions(taskDraft.project)+'</select></div><div class="field" style="margin-top:9px"><label>里程碑</label><select id="draftMilestone">'+milestoneOptions(taskDraft.project,taskDraft.milestone)+'</select></div></section>'+
- '<section class="task-section task-record-section"><div class="task-section-title"><span>工作记录</span><button class="link-btn" type="button" data-task-record>记工作记录 ↗</button></div></section></aside>'+
- '<section class="task-column task-content-column"><div class="field"><label>事项名称</label><input class="title-input" id="taskTitle" value="'+esc(taskDraft.title)+'" placeholder="写清楚要推动的结果"></div><div class="field"><label>下一步动作</label><textarea id="taskNext" rows="1">'+esc(taskDraft.nextAction)+'</textarea></div><section class="task-section checklist-section '+(taskChecklistCollapsed?'collapsed':'')+'" '+(taskChecklistHeight&&!taskChecklistCollapsed?'style="height:'+Math.round(taskChecklistHeight)+'px"':'')+'><button class="checklist-toggle checklist-dropdown-head" type="button" data-toggle-checklist aria-controls="draftChecklistContent" aria-expanded="'+(!taskChecklistCollapsed)+'">'+taskChecklistSummary()+'</button><div id="draftChecklistContent" '+(taskChecklistCollapsed?'hidden':'')+'><div id="draftChecklist">'+checklistMarkup()+'</div><button class="checklist-add-bottom" type="button" data-add-check>＋ 添加检查项</button></div></section><button class="checklist-resizer" id="checklistResizer" type="button" data-tip="上下拖动调整检查清单高度；双击恢复自适应" aria-label="上下拖动调整检查清单高度"></button><div class="field task-notes-field">'+obsidianLinkMarkup(taskDraft)+notesEditor+'</div></section>'+
+ '<section class="task-section task-record-section"></section></aside>'+
+ '<section class="task-column task-content-column"><div class="field"><label>事项名称</label><input class="title-input" id="taskTitle" value="'+esc(taskDraft.title)+'" placeholder="写清楚要推动的结果"></div><div class="field"><label>下一步动作</label><textarea id="taskNext" rows="1">'+esc(taskDraft.nextAction)+'</textarea></div><section class="task-section checklist-section '+(taskChecklistCollapsed?'collapsed':'')+'" '+(taskChecklistHeight&&!taskChecklistCollapsed?'style="height:'+Math.round(taskChecklistHeight)+'px"':'')+'><button class="checklist-toggle checklist-dropdown-head" type="button" data-toggle-checklist aria-controls="draftChecklistContent" aria-expanded="'+(!taskChecklistCollapsed)+'">'+taskChecklistSummary()+'</button><div id="draftChecklistContent" '+(taskChecklistCollapsed?'hidden':'')+'><div id="draftChecklist">'+checklistMarkup()+'</div><button class="checklist-add-bottom" type="button" data-add-check>＋ 添加检查项</button></div></section><button class="checklist-resizer" id="checklistResizer" type="button" data-tip="上下拖动调整任务清单高度；双击恢复自适应" aria-label="上下拖动调整任务清单高度"></button><div class="field task-notes-field">'+obsidianLinkMarkup(taskDraft)+notesEditor+'</div></section>'+
  '<aside class="task-column attachment-column"><details class="task-support-disclosure" open><summary>附件与关联内容</summary><div class="task-support-content"><section class="task-section task-attachment-paste" data-attachment-paste><div class="task-section-title">附件与预览</div><button type="button" class="dropzone" aria-label="选择附件，也可将文件拖入任务详情">拖入图片或文件<br><span>＋ 选择文件</span></button><div id="taskUploadQueue" aria-live="polite"></div><div class="attachment-list">'+attachmentMarkup()+'</div><div class="preview '+(attachmentPreviewId?'has-preview':'')+'" id="attachmentPreview">'+(attachmentPreviewId?"正在加载预览……":"选择附件后在这里预览")+'</div><p class="muted" style="font-size:10px">鼠标停在此区域，Ctrl / ⌘ + V 粘贴图片。每个文件不超过 50MB。</p></section>'+
  '<section class="task-section"><div class="task-section-title" style="display:flex;align-items:center;justify-content:space-between"><span>关联任务 <span class="muted">双向关联</span></span><button class="link-btn" type="button" data-new-related-task>＋ 新建</button></div><input class="related-search" id="relatedSearch" placeholder="搜索任务名称或下一步……"><div id="relationResults"></div><div class="related-list" id="relatedList">'+relationMarkup()+'</div><p class="muted" style="font-size:10px">新建时会先保存当前事项，并自动建立双向关联；关系不参与状态和排序。</p></section><section class="task-section"><div class="task-section-title" style="display:flex;align-items:center;justify-content:space-between"><span>关键决策</span><button class="link-btn" type="button" data-new-decision data-task="'+taskDraft.id+'" '+(existing?"":"disabled")+'>＋ 记录</button></div><div class="decision-list" id="taskDecisionList">'+taskDecisionMarkup()+'</div><p class="muted" style="font-size:10px">记录会自动关联当前任务、项目与里程碑；不改变任务排序。</p></section><section class="task-section"><div class="task-section-title">周记录</div><button class="btn" style="width:100%" type="button" data-view-task-history="'+taskDraft.id+'" '+(existing?"":"disabled")+'>查看周记录 · '+(existing?taskHistoryEntries(taskDraft.id).length:0)+'</button><p class="muted" style="font-size:10px;margin-bottom:0">历史周为只读快照；当前事项仍是唯一可编辑数据源。</p></section></div></details></aside>';
  initQuillEditors($("#taskEditor"));
@@ -3974,32 +3990,16 @@ function openJournalForWeek(key,expanded=true){
  if(!journalFlush())return false;
  journalUI.open=true;journalUI.expanded=expanded;journalUI.week=key;journalUI.reviewOpen=true;journalUI.signature='';syncWorkJournal();journalMountAboveModal();return true;
 }
-let journalPendingTask=null;
 function openTaskRecord(id){
  if(taskDraft?.id===id&&$('#taskDialog')?.open&&!persistTaskDraft())return;
  const task=taskById(id);if(!task)return;
  if(!journalFlush())return;
  taskJournalPane='journal';
  if(!openJournalForWeek(currentWeekKey(),false))return;
- const date=todayKey(),week=journalWeek(journalUI.week);
- journalPendingTask={id,date,week:journalUI.week};
- if(!week.days[date]){week.days[date]={content:'',updatedAt:''};week.deleted=week.deleted.filter(value=>value!==date);journalRenderDays()}
- journalUI.active=date;journalUI.activeReview='';journalShowTaskContext();journalScrollToDate(date);quillFor(journalActiveEditor())?.focus();
-}
-function journalShowTaskContext(){
- const heading=$('#workJournal .journal-top');if(!heading)return;
- let banner=heading.querySelector('.journal-task-context');if(!banner){banner=document.createElement('div');banner.className='journal-task-context';heading.appendChild(banner)}
- const context=journalPendingTask,task=context&&context.week===journalUI.week?taskById(context.id):null;
- const linked=task&&(journalWeek(context.week).days[context.date]?.taskIds||[]).includes(context.id);
- banner.hidden=!task;banner.textContent=task?'关联事项：'+task.title+(linked?'':' · 写入后关联'):'';
-}
-function journalAttachPendingTask(date,day){
- const context=journalPendingTask;if(!context||context.date!==date||context.week!==journalUI.week||!BackupFormat.meaningful(day.content))return;
- day.taskIds=[...new Set([...(day.taskIds||[]),context.id])];journalPendingTask=null;journalShowTaskContext();
- const links=$('#workJournal [data-record-links="'+date+'"]');if(links)links.outerHTML=journalTaskLinksMarkup(date,day);
+ const date=todayKey();if(linkTaskToJournal(id,date)){journalUI.active=date;journalUI.activeReview='';journalScrollToDate(date);const q=quillFor(journalActiveEditor());q?.focus();q?.setSelection(Math.max(0,q.getLength()-1),0,'silent');}
 }
 function journalTaskLinksMarkup(date,day){
- const chips=(day.taskIds||[]).map(id=>{const task=taskById(id);return '<span class="journal-task-chip"><button type="button" data-open-task="'+esc(id)+'" '+(!task?'disabled':'')+'>'+esc(task?.title||'事项已删除')+'</button><button type="button" data-unlink-record-task="'+esc(id)+'" data-record-date="'+date+'" aria-label="解除关联'+esc(task?.title||'事项')+'">×</button></span>'}).join('');
+ const chips=(day.taskIds||[]).map(id=>{const task=taskById(id);return '<span class="journal-task-chip"><button type="button" data-open-task="'+esc(id)+'" '+(!task?'disabled':'')+'>'+esc(task?.title||'事项已删除')+(task?'<span class="journal-linked-status">'+esc(journalTaskStatusLabel(task.status))+'</span><small class="journal-linked-project">'+esc(projectName(task.project))+'</small>':'')+'</button><button type="button" data-unlink-record-task="'+esc(id)+'" data-record-date="'+date+'" aria-label="解除关联'+esc(task?.title||'事项')+'">×</button></span>'}).join('');
  return '<div class="journal-task-links" data-record-links="'+date+'">'+chips+'<button type="button" class="link-btn" data-link-record-date="'+date+'">＋ 关联事项</button><button type="button" class="link-btn" data-curate-record-date="'+date+'" '+(weekMode(journalUI.week)!=='current'?'disabled':'')+'>整理到周复盘</button></div>';
 }
 function workflowDialog(title,description,body,action){
@@ -4011,13 +4011,13 @@ function workflowDialog(title,description,body,action){
 function openRecordTaskPicker(date){
  if(!journalFlush())return;
  const day=journalWeek(journalUI.week).days[date];if(!day)return;
- workflowDialog('关联现有事项',journalDateLabel(date)+' · 只建立链接，不复制任务','<label class="workflow-search">查找事项<input type="search" data-record-task-search autocomplete="off" placeholder="输入任务或项目名称"></label><div class="workflow-task-choices"></div>','保存关联');
+ workflowDialog('关联现有事项',journalDateLabel(date)+' · 只建立链接，不复制任务','<label class="workflow-search">查找事项<input type="search" data-record-task-search autocomplete="off" placeholder="输入任务或项目名称"></label><label class="record-waiting-filter"><input type="checkbox" data-record-include-waiting>包含等待</label><div class="workflow-task-choices"></div>','保存关联');
  workflowDialogContext={kind:'links',week:journalUI.week,date,selected:new Set(day.taskIds||[])};renderRecordTaskChoices('');$('#workflowDialog [data-record-task-search]')?.focus();
 }
 function renderRecordTaskChoices(query){
  const context=workflowDialogContext;if(context?.kind!=='links')return;
- const items=state.tasks.filter(task=>!task.archived&&(!query||taskSearchMatch(task,query).score>0));
- $('#workflowDialog .workflow-task-choices').innerHTML=items.length?items.map(task=>'<label class="workflow-record-choice"><input type="checkbox" data-record-task-choice="'+esc(task.id)+'" '+(context.selected.has(task.id)?'checked':'')+'><span><b>'+esc(task.title)+'</b><small>'+esc(projectName(task.project))+' · '+esc(task.status)+'</small></span></label>').join(''):'<div class="empty">没有匹配的事项。</div>';
+ const items=recordTaskCandidates(state.tasks,query,!!$('#workflowDialog [data-record-include-waiting]')?.checked);
+ $('#workflowDialog .workflow-task-choices').innerHTML=items.length?items.map(task=>'<label class="workflow-record-choice"><input type="checkbox" data-record-task-choice="'+esc(task.id)+'" '+(context.selected.has(task.id)?'checked':'')+'><span><b>'+esc(task.title)+'</b><small>'+esc(projectName(task.project))+' · '+esc(journalTaskStatusLabel(task.status))+'</small></span></label>').join(''):'<div class="empty">没有匹配的事项。</div>';
 }
 function recordCurationBlocks(key,date=''){
  const week=journalWeek(key),result=[];
@@ -4039,8 +4039,9 @@ function openRecordCuration(key,date=''){
 function confirmWorkflowDialog(){
  const context=workflowDialogContext;if(!context)return;if(context.kind==='planning')return confirmPlanningReview();
  if(context.kind==='links'){
+
   if(!journalFlush())return;
-  commit('修改工作记录关联事项',()=>{const day=journalWeek(context.week).days[context.date];if(day)day.taskIds=[...context.selected]},{immediate:true});
+  try{commit('修改工作记录关联事项',()=>{const day=journalWeek(context.week).days[context.date];if(day){day.taskIds=[...context.selected];for(const excerpt of day.taskExcerpts||[])excerpt.taskIds=excerpt.taskIds.filter(id=>context.selected.has(id))}},{immediate:true});}catch{journalUI.dirty=true;journalUI.error=true;journalStatus();return toast('关联保存失败，请重试')}
   $('#workflowDialog').close();journalUI.signature='';syncWorkJournal();toast('关联已保存');return;
  }
  if(context.kind==='curation'){
@@ -4106,12 +4107,13 @@ document.addEventListener('compositionstart',event=>{if(event.target.matches?.('
 document.addEventListener('compositionend',event=>{if(event.target.matches?.('#taskSearch,#projectTaskSearch,#memoSearch')){event.target.dataset.composing='0';scheduleWorkspaceSearch(event.target)}});
 document.addEventListener('input',event=>{if(event.target.matches?.('[data-record-task-search]')&&!event.isComposing)renderRecordTaskChoices(event.target.value)});
 document.addEventListener('compositionend',event=>{if(event.target.matches?.('[data-record-task-search]'))renderRecordTaskChoices(event.target.value)});
-document.addEventListener('change',event=>{const id=event.target.dataset.recordTaskChoice;if(id&&workflowDialogContext?.kind==='links'){event.target.checked?workflowDialogContext.selected.add(id):workflowDialogContext.selected.delete(id)}});
+document.addEventListener('change',event=>{if(event.target.matches('[data-record-include-waiting]'))renderRecordTaskChoices($('#workflowDialog [data-record-task-search]')?.value||'');const id=event.target.dataset.recordTaskChoice;if(id&&workflowDialogContext?.kind==='links'){event.target.checked?workflowDialogContext.selected.add(id):workflowDialogContext.selected.delete(id)}});
 document.addEventListener('submit',event=>{
  const form=event.target;
  if(form.matches('[data-quick-capture]')){event.preventDefault();const input=form.elements.captureTitle,title=input.value.trim();if(!title)return;commit('快速记录到收件箱',draft=>{const task=normalizeTask({id:uid('task'),title,status:'待处理',priority:'P2'});draft.tasks.unshift(task);draft.order.inbox.unshift(task.id)},{immediate:true});toast('已存入临时收件箱');requestAnimationFrame(()=>$('#quickCaptureTitle')?.focus({preventScroll:true}));}
 });
 function handleWorkflowClick(target){
+ if(handleJournalEnhancementClick(target))return true;
  if(target.dataset.projectBriefFilter){filterProjectFromBrief(target.dataset.projectBriefFilter);return true}
  if(target.dataset.editProjectStage){openProject(target.dataset.editProjectStage,{tab:'milestones',milestoneId:target.dataset.stageId});return true}
  if(target.dataset.openTask&&target.closest('.journal-task-chip')){if(!journalFlush())return true;if(!journalUI.pinned){journalUI.open=false;syncWorkJournal()}}
@@ -4120,7 +4122,7 @@ function handleWorkflowClick(target){
  if(target.dataset.curateRecordDate){openRecordCuration(journalUI.week,target.dataset.curateRecordDate);return true}
  if(target.dataset.curateWeek){openRecordCuration(target.dataset.curateWeek);return true}
  if(target.dataset.openWeekJournal){openJournalForWeek(target.dataset.openWeekJournal);return true}
- if(target.dataset.unlinkRecordTask){const id=target.dataset.unlinkRecordTask,date=target.dataset.recordDate;if(!journalFlush())return true;commit('解除工作记录关联',()=>{const day=journalWeek(journalUI.week).days[date];if(day)day.taskIds=(day.taskIds||[]).filter(value=>value!==id)},{immediate:true});return true}
+ if(target.dataset.unlinkRecordTask){const id=target.dataset.unlinkRecordTask,date=target.dataset.recordDate;if(!journalFlush())return true;commit('解除工作记录关联',()=>{const day=journalWeek(journalUI.week).days[date];if(day){day.taskIds=(day.taskIds||[]).filter(value=>value!==id);for(const excerpt of day.taskExcerpts||[])excerpt.taskIds=excerpt.taskIds.filter(value=>value!==id)}},{immediate:true});return true}
  return false;
 }
 function openPlanningReview(scope){
@@ -4382,7 +4384,7 @@ function readTaskWorkspaceLayout(){try{let raw=JSON.parse(localStorage.getItem(T
 let taskWorkspaceLayout=readTaskWorkspaceLayout();
 function saveTaskWorkspaceLayout(){try{localStorage.setItem(TASK_WORKSPACE_LAYOUT_KEY,JSON.stringify(taskWorkspaceLayout))}catch{}}
 function taskWorkspaceMetrics(viewportWidth,width=1180,sideWidth=310){let compact=viewportWidth<=880,available=Math.max(1,viewportWidth-(compact?0:32)),dialogWidth=Math.min(available,Math.max(720,width));return{width:dialogWidth,sideWidth:Math.max(240,Math.min(Math.max(240,dialogWidth-430),sideWidth)),compact,stacked:dialogWidth<=900}}
-function taskChecklistSummary(){let count=taskDraft.checklist.filter(item=>item.done).length;return'<span>执行清单</span><span class="checklist-progress">'+count+' / '+taskDraft.checklist.length+'</span><span class="checklist-chevron" aria-hidden="true">'+(taskChecklistCollapsed?'▶':'▼')+'</span>'}
+function taskChecklistSummary(){let count=taskDraft.checklist.filter(item=>item.done).length;return'<span>任务清单</span><span class="checklist-progress">'+count+' / '+taskDraft.checklist.length+'</span><span class="checklist-chevron" aria-hidden="true">'+(taskChecklistCollapsed?'▶':'▼')+'</span>'}
 function taskLayoutField(id){return $("#"+id)?.closest(".field")}
 function syncTaskWorkspaceGeometry(){
  let c=taskLayoutContext;if(!c||!c.modal.isConnected)return;let metrics=taskWorkspaceMetrics(innerWidth,taskWorkspaceLayout.width,taskWorkspaceLayout.sideWidth);c.modal.style.setProperty('--task-dialog-width',metrics.width+'px');
@@ -4409,11 +4411,11 @@ function initTaskLayouts(){
  let side=document.createElement('aside');side.className='task-column task-workspace-side';side.setAttribute('aria-label','事项信息');side.innerHTML='<div class="task-side-heading"><strong>事项信息</strong><span class="task-side-rail">事项信息</span><button type="button" data-task-side-toggle aria-controls="taskSideBody" aria-expanded="true" aria-label="收起左侧事项信息">‹</button></div>';
  let sideBody=document.createElement('div');sideBody.id='taskSideBody';sideBody.className='task-side-body';side.append(sideBody);let grid=document.createElement('div');grid.className='task-workspace-fields';
  for(let id of ['draftStatus','draftPriority','draftType','draftPlanDate','draftDue','draftCompleted','draftFollowup']){let field=taskLayoutField(id);field.querySelector('label').htmlFor=id;field.querySelector('.hover-select-trigger')?.setAttribute('aria-label',field.querySelector('label').textContent);if(id==='draftType')field.classList.add('task-field-full');grid.append(field)}sideBody.append(grid);
- let flags=document.createElement('div');flags.className='task-workspace-flags';for(let id of ['draftFocus','draftWeek']){let label=$('#'+id).closest('label');label.removeAttribute('style');flags.append(label)}sideBody.append(flags);let record=$('.task-record-section',props);sideBody.append(record);
+ let flags=document.createElement('div');flags.className='task-workspace-flags';for(let id of ['draftFocus','draftWeek']){let label=$('#'+id).closest('label');label.removeAttribute('style');flags.append(label)}sideBody.append(flags);let record=$('.task-record-section',props);
  checklist.style.removeProperty('height');$('.checklist-add-bottom',checklist).textContent='＋ 添加步骤';
  let records=document.createElement('div');records.id='taskSupportPanel';records.className='task-support-scroll task-left-records';let makeGroup=(key,label,nodes,count)=>{let group=document.createElement('details');group.className='task-left-group';group.dataset.taskGroup=key;group.innerHTML='<summary>'+label+(count?'<span data-task-support-count="'+key+'">0</span>':'<span class="task-project-summary">'+esc(projectById(taskDraft.project)?.name||'通用事项')+'</span>')+'</summary>';let body=document.createElement('div');body.className='task-left-group-body';if(count){body.id='taskSupport-'+key;body.dataset.taskSupportSection=key;body.setAttribute('role','region');body.setAttribute('aria-label',label)}nodes.forEach(node=>body.append(node));group.append(body);group.open=openGroups.includes(key);records.append(group);return group};
  for(let id of ['draftProject','draftMilestone'])taskLayoutField(id).querySelector('label').htmlFor=id;let projectLink=$('.task-project-link',props);makeGroup('project','项目与里程碑',[taskLayoutField('draftProject'),taskLayoutField('draftMilestone'),projectLink].filter(Boolean),false);
- for(let [index,key,label] of [[0,'attachments','附件与预览'],[1,'related','相关事项'],[2,'decisions','关键决策'],[3,'history','周记录']])makeGroup(key,label,[sections[index]],true);sideBody.append(records);
+ for(let [index,key,label] of [[0,'attachments','附件与预览'],[1,'related','相关事项'],[2,'decisions','关键决策'],[3,'history','周记录']])makeGroup(key,label,[sections[index]],true);sideBody.append(records);record.innerHTML=taskRecordSectionMarkup();sideBody.append(record);
  let focus=document.createElement('button');focus.type='button';focus.className='task-focus-toggle';focus.dataset.taskFocus='';focus.textContent='⛶ 专注编辑';$('.obsidian-heading',notes).append(focus);
  let inner=document.createElement('div');inner.className='task-editor-inner';inner.append(checklist,notes);main.replaceChildren(inner);main.classList.add('task-notes-column');
  let splitter=document.createElement('button');splitter.type='button';splitter.id='taskColumnSplitter';splitter.className='task-column-splitter';splitter.setAttribute('role','separator');splitter.setAttribute('aria-orientation','vertical');splitter.setAttribute('aria-label','调整事项信息与备注宽度');splitter.title='拖动调整两栏宽度；左右方向键微调；双击恢复';
@@ -4434,7 +4436,7 @@ function saveRelationsNow(label){
 }
 function handleClick(event){
  let target=event.target.closest("[data-retry-thumb],[data-image-view],button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
- if(target.hasAttribute("data-task-record"))return openTaskRecord(taskDraft.id);
+
  if(handleWorkflowClick(target))return;
  if(handleTaskFilterClick(target))return;
  if(target.dataset.projectPane){ui.projectMobilePane=target.dataset.projectPane;return syncProjectMobilePane()}
@@ -4767,7 +4769,7 @@ function finishResize(event){
  todayResizeState=null;checklistResizeState=null;$('#checklistResizer')?.classList.remove('active');
 }
 document.addEventListener("pointerup",finishResize);document.addEventListener("pointercancel",finishResize);document.addEventListener("lostpointercapture",finishResize);
-document.addEventListener("dblclick",event=>{let richHandle=event.target.closest?.("[data-rich-height-resizer]");if(richHandle){let key=richHandle.dataset.richHeightResizer,spec=RICH_HEIGHT_SPECS[key],box=richHandle.closest("[data-rich-resize]");if(!spec||!box)return;uiLayout[key]=spec.default;saveUiLayout();box.style.setProperty("--rich-editor-height",spec.default+"px");toast("文本框高度已恢复默认");return}if(event.target.id==="checklistResizer"){taskChecklistHeight=0;$(".checklist-section")?.style.removeProperty("height");toast("检查清单高度已恢复自适应")}else if(event.target.id==="todayHeightResizer"){uiLayout.todayHeight=460;saveUiLayout();$("#todayExecution")?.style.setProperty("--today-height","460px");scheduleTodayScrollability();toast("执行区高度已恢复默认")}else if(event.target.id==="quickNoteHeightResizer"){uiLayout.quickNoteHeight=190;saveUiLayout();$(".quick-note-card")?.style.setProperty("--quick-note-height","190px");scheduleTodayScrollability();toast("速记输入区高度已恢复默认")}else if(event.target.id==="weekPlanSplitter"||event.target.id==="weekReviewSplitter"){let review=event.target.id==="weekReviewSplitter",key=review?"weekReviewLeft":"weekPlanLeft",value=review ? .46 : .5;uiLayout[key]=value;saveUiLayout();$(review?"#weekReviewSplit":"#weekPlanSplit")?.style.setProperty("--week-left",(value*100)+"%");toast("本周页面分栏已恢复默认")}});
+document.addEventListener("dblclick",event=>{let richHandle=event.target.closest?.("[data-rich-height-resizer]");if(richHandle){let key=richHandle.dataset.richHeightResizer,spec=RICH_HEIGHT_SPECS[key],box=richHandle.closest("[data-rich-resize]");if(!spec||!box)return;uiLayout[key]=spec.default;saveUiLayout();box.style.setProperty("--rich-editor-height",spec.default+"px");toast("文本框高度已恢复默认");return}if(event.target.id==="checklistResizer"){taskChecklistHeight=0;$(".checklist-section")?.style.removeProperty("height");toast("任务清单高度已恢复自适应")}else if(event.target.id==="todayHeightResizer"){uiLayout.todayHeight=460;saveUiLayout();$("#todayExecution")?.style.setProperty("--today-height","460px");scheduleTodayScrollability();toast("执行区高度已恢复默认")}else if(event.target.id==="quickNoteHeightResizer"){uiLayout.quickNoteHeight=190;saveUiLayout();$(".quick-note-card")?.style.setProperty("--quick-note-height","190px");scheduleTodayScrollability();toast("速记输入区高度已恢复默认")}else if(event.target.id==="weekPlanSplitter"||event.target.id==="weekReviewSplitter"){let review=event.target.id==="weekReviewSplitter",key=review?"weekReviewLeft":"weekPlanLeft",value=review ? .46 : .5;uiLayout[key]=value;saveUiLayout();$(review?"#weekReviewSplit":"#weekPlanSplit")?.style.setProperty("--week-left",(value*100)+"%");toast("本周页面分栏已恢复默认")}});
 
 
 window.addEventListener("blur",()=>{document.documentElement.removeAttribute("data-task-dragging");$$(".drag-before,.drag-after,.drag-over").forEach(node=>node.classList.remove("drag-before","drag-after","drag-over"))});
@@ -5111,12 +5113,12 @@ function journalLayout(){
 }
 function journalActionIcon(action){let path=action==="close"?"M9 5l7 7-7 7":action==="restore"?"M3 8h5V3M16 3v5h5M21 16h-5v5M8 21v-5H3":"M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5";return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+path+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
 function initWorkJournal(){if($("#workJournal"))return;let handle=document.createElement("button");handle.className="journal-handle";handle.id="journalHandle";handle.textContent="‹ 工作记录";handle.setAttribute("aria-label","打开每日工作记录");handle.onclick=()=>{journalUI.week=currentWeekKey();journalUI.signature="";journalUI.active="";journalUI.open=true;syncWorkJournal();journalScrollToToday()};document.body.appendChild(handle);let panel=document.createElement("aside");panel.id="workJournal";panel.setAttribute("aria-label","每日工作记录");panel.hidden=true;panel.innerHTML='<div class="journal-resize" tabindex="0" role="separator" aria-label="调整工作记录宽度" aria-orientation="vertical"></div><div class="journal-control-rail"><div class="journal-actions" aria-label="工作记录操作"><button type="button" data-journal-action="expand" title="放大工作记录" aria-label="放大工作记录">'+journalActionIcon('expand')+'</button><button type="button" data-journal-action="pin" title="固定保持展开" aria-label="固定保持展开"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2l8 8-3 1-4 4 1 5-1 1-5-6-5 5-1-1 5-5-6-5 1-1 5 1 4-4z"/></svg></button><button type="button" data-journal-action="close" aria-label="收起工作记录" title="收起工作记录">'+journalActionIcon('close')+'</button></div></div><div class="journal-top"><div class="journal-heading"><h2>工作记录</h2></div><div class="journal-week-nav"><button type="button" data-journal-action="prev" aria-label="上一周">‹</button><button type="button" class="journal-week-range" data-journal-action="week" aria-haspopup="dialog"></button><button type="button" data-journal-action="next" aria-label="下一周">›</button><button type="button" data-journal-action="today">本周</button></div><p class="journal-calendar-notice"></p>'+toolbar()+'</div><div class="journal-workspace"><h3 class="journal-daily-heading">每日记录</h3><div class="journal-body"></div><button class="journal-column-splitter" type="button" role="separator" aria-orientation="vertical" aria-label="调整每日记录与周五整理宽度" aria-valuemin="35" aria-valuemax="72" hidden></button><div class="journal-review-pane" aria-label="周五整理" hidden></div></div><div class="journal-footer"><span class="journal-status" id="journalStatus" role="status"></span><div class="journal-copy"><button type="button" class="btn" data-journal-action="copy" aria-expanded="false">复制本周 ▾</button><div class="journal-copy-menu" hidden><button type="button" data-journal-copy="rich">复制富文本（Word）</button><button type="button" data-journal-copy="markdown">复制 Markdown（OB）</button><button type="button" data-journal-copy="plain">复制纯文本</button><button type="button" data-journal-copy="review">周五整理 · 纯文本</button><button type="button" data-journal-copy="review-rich">周五整理 · 富文本（Word）</button><button type="button" data-journal-copy="review-markdown">周五整理 · Markdown（OB）</button></div></div></div>';document.body.appendChild(panel);
- panel.addEventListener("input",event=>{let reviewEditor=event.target.closest("[data-journal-review]"),editor=event.target.closest("[data-journal-date]"),week=journalWeek(journalUI.week),field=reviewEditor?.dataset.journalReview;if(field&&JOURNAL_REVIEW_FIELDS.includes(field)){if(weekMode(journalUI.week)!=='current')return;recordDirectEdit('summary:'+journalUI.week+':'+field,'编辑周总结');setWeeklySummary(journalUI.week,field,reviewEditor.matches('.rich-editor')?serializeRichEditor(reviewEditor):normalizeRich(reviewEditor.value));syncWeeklySummaryEditors(journalUI.week,field,reviewEditor);journalPersist();return}if(!editor)return;let day=week.days[editor.dataset.journalDate];if(!day)return;day.content=serializeRichEditor(editor);journalAttachPendingTask(editor.dataset.journalDate,day);day.updatedAt=new Date().toISOString();journalPersist();journalUpdateReviewLinks()});
+ panel.addEventListener("input",event=>{let reviewEditor=event.target.closest("[data-journal-review]"),editor=event.target.closest("[data-journal-date]"),week=journalWeek(journalUI.week),field=reviewEditor?.dataset.journalReview;if(field&&JOURNAL_REVIEW_FIELDS.includes(field)){if(weekMode(journalUI.week)!=='current')return;recordDirectEdit('summary:'+journalUI.week+':'+field,'编辑周总结');setWeeklySummary(journalUI.week,field,reviewEditor.matches('.rich-editor')?serializeRichEditor(reviewEditor):normalizeRich(reviewEditor.value));syncWeeklySummaryEditors(journalUI.week,field,reviewEditor);journalPersist();return}if(!editor)return;let day=week.days[editor.dataset.journalDate];if(!day)return;day.content=serializeRichEditor(editor);day.updatedAt=new Date().toISOString();journalPersist();journalUpdateReviewLinks()});
  panel.addEventListener("focusin",event=>{let editor=event.target.closest(".rich-editor"),toolbar=editor?.dataset.journalReview?$(".journal-review-tools .rich-toolbar",panel):$(".journal-daily-header .rich-toolbar",panel)||$(".journal-top .rich-toolbar",panel);if(!editor){if(event.target.matches("textarea[data-journal-review]")){if(toolbar)toolbar.inert=true;activeRichEditor=null}return}if(toolbar)toolbar.inert=false;journalUI.activeReview=editor.dataset.journalReview||"";if(editor.dataset.journalDate)journalUI.active=editor.dataset.journalDate;activeRichEditor=editor;updateRichToolbar(editor)});
  journalInitSplitter(panel);panel.addEventListener("click",journalClick);let resize=$(".journal-resize",panel);resize.addEventListener("pointerdown",event=>{if(journalUI.expanded||event.button!==0)return;event.preventDefault();resize.setPointerCapture(event.pointerId);resize.dataset.resizing="1"});resize.addEventListener("pointermove",event=>{if(!resize.dataset.resizing)return;let rect=$(".main").getBoundingClientRect();journalUI.width=Math.min(rect.width,Math.max(360,rect.right-event.clientX));journalLayout()});let end=()=>{delete resize.dataset.resizing;journalRemember()};resize.addEventListener("pointerup",end);resize.addEventListener("pointercancel",end);resize.addEventListener("keydown",event=>{if(!["ArrowLeft","ArrowRight"].includes(event.key))return;event.preventDefault();journalUI.width=Math.max(360,journalUI.width+(event.key==="ArrowLeft"?24:-24));journalLayout();journalRemember()});
  panel.addEventListener("keydown",event=>{if(event.key!=="Escape")return;if(!$(".journal-copy-menu",panel).hidden){$(".journal-copy-menu",panel).hidden=true;$('[data-journal-action="copy"]',panel).setAttribute("aria-expanded","false");event.stopPropagation();return}if(journalUI.calendar){event.preventDefault();event.stopPropagation();journalCloseCalendar()}else if(journalUI.expanded){event.preventDefault();journalUI.expanded=false;syncWorkJournal()}});window.addEventListener("resize",journalLayout);window.addEventListener("scroll",()=>{if(journalUI.open)journalLayout()},true);new ResizeObserver(()=>{if(journalUI.open)journalLayout()}).observe($(".topbar"));window.addEventListener("pagehide",journalFlush);document.addEventListener("visibilitychange",()=>{if(document.hidden)journalFlush()});document.addEventListener("pointerdown",event=>{if(!event.target.closest(".journal-copy")){ $(".journal-copy-menu",panel).hidden=true;$('[data-journal-action="copy"]',panel).setAttribute("aria-expanded","false")}if(journalUI.calendar&&!event.target.closest(".journal-calendar,[data-journal-change-date],[data-journal-action=week],[data-journal-action=add]"))journalCloseCalendar()});setInterval(journalStatus,1500);
 }
-function syncWorkJournal(){initWorkJournal();let panel=$("#workJournal");panel.hidden=!journalUI.open;$("#journalHandle").hidden=journalUI.open;if(!journalUI.open){journalPendingTask=null;syncTaskJournalLayout();return;}let missing=!state.meta.workJournal?.weeks?.[journalUI.week];journalWeek(journalUI.week);if(missing){journalPersist(true);journalUI.signature=""}journalLayout();$(".journal-week-range",panel).textContent=weekRangeLabel(journalUI.week)+" ▾";let years=[journalUI.week.slice(0,4),weekEnd(journalUI.week).slice(0,4)];let hasCalendar=years.every(year=>WORK_JOURNAL_CALENDARS[year]),notice=$(".journal-calendar-notice",panel);notice.hidden=hasCalendar;notice.textContent=hasCalendar?"":"该年份尚未配置官方安排，暂按周一至周五生成，可手动调整";$(".journal-week-range",panel).title=hasCalendar?"按中国官方放假与调休安排生成工作日":"暂按周一至周五生成，可手动调整";let expand=$('[data-journal-action="expand"]',panel);expand.innerHTML=journalActionIcon(journalUI.expanded?"restore":"expand");expand.title=journalUI.expanded?"还原抽屉":"放大工作记录";expand.setAttribute("aria-label",journalUI.expanded?"还原抽屉":"放大工作记录");let pin=$('[data-journal-action="pin"]',panel);pin.classList.toggle("active",journalUI.pinned);pin.setAttribute("aria-pressed",String(journalUI.pinned));pin.title=journalUI.pinned?"取消固定":"固定保持展开";pin.setAttribute("aria-label",pin.title);if(journalSignature()!==journalUI.signature||!panel.querySelector(".journal-add"))journalRenderDays();journalUpdateReviewLinks();journalShowTaskContext();journalStatus()}
+function syncWorkJournal(){initWorkJournal();let panel=$("#workJournal");panel.hidden=!journalUI.open;$("#journalHandle").hidden=journalUI.open;if(!journalUI.open){syncTaskJournalLayout();return;}let missing=!state.meta.workJournal?.weeks?.[journalUI.week];journalWeek(journalUI.week);if(missing){journalPersist(true);journalUI.signature=""}journalLayout();$(".journal-week-range",panel).textContent=weekRangeLabel(journalUI.week)+" ▾";let years=[journalUI.week.slice(0,4),weekEnd(journalUI.week).slice(0,4)];let hasCalendar=years.every(year=>WORK_JOURNAL_CALENDARS[year]),notice=$(".journal-calendar-notice",panel);notice.hidden=hasCalendar;notice.textContent=hasCalendar?"":"该年份尚未配置官方安排，暂按周一至周五生成，可手动调整";$(".journal-week-range",panel).title=hasCalendar?"按中国官方放假与调休安排生成工作日":"暂按周一至周五生成，可手动调整";let expand=$('[data-journal-action="expand"]',panel);expand.innerHTML=journalActionIcon(journalUI.expanded?"restore":"expand");expand.title=journalUI.expanded?"还原抽屉":"放大工作记录";expand.setAttribute("aria-label",journalUI.expanded?"还原抽屉":"放大工作记录");let pin=$('[data-journal-action="pin"]',panel);pin.classList.toggle("active",journalUI.pinned);pin.setAttribute("aria-pressed",String(journalUI.pinned));pin.title=journalUI.pinned?"取消固定":"固定保持展开";pin.setAttribute("aria-label",pin.title);if(journalSignature()!==journalUI.signature||!panel.querySelector(".journal-add"))journalRenderDays();journalUpdateReviewLinks();journalStatus()}
 function journalReviewMarkup(){
  let week=journalWeek(journalUI.week),review=normalizeJournalReview(week.review),rich=journalRichReviewEnabled(),labels=WEEKLY_SUMMARY_LABELS;
  let fields=JOURNAL_REVIEW_FIELDS.map(field=>rich?'<section class="journal-review-field"><label id="journalReviewLabel-'+field+'">'+labels[field]+'</label><div class="rich-editor journal-review-editor" data-journal-review="'+field+'" contenteditable="'+(weekMode(journalUI.week)==='current')+'" role="textbox" aria-multiline="true" aria-labelledby="journalReviewLabel-'+field+'" data-placeholder="写下'+labels[field]+'…">'+journalReviewHTML(week,field)+'</div></section>':'<label class="journal-review-field"><span>'+labels[field]+'</span><textarea rows="2" data-journal-review="'+field+'" '+(weekMode(journalUI.week)!=='current'?'readonly':'')+' placeholder="写下'+labels[field]+'…">'+esc(review[field])+'</textarea></label>').join('');
@@ -5132,7 +5134,7 @@ function journalScrollToToday(){if(journalUI.week!==currentWeekKey())return;let 
 function journalRenderDays(){
  let panel=$("#workJournal"),body=$(".journal-body",panel),position=body.scrollTop,week=journalWeek(journalUI.week);
  journalCloseCalendar();if(activeRichEditor?.closest("#workJournal"))activeRichEditor=null;
- panel.querySelector(".journal-review")?.remove();body.innerHTML=Object.keys(week.days).sort().map(date=>'<section class="journal-day'+(date===todayKey()?' is-today':'')+'" data-journal-section="'+date+'"><div class="journal-date-row"><button type="button" class="journal-date" data-journal-change-date="'+date+'" aria-label="修改日期：'+journalDateLabel(date)+'">'+journalDateLabel(date)+(date===todayKey()?'<span class="journal-today">今天</span>':'')+'</button><button type="button" class="journal-remove" data-journal-remove="'+date+'" aria-label="移除'+journalDateLabel(date)+'">移除</button></div><div class="rich-editor" data-journal-date="'+date+'" contenteditable="true" data-placeholder="记录实际发生的事情、结果与下一步…">'+week.days[date].content+'</div>'+journalTaskLinksMarkup(date,week.days[date])+'</section>').join("")+'<button type="button" class="journal-add" data-journal-action="add">＋ 新增日期</button>'+journalReviewMarkup();
+ panel.querySelector(".journal-review")?.remove();body.innerHTML=Object.keys(week.days).sort().map(date=>'<section class="journal-day'+(date===todayKey()?' is-today':'')+'" data-journal-section="'+date+'"><div class="journal-date-row"><button type="button" class="journal-date" data-journal-change-date="'+date+'" aria-label="修改日期：'+journalDateLabel(date)+'">'+journalDateLabel(date)+(date===todayKey()?'<span class="journal-today">今天</span>':'')+'</button><button type="button" class="journal-remove" data-journal-remove="'+date+'" aria-label="移除'+journalDateLabel(date)+'">移除</button></div>'+journalTaskLinksMarkup(date,week.days[date])+'<div class="rich-editor" data-journal-date="'+date+'" contenteditable="true" data-placeholder="记录实际发生的事情、结果与下一步…">'+week.days[date].content+'</div>'+journalSelectionActions(date)+'</section>').join("")+'<button type="button" class="journal-add" data-journal-action="add">＋ 新增日期</button>'+journalReviewMarkup();
  initQuillEditors(body);journalUI.activeReview="";journalSyncPanes();body.scrollTop=position;journalUI.signature=journalSignature();if(!week.days[journalUI.active])journalUI.active=Object.keys(week.days).sort()[0]||"";
  panel.querySelectorAll(".rich-toolbar").forEach(node=>node.inert=false);journalUpdateReviewLinks();
 }
@@ -5368,7 +5370,7 @@ document.addEventListener('click',event=>{
  const target=taskJournalPane==='task'?$('#taskTitle'):journalActiveEditor();target?.focus({preventScroll:true});
 });
 // Preview-only integration. Showcase examples never enter synchronized business data.
-let componentPreview={open:false,page:null,focus:null},journalShortcutReturn=null;
+let componentPreview={open:false,page:null,focus:null};
 const scopedPlanningCards=new WeakMap();
 let scopedPlanningPrefs={};try{scopedPlanningPrefs=JSON.parse(localStorage.getItem('work-cockpit-planning-columns-v2')||'{}')}catch{}
 let planningRowsObserver=null;const observedPlanningRows=new Set();
@@ -5393,38 +5395,6 @@ function initScopedPlanningResize(root=document){
   }
   if(main){if(!observedPlanningRows.has(main)){observedPlanningRows.add(main);planningRowsObserver.observe(main)}syncPlanningRow(main)}
  });
-}
-function journalMountAboveModal(){
- let panel=$('#workJournal');if(!panel)return;if(!journalUI.open){syncTaskJournalLayout();return;}
- if($('#workflowDialog')?.open){if(panel.parentElement!==document.body)document.body.appendChild(panel);return;}
- let modal=[...document.querySelectorAll('dialog[open]')].filter(node=>!panel.contains(node)&&!node.matches('.journal-copy-dialog')).at(-1),host=expandedRichBox&&(!modal||modal.contains(expandedRichBox))?expandedRichBox:modal||document.body;
- if(panel.parentElement!==host){let active=panel.contains(document.activeElement)?document.activeElement:null;host.appendChild(panel);active?.focus({preventScroll:true})}journalLayout();
-}
-function toggleJournalShortcut(){
- initWorkJournal();let panel=$('#workJournal');
- if(journalUI.open){
-  let active=document.activeElement;if(panel.contains(active))active.blur();
-  if(!journalFlush())return;
-  journalCloseCalendar();journalUI.open=false;journalRemember();syncWorkJournal();if(panel.parentElement!==document.body)document.body.appendChild(panel);
-  if(journalShortcutReturn?.isConnected)journalShortcutReturn.focus({preventScroll:true});journalShortcutReturn=null;
- }else{
-  journalShortcutReturn=document.activeElement;journalUI.open=true;syncWorkJournal();journalMountAboveModal();
- }
-}
-window.addEventListener('keydown',event=>{
- if(!VISUAL_PREVIEW_ENABLED)return;
- // Physical key, intentionally valid in all editable fields and during composition.
- if(event.code==='Backquote'){
-  event.preventDefault();event.stopImmediatePropagation();if(event.repeat)return;toggleJournalShortcut();return;
- }
- if(event.altKey&&!event.ctrlKey&&!event.metaKey&&!event.isComposing&&['Digit1','Digit2','Digit3'].includes(event.code)){
-  let editor=event.target.closest?.('.rich-editor');if(!editor||!quillFor(editor)?.isEnabled())return;
-  event.preventDefault();event.stopImmediatePropagation();applyRichCommand({Digit1:'heading2',Digit2:'heading3',Digit3:'paragraph'}[event.code],editor);
- }
-},true);
-if(VISUAL_PREVIEW_ENABLED){
- new MutationObserver(()=>{if(journalUI.open)journalMountAboveModal();else syncTaskJournalLayout()}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['open']});
- document.addEventListener('focusin',event=>{let editor=event.target.closest?.('#workJournal [data-journal-review]');if(editor)journalUI.lastReview=editor.dataset.journalReview});
 }
 function componentPreviewMarkup(){
  let sample={...state.tasks[0],id:'component-example',title:'核对样机供电与测试条件，补充复测结论',nextAction:'记录测试条件与验证结果',project:state.projects[0]?.id||'',status:'进行中',priority:'P1',type:'任务',focus:false,week:true,planDate:todayKey(),due:'',completed:''};
@@ -5518,6 +5488,181 @@ if(VISUAL_PREVIEW_ENABLED){
  let scheduled=false;const refresh=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;initUiResizeDividers()})};
  new MutationObserver(refresh).observe(document.body,{childList:true,subtree:true});initUiResizeDividers();
 }
+// Journal interactions are production features, independent of appearance/showcase flags.
+let journalShortcutReturn=null,journalShortcutHeld=false,journalShortcutAt=0,journalImeTarget=null;
+function journalMountAboveModal(){
+ const panel=$('#workJournal');if(!panel)return;if(!journalUI.open){syncTaskJournalLayout();return}
+ const modal=[...document.querySelectorAll('dialog[open]')].filter(node=>!panel.contains(node)&&!node.matches('.journal-copy-dialog')).at(-1);
+ const host=expandedRichBox&&(!modal||modal.contains(expandedRichBox))?expandedRichBox:modal||document.body;
+ if(panel.parentElement!==host){const active=panel.contains(document.activeElement)?document.activeElement:null;host.append(panel);active?.focus({preventScroll:true})}journalLayout();
+}
+function toggleJournalShortcut(){
+ initWorkJournal();const panel=$('#workJournal');
+ if(journalUI.open){
+  // Failed writes keep the draft and expose the reason rather than silently ignoring a key.
+  if(!journalFlush()){toast('工作记录保存失败，请重试保存；草稿仍保留');return}
+  const active=document.activeElement;if(panel.contains(active))active.blur();journalCloseCalendar();journalUI.open=false;journalRemember();syncWorkJournal();document.body.append(panel);
+  if(journalShortcutReturn?.isConnected)journalShortcutReturn.focus({preventScroll:true});journalShortcutReturn=null;
+ }else{journalShortcutReturn=document.activeElement;journalUI.open=true;syncWorkJournal();journalMountAboveModal()}
+}
+window.addEventListener('keydown',event=>{
+ if(event.code==='Backquote'){
+  event.preventDefault();event.stopImmediatePropagation();journalShortcutAt=performance.now();
+  if(event.repeat||journalShortcutHeld)return;journalShortcutHeld=true;
+  if(event.isComposing){journalImeTarget=event.target;return}toggleJournalShortcut();return;
+ }
+ if(event.altKey&&!event.ctrlKey&&!event.metaKey&&!event.isComposing&&['Digit1','Digit2','Digit3'].includes(event.code)){
+  const editor=event.target.closest?.('.rich-editor');if(!editor||!quillFor(editor)?.isEnabled())return;
+  event.preventDefault();event.stopImmediatePropagation();applyRichCommand({Digit1:'heading2',Digit2:'heading3',Digit3:'paragraph'}[event.code],editor);
+ }
+},true);
+window.addEventListener('keyup',event=>{if(event.code==='Backquote'){event.preventDefault();event.stopImmediatePropagation();journalShortcutHeld=false}},true);
+window.addEventListener('beforeinput',event=>{if(performance.now()-journalShortcutAt<200&&['`','~','·'].includes(event.data)&&['insertText','insertCompositionText'].includes(event.inputType)){event.preventDefault();event.stopImmediatePropagation()}},true);
+document.addEventListener('compositionend',event=>{if(event.target===journalImeTarget){journalImeTarget=null;queueMicrotask(toggleJournalShortcut)}},true);
+window.addEventListener('blur',()=>{journalShortcutHeld=false;journalImeTarget=null});
+new MutationObserver(()=>{if(journalUI.open)journalMountAboveModal();else syncTaskJournalLayout()}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['open']});
+document.addEventListener('focusin',event=>{const editor=event.target.closest?.('#workJournal [data-journal-review]');if(editor)journalUI.lastReview=editor.dataset.journalReview});
+
+function journalTaskStatusLabel(status){return status==='待处理'?'未开始':status}
+function recordTaskCandidates(tasks,query='',includeWaiting=false){
+ const statuses=['进行中','待处理','未开始','暂停','已暂停'];if(includeWaiting)statuses.push('等待');
+ return tasks.filter(task=>!task.archived&&statuses.includes(task.status)&&(!query||taskSearchMatch(task,query).score>0))
+  .sort((a,b)=>Number(!!b.focus)-Number(!!a.focus)||Number(!!b.week)-Number(!!a.week)||statuses.indexOf(a.status)-statuses.indexOf(b.status)||String(a.title).localeCompare(String(b.title),'zh-CN'));
+}
+function taskChecklistRemaining(task){return(task.checklist||[]).filter(item=>!item.done&&String(item.text||'').trim()).length}
+function taskChecklistBadge(task){const count=taskChecklistRemaining(task);return count?'<span class="task-checklist-remaining" aria-label="任务清单还有'+count+'项未完成" title="任务清单 · '+count+' 项未完成">☷ '+count+'</span>':''}
+function taskRecordSectionMarkup(){
+ return '<div class="task-journal-history">'+taskJournalHistoryMarkup(taskDraft.id)+'</div><button type="button" class="task-journal-drag" draggable="true" data-journal-task-drag="'+esc(taskDraft.id)+'" aria-label="拖到工作记录；点击关联今天" title="拖到指定日期；点击或按 Enter 关联今天"><span aria-hidden="true">⠿</span><span>拖到工作记录<small>拖至日期 · 点击记录今天</small></span><span aria-hidden="true">↗</span></button>';
+}
+function taskJournalHistoryMarkup(id){
+ const entries=[];for(const [key,week] of Object.entries(state.meta.workJournal?.weeks||{}))for(const [date,day] of Object.entries(week.days||{}))if(day.taskIds?.includes(id))entries.push({key,date,day});
+ entries.sort((a,b)=>b.date.localeCompare(a.date));
+ return '<details class="task-record-timeline"><summary>关联工作记录 <span>'+entries.length+'</span></summary>'+(entries.length?entries.map(({date,day})=>{
+ const excerpts=(day.taskExcerpts||[]).filter(item=>item.taskIds?.includes(id));const text=excerpts.length?excerpts.map(item=>item.text).join('；'):strip(day.content);
+ return '<button type="button" data-open-journal-date="'+date+'"><time>'+esc(date)+'</time><span>'+esc(text||'已关联，尚无正文')+'</span>'+(excerpts.length?'':'<small>当天记录</small>')+'</button>';
+ }).join(''):'<p class="muted">尚未关联记录</p>')+'</details>';
+}
+function refreshJournalLinks(date){
+ const day=journalWeek(journalUI.week).days[date],node=$('#workJournal [data-record-links="'+date+'"]');if(day&&node)node.outerHTML=journalTaskLinksMarkup(date,day);
+ const history=$('#taskDialog .task-journal-history');if(history&&taskDraft)history.innerHTML=taskJournalHistoryMarkup(taskDraft.id);journalUI.signature=journalSignature();
+}
+function linkTaskToJournal(id,date){
+ const task=taskById(id);if(!task||!journalDateValid(date)||fmt(mondayOf(parseDate(date)))!==journalUI.week||!journalFlush())return false;
+ const week=journalWeek(journalUI.week),existing=week.days[date];
+ if(existing?.taskIds?.includes(id)){refreshJournalLinks(date);return true}
+ try{commit('关联事项到工作记录',()=>{
+  const day=week.days[date]||(week.days[date]={content:'',updatedAt:''});day.taskIds=[...new Set([...(day.taskIds||[]),id])];day.updatedAt=new Date().toISOString();week.deleted=week.deleted.filter(value=>value!==date);
+ },{immediate:true});}catch{journalUI.dirty=true;journalUI.error=true;journalStatus();toast('关联保存失败，请重试；草稿仍保留');return false}
+ if(!existing)journalRenderDays();else refreshJournalLinks(date);
+ toast('已关联到 '+date+'；可撤回');return true;
+}
+
+// Native detail/all-list drags and Sortable fallback drags use the same journal drop target.
+let journalTaskDrag=null,journalTaskHoverTimer=0,journalDragScrollFrame=0;
+function journalTaskDragBegin(id,row=null){
+ if(!taskById(id))return false;journalTaskDrag={id,row,opened:false,cancelled:false,point:null};return true;
+}
+function journalDragReveal(){
+ if(!journalTaskDrag||journalUI.open)return;if(!journalFlush())return;
+ journalUI.week=currentWeekKey();journalUI.signature='';journalUI.open=true;journalUI.expanded=false;journalTaskDrag.opened=true;taskJournalPane='journal';syncWorkJournal();journalMountAboveModal();journalScrollToToday();
+}
+function journalDragPoint(event){
+ if(!journalTaskDrag)return null;
+ const point=document.elementsFromPoint(event.clientX,event.clientY).find(node=>!node.closest('.sortable-fallback,.sortable-drag'))||event.target;
+ const day=point?.closest?.('#workJournal .journal-day'),handle=point?.closest?.('#journalHandle');
+ if(!journalUI.open&&(handle||event.clientX>=innerWidth-40)){
+  if(!journalTaskHoverTimer)journalTaskHoverTimer=setTimeout(()=>{journalTaskHoverTimer=0;journalDragReveal()},450);
+ }else{clearTimeout(journalTaskHoverTimer);journalTaskHoverTimer=0}
+ document.querySelectorAll('.journal-day.journal-drop-target').forEach(node=>{if(node!==day)node.classList.remove('journal-drop-target')});
+ if(day)day.classList.add('journal-drop-target');journalTaskDrag.point={x:event.clientX,y:event.clientY};
+ if(!journalDragScrollFrame)journalDragScrollFrame=requestAnimationFrame(journalDragAutoScroll);
+ return day;
+}
+function journalDragAutoScroll(){
+ journalDragScrollFrame=0;const point=journalTaskDrag?.point,body=$('#workJournal .journal-body');if(!point||!body||!journalUI.open)return;
+ const rect=body.getBoundingClientRect();if(point.x<rect.left||point.x>rect.right||point.y<rect.top||point.y>rect.bottom)return;
+ const edge=48,distance=point.y<rect.top+edge?point.y-rect.top-edge:point.y>rect.bottom-edge?point.y-rect.bottom+edge:0;
+ if(distance){body.scrollTop+=Math.sign(distance)*Math.min(18,Math.abs(distance)/3);journalDragScrollFrame=requestAnimationFrame(journalDragAutoScroll)}
+}
+function journalTaskDrop(event){
+ if(!journalTaskDrag)return false;const drag=journalTaskDrag,day=journalDragPoint(event),panel=event.target.closest?.('#workJournal');
+ if(!day&&!panel)return false;
+ event.preventDefault();if(!activeSortableTask)event.stopImmediatePropagation();if(drag.row)drag.row._journalDropHandled=true;
+ if(day&&!drag.cancelled){const date=day.dataset.journalSection;linkTaskToJournal(drag.id,date)}
+ journalTaskDragEnd(!!day);return true;
+}
+function journalTaskDragEnd(success=false){
+ const drag=journalTaskDrag;clearTimeout(journalTaskHoverTimer);journalTaskHoverTimer=0;cancelAnimationFrame(journalDragScrollFrame);journalDragScrollFrame=0;
+ document.querySelectorAll('.journal-drop-target').forEach(node=>node.classList.remove('journal-drop-target'));journalTaskDrag=null;
+ if(drag?.opened&&!success){journalUI.open=false;syncWorkJournal();$('#workJournal')&&document.body.append($('#workJournal'))}
+}
+document.addEventListener('dragstart',event=>{
+ const button=event.target.closest?.('[data-journal-task-drag]'),all=event.target.closest?.('[data-drag-handle="all"]');if(!button&&!all)return;
+ const id=button?.dataset.journalTaskDrag||all.dataset.task;
+ if(button&&(!persistTaskDraft()||!taskById(id))){event.preventDefault();return}
+ if(!journalTaskDragBegin(id)){event.preventDefault();return}
+ event.dataTransfer.effectAllowed='copyMove';event.dataTransfer.setData('application/x-cockpit-task',id);event.dataTransfer.setData('text/plain',id);
+ if(button){event.stopImmediatePropagation();journalDragReveal()}
+},true);
+document.addEventListener('dragover',event=>{if(!journalTaskDrag)return;const day=journalDragPoint(event);if(day||event.target.closest?.('#workJournal,#journalHandle')){event.preventDefault();event.stopImmediatePropagation();if(event.dataTransfer)event.dataTransfer.dropEffect='link'}},true);
+document.addEventListener('drop',journalTaskDrop,true);
+document.addEventListener('pointermove',event=>{if(journalTaskDrag)journalDragPoint(event)},true);
+document.addEventListener('pointerup',event=>{if(activeSortableTask&&journalTaskDrag)journalTaskDrop(event)},true);
+document.addEventListener('mouseup',event=>{if(activeSortableTask&&journalTaskDrag)journalTaskDrop(event)},true);
+document.addEventListener('dragend',()=>journalTaskDragEnd());
+window.addEventListener('blur',()=>journalTaskDragEnd());
+window.addEventListener('keydown',event=>{if(event.key==='Escape'&&journalTaskDrag){if(journalTaskDrag.row)journalTaskDrag.row._journalDropHandled=true;journalTaskDragEnd();event.preventDefault();event.stopImmediatePropagation();requestRender()}},true);
+
+let memoColumnWidth=300,memoColumnObserver=null;
+try{memoColumnWidth=Math.max(220,Math.min(520,Number(localStorage.getItem('work-cockpit-memo-column-v1'))||300))}catch{}
+function initMemoColumnSplitter(){
+ const layout=$('#page-memos .memo-layout'),handle=layout?.querySelector('.memo-column-splitter');if(!handle||handle.dataset.bound)return;handle.dataset.bound='1';
+ const limit=()=>Math.max(220,Math.min(520,layout.clientWidth-390));
+ const update=value=>{memoColumnWidth=value;sync()};
+ const sync=()=>{const compact=layout.clientWidth<740;handle.hidden=compact;handle.setAttribute('aria-disabled',String(compact));layout.classList.toggle('memo-columns-compact',compact);layout.style.setProperty('--memo-list-width',Math.min(limit(),memoColumnWidth)+'px');handle.setAttribute('aria-valuemin','220');handle.setAttribute('aria-valuemax',String(limit()));handle.setAttribute('aria-valuenow',String(Math.round(Math.min(limit(),memoColumnWidth))))};
+ bindUiSplitter(handle,{read:()=>memoColumnWidth,write:update,min:220,max:limit,step:16,reset:300,position:event=>event.clientX-layout.getBoundingClientRect().left,commit:()=>{try{localStorage.setItem('work-cockpit-memo-column-v1',String(memoColumnWidth))}catch{}}});
+ memoColumnObserver?.disconnect();memoColumnObserver=new ResizeObserver(sync);memoColumnObserver.observe(layout);sync();
+}
+
+
+let journalSelectedPassage=null;
+function journalSelectionActions(date){return '<div class="journal-selection-actions"><span>选中文字后：</span><button type="button" class="link-btn" data-journal-passage="'+date+'">关联段落 / 转为任务</button></div>'}
+// Quill remembers its selection when a toolbar/button receives focus. Capture before the click.
+document.addEventListener('pointerdown',event=>{if(event.target.closest?.('[data-journal-passage]')){captureJournalPassage(event.target.closest('[data-journal-passage]').dataset.journalPassage)}},true);
+function captureJournalPassage(date){
+ const editor=$('#workJournal [data-journal-date="'+date+'"]'),q=quillFor(editor),range=q?.getSelection()||q?.selection?.savedRange;
+ journalSelectedPassage=range?.length?{week:journalUI.week,date,text:q.getText(range.index,range.length).trim()}:null;return journalSelectedPassage;
+}
+function openJournalPassage(date){
+ if(!journalSelectedPassage||journalSelectedPassage.date!==date||journalSelectedPassage.week!==journalUI.week)captureJournalPassage(date);
+ const passage=journalSelectedPassage;if(!passage?.text)return toast('请先选中当天记录中的文字');if(!journalFlush())return;
+ const ids=journalWeek(journalUI.week).days[date]?.taskIds||[];
+ workflowDialog('整理选中记录',date+' · 保留原文和来源','<blockquote class="journal-passage-preview">'+esc(passage.text)+'</blockquote><label>操作<select id="journalPassageAction"><option value="link">关联到事项</option><option value="checklist">加入任务清单</option><option value="task">新建事项</option></select></label><label id="journalPassageTaskField">事项<select id="journalPassageTask">'+recordTaskCandidates(state.tasks,'',true).map(task=>'<option value="'+esc(task.id)+'" '+(ids.includes(task.id)?'selected':'')+'>'+esc(task.title)+'</option>').join('')+'</select></label>','确认');
+ workflowDialogContext={kind:'passage',passage};
+}
+function confirmJournalPassage(){
+ const context=workflowDialogContext;if(context?.kind!=='passage')return;
+ const passage=context.passage,action=$('#journalPassageAction').value;let id=$('#journalPassageTask').value;
+ if(action!=='task'&&!id)return toast('请选择事项');if(!journalFlush())return;
+ if(taskDraft&&$('#taskDialog')?.open&&!persistTaskDraft())return;
+ const day=state.meta.workJournal.weeks[passage.week]?.days[passage.date];if(!day)return toast('来源记录已移除，请重新选择');
+ const duplicate=(day.taskExcerpts||[]).some(item=>item.text===passage.text&&item.action===action&&(action==='task'||item.targetId===id));if(duplicate)return toast('这段记录已执行过该操作');
+ try{commit('整理工作记录段落',draft=>{
+  const live=draft.meta.workJournal.weeks[passage.week].days[passage.date];
+  if(action==='task'){const task=normalizeTask({id:uid('task'),title:passage.text.split('\n')[0].slice(0,500),status:'待处理',priority:'P2',notes:'<p>'+esc(passage.text).replace(/\n/g,'<br>')+'</p><p>来源：工作记录 '+passage.date+'</p>'});draft.tasks.unshift(task);draft.order.inbox.unshift(task.id);id=task.id}
+  if(action==='checklist'){const task=draft.tasks.find(task=>task.id===id);if(!task||task.archived||isDone(task))throw Error('事项状态已变化');task.checklist.push(normalizeChecklistItem({text:passage.text}));task.updatedAt=new Date().toISOString()}
+  live.taskIds=[...new Set([...(live.taskIds||[]),id])];live.taskExcerpts||=[];live.taskExcerpts.push({id:uid('excerpt'),text:passage.text,taskIds:[id],createdAt:new Date().toISOString(),action,targetId:id});
+ },{immediate:true});}catch{toast('保存失败，请重试；原始记录保留');return}
+ if(taskDraft&&$('#taskDialog')?.open)syncOpenTaskDraftFromState();$('#workflowDialog').close();refreshJournalLinks(passage.date);journalSelectedPassage=null;toast('已整理；原始记录保留，可撤回');
+}
+function handleJournalEnhancementClick(target){
+ if(target.hasAttribute('data-journal-task-drag')){openTaskRecord(target.dataset.journalTaskDrag);return true}
+ if(target.dataset.openJournalDate){const date=target.dataset.openJournalDate;if(openJournalForWeek(fmt(mondayOf(parseDate(date))),false)){journalUI.active=date;journalScrollToDate(date)}return true}
+ if(target.dataset.journalPassage){openJournalPassage(target.dataset.journalPassage);return true}
+ if(target.hasAttribute('data-workflow-confirm')&&workflowDialogContext?.kind==='passage'){confirmJournalPassage();return true}
+ return false;
+}
+document.addEventListener('change',event=>{if(event.target.id==='journalPassageAction')$('#journalPassageTaskField').hidden=event.target.value==='task'});
 let dateWatch=todayKey();
 function checkDateChange(){let next=todayKey();if(next===dateWatch)return;dateWatch=next;ensureCurrentWeek();selectedWeekKey=currentWeekKey();activateScheduledTasks();captureCurrentWeek();saveLocal(true);requestRender()}
 setInterval(checkDateChange,60000);

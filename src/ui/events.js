@@ -5,7 +5,7 @@ function saveRelationsNow(label){
 }
 function handleClick(event){
  let target=event.target.closest("[data-retry-thumb],[data-image-view],button,[data-page],[data-select-project],[data-select-memo],[data-command]");if(!target)return;
- if(target.hasAttribute("data-task-record"))return openTaskRecord(taskDraft.id);
+
  if(handleWorkflowClick(target))return;
  if(handleTaskFilterClick(target))return;
  if(target.dataset.projectPane){ui.projectMobilePane=target.dataset.projectPane;return syncProjectMobilePane()}
